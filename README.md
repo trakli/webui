@@ -1,4 +1,4 @@
-<p ><a href="#" target="_blank"><img src="https://raw.githubusercontent.com/whilemsart/trakli/master/logo.svg" width="400" alt="Trakli Logo"></a></p>
+<p ><a href="#" target="_blank"><img src="https://raw.githubusercontent.com/whilesmart/trakli/main/logo.svg" width="400" alt="Trakli Logo"></a></p>
 
 # Trakli UI
 
