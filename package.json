@@ -10,8 +10,8 @@
     "postinstall": "nuxt prepare",
     "start": "nuxt start",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "format:check": "prettier --check src/",
-    "format:fix": "prettier --write src/"
+    "format:check": "prettier --check ./",
+    "format:fix": "prettier --write ./"
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.12.1",
@@ -19,11 +19,14 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "@rushstack/eslint-patch": "^1.10.3",
+    "@vue/eslint-config-prettier": "^9.0.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-vue": "^9.27.0",
     "prettier": "^3.3.3",
     "sass": "^1.77.8"
   }
