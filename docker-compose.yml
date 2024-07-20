@@ -7,7 +7,7 @@ services:
     # Maps the port 3000 of the container to the port 3000 of the host machine so that you can access the app from your browser
     # Check ./package.json for more information
     ports:
-      - "3000:3000"
+      - '3000:3000'
     # Mounts the current directory (.) on the host machine to /usr/src/app in the container
     volumes:
       - ./:/usr/src/app
@@ -17,4 +17,4 @@ services:
     tty: true
     # Adds an extra host for docker-compose to access the host machine
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'

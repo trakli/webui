@@ -11,7 +11,7 @@
     "start": "nuxt start",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format:check": "prettier --check ./",
-    "format:fix": "prettier --write src/"
+    "format:fix": "prettier --write ./"
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.12.1",
