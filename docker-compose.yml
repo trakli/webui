@@ -1,0 +1,20 @@
+# Docker Compose configuration file
+services:
+  # Defines a service named "app"
+  app:
+    # Specifies the Docker image to use for this service. In this case, it's the Long Term Support (LTS) version of Node.js
+    image: node:lts
+    # Maps the port 3000 of the container to the port 3000 of the host machine so that you can access the app from your browser
+    # Check ./package.json for more information
+    ports:
+      - "3000:3000"
+    # Mounts the current directory (.) on the host machine to /usr/src/app in the container
+    volumes:
+      - ./:/usr/src/app
+    # Sets the working directory inside the container
+    working_dir: /usr/src/app
+    # Keeps the container running even when its entrypoint process has exited
+    tty: true
+    # Adds an extra host for docker-compose to access the host machine
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
