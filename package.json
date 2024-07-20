@@ -10,7 +10,7 @@
     "postinstall": "nuxt prepare",
     "start": "nuxt start",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "format:check": "prettier --check src/",
+    "format:check": "prettier --check ./",
     "format:fix": "prettier --write src/"
   },
   "dependencies": {
