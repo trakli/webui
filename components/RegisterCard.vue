@@ -1,6 +1,7 @@
 <script setup>
 import TButton from '@/components/TButton.vue';
 import AuthFooterLink from '@/components/AuthFooterLink.vue';
+import Logo from '@/components/Logo.vue';
 
 const requiredFields = ['firstName', 'email', 'username', 'password'];
 </script>
@@ -8,7 +9,7 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
 <template>
   <div class="register-card">
     <div class="register-header">
-      <img src="/Logo.svg" alt="Logo Image" class="logo" />
+      <Logo size="medium" />
       <h1 class="title">Create an account</h1>
     </div>
 

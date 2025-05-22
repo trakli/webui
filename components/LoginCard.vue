@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import TButton from './TButton.vue';
 import AuthFooterLink from './AuthFooterLink.vue';
+import Logo from './Logo.vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
 const showPassword = ref(false);
@@ -12,7 +13,7 @@ const showPassword = ref(false);
     <div class="login-card">
       <div class="login-content">
         <div class="login-header">
-          <img src="/Logo.svg" alt="Logo Image" class="logo" />
+          <Logo size="medium" />
           <h1 class="title">Login</h1>
         </div>
 

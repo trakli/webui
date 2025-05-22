@@ -2,6 +2,7 @@
 // Redirect to login page
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
+import Logo from '@/components/Logo.vue';
 
 const router = useRouter();
 
@@ -16,7 +17,7 @@ onMounted(() => {
 <template>
   <div class="loading-container">
     <div class="loading-content">
-      <img src="/Logo.svg" alt="Trakli Logo" class="logo" />
+      <Logo size="large" />
       <div class="spinner"></div>
       <p class="loading-text">Loading Trakli...</p>
     </div>
