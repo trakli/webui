@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import TButton from './TButton.vue';
+import AuthFooterLink from './AuthFooterLink.vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
 const showPassword = ref(false);
@@ -51,6 +52,9 @@ const showPassword = ref(false);
             <div class="button-container">
               <TButton text="Login" width="100%" :height="53" />
             </div>
+
+            <!-- Sign up link -->
+            <AuthFooterLink text="Don't have an account?" link-text="Sign up" to="/register" />
           </form>
         </div>
       </div>
@@ -70,7 +74,7 @@ const showPassword = ref(false);
   .login-card {
     background-color: $bg-white;
     width: 100%;
-    max-width: 460px;
+    max-width: 480px;
     border-radius: $radius-xl;
     border: 1px solid $border-medium;
     margin: $spacing-10 $spacing-4;
@@ -191,7 +195,7 @@ const showPassword = ref(false);
           }
 
           .button-container {
-            margin-top: $spacing-2;
+            margin-top: $spacing-6;
             width: 100%;
           }
         }

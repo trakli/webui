@@ -1,5 +1,6 @@
 <script setup>
 import TButton from '@/components/TButton.vue';
+import AuthFooterLink from '@/components/AuthFooterLink.vue';
 
 const requiredFields = ['firstName', 'email', 'username', 'password'];
 </script>
@@ -64,7 +65,7 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
         <TButton size="large" class="register-button">Register</TButton>
       </div>
 
-      <div class="login-link">Already have an account? <a href="/login">Login</a></div>
+      <AuthFooterLink text="Already have an account?" link-text="Login" to="/login" />
     </form>
   </div>
 </template>
@@ -185,13 +186,6 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
     .register-button {
       width: 100%;
     }
-  }
-
-  .login-link {
-    text-align: center;
-    font-size: $font-size-sm;
-    margin-top: $spacing-5;
-    color: $text-secondary;
   }
 
   @media (max-width: $breakpoint-sm) {
