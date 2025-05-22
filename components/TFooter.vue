@@ -1,55 +1,62 @@
-<script setup>
-import { useRoute } from 'vue-router';
-import { computed } from 'vue';
-const route = useRoute();
-
-const footerClass = computed(() => {
-  if (route.path === '/login') {
-    return 'footer-login';
-  } else if (route.path === '/register') {
-    return 'footer-register';
-  }
-  return 'footer-default';
-});
-</script>
-
 <template>
-  <footer :class="footerClass">
-    <div class="container">
-      <div class="copyright">© 2024 Trakli, All Right Reserved</div>
-    </div>
+  <footer class="footer" :class="{ 'no-border': noBorder }" :style="footerStyles">
+    <div class="copyright">© 2025 Trakli, All Right Reserved</div>
   </footer>
 </template>
 
+<script setup>
+const props = defineProps({
+  /**
+   * Background color of the footer
+   * @default 'var(--bg-white)'
+   */
+  backgroundColor: {
+    type: String,
+    default: 'var(--bg-white)'
+  },
+  /**
+   * Border color of the footer
+   * @default 'var(--border-light)'
+   */
+  borderColor: {
+    type: String,
+    default: 'var(--border-light)'
+  },
+  /**
+   * Whether to hide the top border
+   * @default false
+   */
+  noBorder: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const footerStyles = {
+  '--footer-bg-color': props.backgroundColor,
+  '--footer-border-color': props.noBorder ? 'transparent' : props.borderColor
+};
+</script>
+
 <style lang="scss" scoped>
-footer {
+@use '~/assets/_variables' as *;
+
+.footer {
   width: 100%;
   flex-shrink: 0;
+  padding: $spacing-4 0;
+  background-color: var(--footer-bg-color);
+  border-top: 1px solid var(--footer-border-color);
 
-  &.footer-login {
-    background-color: #ebedec;
+  .copyright {
+    text-align: center;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    margin: 0;
   }
 
-  &.footer-register {
-    background-color: white;
-    margin-left: 400px;
-  }
-
-  &.footer-default {
-    background-color: white;
-  }
-
-  .container {
-    margin-left: auto;
-    margin-right: auto;
-
-    .copyright {
-      text-align: center;
-      color: #000000;
-      font-size: 16px;
-      padding: 12px 0;
-      margin: 0;
-    }
+  &.no-border {
+    border-top: none;
   }
 }
 </style>

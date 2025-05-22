@@ -13,7 +13,7 @@ export default defineNuxtConfig({
       ]
     }
   },
-  css: ['@/assets/_variables.scss'],
+  css: ['@/assets/_variables.scss', '@/assets/css/base.scss'],
   build: {
     transpile: [],
     optimizeCSS: true

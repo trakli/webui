@@ -6,7 +6,10 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
 
 <template>
   <div class="register-card">
-    <h1 class="title">Create an Account</h1>
+    <div class="register-header">
+      <img src="/Logo.svg" alt="Logo Image" class="logo" />
+      <h1 class="title">Create an account</h1>
+    </div>
 
     <form class="form">
       <!-- Name row -->
@@ -58,7 +61,7 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
       </div>
 
       <div class="button-container">
-        <TButton text="Register" :width="604" :height="53" />
+        <TButton size="large" class="register-button">Register</TButton>
       </div>
 
       <div class="login-link">Already have an account? <a href="/login">Login</a></div>
@@ -67,86 +70,140 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
 </template>
 
 <style lang="scss" scoped>
+@use '~/assets/_variables' as *;
+
 .register-card {
+  background-color: $bg-white;
+  border-radius: $radius-xl;
+  border: 1px solid $border-medium;
+  box-shadow: $shadow-sm;
+  padding: $spacing-8;
   width: 100%;
-  max-width: 600px;
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 8px;
-  border: 1px solid #b0b8b4; /* Added border to match LoginCard */
-  box-shadow: none; /* Removed shadow */
-}
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
 
-.title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-row {
-  display: flex;
-  gap: 15px;
-
-  @media (max-width: 600px) {
+  .register-header {
+    display: flex;
     flex-direction: column;
-  }
-}
+    align-items: center;
+    margin-bottom: $spacing-6;
 
-.form-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    .logo {
+      width: 120px;
+      height: auto;
+      margin-bottom: $spacing-4;
+    }
 
-  label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-  }
-
-  input {
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #b0b8b4;
-    border-radius: 4px;
-    font-size: 14px;
-
-    &:focus {
-      outline: none;
-      border-color: #047844;
+    .title {
+      font-size: $font-size-2xl;
+      font-weight: $font-bold;
+      color: $text-primary;
+      margin: 0 0 $spacing-6 0;
+      text-align: center;
     }
   }
-}
 
-.required {
-  color: red;
-}
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-5;
+  }
 
-.button-container {
-  margin-top: 10px;
-}
+  .form-row {
+    display: flex;
+    gap: $spacing-6;
+    width: 100%;
 
-.login-link {
-  text-align: center;
-  font-size: 14px;
-  margin-top: 15px;
-
-  a {
-    color: #047844;
-    text-decoration: none;
-    font-weight: 600;
-
-    &:hover {
-      text-decoration: underline;
+    @media (max-width: $breakpoint-md) {
+      flex-direction: column;
+      gap: $spacing-4;
     }
+
+    .form-group {
+      flex: 1;
+      min-width: 0; /* Prevents flex items from overflowing */
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-2;
+    width: 100%;
+    min-width: 0;
+
+    label {
+      font-size: $font-size-sm;
+      font-weight: $font-semibold;
+      color: $text-secondary;
+      display: flex;
+      align-items: center;
+      gap: $spacing-1;
+    }
+
+    input {
+      height: 44px;
+      padding: 0 $spacing-4;
+      border: 1px solid $border-light;
+      border-radius: $radius-md;
+      font-size: $font-size-base;
+      background-color: $bg-white;
+      transition: $transition-base;
+      color: $text-secondary;
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 2px $input-focus;
+      }
+
+      &::placeholder {
+        color: $text-muted;
+        opacity: 1;
+      }
+    }
+
+    a {
+      color: $primary;
+      font-weight: $font-semibold;
+      text-decoration: none;
+      margin-left: $spacing-1;
+      transition: $transition-base;
+
+      &:hover {
+        text-decoration: underline;
+        color: $primary-hover;
+      }
+    }
+  }
+
+  .button-container {
+    margin-top: $spacing-6;
+    width: 100%;
+
+    .register-button {
+      width: 100%;
+    }
+  }
+
+  .login-link {
+    text-align: center;
+    font-size: $font-size-sm;
+    margin-top: $spacing-5;
+    color: $text-secondary;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-6 $spacing-4;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .title {
+    font-size: $font-size-xl;
+    margin-bottom: $spacing-5;
   }
 }
 </style>

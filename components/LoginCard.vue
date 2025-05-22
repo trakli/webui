@@ -59,77 +59,95 @@ const showPassword = ref(false);
 </template>
 
 <style lang="scss" scoped>
+@use '~/assets/_variables' as *;
+
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: $spacing-6 0;
 
   .login-card {
-    background-color: #ffffff;
-    width: 627px;
-    height: 618px;
-    border-radius: 1rem;
-    border: 1px solid #b0b8b4;
-    margin-top: 2.5rem;
+    background-color: $bg-white;
+    width: 100%;
+    max-width: 460px;
+    border-radius: $radius-xl;
+    border: 1px solid $border-medium;
+    margin: $spacing-10 $spacing-4;
+    box-shadow: $shadow-sm;
 
     .login-content {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      align-items: center;
       width: 100%;
+      padding: $spacing-12 $spacing-10;
+
+      @media (max-width: $breakpoint-sm) {
+        padding: $spacing-8 $spacing-4;
+      }
 
       .login-header {
-        padding: 60px 63px;
+        width: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        text-align: center;
+        align-items: center;
+        margin-bottom: $spacing-8;
 
         .logo {
           width: 195px;
-          height: 80px;
-          margin: 0 auto;
+          height: auto;
+          margin-bottom: $spacing-8;
         }
 
         .title {
-          margin-top: 2rem;
-          font-weight: 700;
-          font-size: 1.5rem;
+          color: $text-primary;
+          font-size: $font-size-2xl;
+          font-weight: $font-bold;
+          margin: 0;
         }
       }
 
       .login-form-container {
-        padding: 0 63px 60px;
+        width: 100%;
+        max-width: 400px;
 
         .login-form {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-          max-width: 100%;
+          gap: $spacing-6;
+          width: 100%;
 
           .form-group {
             width: 100%;
+            margin-bottom: $spacing-1;
 
             .form-label {
               display: block;
-              font-size: 1rem;
-              font-weight: 700;
-              color: #374151;
-              margin-bottom: 0.25rem;
+              font-size: $font-size-sm;
+              font-weight: $font-bold;
+              color: $text-secondary;
+              margin-bottom: $spacing-2;
             }
 
             .form-input {
               width: 100%;
-              padding: 0.75rem 1rem;
-              border: 1px solid #d1d5db;
-              background-color: #f5f6f7;
-              border-radius: 0.375rem;
-              box-sizing: border-box;
+              padding: $spacing-3 $spacing-4;
+              border: 1px solid $border-light;
+              background-color: $input-bg;
+              border-radius: $radius-md;
+              font-size: $font-size-base;
+              transition: $transition-base;
 
               &:focus {
                 outline: none;
-                box-shadow: 0 0 0 2px rgba(4, 120, 68, 0.5);
-                border-color: #047844;
+                border-color: $primary;
+                box-shadow: 0 0 0 2px $input-focus;
+              }
+
+              &::placeholder {
+                color: $text-muted;
+                opacity: 1;
               }
             }
 
@@ -140,38 +158,40 @@ const showPassword = ref(false);
               .password-toggle {
                 position: absolute;
                 top: 50%;
-                right: 12px;
+                right: $spacing-3;
                 transform: translateY(-50%);
                 background: transparent;
                 border: none;
                 cursor: pointer;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                padding: $spacing-1;
+                border-radius: $radius-sm;
+                color: $text-muted;
+                transition: $transition-base;
 
-                &:hover,
+                &:hover {
+                  background-color: rgba($primary, 0.1);
+                  color: $primary;
+                }
+
                 &:focus {
                   outline: none;
-                  background: transparent;
+                  box-shadow: 0 0 0 2px $input-focus;
                 }
 
                 .icon {
-                  height: 1.25rem;
-                  width: 1.25rem;
-                  color: #6b7280;
+                  width: $spacing-5;
+                  height: $spacing-5;
                 }
               }
 
-              /* Adjust padding on password input to make room for the icon */
               .form-input {
-                padding-right: 2.5rem;
+                padding-right: $spacing-10;
               }
             }
           }
 
           .button-container {
-            padding-top: 0.5rem;
+            margin-top: $spacing-2;
             width: 100%;
           }
         }
