@@ -1,0 +1,167 @@
+@use '../_variables' as *;
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+/* Reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: $font-family-sans;
+  font-size: $font-size-base;
+  line-height: 1.5;
+  color: $text-primary;
+  background-color: $bg-white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 $spacing-4;
+  font-weight: $font-bold;
+  line-height: 1.2;
+  color: $text-primary;
+}
+
+h1 {
+  font-size: $font-size-2xl;
+}
+h2 {
+  font-size: $font-size-xl;
+}
+h3 {
+  font-size: $font-size-lg;
+}
+
+p {
+  margin: 0 0 $spacing-4;
+}
+
+a {
+  color: $primary;
+  text-decoration: none;
+  transition: $transition-base;
+
+  &:hover {
+    color: $primary-hover;
+    text-decoration: underline;
+  }
+}
+
+/* Forms */
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* Layout */
+.container {
+  width: 100%;
+  padding-right: $spacing-4;
+  padding-left: $spacing-4;
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 1200px;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-left {
+  text-align: left;
+}
+
+.mt-1 {
+  margin-top: $spacing-1;
+}
+.mt-2 {
+  margin-top: $spacing-2;
+}
+.mt-3 {
+  margin-top: $spacing-3;
+}
+.mt-4 {
+  margin-top: $spacing-4;
+}
+.mt-5 {
+  margin-top: $spacing-5;
+}
+.mt-6 {
+  margin-top: $spacing-6;
+}
+
+.mb-1 {
+  margin-bottom: $spacing-1;
+}
+.mb-2 {
+  margin-bottom: $spacing-2;
+}
+.mb-3 {
+  margin-bottom: $spacing-3;
+}
+.mb-4 {
+  margin-bottom: $spacing-4;
+}
+.mb-5 {
+  margin-bottom: $spacing-5;
+}
+.mb-6 {
+  margin-bottom: $spacing-6;
+}
+
+/* Responsive helpers */
+@mixin media-breakpoint-up($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @media (min-width: $breakpoint) {
+      @content;
+    }
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: none;
+  }
+}
