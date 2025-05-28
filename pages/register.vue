@@ -1,6 +1,12 @@
 <script setup>
 import RegisterCard from '@/components/RegisterCard.vue';
 import TFooter from '@/components/TFooter.vue';
+
+/* eslint-disable no-undef */
+definePageMeta({
+  layout: 'auth'
+});
+/* eslint-enable no-undef */
 </script>
 
 <template>
