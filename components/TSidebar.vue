@@ -8,8 +8,8 @@
         <li>
           <button
             class="nav-button"
-            :class="{ selected: $route.path === '/dashboard' }"
-            @click="$router.push('/dashboard')"
+            :class="{ selected: $route.path === '/home' }"
+            @click="$router.push('/home')"
           >
             <HomeIcon class="icon" />
             <span class="text">Home</span>

@@ -57,6 +57,3 @@ const props = defineProps({
   margin-left: 10px;
 }
 </style>
-
-<!--   width: 296px;
-  height: 76px; -->

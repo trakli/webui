@@ -3,9 +3,9 @@
     <div class="dashboard-content-container">
       <TDashboardTopCard />
       <div class="balance-card-container">
-        <TDashboardBalanceCards />
-        <TDashboardBalanceCards />
-        <TDashboardBalanceCards />
+        <WalletCard />
+        <WalletCard />
+        <WalletCard />
       </div>
       <TTransactionCard />
       <TTransactionCard :is-collapsed="true" />
@@ -14,7 +14,9 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import WalletCard from './WalletCard.vue';
+</script>
 
 <style lang="scss" scoped>
 @use '~/assets/_variables' as *;
