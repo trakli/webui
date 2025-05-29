@@ -23,8 +23,10 @@ definePageMeta({
 @use '~/assets/_variables' as *;
 
 .dashboard-page {
+  width: 1500px;
+  height: 1440px;
   background-color: $bg-gray;
-  min-height: 100vh;
+  overflow-y: auto;
 }
 
 .dashboard-content-wrapper {
@@ -32,9 +34,16 @@ definePageMeta({
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 80px);
   margin-top: 80px;
   margin-left: 328px;
   padding: 20px;
+}
+</style>
+
+<style lang="scss">
+/* Global styles to hide footer on dashboard page */
+.dashboard-page ~ footer,
+body:has(.dashboard-page) footer {
+  display: none !important;
 }
 </style>

@@ -23,7 +23,7 @@ import WalletCard from './WalletCard.vue';
 
 .dashboard-content {
   width: 1072px;
-  height: 700px;
+  height: 1600px;
   background-color: $bg-white;
   border-radius: $radius-xl;
   border: 1px solid $bg-gray;
