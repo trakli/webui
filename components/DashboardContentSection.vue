@@ -4,11 +4,8 @@
       <TDashboardTopCard />
       <div class="balance-card-container">
         <WalletCard />
-        <WalletCard />
-        <WalletCard />
       </div>
       <TTransactionCard />
-      <TTransactionCard :is-collapsed="true" />
       <TTableComponent />
     </div>
   </div>

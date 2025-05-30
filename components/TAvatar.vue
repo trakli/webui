@@ -28,7 +28,7 @@ const props = defineProps({
   display: flex;
   align-items: center;
   border-radius: 8px;
-  padding: 16px;
+  padding: 8px;
   gap: 16px;
   background-color: transparent;
   border: none;

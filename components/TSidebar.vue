@@ -116,7 +116,7 @@ import TAvatar from './TAvatar.vue';
 @use '~/assets/_variables' as *;
 
 .sidebar {
-  width: 328px;
+  width: 300px;
   height: 1440px;
   background-color: $bg-gray;
   border-right: 1px solid #e9ecef;
@@ -148,10 +148,10 @@ import TAvatar from './TAvatar.vue';
 .nav-button {
   display: flex;
   align-items: center;
-  width: 296px;
+  width: 250px;
   height: 56px;
   border-radius: 12px;
-  padding: 16px 8px 16px 27px;
+  padding: 16px 8px 16px 1px;
   gap: 12px;
   background-color: transparent;
   border: none;
@@ -163,6 +163,7 @@ import TAvatar from './TAvatar.vue';
 }
 
 .nav-button:hover {
+  width: 250px;
   background-color: #bcdccc;
 }
 
@@ -208,7 +209,7 @@ import TAvatar from './TAvatar.vue';
   width: 267px;
   height: 56px;
   border-radius: 12px;
-  padding: 16px 8px 16px 27px;
+  padding: 16px 8px 16px 1px;
   gap: 12px;
   background-color: transparent;
   border: none;

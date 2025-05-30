@@ -35,7 +35,7 @@ definePageMeta({
   justify-content: center;
   align-items: center;
   margin-top: 62px;
-  margin-left: 228px;
+  margin-left: 200px;
   padding: 5px;
 }
 </style>
