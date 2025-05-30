@@ -34,9 +34,9 @@ definePageMeta({
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 80px;
-  margin-left: 328px;
-  padding: 20px;
+  margin-top: 62px;
+  margin-left: 228px;
+  padding: 5px;
 }
 </style>
 

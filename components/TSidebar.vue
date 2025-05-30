@@ -129,14 +129,14 @@ import TAvatar from './TAvatar.vue';
 .sidebar-header {
   display: flex;
   justify-items: start;
-  padding: 20px;
+  padding-top: 2px;
   text-align: center;
 }
 
 .logo {
-  width: 150px;
+  width: 90px;
   height: 62px;
-  margin-left: 10px;
+  margin-left: 5px;
 }
 
 .sidebar-nav ul {
