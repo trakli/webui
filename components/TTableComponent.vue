@@ -248,7 +248,7 @@ const transactions = ref([
 
 .table-wrapper {
   width: 992px;
-  height: 594px;
+  height: 620px;
   border-radius: 8px;
   overflow: hidden;
   background-color: #ebedec;

@@ -4,8 +4,8 @@
       <TDashboardTopCard />
       <div class="balance-card-container">
         <WalletCard />
+        <TTransactionCard />
       </div>
-      <TTransactionCard />
       <TTableComponent />
     </div>
   </div>

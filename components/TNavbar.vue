@@ -42,7 +42,7 @@ import { MagnifyingGlassIcon, BellIcon, ChevronDownIcon } from '@heroicons/vue/2
   position: fixed;
   top: 0;
   right: 0;
-  left: 328px;
+  left: 310px;
   z-index: 10;
 }
 

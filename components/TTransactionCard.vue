@@ -1,38 +1,48 @@
 <template>
-  <div class="transaction-card" :class="{ collapsed: isCollapsed }">
+  <div class="transaction-card">
     <div class="transaction-card-header">
       <h2 class="transaction-card-title">Transaction of Last 30 days</h2>
-      <div class="toggle-button">
-        <span class="toggle-text">{{ isCollapsed ? 'Show' : 'Hide' }}</span>
-        <ChevronUpIcon v-if="!isCollapsed" class="chevron-icon" />
-        <ChevronDownIcon v-else class="chevron-icon" />
-      </div>
     </div>
-    <div v-if="!isCollapsed" class="transaction-card-content">
-      <TTransactionSubCard
-        v-for="(card, index) in transactionCards"
-        :key="index"
-        :title="card.title"
-        :text="card.text"
-        :title-color="card.titleColor"
-        :text-color="card.textColor"
-        :currency="card.currency"
-      />
+    <div class="transaction-card-content">
+      <div class="transaction-cards-grid">
+        <div class="transaction-cards-row">
+          <TTransactionSubCard
+            :title="transactionCards[0].title"
+            :text="transactionCards[0].text"
+            :title-color="transactionCards[0].titleColor"
+            :text-color="transactionCards[0].textColor"
+            :currency="transactionCards[0].currency"
+          />
+          <TTransactionSubCard
+            :title="transactionCards[1].title"
+            :text="transactionCards[1].text"
+            :title-color="transactionCards[1].titleColor"
+            :text-color="transactionCards[1].textColor"
+            :currency="transactionCards[1].currency"
+          />
+        </div>
+        <div class="transaction-cards-row">
+          <TTransactionSubCard
+            :title="transactionCards[2].title"
+            :text="transactionCards[2].text"
+            :title-color="transactionCards[2].titleColor"
+            :text-color="transactionCards[2].textColor"
+            :currency="transactionCards[2].currency"
+          />
+          <TTransactionSubCard
+            :title="transactionCards[3].title"
+            :text="transactionCards[3].text"
+            :title-color="transactionCards[3].titleColor"
+            :text-color="transactionCards[3].textColor"
+            :currency="transactionCards[3].currency"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/solid';
-
-// eslint-disable-next-line no-unused-vars
-const props = defineProps({
-  isCollapsed: {
-    type: Boolean,
-    default: false
-  }
-});
-
 const transactionCards = [
   {
     id: 0,
@@ -73,67 +83,46 @@ const transactionCards = [
 @use '~/assets/_variables' as *;
 
 .transaction-card {
-  width: 992px;
-  height: 197px;
+  width: 655px;
+  height: 220px;
   background-color: $bg-gray;
   border-radius: $radius-lg;
   padding: 16px;
   gap: 8px;
-
-  &.collapsed {
-    width: 992px;
-    height: 68px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-  }
 }
 
 .transaction-card-header {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-
-  .collapsed & {
-    width: 100%;
-  }
+  margin-bottom: 16px;
 }
 
 .transaction-card-title {
-  font-size: $font-size-2xl;
+  font-size: $font-size-lg;
   font-weight: $font-bold;
   font-family: $font-family-sans;
   margin: 0;
 }
 
-.toggle-button {
-  width: 89px;
-  height: 36px;
-  border-radius: $radius-lg;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  padding: 8px 16px 8px 16px;
-  align-items: center;
-}
-
-.toggle-text {
-  color: #000000;
-  font-weight: $font-bold;
-  font-size: $font-size-sm;
-}
-
-.chevron-icon {
-  width: 20px;
-  height: 20px;
-}
-
 .transaction-card-content {
-  width: 960px;
-  height: 121px;
-  gap: 24px;
+  width: 100%;
+}
+
+.transaction-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transaction-cards-row {
   display: flex;
   flex-direction: row;
+  gap: 12px;
+}
+
+.transaction-cards-row > * {
+  flex: 1;
 }
 </style>

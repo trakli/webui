@@ -42,11 +42,11 @@ const props = defineProps({
 @use '~/assets/_variables' as *;
 
 .transaction-sub-card {
-  width: 222px;
-  height: 121px;
+  width: 100px;
+  height: 70px;
   border-radius: $radius-xl;
   background-color: $bg-white;
-  padding: 16px 32px 16px 32px;
+  padding: 8px 16px 8px 16px;
 }
 
 .transaction-sub-card-content {
@@ -59,25 +59,25 @@ const props = defineProps({
   margin: 0;
   color: $primary;
   font-weight: $font-bold;
-  font-size: 48px;
+  font-size: $font-size-lg;
   line-height: 1.2;
   position: relative;
 }
 
 .currency-superscript {
-  font-size: 14px;
+  font-size: $font-size-sm;
   font-weight: $font-bold;
   vertical-align: super;
   line-height: 0;
   margin-left: 10px;
   position: relative;
-  top: -20px;
+  top: -5px;
 }
 
 .transaction-sub-card-text {
   margin: 0;
   font-weight: $font-normal;
-  font-size: $font-size-xl;
+  font-size: $font-size-sm;
   color: #371e48;
 }
 </style>
