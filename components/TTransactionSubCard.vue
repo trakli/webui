@@ -69,7 +69,7 @@ const props = defineProps({
   font-weight: $font-bold;
   vertical-align: super;
   line-height: 0;
-  margin-left: 10px;
+  margin-left: 4px;
   position: relative;
   top: -5px;
 }
