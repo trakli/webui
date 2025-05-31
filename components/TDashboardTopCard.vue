@@ -12,7 +12,7 @@
 
 .card-container {
   width: 992px;
-  height: 90px;
+  height: 70px;
   background-color: #e6f2ec;
   border-radius: $radius-xl;
   padding: 16px;
@@ -21,20 +21,20 @@
 
 .card-title {
   color: #1d3229;
-  font-size: $font-size-2xl;
+  font-size: $font-size-lg;
   font-weight: $font-bold;
   margin: 0 0 4px 0;
 }
 
 .card-title-username {
   color: $primary-hover;
-  font-size: $font-size-2xl;
+  font-size: $font-size-lg;
   font-weight: $font-bold;
 }
 
 .card-subtitle {
   color: $text-muted;
   font-weight: $font-normal;
-  font-size: $font-size-base;
+  font-size: $font-size-sm;
 }
 </style>
