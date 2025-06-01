@@ -38,7 +38,7 @@ import { MagnifyingGlassIcon, BellIcon, ChevronDownIcon } from '@heroicons/vue/2
   justify-content: space-between;
   align-items: center;
   height: 65px;
-  padding: 0 1.5rem;
+  padding: 0 5rem;
   background-color: $bg-gray;
   border-bottom: 1px solid #e9ecef;
   position: fixed;

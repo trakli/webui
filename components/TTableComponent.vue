@@ -147,30 +147,32 @@ const transactions = ref([
 <style lang="scss" scoped>
 @use '~/assets/_variables' as *;
 
-.table-container {
-  width: 100%;
-  max-width: 100%;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.table-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+.table {
+  &-container {
+    width: 100%;
+    max-width: 100%;
+    gap: 8px;
+    overflow: hidden;
   }
-}
 
-.table-heading-text {
-  font-weight: $font-bold;
-  font-size: $font-size-2xl;
-  margin-bottom: 0;
+  &-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &-text {
+      font-weight: $font-bold;
+      font-size: $font-size-2xl;
+      margin-bottom: 0;
+    }
+  }
 }
 
 .input-controls {
@@ -189,34 +191,34 @@ const transactions = ref([
 .filter-container {
   position: relative;
   width: 100%;
-  height: 50px;
+  height: 44px;
   min-width: 160px;
 
   @media (min-width: 640px) {
     width: 184px;
   }
-}
 
-.search-input,
-.filter-input {
-  width: 100%;
-  height: 44px;
-  background-color: #f5f6f7;
-  padding: 8px 36px 8px 16px;
-  border: 1px solid $bg-gray;
-  border-radius: $radius-lg;
-  font-size: $font-size-sm;
-  outline: none;
-  transition: border-color 0.2s ease;
-  box-sizing: border-box;
+  .search-input,
+  .filter-input {
+    width: 100%;
+    height: 100%;
+    padding: 8px 36px 8px 16px;
+    border: 1px solid $bg-gray;
+    border-radius: $radius-lg;
+    font-size: $font-size-sm;
+    background-color: #f5f6f7;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
 
-  &::placeholder {
-    color: #9ca3af;
-  }
+    &::placeholder {
+      color: #9ca3af;
+    }
 
-  &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
   }
 }
 
@@ -241,18 +243,13 @@ const transactions = ref([
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
-.table {
-  width: 100%;
-  min-width: 100%;
-  table-layout: auto;
-}
-
 .custom-table {
   width: 100%;
   min-width: 100%;
   border-collapse: collapse;
   font-family: $font-family-sans;
   table-layout: auto;
+
   th,
   td {
     white-space: nowrap;
@@ -275,15 +272,17 @@ const transactions = ref([
     vertical-align: top;
   }
 
-  .date-main {
-    color: #1d3229;
-    font-weight: $font-bold;
-  }
+  .date {
+    &-main {
+      color: #1d3229;
+      font-weight: $font-bold;
+    }
 
-  .date-sub {
-    font-size: 9px;
-    font-weight: $font-normal;
-    color: #646b6b;
+    &-sub {
+      font-size: 9px;
+      font-weight: $font-normal;
+      color: #646b6b;
+    }
   }
 
   .type-badge {
@@ -292,33 +291,34 @@ const transactions = ref([
     font-weight: bold;
     font-size: 12px;
     display: inline-block;
-  }
 
-  .income {
-    background-color: #d1fae5;
-    color: #065f46;
-  }
+    &.income {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
 
-  .outcome {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    &.outcome {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
   }
 
   .party {
-    background-color: #f5f6f7;
     padding: 4px 8px;
     border-radius: 6px;
     display: inline-block;
   }
 
-  .amount-income {
-    color: #059669;
-    font-weight: bold;
-  }
+  .amount {
+    &-income {
+      color: #059669;
+      font-weight: bold;
+    }
 
-  .amount-outcome {
-    color: #ef4444;
-    font-weight: bold;
+    &-outcome {
+      color: #ef4444;
+      font-weight: bold;
+    }
   }
 
   .actions {
@@ -330,29 +330,26 @@ const transactions = ref([
     cursor: pointer;
   }
 
-  .action-icon-eye {
-    width: 20px;
-    height: 20px;
-    color: #047844;
+  .action-icon {
+    &-eye,
+    &-attach {
+      width: 20px;
+      height: 20px;
 
-    svg {
-      width: 100%;
-      height: 100%;
-      stroke: currentColor;
-      fill: none;
+      svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        fill: none;
+      }
     }
-  }
 
-  .action-icon-attach {
-    width: 20px;
-    height: 20px;
-    color: #2d9cdb;
+    &-eye {
+      color: #047844;
+    }
 
-    svg {
-      width: 100%;
-      height: 100%;
-      stroke: currentColor;
-      fill: none;
+    &-attach {
+      color: #2d9cdb;
     }
   }
 }

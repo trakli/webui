@@ -128,6 +128,7 @@ import Logo from './Logo.vue';
   left: 0;
   top: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
   transition: width 0.3s ease;
 
