@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar">
     <div class="sidebar-header">
-      <img src="~/public/logo.svg" alt="Trakli Logo" class="logo" />
+      <Logo size="small" alt="Trakli Logo" />
     </div>
     <nav class="sidebar-nav">
       <ul>
@@ -110,6 +110,7 @@ import {
   WalletIcon
 } from '@heroicons/vue/24/outline';
 import TAvatar from './TAvatar.vue';
+import Logo from './Logo.vue';
 </script>
 
 <style lang="scss" scoped>
@@ -124,104 +125,103 @@ import TAvatar from './TAvatar.vue';
   left: 0;
   top: 0;
   overflow-y: auto;
-}
+  box-sizing: border-box;
 
-.sidebar-header {
-  display: flex;
-  justify-items: start;
-  padding-top: 2px;
-  text-align: center;
-}
+  &-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 16px;
+    width: 100%;
+  }
 
-.logo {
-  width: 90px;
-  height: 62px;
-  margin-left: 5px;
-}
+  &-nav {
+    width: 100%;
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+    li {
+      width: 100%;
+    }
+  }
 
-.sidebar-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+  .nav-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 56px;
+    border-radius: 12px;
+    padding: 16px 8px;
+    gap: 12px;
+    background-color: transparent;
+    border: none;
+    color: #495057;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px;
 
-.nav-button {
-  display: flex;
-  align-items: center;
-  width: 250px;
-  height: 56px;
-  border-radius: 12px;
-  padding: 16px 8px 16px 1px;
-  gap: 12px;
-  background-color: transparent;
-  border: none;
-  color: #495057;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-left: 10px;
-}
+    &:hover {
+      width: 250px;
+      background-color: #bcdccc;
+    }
 
-.nav-button:hover {
-  width: 250px;
-  background-color: #bcdccc;
-}
+    &.selected {
+      background-color: #bcdccc;
+    }
+  }
 
-.nav-button.selected {
-  background-color: #bcdccc;
-}
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
 
-.nav-link {
-  display: flex;
-  align-items: center;
-  padding: 15px 20px;
-  color: #495057;
-  text-decoration: none;
-  transition: background-color 0.3s;
-  gap: 12px;
-}
+  .divider {
+    display: flex;
+    justify-items: center;
+    border: 1px solid #b9b1bf;
+    width: 296px;
+    margin-left: 10px;
+    margin-top: 20px;
+  }
 
-.icon {
-  width: 24px;
-  height: 24px;
-}
+  .nav-footer {
+    display: flex;
+    width: 296px;
+    height: 204px;
+    gap: 8px;
+    flex-direction: column;
 
-.divider {
-  display: flex;
-  justify-items: center;
-  border: 1px solid #b9b1bf;
-  width: 296px;
-  margin-left: 10px;
-  margin-top: 20px;
-}
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+  }
 
-.nav-footer {
-  display: flex;
-  width: 296px;
-  height: 204px;
-  gap: 8px;
-  flex-direction: column;
-}
+  .nav-footer-button {
+    display: flex;
+    align-items: center;
+    width: 267px;
+    height: 56px;
+    border-radius: 12px;
+    padding: 16px 16px;
+    gap: 12px;
+    background-color: transparent;
+    border: none;
+    color: #495057;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+    margin-top: 10px;
 
-.nav-footer-button {
-  display: flex;
-  align-items: center;
-  width: 267px;
-  height: 56px;
-  border-radius: 12px;
-  padding: 16px 8px 16px 1px;
-  gap: 12px;
-  background-color: transparent;
-  border: none;
-  color: #495057;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-left: 10px;
-  margin-top: 10px;
-}
-
-.nav-footer-button:hover {
-  background-color: #bcdccc;
+    &:hover {
+      background-color: #bcdccc;
+    }
+  }
 }
 </style>
