@@ -23,20 +23,23 @@ definePageMeta({
 @use '~/assets/_variables' as *;
 
 .dashboard-page {
-  width: 1500px;
-  height: 1440px;
+  display: flex;
+  min-height: 100vh;
   background-color: $bg-gray;
-  overflow-y: auto;
+  margin-left: var(--sidebar-width, 250px);
+  transition: margin-left 0.3s ease;
+  width: calc(100% - var(--sidebar-width, 250px));
+  overflow-x: hidden; /* Prevent horizontal scroll on the page */
 }
 
 .dashboard-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-top: 62px;
-  margin-left: 200px;
-  padding: 5px;
+  width: 100%;
+  padding: 0 1.5rem 1.5rem;
+  margin-top: 62px; // Navbar height
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
 }
 </style>
 

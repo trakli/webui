@@ -11,12 +11,12 @@
 @use '~/assets/_variables' as *;
 
 .card-container {
-  width: 992px;
-  height: 70px;
+  width: 100%;
   background-color: #e6f2ec;
   border-radius: $radius-xl;
-  padding: 16px;
-  margin-top: 25px;
+  padding: 0.75rem 1rem;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .card-title {

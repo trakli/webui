@@ -117,8 +117,11 @@ import Logo from './Logo.vue';
 @use '~/assets/_variables' as *;
 
 .sidebar {
-  width: 300px;
-  height: 1440px;
+  --sidebar-width: min(300px, 30vw);
+  --sidebar-min-width: 200px;
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-min-width);
+  height: 100vh;
   background-color: $bg-gray;
   border-right: 1px solid #e9ecef;
   position: fixed;
@@ -126,6 +129,7 @@ import Logo from './Logo.vue';
   top: 0;
   overflow-y: auto;
   box-sizing: border-box;
+  transition: width 0.3s ease;
 
   &-header {
     display: flex;
@@ -190,8 +194,8 @@ import Logo from './Logo.vue';
 
   .nav-footer {
     display: flex;
-    width: 296px;
-    height: 204px;
+    width: calc(100% - 16px);
+    padding: 8px;
     gap: 8px;
     flex-direction: column;
 
@@ -205,10 +209,10 @@ import Logo from './Logo.vue';
   .nav-footer-button {
     display: flex;
     align-items: center;
-    width: 267px;
-    height: 56px;
+    width: 100%;
+    min-height: 56px;
     border-radius: 12px;
-    padding: 16px 16px;
+    padding: 12px 16px;
     gap: 12px;
     background-color: transparent;
     border: none;

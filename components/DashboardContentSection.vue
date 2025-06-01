@@ -19,28 +19,61 @@ import WalletCard from './WalletCard.vue';
 @use '~/assets/_variables' as *;
 
 .dashboard-content {
-  width: 1072px;
-  height: 1600px;
+  width: 100%;
+  max-width: 1400px;
+  min-height: calc(100vh - 100px);
   background-color: $bg-white;
-  border-radius: $radius-xl;
+  border-radius: 2rem;
   border: 1px solid $bg-gray;
-  margin: 0 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+  margin: 1rem 1.5rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  @media (min-width: 768px) {
+    padding: 1.25rem;
+  }
 }
 
 .dashboard-content-container {
   display: flex;
   flex-direction: column;
-  width: 992px;
-  height: 1285px;
-  gap: 32px;
-  margin: 0 auto;
+  width: 100%;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
 }
 
 .balance-card-container {
   display: flex;
-  flex-direction: row;
-  gap: 24px;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  /* WalletCard - 40% width */
+  & > :first-child {
+    flex: 0 0 100%;
+    @media (min-width: 768px) {
+      flex: 0 0 40%;
+      max-width: 40%;
+    }
+  }
+
+  /* TransactionCard - 60% width */
+  & > :last-child {
+    flex: 0 0 100%;
+    @media (min-width: 768px) {
+      flex: 0 0 58%;
+      max-width: 58%;
+    }
+  }
 }
 </style>

@@ -42,11 +42,15 @@ const props = defineProps({
 @use '~/assets/_variables' as *;
 
 .transaction-sub-card {
-  width: 100px;
-  height: 70px;
+  flex: 1;
+  min-width: 0; /* Prevents flex items from overflowing */
   border-radius: $radius-xl;
   background-color: $bg-white;
-  padding: 8px 16px 8px 16px;
+  padding: 0.75rem 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .transaction-sub-card-content {

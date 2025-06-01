@@ -27,7 +27,7 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="table-body">
             <tr v-for="(txn, index) in transactions" :key="index">
               <td>
                 <div class="date-main">{{ txn.date }}</div>
@@ -49,12 +49,12 @@
               <td>{{ txn.category }}</td>
               <td>
                 <div class="actions">
-                  <span class="action-icon-eye">
-                    <EyeIcon />
-                  </span>
-                  <span class="action-icon-attach">
-                    <PaperClipIcon />
-                  </span>
+                  <button class="action-btn">
+                    <PencilSquareIcon class="action-icon" />
+                  </button>
+                  <button class="action-btn">
+                    <TrashIcon class="action-icon" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -67,7 +67,12 @@
 
 <script setup>
 import { ref } from 'vue';
-import { MagnifyingGlassIcon, FunnelIcon, EyeIcon, PaperClipIcon } from '@heroicons/vue/24/outline';
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  PencilSquareIcon,
+  TrashIcon
+} from '@heroicons/vue/24/outline';
 
 const searchQuery = ref('');
 const filterQuery = ref('');
@@ -143,87 +148,67 @@ const transactions = ref([
 @use '~/assets/_variables' as *;
 
 .table-container {
-  width: 992px;
-  height: 652px;
+  width: 100%;
+  max-width: 100%;
   gap: 8px;
+  overflow: hidden;
 }
 
 .table-heading {
-  width: 992px;
-  height: 50px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .table-heading-text {
   font-weight: $font-bold;
   font-size: $font-size-2xl;
-  line-height: 120%;
+  margin-bottom: 0;
 }
 
 .input-controls {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  @media (min-width: 640px) {
+    flex-wrap: nowrap;
+    gap: 1rem;
+  }
   align-items: center;
 }
 
-.search-container {
-  position: relative;
-  width: 311px;
-  height: 50px;
-  gap: 8px;
-}
-
-.search-input {
-  width: 311px;
-  height: 50px;
-  background-color: #f5f6f7;
-  padding: 12px 48px 12px 16px;
-  border: 1px solid $bg-gray;
-  border-radius: $radius-lg;
-  font-size: $font-size-base;
-  outline: none;
-  transition: border-color 0.2s ease;
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-
-  &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-}
-
-.search-icon {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: #798588;
-  pointer-events: none;
-}
-
+.search-container,
 .filter-container {
   position: relative;
-  width: 184px;
+  width: 100%;
   height: 50px;
-  gap: 8px;
+  min-width: 160px;
+
+  @media (min-width: 640px) {
+    width: 184px;
+  }
 }
 
+.search-input,
 .filter-input {
-  width: 184px;
-  height: 50px;
+  width: 100%;
+  height: 44px;
   background-color: #f5f6f7;
-  padding: 12px 48px 12px 16px;
+  padding: 8px 36px 8px 16px;
   border: 1px solid $bg-gray;
   border-radius: $radius-lg;
-  font-size: $font-size-base;
+  font-size: $font-size-sm;
   outline: none;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
 
   &::placeholder {
     color: #9ca3af;
@@ -235,9 +220,10 @@ const transactions = ref([
   }
 }
 
+.search-icon,
 .filter-icon {
   position: absolute;
-  right: 16px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   width: 16px;
@@ -247,24 +233,33 @@ const transactions = ref([
 }
 
 .table-wrapper {
-  width: 992px;
-  height: 620px;
+  width: 100%;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
   background-color: #ebedec;
-  margin-top: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .table {
   width: 100%;
-  height: 100%;
+  min-width: 100%;
+  table-layout: auto;
 }
 
 .custom-table {
   width: 100%;
-  height: 100%;
+  min-width: 100%;
   border-collapse: collapse;
-  font-family: sans-serif;
+  font-family: $font-family-sans;
+  table-layout: auto;
+  th,
+  td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
 
   th {
     background-color: #057a55;

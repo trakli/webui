@@ -43,12 +43,14 @@ import { ArrowDownLeftIcon, ArrowUpLeftIcon, ChevronDownIcon } from '@heroicons/
 @use '~/assets/_variables' as *;
 
 .card-container {
-  width: 314.67px;
-  height: 158px;
+  width: 100%;
+  min-height: 158px;
   background-color: #f5f6f5;
   border: 0.5px solid #c0c6c3;
   border-radius: $radius-xl;
   position: relative;
+  box-sizing: border-box;
+  padding: 1rem;
   overflow: hidden;
   padding: 16px;
   display: flex;

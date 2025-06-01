@@ -32,25 +32,51 @@ import { MagnifyingGlassIcon, BellIcon, ChevronDownIcon } from '@heroicons/vue/2
 @use '~/assets/_variables' as *;
 
 .navbar {
+  --sidebar-width: min(300px, 30vw);
+  --sidebar-min-width: 200px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 65px;
-  padding: 0 50px;
+  padding: 0 1.5rem;
   background-color: $bg-gray;
   border-bottom: 1px solid #e9ecef;
   position: fixed;
   top: 0;
   right: 0;
-  left: 310px;
+  left: var(--sidebar-width, 300px);
   z-index: 10;
+  transition: left 0.3s ease;
+
+  @media (max-width: 1200px) {
+    left: 250px;
+  }
+
+  @media (max-width: 992px) {
+    left: 200px;
+  }
+
+  @media (max-width: 768px) {
+    left: 0;
+    padding: 0 1rem;
+  }
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
   margin-left: auto;
+
+  @media (max-width: 768px) {
+    gap: 0.75rem;
+  }
+}
+
+.avatar-container {
+  @media (max-width: 480px) {
+    display: none;
+  }
 }
 
 .search-container {
