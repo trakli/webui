@@ -1,5 +1,11 @@
 <script setup>
 import LoginCard from '@/components/LoginCard.vue';
+
+/* eslint-disable no-undef */
+definePageMeta({
+  layout: 'auth'
+});
+/* eslint-enable no-undef */
 </script>
 
 <template>

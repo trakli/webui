@@ -36,7 +36,9 @@ const handleImageError = (e) => {
 img.logo {
   display: block;
   height: auto;
-  margin: 0 auto $spacing-4;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
 }
 
 img.logo-small {
