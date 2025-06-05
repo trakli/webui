@@ -38,8 +38,8 @@
         <li>
           <button
             class="nav-button"
-            :class="{ selected: $route.path === '/expenses' }"
-            @click="$router.push('/expenses')"
+            :class="{ selected: $route.path === '/transaction' }"
+            @click="$router.push('/transaction')"
           >
             <UserGroupIcon class="icon" />
             <span class="text">Parties</span>
