@@ -30,14 +30,14 @@ import TSidebar from '@/components/TSidebar.vue';
 }
 
 .group-content-wrapper {
-  width: 1200px;
-  height: 932px;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 600px;
   background-color: $bg-white;
   border-radius: 2rem;
   border: 1px solid $bg-gray;
-  margin: 0 1.5rem 1rem;
-  margin-top: 72px;
-  margin-left: 55px;
+  margin: 72px auto 1rem;
+  padding: 0 1.5rem 1.5rem;
   box-sizing: border-box;
   overflow: hidden;
 

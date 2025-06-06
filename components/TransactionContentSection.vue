@@ -19,7 +19,7 @@ import TransactionFormSection from './TransactionFormSection.vue';
 .transaction-content {
   width: calc(100% - 1.5rem);
   max-width: 1200px;
-  min-height: calc(1722px - 100px);
+  min-height: 100vh;
   background-color: $bg-white;
   border-radius: 2rem;
   border: 1px solid $bg-gray;

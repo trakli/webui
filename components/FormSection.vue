@@ -53,8 +53,9 @@ const selectOutcome = () => {
 @use '~/assets/_variables' as *;
 
 .form-container {
-  width: 640px;
-  height: 1271px;
+  width: 100%;
+  max-width: 640px;
+  min-height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: center;
