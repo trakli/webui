@@ -58,6 +58,43 @@
                 </div>
               </td>
             </tr>
+            <!-- Pagination Row -->
+            <tr class="pagination-row">
+              <td colspan="6">
+                <div class="pagination-container">
+                  <div class="pagination-controls">
+                    <button
+                      class="pagination-btn"
+                      :disabled="currentPage === 1"
+                      @click="goToPage(currentPage - 1)"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      v-for="page in visiblePages"
+                      :key="page"
+                      class="pagination-btn"
+                      :class="{ active: page === currentPage }"
+                      @click="goToPage(page)"
+                    >
+                      {{ page }}
+                    </button>
+                    <button
+                      class="pagination-btn"
+                      :disabled="currentPage === totalPages"
+                      @click="goToPage(currentPage + 1)"
+                    >
+                      Next
+                    </button>
+                  </div>
+                  <div class="pagination-info">
+                    <span class="entries-text">
+                      Showing {{ startEntry }}-{{ endEntry }} of {{ totalEntries }} entries
+                    </span>
+                  </div>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -66,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -76,6 +113,8 @@ import {
 
 const searchQuery = ref('');
 const filterQuery = ref('');
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
 const transactions = ref([
   {
@@ -142,6 +181,48 @@ const transactions = ref([
     category: 'School'
   }
 ]);
+
+// Pagination computed properties
+const totalPages = computed(() => {
+  return Math.ceil(transactions.value.length / itemsPerPage.value);
+});
+
+const totalEntries = computed(() => {
+  return transactions.value.length;
+});
+
+const startEntry = computed(() => {
+  return (currentPage.value - 1) * itemsPerPage.value + 1;
+});
+
+const endEntry = computed(() => {
+  const end = currentPage.value * itemsPerPage.value;
+  return Math.min(end, totalEntries.value);
+});
+
+const visiblePages = computed(() => {
+  const pages = [];
+  const maxVisible = 5;
+  let start = Math.max(1, currentPage.value - Math.floor(maxVisible / 2));
+  let end = Math.min(totalPages.value, start + maxVisible - 1);
+
+  if (end - start + 1 < maxVisible) {
+    start = Math.max(1, end - maxVisible + 1);
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+// Pagination methods
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -350,6 +431,74 @@ const transactions = ref([
 
     &-attach {
       color: #2d9cdb;
+    }
+  }
+}
+
+// Pagination styles
+.pagination-row {
+  td {
+    background-color: #f9f9f9 !important;
+    border-bottom: none !important;
+    padding: 16px 12px !important;
+  }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+}
+
+.entries-text {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.pagination-btn {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
+
+  &:hover:not(:disabled) {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f9fafb;
+  }
+
+  &.active {
+    background-color: #057a55;
+    color: white;
+    border-color: #057a55;
+
+    &:hover {
+      background-color: #065f46;
     }
   }
 }
