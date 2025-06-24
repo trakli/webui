@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import Logo from '@/components/Logo.vue';
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
+import { usePasswordToggle } from '@/composables/usePasswordToggle';
 
 /* eslint-disable no-undef */
 definePageMeta({
@@ -14,16 +15,18 @@ const form = ref({
   password: ''
 });
 
+const user = useState('user', () => null);
+const router = useRouter();
+
 const handleSubmit = () => {
-  // Add your login logic here
+  if (user.value && user.value.email === form.value.email && user.value.password === form.value.password) {
+    router.push('/dashboard');
+  } else {
+    alert('Invalid credentials or no user registered.');
+  }
 };
 
-// Add ref for password visibility
-const showPassword = ref(false);
-
-const togglePassword = () => {
-  showPassword.value = !showPassword.value;
-};
+const { showPassword, togglePassword } = usePasswordToggle();
 </script>
 
 <template>

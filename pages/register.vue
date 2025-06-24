@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import Logo from '@/components/Logo.vue';
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
+import { usePasswordToggle } from '@/composables/usePasswordToggle';
 
 /* eslint-disable no-undef */
 definePageMeta({
@@ -19,7 +20,8 @@ const form = ref({
 });
 
 const phoneError = ref(false);
-const showPassword = ref(false);
+const user = useState('user');
+const router = useRouter();
 
 watch(
   () => form.value.phone,
@@ -34,15 +36,14 @@ watch(
 );
 
 const handleSubmit = () => {
-  // Add your registration logic here
   if (phoneError.value) {
     return;
   }
+  user.value = { ...form.value };
+  router.push('/login');
 };
 
-const togglePassword = () => {
-  showPassword.value = !showPassword.value;
-};
+const { showPassword, togglePassword } = usePasswordToggle();
 </script>
 
 <template>
