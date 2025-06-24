@@ -4,6 +4,7 @@ import { useState, useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 
 /* eslint-disable no-undef */
 definePageMeta({
@@ -20,6 +21,15 @@ const form = ref({
   password: ''
 });
 
+const formErrors = ref({
+  email: '',
+  username: '',
+  firstName: '',
+  lastName: '',
+  phone: '',
+  password: ''
+});
+
 const phoneError = ref(false);
 const user = useState('user');
 const router = useRouter();
@@ -28,20 +38,83 @@ watch(
   () => form.value.phone,
   (newVal) => {
     if (newVal) {
-      const phoneRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/im;
-      phoneError.value = !phoneRegex.test(newVal);
+      phoneError.value = !isValidPhoneNumber(newVal, 'CM');
     } else {
       phoneError.value = false;
     }
   }
 );
 
-const handleSubmit = () => {
-  if (phoneError.value) {
-    return;
+const validatePhoneNumber = (number) => {
+  // Add your phone number validation logic here
+  return true;
+};
+
+const validateForm = () => {
+  let isValid = true;
+  
+  // Reset errors
+  Object.keys(formErrors.value).forEach(key => formErrors.value[key] = '');
+  
+  // Email validation
+  if (!form.value.email) {
+    formErrors.value.email = 'Email is required';
+    isValid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    formErrors.value.email = 'Invalid email format';
+    isValid = false;
   }
-  user.value = { ...form.value };
-  router.push('/login');
+
+  // Username validation
+  if (!form.value.username) {
+    formErrors.value.username = 'Username is required';
+    isValid = false;
+  } else if (form.value.username.length < 3) {
+    formErrors.value.username = 'Username must be at least 3 characters';
+    isValid = false;
+  }
+
+  // Name validation
+  if (!form.value.firstName) {
+    formErrors.value.firstName = 'First name is required';
+    isValid = false;
+  }
+  if (!form.value.lastName) {
+    formErrors.value.lastName = 'Last name is required';
+    isValid = false;
+  }
+
+  // Phone validation
+  if (!form.value.phone) {
+    formErrors.value.phone = 'Phone number is required';
+    isValid = false;
+  } else if (!validatePhoneNumber(form.value.phone)) {
+    formErrors.value.phone = 'Invalid phone number format';
+    isValid = false;
+  }
+
+  // Password validation
+  if (!form.value.password) {
+    formErrors.value.password = 'Password is required';
+    isValid = false;
+  } else if (form.value.password.length < 8) {
+    formErrors.value.password = 'Password must be at least 8 characters';
+    isValid = false;
+  }
+
+  return isValid;
+};
+
+const handleSubmit = () => {
+  if (validateForm()) {
+    // Proceed with form submission
+    console.log('Form submitted:', form.value);
+    if (phoneError.value) {
+      return;
+    }
+    user.value = { ...form.value };
+    router.push('/login');
+  }
 };
 
 const { showPassword, togglePassword } = usePasswordToggle();
@@ -65,10 +138,12 @@ const { showPassword, togglePassword } = usePasswordToggle();
               <div class="form-group">
                 <label>Email</label>
                 <input type="email" v-model="form.email" placeholder="myemail@gmail.com" required />
+                <small v-if="formErrors.email" class="error-text">{{ formErrors.email }}</small>
               </div>
               <div class="form-group">
                 <label>Username</label>
                 <input type="text" v-model="form.username" placeholder="Choose Username" required />
+                <small v-if="formErrors.username" class="error-text">{{ formErrors.username }}</small>
               </div>
             </div>
 
@@ -81,10 +156,12 @@ const { showPassword, togglePassword } = usePasswordToggle();
                   placeholder="Enter First Name"
                   required
                 />
+                <small v-if="formErrors.firstName" class="error-text">{{ formErrors.firstName }}</small>
               </div>
               <div class="form-group">
                 <label>Last Name</label>
                 <input type="text" v-model="form.lastName" placeholder="Enter Last Name" required />
+                <small v-if="formErrors.lastName" class="error-text">{{ formErrors.lastName }}</small>
               </div>
             </div>
 
@@ -93,6 +170,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
                 <label>Phone Number</label>
                 <input type="tel" v-model="form.phone" placeholder="+237 674 845 657" required />
                 <small v-if="phoneError" class="error-text">Wrong Phone Number!</small>
+                <small v-if="formErrors.phone" class="error-text">{{ formErrors.phone }}</small>
               </div>
               <div class="form-group">
                 <label>Password</label>
@@ -138,6 +216,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
                     </svg>
                   </button>
                 </div>
+                <small v-if="formErrors.password" class="error-text">{{ formErrors.password }}</small>
               </div>
             </div>
 
@@ -182,12 +261,40 @@ const { showPassword, togglePassword } = usePasswordToggle();
 }
 
 .register-container {
-  flex: 1;
   position: relative;
+  min-height: 100vh;
   display: flex;
   max-width: 1440px;
   margin: 0 auto;
   padding: 2rem;
+
+  @media (max-width: 1024px) {
+    padding: 1.5rem;
+    flex-direction: column;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    
+    .register-sidebar {
+      display: none; // Hide sidebar on mobile
+    }
+
+    .register-form-container {
+      padding: 1rem;
+      
+      .form-card {
+        padding: 2rem;
+        margin-top: 1rem;
+        min-height: auto;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  }
 }
 
 .register-form-container {
@@ -231,6 +338,13 @@ h1 {
   gap: 1.5rem;
 }
 
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
 .form-group {
   flex: 1;
   text-align: left;
@@ -255,6 +369,20 @@ h1 {
       border-color: $primary-color;
     }
   }
+
+  .error-text {
+    color: #DC2626;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  input.has-error {
+    border-color: #DC2626;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+  }
 }
 
 .password-input {
@@ -274,11 +402,6 @@ h1 {
     cursor: pointer;
     color: #888;
   }
-}
-
-.error-text {
-  color: red;
-  font-size: 0.8rem;
 }
 
 .submit-button {
