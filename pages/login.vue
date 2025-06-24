@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { useState, useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
@@ -19,7 +20,11 @@ const user = useState('user', () => null);
 const router = useRouter();
 
 const handleSubmit = () => {
-  if (user.value && user.value.email === form.value.email && user.value.password === form.value.password) {
+  if (
+    user.value &&
+    user.value.email === form.value.email &&
+    user.value.password === form.value.password
+  ) {
     router.push('/dashboard');
   } else {
     alert('Invalid credentials or no user registered.');

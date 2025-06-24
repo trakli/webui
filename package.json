@@ -10,8 +10,8 @@
     "postinstall": "nuxt prepare",
     "start": "nuxt start",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "format:check": "prettier --check ./",
-    "format:fix": "prettier --write ./"
+    "format": "prettier --write ./",
+    "format:check": "prettier --check ./"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",

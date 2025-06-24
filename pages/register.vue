@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
+import { useState, useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
