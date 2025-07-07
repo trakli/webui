@@ -20,6 +20,8 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@rushstack/eslint-patch": "^1.10.3",
     "@vue/eslint-config-prettier": "^9.0.0",
     "eslint": "^8.57.0",

@@ -1,3 +1,31 @@
+<template>
+  <div class="login-sidebar">
+    <div class="sidebar-content">
+      <div class="carousel-slide">
+        <div class="slide-image-wrapper">
+          <div class="carousel-image" />
+        </div>
+        <div class="sidebar-text">
+          <transition name="fade" mode="out-in">
+            <div :key="currentSlide" class="text-content">
+              <h2>{{ slides[currentSlide].title }}</h2>
+              <p>{{ slides[currentSlide].text }}</p>
+            </div>
+          </transition>
+        </div>
+        <div class="carousel-dots">
+          <span
+            v-for="(slide, index) in slides"
+            :key="index"
+            :class="['dot', { active: currentSlide === index }]"
+            @click="currentSlide = index"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 
@@ -26,40 +54,11 @@ const startSlideShow = () => {
   }, 5000);
 };
 
-onMounted(() => {
-  startSlideShow();
-});
-
-onBeforeUnmount(() => {
-  clearInterval(slideInterval);
-});
+onMounted(startSlideShow);
+onBeforeUnmount(() => clearInterval(slideInterval));
 </script>
 
-<template>
-  <div class="login-sidebar">
-    <div class="sidebar-content">
-      <div class="carousel-slide">
-        <div class="slide-image-wrapper">
-          <div class="carousel-image"></div>
-        </div>
-        <div class="sidebar-text">
-          <h2>{{ slides[currentSlide].title }}</h2>
-          <p>{{ slides[currentSlide].text }}</p>
-        </div>
-        <div class="carousel-dots">
-          <span
-            v-for="(slide, index) in slides"
-            :key="index"
-            :class="['dot', { active: currentSlide === index }]"
-            @click="currentSlide = index"
-          ></span>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<style lang="scss" scoped>
+<style scoped lang="scss">
 @use '@/assets/scss/_variables.scss' as *;
 
 .login-sidebar {
@@ -69,74 +68,96 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   color: white;
   padding: 4rem 6rem 2rem 4rem;
+  min-width: 480px;
+}
 
-  .sidebar-content {
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: 6rem;
+}
+
+.carousel-slide {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  height: 100%;
+  justify-content: flex-start;
+}
+
+.slide-image-wrapper {
+  width: 40%;
+  max-width: 400px;
+  margin: 0 auto;
+  aspect-ratio: 16/15;
+
+  .carousel-image {
+    width: 100%;
     height: 100%;
+    background: url('/SidebarImage.svg') no-repeat center;
+    background-size: contain;
+    opacity: 0.9;
+  }
+}
+
+.sidebar-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 180px;
+  overflow: hidden;
+  text-align: center;
+
+  .text-content {
     display: flex;
     flex-direction: column;
-    padding-top: 6rem;
-  }
-
-  .carousel-slide {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
-  }
-
-  .slide-image-wrapper {
-    width: 90%;
-    max-width: 400px;
-    margin: 0 auto;
-    aspect-ratio: 16/15;
-
-    .carousel-image {
-      width: 100%;
-      height: 100%;
-      background: url('/SidebarImage.svg') no-repeat center;
-      background-size: contain;
-      opacity: 0.9;
-    }
-  }
-
-  .sidebar-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
+    gap: 1rem;
+    max-width: 80%;
 
     h2 {
       font-size: 3.5rem;
       font-weight: 700;
       color: $accent-color;
+      margin: 0;
     }
 
     p {
       font-size: 1.125rem;
       line-height: 1.6;
-      text-align: center;
-      max-width: 80%;
+      margin: 0;
     }
   }
+}
 
-  .carousel-dots {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 2rem;
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 10px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &.active {
+    background-color: $accent-color;
   }
+}
 
-  .dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: background-color 0.3s;
-
-    &.active {
-      background-color: $accent-color;
-    }
-  }
+// Fade transition
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

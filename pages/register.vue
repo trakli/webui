@@ -45,17 +45,12 @@ watch(
   }
 );
 
-const validatePhoneNumber = (number) => {
-  // Add your phone number validation logic here
-  return true;
-};
-
 const validateForm = () => {
   let isValid = true;
-  
+
   // Reset errors
-  Object.keys(formErrors.value).forEach(key => formErrors.value[key] = '');
-  
+  Object.keys(formErrors.value).forEach((key) => (formErrors.value[key] = ''));
+
   // Email validation
   if (!form.value.email) {
     formErrors.value.email = 'Email is required';
@@ -88,7 +83,7 @@ const validateForm = () => {
   if (!form.value.phone) {
     formErrors.value.phone = 'Phone number is required';
     isValid = false;
-  } else if (!validatePhoneNumber(form.value.phone)) {
+  } else if (!isValidPhoneNumber(form.value.phone, 'CM')) {
     formErrors.value.phone = 'Invalid phone number format';
     isValid = false;
   }
@@ -143,7 +138,9 @@ const { showPassword, togglePassword } = usePasswordToggle();
               <div class="form-group">
                 <label>Username</label>
                 <input type="text" v-model="form.username" placeholder="Choose Username" required />
-                <small v-if="formErrors.username" class="error-text">{{ formErrors.username }}</small>
+                <small v-if="formErrors.username" class="error-text">{{
+                  formErrors.username
+                }}</small>
               </div>
             </div>
 
@@ -156,12 +153,16 @@ const { showPassword, togglePassword } = usePasswordToggle();
                   placeholder="Enter First Name"
                   required
                 />
-                <small v-if="formErrors.firstName" class="error-text">{{ formErrors.firstName }}</small>
+                <small v-if="formErrors.firstName" class="error-text">{{
+                  formErrors.firstName
+                }}</small>
               </div>
               <div class="form-group">
                 <label>Last Name</label>
                 <input type="text" v-model="form.lastName" placeholder="Enter Last Name" required />
-                <small v-if="formErrors.lastName" class="error-text">{{ formErrors.lastName }}</small>
+                <small v-if="formErrors.lastName" class="error-text">{{
+                  formErrors.lastName
+                }}</small>
               </div>
             </div>
 
@@ -216,7 +217,9 @@ const { showPassword, togglePassword } = usePasswordToggle();
                     </svg>
                   </button>
                 </div>
-                <small v-if="formErrors.password" class="error-text">{{ formErrors.password }}</small>
+                <small v-if="formErrors.password" class="error-text">{{
+                  formErrors.password
+                }}</small>
               </div>
             </div>
 
@@ -275,14 +278,14 @@ const { showPassword, togglePassword } = usePasswordToggle();
 
   @media (max-width: 768px) {
     padding: 1rem;
-    
+
     .register-sidebar {
       display: none; // Hide sidebar on mobile
     }
 
     .register-form-container {
       padding: 1rem;
-      
+
       .form-card {
         padding: 2rem;
         margin-top: 1rem;
@@ -371,14 +374,14 @@ h1 {
   }
 
   .error-text {
-    color: #DC2626;
+    color: #dc2626;
     font-size: 0.75rem;
     margin-top: 0.25rem;
   }
 
   input.has-error {
-    border-color: #DC2626;
-    
+    border-color: #dc2626;
+
     &:focus {
       box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
