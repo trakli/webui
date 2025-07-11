@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useState, useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
@@ -112,6 +112,22 @@ const handleSubmit = () => {
   }
 };
 
+const screenWidth = ref(window.innerWidth);
+
+const updateScreenWidth = () => {
+  screenWidth.value = window.innerWidth;
+};
+
+onMounted(() => {
+  window.addEventListener('resize', updateScreenWidth);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateScreenWidth);
+});
+
+
+
 const { showPassword, togglePassword } = usePasswordToggle();
 </script>
 
@@ -119,8 +135,15 @@ const { showPassword, togglePassword } = usePasswordToggle();
   <div class="page-wrapper">
     <div class="floating-docs-pattern"></div>
 
-    <div class="register-container">
-      <AuthCarousel />
+    <div
+      class="register-container"
+      :class="{
+        'layout-mobile': screenWidth < 640,
+        'layout-tablet': screenWidth >= 640 && screenWidth < 1024,
+        'layout-desktop': screenWidth >= 1024
+      }"
+    >
+      <AuthCarousel v-if="screenWidth >= 1024" />
       <div class="register-form-container">
         <div class="form-card">
           <div class="logo-wrapper">
@@ -245,58 +268,44 @@ const { showPassword, togglePassword } = usePasswordToggle();
 
 .page-wrapper {
   min-height: 100vh;
-  position: relative;
-  background: $primary-color;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: $primary-color;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  padding: 0;
 }
 
 .floating-docs-pattern {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: url('/SidebarImage.svg') no-repeat center;
   background-size: cover;
   opacity: 0.1;
+  z-index: 0;
 }
 
 .register-container {
-  position: relative;
-  min-height: 100vh;
   display: flex;
   max-width: 1440px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  gap: 2rem;
 
-  @media (max-width: 1024px) {
-    padding: 1.5rem;
+  &.layout-mobile,
+  &.layout-tablet {
     flex-direction: column;
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
   }
 
-  @media (max-width: 768px) {
-    padding: 1rem;
-
-    .register-sidebar {
-      display: none; // Hide sidebar on mobile
-    }
-
-    .register-form-container {
-      padding: 1rem;
-
-      .form-card {
-        padding: 2rem;
-        margin-top: 1rem;
-        min-height: auto;
-      }
-
-      .form-row {
-        flex-direction: column;
-        gap: 1rem;
-      }
-    }
+  &.layout-mobile {
+    padding: 1rem 0.75rem;
   }
 }
 
@@ -315,6 +324,17 @@ const { showPassword, togglePassword } = usePasswordToggle();
   border-radius: 1rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   text-align: center;
+
+  @media (max-width: 1023px) {
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: none;
+  }
+
+  @media (max-width: 639px) {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+  }
 }
 
 .logo-wrapper {
@@ -339,10 +359,8 @@ h1 {
 .form-row {
   display: flex;
   gap: 1.5rem;
-}
 
-@media (max-width: 600px) {
-  .form-row {
+  @media (max-width: 600px) {
     flex-direction: column;
     gap: 0.75rem;
   }
@@ -371,20 +389,20 @@ h1 {
       outline: none;
       border-color: $primary-color;
     }
+
+    &.has-error {
+      border-color: #dc2626;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+      }
+    }
   }
 
   .error-text {
     color: #dc2626;
     font-size: 0.75rem;
     margin-top: 0.25rem;
-  }
-
-  input.has-error {
-    border-color: #dc2626;
-
-    &:focus {
-      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-    }
   }
 }
 
@@ -451,11 +469,14 @@ h1 {
 }
 
 .global-copyright {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  padding: 1rem;
   font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+
+  @media (max-width: 639px) {
+    display: none;
+  }
 }
+
 </style>

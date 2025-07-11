@@ -64,27 +64,29 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 .login-sidebar {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  color: white;
-  padding: 4rem 6rem 2rem 4rem;
+  align-items: center; // ✅ Center horizontally
+  justify-content: center; // ✅ Center vertically
+  padding: 2rem 3rem;
   min-width: 480px;
+  color: white;
 }
 
 .sidebar-content {
-  height: 100%;
+  width: 100%;
+  max-width: 600px;
   display: flex;
   flex-direction: column;
-  padding-top: 6rem;
+  align-items: center;
+  gap: 2.5rem;
 }
 
 .carousel-slide {
-  margin-top: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
-  height: 100%;
-  justify-content: flex-start;
+  gap: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .slide-image-wrapper {
@@ -160,4 +162,5 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 .fade-leave-to {
   opacity: 0;
 }
+
 </style>

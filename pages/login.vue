@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted} from 'vue';
 import { useState, useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
@@ -14,6 +14,20 @@ definePageMeta({
 const form = ref({
   email: '',
   password: ''
+});
+
+const screenWidth = ref(window.innerWidth);
+
+const updateScreenWidth = () => {
+  screenWidth.value = window.innerWidth;
+};
+
+onMounted(() => {
+  window.addEventListener('resize', updateScreenWidth);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateScreenWidth);
 });
 
 const user = useState('user', () => null);
@@ -36,23 +50,41 @@ const { showPassword, togglePassword } = usePasswordToggle();
 
 <template>
   <div class="page-wrapper">
+    <!-- Background floating pattern -->
     <div class="floating-docs-pattern"></div>
 
-    <div class="login-container">
-      <AuthCarousel />
+    <!-- Responsive container with conditional layout classes -->
+    <div
+      class="login-container"
+      :class="{
+        'layout-mobile': screenWidth < 640,
+        'layout-tablet': screenWidth >= 640 && screenWidth < 1024,
+        'layout-desktop': screenWidth >= 1024
+      }"
+    >
+      <!-- Show AuthCarousel only on desktops and laptops -->
+      <AuthCarousel v-if="screenWidth >= 1024" />
 
+      <!-- Login Form Section -->
       <div class="login-form-container">
         <div class="form-card">
           <div class="logo-wrapper">
             <Logo size="medium" />
           </div>
+
           <h1>Welcome Back</h1>
 
           <form @submit.prevent="handleSubmit" class="login-form">
             <div class="form-group">
               <label>Email</label>
-              <input type="email" v-model="form.email" placeholder="Enter your email" required />
+              <input
+                type="email"
+                v-model="form.email"
+                placeholder="Enter your email"
+                required
+              />
             </div>
+
             <div class="form-group">
               <label>Password</label>
               <div class="password-input">
@@ -62,7 +94,12 @@ const { showPassword, togglePassword } = usePasswordToggle();
                   placeholder="Enter your password"
                   required
                 />
-                <button type="button" class="password-toggle" @click="togglePassword">
+                <button
+                  type="button"
+                  class="password-toggle"
+                  @click="togglePassword"
+                >
+                  <!-- Eye Icon -->
                   <svg
                     v-if="!showPassword"
                     xmlns="http://www.w3.org/2000/svg"
@@ -78,6 +115,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
+                  <!-- Eye-Off Icon -->
                   <svg
                     v-else
                     xmlns="http://www.w3.org/2000/svg"
@@ -100,25 +138,34 @@ const { showPassword, togglePassword } = usePasswordToggle();
             </div>
 
             <div class="form-actions">
-              <label class="remember-me"> <input type="checkbox" /> Remember me </label>
+              <label class="remember-me">
+                <input type="checkbox" /> Remember me
+              </label>
               <a href="#" class="forgot-password">Forgot Password?</a>
             </div>
 
             <button type="submit" class="submit-button">Login</button>
+
             <div class="divider">
               <span class="line"></span>
             </div>
           </form>
 
           <p class="signup-link">
-            Don't have an account? <nuxt-link to="/register">Sign Up</nuxt-link>
+            Don't have an account?
+            <nuxt-link to="/register">Sign Up</nuxt-link>
           </p>
         </div>
       </div>
     </div>
-    <div class="global-copyright">© {{ new Date().getFullYear() }} Trakli. All Right Reserved</div>
+
+    <!-- Show footer on tablets and larger screens -->
+    <div v-if="screenWidth >= 640" class="global-footer">
+      © {{ new Date().getFullYear() }} Trakli. All Right Reserved
+    </div>
   </div>
 </template>
+
 
 <style lang="scss" scoped>
 @use 'sass:color';
@@ -126,31 +173,45 @@ const { showPassword, togglePassword } = usePasswordToggle();
 
 .page-wrapper {
   min-height: 100vh;
-  position: relative;
-  background: $primary-color;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: $primary-color;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  padding: 0;
 }
 
 .floating-docs-pattern {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: url('/SidebarImage.svg') no-repeat center;
   background-size: cover;
   opacity: 0.1;
+  z-index: 0;
 }
 
 .login-container {
-  flex: 1;
-  position: relative;
   display: flex;
   max-width: 1440px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  gap: 2rem;
+
+  &.layout-mobile,
+  &.layout-tablet {
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+  }
+
+  &.layout-mobile {
+    padding: 1rem 0.75rem;
+  }
 }
 
 .login-form-container {
@@ -168,6 +229,17 @@ const { showPassword, togglePassword } = usePasswordToggle();
   border-radius: 1rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   text-align: center;
+
+  @media (max-width: 1023px) {
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: none;
+  }
+
+  @media (max-width: 639px) {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+  }
 }
 
 .logo-wrapper {
@@ -298,12 +370,17 @@ h1 {
   }
 }
 
-.global-copyright {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.7);
+.global-footer {
+  text-align: center;
+  padding: 1rem;
   font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 2;
+
+  @media (max-width: 639px) {
+    display: none;
+  }
 }
+
+
 </style>
