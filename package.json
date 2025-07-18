@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
+    "country-flag-icons": "^1.5.19",
     "libphonenumber-js": "^1.12.9",
     "lucide-vue-next": "^0.525.0",
     "nuxt": "^3.12.4",

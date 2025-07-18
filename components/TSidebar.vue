@@ -90,9 +90,6 @@
             <span class="text">Support</span>
           </button>
         </li>
-        <li>
-          <TAvatar />
-        </li>
       </ul>
     </div>
   </div>
@@ -109,7 +106,6 @@ import {
   UserGroupIcon,
   WalletIcon
 } from '@heroicons/vue/24/outline';
-import TAvatar from './TAvatar.vue';
 import Logo from './Logo.vue';
 </script>
 
@@ -117,8 +113,6 @@ import Logo from './Logo.vue';
 @use '@/assets/scss/_variables.scss' as *;
 
 .sidebar {
-  --sidebar-width: min(300px, 30vw);
-  --sidebar-min-width: 200px;
   width: var(--sidebar-width);
   min-width: var(--sidebar-min-width);
   height: 100vh;

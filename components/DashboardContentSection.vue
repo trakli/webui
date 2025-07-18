@@ -19,13 +19,10 @@ import WalletCard from './WalletCard.vue';
 @use '@/assets/scss/_variables.scss' as *;
 
 .dashboard-content {
-  width: calc(100% - 1.5rem);
-  max-width: 1400px;
   min-height: calc(100vh - 100px);
   background-color: $bg-white;
   border-radius: 2rem;
   border: 1px solid $bg-gray;
-  margin: 0 1.5rem 1rem;
   padding: 1.5rem;
   box-sizing: border-box;
   overflow: hidden;
