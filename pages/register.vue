@@ -38,7 +38,7 @@ watch(
   () => form.value.phone,
   (newVal) => {
     if (newVal) {
-      phoneError.value = !isValidPhoneNumber(newVal, 'CM');
+      phoneError.value = !isValidPhoneNumber(newVal);
     } else {
       phoneError.value = false;
     }
@@ -83,7 +83,7 @@ const validateForm = () => {
   if (!form.value.phone) {
     formErrors.value.phone = 'Phone number is required';
     isValid = false;
-  } else if (!isValidPhoneNumber(form.value.phone, 'CM')) {
+  } else if (!isValidPhoneNumber(form.value.phone)) {
     formErrors.value.phone = 'Invalid phone number format';
     isValid = false;
   }

@@ -2,7 +2,7 @@
   <div class="navbar">
     <div class="navbar-right">
       <div class="search-container">
-        <TButton size="small" text="Add Transaction +" type="button" />
+        <TButton size="small" text="Add Transaction +" to="/transactions/new" />
         <button class="icon-button">
           <BellIcon class="icon" />
         </button>

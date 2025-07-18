@@ -25,6 +25,10 @@ const props = defineProps({
   type: {
     type: String,
     default: 'button'
+  },
+  to: {
+    type: [String, Object],
+    default: null
   }
 });
 
@@ -40,7 +44,12 @@ const buttonClasses = [
 </script>
 
 <template>
-  <button :class="buttonClasses" :type="type" :disabled="disabled">
+  <NuxtLink v-if="to" :to="to" :class="buttonClasses" :disabled="disabled">
+    <span class="button__text">
+      <slot>{{ text }}</slot>
+    </span>
+  </NuxtLink>
+  <button v-else :class="buttonClasses" :type="type" :disabled="disabled">
     <span class="button__text">
       <slot>{{ text }}</slot>
     </span>
