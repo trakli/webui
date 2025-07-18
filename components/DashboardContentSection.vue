@@ -16,7 +16,7 @@ import WalletCard from './WalletCard.vue';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .dashboard-content {
   width: calc(100% - 1.5rem);

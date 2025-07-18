@@ -29,7 +29,7 @@ import { MagnifyingGlassIcon, BellIcon, ChevronDownIcon } from '@heroicons/vue/2
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .navbar {
   --sidebar-width: min(300px, 30vw);

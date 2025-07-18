@@ -1,0 +1,141 @@
+@use 'sass:color';
+@use '@/assets/scss/_variables.scss' as *;
+
+// This file contains shared styles for authentication pages (Login, Register, etc.)
+
+.form-card {
+  width: 100%;
+  background-color: $bg-white;
+  padding: $spacing-12;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-md;
+  text-align: center;
+
+  @media (max-width: $breakpoint-lg) {
+    padding: $spacing-8;
+    border-radius: $radius-lg;
+    box-shadow: none;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-6;
+    border-radius: $radius-md;
+  }
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-6;
+}
+
+h1 {
+  font-size: $font-size-2xl;
+  font-weight: $font-bold;
+  margin-bottom: $spacing-8;
+  color: $text-primary;
+}
+
+.form-group {
+  text-align: left;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-2;
+    font-weight: $font-semibold;
+    color: $text-secondary;
+  }
+
+  input {
+    width: 100%;
+    padding: $spacing-3 $spacing-4;
+    border: 1px solid $border-light;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    transition: $transition-base;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px $input-focus;
+    }
+
+    &.has-error {
+      border-color: $error-color;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($error-color, 0.2);
+      }
+    }
+  }
+
+  .error-text {
+    color: $error-color;
+    font-size: $font-size-xs;
+    margin-top: $spacing-1;
+  }
+}
+
+.password-input {
+  position: relative;
+
+  input {
+    padding-right: $spacing-12;
+  }
+
+  .password-toggle {
+    position: absolute;
+    top: 50%;
+    right: $spacing-3;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $text-muted;
+    padding: $spacing-1;
+  }
+}
+
+.submit-button {
+  width: 100%;
+  padding: $spacing-4;
+  background-color: $primary;
+  color: $bg-white;
+  border: none;
+  border-radius: $radius-md;
+  font-size: $font-size-lg;
+  font-weight: $font-bold;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: $primary-hover;
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: $spacing-6 0;
+
+  .line {
+    flex-grow: 1;
+    border-bottom: 1px solid $border-light;
+  }
+}
+
+.signup-link,
+.login-link {
+  margin-top: $spacing-4;
+
+  a {
+    color: $primary;
+    font-weight: $font-semibold;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -177,7 +177,7 @@ const selectedCategory = ref('Food');
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .transaction-form {
   --focus-color: v-bind(focusColor);

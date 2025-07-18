@@ -114,7 +114,7 @@ import Logo from './Logo.vue';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .sidebar {
   --sidebar-width: min(300px, 30vw);

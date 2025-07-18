@@ -90,7 +90,7 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 }
 
 .slide-image-wrapper {
-  width: 40%;
+  width: 65%;
   max-width: 400px;
   margin: 0 auto;
   aspect-ratio: 16/15;
@@ -98,7 +98,7 @@ onBeforeUnmount(() => clearInterval(slideInterval));
   .carousel-image {
     width: 100%;
     height: 100%;
-    background: url('/SidebarImage.svg') no-repeat center;
+    background: url('/floating-docs-man.svg') no-repeat center;
     background-size: contain;
     opacity: 0.9;
   }
@@ -162,5 +162,4 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 .fade-leave-to {
   opacity: 0;
 }
-
 </style>

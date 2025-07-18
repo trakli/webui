@@ -17,7 +17,7 @@ import TSidebar from '@/components/TSidebar.vue';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .group-page {
   display: flex;
