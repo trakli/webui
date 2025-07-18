@@ -1,4 +1,4 @@
-<p ><a href="#" target="_blank"><img src="https://raw.githubusercontent.com/whilesmart/trakli/main/logo.svg" width="400" alt="Trakli Logo"></a></p>
+<p align="center"><a href="#" target="_blank"><img src="https://raw.githubusercontent.com/whilesmart/trakli/main/logo.svg" width="200" alt="Trakli Logo"></a></p>
 
 ## Trakli UI
 
@@ -14,11 +14,11 @@ Web UI for [Trakli](https://github.com/whilesmart/trakli)
 
 #### Setup
 
-**Clone the repository** (if you haven't already):
+**Clone the repository**:
 
 ```sh
-git clone <repository-url>
-cd <repository-directory>
+git clone git@github.com:trakli/webui.git
+cd webui
 ```
 
 #### Running the Project
