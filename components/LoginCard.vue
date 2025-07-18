@@ -64,7 +64,7 @@ const showPassword = ref(false);
 </template>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .login-container {
   display: flex;

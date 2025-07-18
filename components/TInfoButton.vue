@@ -9,7 +9,7 @@ import { InformationCircleIcon } from '@heroicons/vue/24/outline';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .info-button {
   width: 48px;

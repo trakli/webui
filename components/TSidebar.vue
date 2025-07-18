@@ -6,64 +6,34 @@
     <nav class="sidebar-nav">
       <ul>
         <li>
-          <button
-            class="nav-button"
-            :class="{ selected: $route.path === '/home' }"
-            @click="$router.push('/home')"
-          >
+          <NuxtLink to="/dashboard" class="nav-button" active-class="selected">
             <HomeIcon class="icon" />
             <span class="text">Home</span>
-          </button>
+          </NuxtLink>
         </li>
         <li>
-          <button
-            class="nav-button"
-            :class="{ selected: $route.path === '/groups' }"
-            @click="$router.push('/groups')"
-          >
+          <NuxtLink to="/transactions" class="nav-button" active-class="selected">
             <RectangleGroupIcon class="icon" />
-            <span class="text">Groups</span>
-          </button>
+            <span class="text">Transactions</span>
+          </NuxtLink>
         </li>
         <li>
-          <button
-            class="nav-button"
-            :class="{ selected: $route.path === '/income' }"
-            @click="$router.push('/income')"
-          >
+          <NuxtLink to="/groups" class="nav-button" active-class="selected">
+            <UserGroupIcon class="icon" />
+            <span class="text">Groups</span>
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/parties" class="nav-button" active-class="selected">
             <BuildingLibraryIcon class="icon" />
             <span class="text">Parties</span>
-          </button>
+          </NuxtLink>
         </li>
         <li>
-          <button
-            class="nav-button"
-            :class="{ selected: $route.path === '/transaction' }"
-            @click="$router.push('/transaction')"
-          >
-            <UserGroupIcon class="icon" />
-            <span class="text">Parties</span>
-          </button>
-        </li>
-        <li>
-          <button
-            class="nav-button"
-            :class="{ selected: $route.path === '/parties' }"
-            @click="$router.push('/parties')"
-          >
+          <NuxtLink to="/wallets" class="nav-button" active-class="selected">
             <WalletIcon class="icon" />
             <span class="text">Wallets</span>
-          </button>
-        </li>
-        <li>
-          <button
-            class="nav-button"
-            :class="{ selected: $route.path === '/wallets' }"
-            @click="$router.push('/wallets')"
-          >
-            <ArrowPathIcon class="icon" />
-            <span class="text">Transaction tracking</span>
-          </button>
+          </NuxtLink>
         </li>
       </ul>
     </nav>
@@ -90,9 +60,6 @@
             <span class="text">Support</span>
           </button>
         </li>
-        <li>
-          <TAvatar />
-        </li>
       </ul>
     </div>
   </div>
@@ -100,7 +67,6 @@
 
 <script setup>
 import {
-  ArrowPathIcon,
   BuildingLibraryIcon,
   ChatBubbleLeftRightIcon,
   Cog8ToothIcon,
@@ -109,16 +75,13 @@ import {
   UserGroupIcon,
   WalletIcon
 } from '@heroicons/vue/24/outline';
-import TAvatar from './TAvatar.vue';
 import Logo from './Logo.vue';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .sidebar {
-  --sidebar-width: min(300px, 30vw);
-  --sidebar-min-width: 200px;
   width: var(--sidebar-width);
   min-width: var(--sidebar-min-width);
   height: 100vh;
@@ -131,6 +94,8 @@ import Logo from './Logo.vue';
   overflow-x: hidden;
   box-sizing: border-box;
   transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
 
   &-header {
     display: flex;
@@ -141,6 +106,7 @@ import Logo from './Logo.vue';
   }
 
   &-nav {
+    flex-grow: 1;
     width: 100%;
     ul {
       list-style: none;
@@ -170,11 +136,12 @@ import Logo from './Logo.vue';
     margin-left: 10px;
 
     &:hover {
-      width: 250px;
+      width: calc(var(--sidebar-width) - 20px);
       background-color: #bcdccc;
     }
 
     &.selected {
+      width: calc(var(--sidebar-width) - 20px);
       background-color: #bcdccc;
     }
   }
