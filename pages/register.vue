@@ -1,38 +1,39 @@
 <script setup>
 import { ref, watch } from 'vue';
-import { useState, useRouter } from '#imports';
+import { useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 import { Eye, EyeOff } from 'lucide-vue-next';
+import { useAuth } from '@/composables/useAuth';
 
 /* eslint-disable no-undef */
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
 });
 /* eslint-enable no-undef */
 
 const form = ref({
   email: '',
   username: '',
-  firstName: '',
-  lastName: '',
+  first_name: '',
+  last_name: '',
   phone: '',
-  password: ''
+  password: '',
 });
 
 const formErrors = ref({
   email: '',
   username: '',
-  firstName: '',
-  lastName: '',
+  first_name: '',
+  last_name: '',
   phone: '',
-  password: ''
+  password: '',
 });
 
 const phoneError = ref(false);
-const user = useState('user');
 const router = useRouter();
+const { register } = useAuth();
 
 watch(
   () => form.value.phone,
@@ -51,64 +52,31 @@ const validateForm = () => {
   // Reset errors
   Object.keys(formErrors.value).forEach((key) => (formErrors.value[key] = ''));
 
-  // Email validation
+  // Basic client-side validation
   if (!form.value.email) {
     formErrors.value.email = 'Email is required';
     isValid = false;
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    formErrors.value.email = 'Invalid email format';
+  }
+  if (!form.value.first_name) {
+    formErrors.value.first_name = 'First name is required';
     isValid = false;
   }
-
-  // Username validation
-  if (!form.value.username) {
-    formErrors.value.username = 'Username is required';
-    isValid = false;
-  } else if (form.value.username.length < 3) {
-    formErrors.value.username = 'Username must be at least 3 characters';
-    isValid = false;
-  }
-
-  // Name validation
-  if (!form.value.firstName) {
-    formErrors.value.firstName = 'First name is required';
-    isValid = false;
-  }
-  if (!form.value.lastName) {
-    formErrors.value.lastName = 'Last name is required';
-    isValid = false;
-  }
-
-  // Phone validation
-  if (!form.value.phone) {
-    formErrors.value.phone = 'Phone number is required';
-    isValid = false;
-  } else if (!isValidPhoneNumber(form.value.phone)) {
-    formErrors.value.phone = 'Invalid phone number format';
-    isValid = false;
-  }
-
-  // Password validation
   if (!form.value.password) {
     formErrors.value.password = 'Password is required';
-    isValid = false;
-  } else if (form.value.password.length < 8) {
-    formErrors.value.password = 'Password must be at least 8 characters';
     isValid = false;
   }
 
   return isValid;
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (validateForm()) {
-    // Proceed with form submission
-    console.log('Form submitted:', form.value);
-    if (phoneError.value) {
-      return;
+    try {
+      await register(form.value);
+      router.push('/login');
+    } catch (error) {
+      alert('Registration failed. Please check your details and try again.');
     }
-    user.value = { ...form.value };
-    router.push('/login');
   }
 };
 

@@ -1,11 +1,15 @@
 <template>
   <div class="card-container">
-    <h1 class="card-title">Welcome, <span class="card-title-username">Nde-Fru Che-boy </span></h1>
+    <h1 v-if="user" class="card-title">Welcome, <span class="card-title-username">{{ user.first_name }} {{ user.last_name }}</span></h1>
     <span class="card-subtitle">Are you ready to start track your money?</span>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useAuth } from '@/composables/useAuth';
+
+const { user } = useAuth();
+</script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;

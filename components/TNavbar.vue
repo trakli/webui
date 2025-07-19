@@ -12,7 +12,7 @@
         <LanguageSelector />
       </div>
       <div class="avatar-container">
-        <TAvatar image-url="/userImage.png" user-name="Nde-Fru Che-boy" :show-dropdown="true" />
+        <TAvatar image-url="/userImage.png" :show-dropdown="true" />
       </div>
     </div>
   </div>

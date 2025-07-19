@@ -10,14 +10,20 @@ const props = defineProps({
 const token = useCookie('token');
 
 const layout = computed(() => {
-  return token.value ? 'default' : 'auth';
+  return token.value ? 'dashboard' : 'auth';
 });
 
 useHead({
   title: `Error ${props.error.statusCode}`
 });
 
-const handleError = () => clearError({ redirect: '/' });
+const handleError = () => {
+  if (token.value) {
+    clearError({ redirect: '/dashboard' });
+  } else {
+    clearError({ redirect: '/login' });
+  }
+};
 </script>
 
 <template>
