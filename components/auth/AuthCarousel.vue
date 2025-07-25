@@ -1,5 +1,5 @@
 <template>
-  <div class="login-sidebar">
+  <div class="sidebar">
     <div class="sidebar-content">
       <div class="carousel-slide">
         <div class="slide-image-wrapper">
@@ -59,13 +59,13 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 </script>
 
 <style scoped lang="scss">
-@use '@/assets/scss/_variables.scss' as *;
+@use '@/assets/_variables.scss' as *;
 
-.login-sidebar {
+.sidebar {
   flex: 1;
   display: flex;
-  align-items: center; // ✅ Center horizontally
-  justify-content: center; // ✅ Center vertically
+  align-items: center; 
+  justify-content: center;
   padding: 2rem 3rem;
   min-width: 480px;
   color: white;

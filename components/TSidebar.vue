@@ -15,6 +15,7 @@
             <span class="text">Home</span>
           </button>
         </li>
+       
         <li>
           <button
             class="nav-button"
@@ -25,6 +26,17 @@
             <span class="text">Groups</span>
           </button>
         </li>
+        <li>
+          <button
+            class="nav-button"
+            :class="{ selected: $route.path.startsWith('/categories') }"
+            @click="$router.push('/categories')"
+          >
+            <BuildingLibraryIcon class="icon" />
+            <span class="text">Categories</span>
+          </button>
+        </li>
+
         <li>
           <button
             class="nav-button"
