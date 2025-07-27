@@ -24,7 +24,7 @@ import TInfoButton from './TInfoButton.vue';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .card-container {
   width: 100%;

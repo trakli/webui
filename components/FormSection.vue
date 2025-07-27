@@ -50,7 +50,7 @@ const selectOutcome = () => {
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .form-container {
   width: 100%;
