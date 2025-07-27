@@ -2,7 +2,7 @@
   <form class="category-form" @submit.prevent="handleSubmit">
     <div class="form-header">
       <button type="button" class="close-btn" @click="$emit('close')">
-        <X class="close-icon"/>
+        <X class="close-icon" />
       </button>
     </div>
 
@@ -69,7 +69,7 @@ function handleSubmit() {
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '~/assets/scss/_variables.scss' as *;
 
 .category-form {
   display: flex;
@@ -121,10 +121,11 @@ function handleSubmit() {
     width: 20px;
     height: 20px;
     color: #6b7280; // Tailwind's gray-500
-    transition: color 0.2s ease, transform 0.2s ease;
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
   }
 }
-
 
 .form-group {
   display: flex;
@@ -178,7 +179,7 @@ function handleSubmit() {
   width: 30%;
   padding: 0.75rem 1rem;
   cursor: pointer;
-  transition:  0.2s;
+  transition: 0.2s;
 }
 
 .submit-btn:hover {

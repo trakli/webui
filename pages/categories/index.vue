@@ -21,7 +21,7 @@ definePageMeta({
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '~/assets/scss/_variables.scss' as *;
 
 .categories-page {
   display: flex;
@@ -35,7 +35,7 @@ definePageMeta({
 
 .categories-content-wrapper {
   width: 100%;
-  padding: 0 ;
+  padding: 0;
   margin-top: 62px;
   max-width: 1400px;
   margin-left: auto;

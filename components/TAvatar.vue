@@ -1,59 +1,76 @@
 <template>
-  <button class="nav-footer-button-avatar" :style="{ width: width, height: height }">
-    <img src="~/public/userImage.png" alt="User Image" />
-    <div class="footer-user-name">
-      <span class="footer-user-text">Nde-Fru Che-boy </span>
-      <ChevronDownIcon class="footer-user-icon" />
+  <button class="t-avatar-button">
+    <img :src="imageUrl" alt="User Avatar" class="avatar-image" />
+    <div v-if="showName && userName" class="user-info">
+      <span class="user-name-text">{{ userName }}</span>
     </div>
+    <ChevronDownIcon v-if="showDropdown" class="dropdown-icon" />
   </button>
 </template>
 
 <script setup>
 import { ChevronDownIcon } from '@heroicons/vue/24/outline';
-// eslint-disable-next-line no-unused-vars
-const props = defineProps({
-  width: {
+
+defineProps({
+  imageUrl: {
     type: String,
-    default: '296px'
+    required: true
   },
-  height: {
+  userName: {
     type: String,
-    default: '76px'
+    default: ''
+  },
+  showName: {
+    type: Boolean,
+    default: false
+  },
+  showDropdown: {
+    type: Boolean,
+    default: true
   }
 });
 </script>
 
 <style lang="scss" scoped>
-.nav-footer-button-avatar {
+@use '@/assets/scss/_variables.scss' as *;
+
+.t-avatar-button {
   display: flex;
   align-items: center;
-  border-radius: 8px;
-  padding: 8px;
-  gap: 16px;
   background-color: transparent;
   border: none;
-  color: #495057;
-  text-align: left;
+  border-radius: $radius-md;
+  padding: 0.5rem;
+  gap: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.3s;
-  margin-left: 10px;
-}
+  transition: background-color 0.2s ease;
 
-.footer-user-name {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-}
+  &:hover {
+    background-color: $bg-light;
+  }
 
-.footer-user-text {
-  color: #01190e;
-  font-weight: 700;
-  font-size: 16px;
-}
+  .avatar-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
 
-.footer-user-icon {
-  width: 24px;
-  height: 24px;
-  margin-left: 10px;
+  .user-info {
+    display: flex;
+    align-items: center;
+  }
+
+  .user-name-text {
+    color: $text-primary;
+    font-weight: $font-semibold;
+    font-size: 1rem;
+  }
+
+  .dropdown-icon {
+    width: 20px;
+    height: 20px;
+    color: $text-secondary;
+  }
 }
 </style>

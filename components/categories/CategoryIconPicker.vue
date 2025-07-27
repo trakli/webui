@@ -3,11 +3,7 @@
     <!-- Search Section with Input, Selected Icon, and Dropdown Button -->
     <div class="icon-search-section">
       <div class="input-container">
-        <component
-          v-if="modelValue"
-          :is="selectedIconComponent"
-          class="selected-icon"
-        />
+        <component v-if="modelValue" :is="selectedIconComponent" class="selected-icon" />
         <input
           id="iconSearch"
           v-model="search"
@@ -42,13 +38,80 @@
 <script setup>
 import { ref, computed } from 'vue';
 import {
-  Home, User, Wallet, Settings, Plus, Minus, ArrowUp, ArrowDown, Bell, Book, Calendar, Camera,
-  Check, ChevronDown, ChevronUp, Clipboard, Cloud, CreditCard, DollarSign, Edit, Eye, EyeOff,
-  File, Filter, Gift, Globe, Heart, Image, Info, Key, Link, List, Lock, Mail, Map, Menu,
-  MessageCircle, Monitor, MoreHorizontal, MoreVertical, Package, Paperclip, Pause, PenTool,
-  Percent, Phone, PieChart, Play, PlusCircle, Printer, RefreshCw, Repeat, Save, Search, Send,
-  Share, Shield, ShoppingCart, Shuffle, Sliders, Star, Sun, Tag, Target, ThumbsUp, Trash,
-  TrendingUp, Truck, Unlock, Upload, UserCheck, Users, X, Zap
+  Home,
+  User,
+  Wallet,
+  Settings,
+  Plus,
+  Minus,
+  ArrowUp,
+  ArrowDown,
+  Bell,
+  Book,
+  Calendar,
+  Camera,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Clipboard,
+  Cloud,
+  CreditCard,
+  DollarSign,
+  Edit,
+  Eye,
+  EyeOff,
+  File,
+  Filter,
+  Gift,
+  Globe,
+  Heart,
+  Image,
+  Info,
+  Key,
+  Link,
+  List,
+  Lock,
+  Mail,
+  Map,
+  Menu,
+  MessageCircle,
+  Monitor,
+  MoreHorizontal,
+  MoreVertical,
+  Package,
+  Paperclip,
+  Pause,
+  PenTool,
+  Percent,
+  Phone,
+  PieChart,
+  Play,
+  PlusCircle,
+  Printer,
+  RefreshCw,
+  Repeat,
+  Save,
+  Search,
+  Send,
+  Share,
+  Shield,
+  ShoppingCart,
+  Shuffle,
+  Sliders,
+  Star,
+  Sun,
+  Tag,
+  Target,
+  ThumbsUp,
+  Trash,
+  TrendingUp,
+  Truck,
+  Unlock,
+  Upload,
+  UserCheck,
+  Users,
+  X,
+  Zap
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -137,19 +200,17 @@ const icons = [
 ];
 
 const filteredIcons = computed(() =>
-  icons.filter(icon =>
-    icon.name.toLowerCase().includes(search.value.toLowerCase())
-  )
+  icons.filter((icon) => icon.name.toLowerCase().includes(search.value.toLowerCase()))
 );
 
-const selectedIconComponent = computed(() =>
-  icons.find(icon => icon.name === props.modelValue)?.component || null
+const selectedIconComponent = computed(
+  () => icons.find((icon) => icon.name === props.modelValue)?.component || null
 );
 
 function selectIcon(name) {
   emit('update:modelValue', name);
-  showDropdown.value = false; 
-  search.value = ''; 
+  showDropdown.value = false;
+  search.value = '';
 }
 
 function toggleDropdown() {
@@ -158,7 +219,7 @@ function toggleDropdown() {
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables.scss' as *;
+@use '~/assets/scss/_variables.scss' as *;
 .icon-picker {
   width: 100%;
   display: flex;
@@ -187,12 +248,12 @@ function toggleDropdown() {
   left: 0.5rem;
   width: 20px;
   height: 20px;
-  color: #047844; 
+  color: #047844;
 }
 
 .icon-search {
   width: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 2.5rem; 
+  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 1rem;
@@ -223,7 +284,7 @@ function toggleDropdown() {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 0 0 12px 12px;
-  max-height: 25vh; 
+  max-height: 25vh;
   overflow-y: auto;
 }
 
@@ -241,7 +302,9 @@ function toggleDropdown() {
   border-radius: 8px;
   padding: 6px;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;

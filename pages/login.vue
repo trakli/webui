@@ -1,15 +1,17 @@
-
 <script setup>
-definePageMeta({
-  layout: 'auth'
-});
-
 import { ref } from 'vue';
 import { useRouter, useState } from '#imports';
 import Logo from '@/components/Logo.vue';
 import AuthLayout from '@/components/auth/AuthLayout.vue';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
 import { Eye, EyeOff } from 'lucide-vue-next';
+
+// Import definePageMeta
+import { definePageMeta } from '#app';
+
+definePageMeta({
+  layout: 'auth'
+});
 
 const form = ref({
   email: '',
@@ -45,12 +47,7 @@ const handleSubmit = () => {
       <form @submit.prevent="handleSubmit" class="login-form">
         <div class="form-group">
           <label>Email</label>
-          <input
-            type="email"
-            v-model="form.email"
-            placeholder="Enter your email"
-            required
-          />
+          <input type="email" v-model="form.email" placeholder="Enter your email" required />
         </div>
 
         <div class="form-group">
@@ -69,9 +66,7 @@ const handleSubmit = () => {
         </div>
 
         <div class="form-actions">
-          <label class="remember-me">
-            <input type="checkbox" /> Remember me
-          </label>
+          <label class="remember-me"> <input type="checkbox" /> Remember me </label>
           <a href="#" class="forgot-password">Forgot Password?</a>
         </div>
 
@@ -130,28 +125,28 @@ h1 {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: .75rem;
+  gap: 0.75rem;
 }
 
 .form-group {
   text-align: left;
-label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-weight: 600;
-  color: #555;
-}
+  label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    color: #555;
+  }
 
-input {
-  width: 100%;
-  padding: .7rem .75rem;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
-  font-size: 1rem;
+  input {
+    width: 100%;
+    padding: 0.7rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    font-size: 1rem;
 
-  &:focus {
-    outline: none;
-    border-color: $primary-color;
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
     }
   }
 }
@@ -198,7 +193,7 @@ input {
 
 .submit-button {
   width: 100%;
-  padding: .75rem;
+  padding: 0.75rem;
   background: $primary-color;
   color: white;
   font-size: 1.1rem;
@@ -212,7 +207,7 @@ input {
 }
 
 .signup-link {
-  margin-top: .60rem;
+  margin-top: 0.6rem;
 
   a {
     color: $primary-color;
@@ -225,7 +220,7 @@ input {
 }
 
 .divider {
-  margin: .65rem ;
+  margin: 0.65rem;
 
   .line {
     border-bottom: 1px solid #ddd;

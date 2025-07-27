@@ -4,17 +4,11 @@
 
     <div class="content-area">
       <!-- Empty State -->
-      <CategoryEmptyState
-        v-if="categories.length === 0 && !showForm"
-        @add="showForm = true"
-      />
+      <CategoryEmptyState v-if="categories.length === 0 && !showForm" @add="showForm = true" />
 
       <!-- Category Form -->
       <div v-if="showForm" class="form-wrapper">
-        <CategoryForm 
-          @created="handleCreate" 
-          @close="showForm = false"
-        />
+        <CategoryForm @created="handleCreate" @close="showForm = false" />
       </div>
 
       <!-- Category List -->
@@ -37,11 +31,11 @@ import { ref } from 'vue';
 import CategoryTopCard from './CategoryTopCard.vue';
 import CategoryEmptyState from './CategoryEmptyState.vue';
 import CategoryForm from './CategoryForm.vue';
-import CategoryList from './CategoryList.vue'; 
+import CategoryList from './CategoryList.vue';
 import TFooter from '@/components/TFooter.vue';
 
 const showForm = ref(false);
-const categories = ref([]); 
+const categories = ref([]);
 
 const handleCreate = (newCategory) => {
   const categoryWithId = {
@@ -49,7 +43,7 @@ const handleCreate = (newCategory) => {
     id: Date.now(),
     createdAt: new Date().toISOString()
   };
-  
+
   categories.value.push(categoryWithId);
   // Don't automatically close form anymore - user will close when done
 };
@@ -62,15 +56,15 @@ const handleEdit = (categoryToEdit) => {
 
 // Future delete support
 const handleDelete = (idToRemove) => {
-  categories.value = categories.value.filter(cat => cat.id !== idToRemove);
+  categories.value = categories.value.filter((cat) => cat.id !== idToRemove);
 };
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '~/assets/scss/_variables.scss' as *;
 
 .category-content {
-  width: calc(100% - .5rem);
+  width: calc(100% - 0.5rem);
   max-width: 1400px;
   min-height: 100vh;
   background-color: $bg-white;
@@ -100,8 +94,8 @@ const handleDelete = (idToRemove) => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  align-items: center; 
-  width: 100%; 
+  align-items: center;
+  width: 100%;
 }
 
 .form-wrapper {
@@ -111,7 +105,6 @@ const handleDelete = (idToRemove) => {
   max-width: 1200px;
   align-self: flex-start;
 }
-
 
 .footer-section {
   display: flex;

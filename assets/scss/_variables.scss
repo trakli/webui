@@ -34,7 +34,10 @@ $border-light: #d1d5db;
 $border-medium: #b0b8b4;
 
 // Form colors
-$input-bg: #f5f6f7;
+$input-bg: #f9fafb;
+$accent-color: #ff9f43;
+$error-color: #dc2626;
+$border-color: #e5e7eb;
 $input-focus: rgba(4, 120, 68, 0.5);
 
 // Shadows
@@ -82,6 +85,10 @@ $font-normal: 400;
 $font-medium: 500;
 $font-semibold: 600;
 $font-bold: 700;
+
+// Navbar
+$navbar-height: 65px;
+$navbar-icon-button-height: 36px;
 
 // Transitions
 $transition-base: all 0.2s ease-in-out;

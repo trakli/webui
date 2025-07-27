@@ -25,7 +25,7 @@ import TButton from './../TButton.vue';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '~/assets/scss/_variables.scss' as *;
 
 .card-container {
   width: 100%;
@@ -96,4 +96,3 @@ import TButton from './../TButton.vue';
   font-weight: $font-semibold;
 }
 </style>
- 

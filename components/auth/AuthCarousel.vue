@@ -64,7 +64,7 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 .sidebar {
   flex: 1;
   display: flex;
-  align-items: center; 
+  align-items: center;
   justify-content: center;
   padding: 2rem 3rem;
   min-width: 480px;
@@ -162,5 +162,4 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 .fade-leave-to {
   opacity: 0;
 }
-
 </style>
