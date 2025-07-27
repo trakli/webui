@@ -15,7 +15,7 @@
             <span class="text">Home</span>
           </button>
         </li>
-       
+
         <li>
           <button
             class="nav-button"
