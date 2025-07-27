@@ -2,21 +2,17 @@
   <div class="navbar">
     <div class="navbar-right">
       <div class="search-container">
-        <TButton size="small" text="Add Transaction +" type="button" />
-        <button class="search-button">
-          <BellIcon class="search-icon" />
+        <TButton size="small" text="Add Transaction +" to="/transactions/new" />
+        <button class="icon-button">
+          <BellIcon class="icon" />
         </button>
-        <button class="search-button">
-          <MagnifyingGlassIcon class="search-icon" />
+        <button class="icon-button">
+          <MagnifyingGlassIcon class="icon" />
         </button>
-        <button class="language-button">
-          <span class="language-text">English</span>
-          <img src="~/public/greatBritain.svg" alt="Language Icon" />
-          <ChevronDownIcon class="search-icon" />
-        </button>
+        <LanguageSelector />
       </div>
       <div class="avatar-container">
-        <TAvatar width="266px" height="44px" />
+        <TAvatar image-url="/userImage.png" user-name="Nde-Fru Che-boy" :show-dropdown="true" />
       </div>
     </div>
   </div>
@@ -25,11 +21,12 @@
 <script setup>
 import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
-import { MagnifyingGlassIcon, BellIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
+import LanguageSelector from './LanguageSelector.vue';
+import { MagnifyingGlassIcon, BellIcon } from '@heroicons/vue/24/outline';
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .navbar {
   --sidebar-width: min(300px, 30vw);
@@ -37,7 +34,7 @@ import { MagnifyingGlassIcon, BellIcon, ChevronDownIcon } from '@heroicons/vue/2
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 65px;
+  height: $navbar-height;
   padding: 0 5rem;
   background-color: $bg-gray;
   border-bottom: 1px solid #e9ecef;
@@ -60,70 +57,53 @@ import { MagnifyingGlassIcon, BellIcon, ChevronDownIcon } from '@heroicons/vue/2
     left: 0;
     padding: 0 1rem;
   }
-}
 
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-left: auto;
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
 
-  @media (max-width: 768px) {
-    gap: 0.75rem;
+    @media (max-width: 768px) {
+      gap: 0.75rem;
+    }
   }
-}
 
-.avatar-container {
-  @media (max-width: 480px) {
-    display: none;
+  .search-container {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    position: relative;
+    width: 396px;
   }
-}
 
-.search-container {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  position: relative;
-  width: 396px;
-}
+  .icon {
+    width: 20px;
+    height: 20px;
+    color: #1d3229;
+  }
 
-.search-icon {
-  width: 20px;
-  height: 20px;
-  color: #1d3229;
-}
+  .icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    width: 36px;
+    height: $navbar-icon-button-height;
+    border-radius: $radius-lg;
+    background-color: #dee1e0;
+    border: none;
+    cursor: pointer;
+  }
 
-.search-button {
-  display: flex;
-  justify-content: center;
-  padding: 8px;
-  width: 36px;
-  height: 36px;
-  border-radius: $radius-lg;
-  background-color: #dee1e0;
-}
+  .avatar-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 
-.language-button {
-  display: flex;
-  justify-content: center;
-  padding: 8px;
-  width: 114px;
-  height: 36px;
-  border-radius: $radius-lg;
-  gap: 8px;
-  background-color: #dee1e0;
-}
-
-.language-text {
-  color: #000000;
-  font-size: 14px;
-  font-weight: $font-bold;
-  text-align: center;
-}
-
-.avatar-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+    @media (max-width: 480px) {
+      display: none;
+    }
+  }
 }
 </style>

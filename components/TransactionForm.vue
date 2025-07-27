@@ -177,7 +177,7 @@ const selectedCategory = ref('Food');
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .transaction-form {
   --focus-color: v-bind(focusColor);
@@ -201,7 +201,6 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   width: 576px;
-  height: 1021px;
   gap: 20px;
 }
 
@@ -420,7 +419,6 @@ textarea:focus {
 
   textarea {
     width: 576px;
-    height: 263px;
     border-radius: 12px;
     padding: 16px;
     font-size: 16px;
@@ -453,7 +451,7 @@ textarea:focus {
 
   .upload-box {
     width: 576px;
-    height: 170px;
+    height: 120px;
     border: 1px dashed #acb7b8;
     border-radius: $radius-lg;
     background-color: #ffffff;

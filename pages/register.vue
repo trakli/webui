@@ -1,4 +1,5 @@
 <script setup>
+<<<<<<< HEAD
 import { ref } from 'vue';
 import { useRouter, useState } from '#imports';
 import Logo from '@/components/Logo.vue';
@@ -8,10 +9,22 @@ import { usePasswordToggle } from '@/composables/usePasswordToggle';
 
 // Import definePageMeta
 import { definePageMeta } from '#app';
+=======
+import { ref, watch } from 'vue';
+import { useState, useRouter } from '#imports';
+import Logo from '@/components/Logo.vue';
+import { usePasswordToggle } from '@/composables/usePasswordToggle';
+import { isValidPhoneNumber } from 'libphonenumber-js';
+import { Eye, EyeOff } from 'lucide-vue-next';
+>>>>>>> origin/main
 
 definePageMeta({
   layout: 'auth'
 });
+<<<<<<< HEAD
+=======
+/* eslint-enable no-undef */
+>>>>>>> origin/main
 
 const form = ref({
   email: '',
@@ -31,9 +44,26 @@ const formErrors = ref({
   password: ''
 });
 
+<<<<<<< HEAD
 const user = useState('user');
 const router = useRouter();
 const { showPassword, togglePassword } = usePasswordToggle();
+=======
+const phoneError = ref(false);
+const user = useState('user');
+const router = useRouter();
+
+watch(
+  () => form.value.phone,
+  (newVal) => {
+    if (newVal) {
+      phoneError.value = !isValidPhoneNumber(newVal);
+    } else {
+      phoneError.value = false;
+    }
+  }
+);
+>>>>>>> origin/main
 
 const validateForm = () => {
   let isValid = true;
@@ -73,6 +103,12 @@ const validateForm = () => {
   if (!form.value.phone) {
     formErrors.value.phone = 'Phone number is required';
     isValid = false;
+<<<<<<< HEAD
+=======
+  } else if (!isValidPhoneNumber(form.value.phone)) {
+    formErrors.value.phone = 'Invalid phone number format';
+    isValid = false;
+>>>>>>> origin/main
   }
 
   // Password validation
@@ -89,6 +125,7 @@ const validateForm = () => {
 
 const handleSubmit = () => {
   if (validateForm()) {
+<<<<<<< HEAD
     user.value = { ...form.value };
     router.push('/dashboard');
   }
@@ -356,4 +393,128 @@ h1 {
     }
   }
 }
+=======
+    // Proceed with form submission
+    console.log('Form submitted:', form.value);
+    if (phoneError.value) {
+      return;
+    }
+    user.value = { ...form.value };
+    router.push('/login');
+  }
+};
+
+const { showPassword, togglePassword } = usePasswordToggle();
+</script>
+
+<template>
+  <div class="form-card">
+    <div class="logo-wrapper">
+      <Logo size="medium" />
+    </div>
+    <h1>Create an account</h1>
+
+    <form @submit.prevent="handleSubmit" class="register-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" v-model="form.email" placeholder="myemail@gmail.com" required />
+          <small v-if="formErrors.email" class="error-text">{{ formErrors.email }}</small>
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" v-model="form.username" placeholder="johndoe" required />
+          <small v-if="formErrors.username" class="error-text">
+            {{ formErrors.username }}
+          </small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" v-model="form.firstName" placeholder="Enter First Name" required />
+          <small v-if="formErrors.firstName" class="error-text">
+            {{ formErrors.firstName }}
+          </small>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" v-model="form.lastName" placeholder="Enter Last Name" required />
+          <small v-if="formErrors.lastName" class="error-text">
+            {{ formErrors.lastName }}
+          </small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" v-model="form.phone" placeholder="+237 674 845 657" required />
+          <small v-if="phoneError" class="error-text">Wrong Phone Number!</small>
+          <small v-if="formErrors.phone" class="error-text">{{ formErrors.phone }}</small>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="password-input">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="form.password"
+              placeholder="Enter a Password"
+              required
+            />
+            <button type="button" class="password-toggle" @click="togglePassword">
+              <EyeOff v-if="showPassword" :size="20" />
+              <Eye v-else :size="20" />
+            </button>
+          </div>
+          <small v-if="formErrors.password" class="error-text">
+            {{ formErrors.password }}
+          </small>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-button">Sign Up</button>
+      <div class="divider">
+        <span class="line"></span>
+      </div>
+    </form>
+
+    <p class="login-link">
+      Already have an account?
+      <nuxt-link to="/login">Log In</nuxt-link>
+    </p>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+@use '@/assets/scss/auth.scss';
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1.5rem;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.global-copyright {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+
+  @media (max-width: 639px) {
+    display: none;
+  }
+}
+>>>>>>> origin/main
 </style>

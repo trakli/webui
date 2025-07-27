@@ -1,12 +1,7 @@
-<script setup>
-import TFooter from './components/TFooter.vue';
-</script>
-
 <template>
-  <div class="app-container">
+  <NuxtLayout>
     <NuxtPage />
-    <TFooter />
-  </div>
+  </NuxtLayout>
 </template>
 
 <style lang="scss">

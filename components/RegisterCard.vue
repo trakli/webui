@@ -72,7 +72,7 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
 </template>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .register-card {
   background-color: $bg-white;

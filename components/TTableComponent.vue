@@ -226,7 +226,7 @@ const goToPage = (page) => {
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/_variables' as *;
+@use '@/assets/scss/_variables.scss' as *;
 
 .table {
   &-container {

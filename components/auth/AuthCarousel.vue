@@ -1,5 +1,9 @@
 <template>
+<<<<<<< HEAD
   <div class="sidebar">
+=======
+  <div class="login-sidebar">
+>>>>>>> origin/main
     <div class="sidebar-content">
       <div class="carousel-slide">
         <div class="slide-image-wrapper">
@@ -59,6 +63,7 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 </script>
 
 <style scoped lang="scss">
+<<<<<<< HEAD
 @use '@/assets/_variables.scss' as *;
 
 .sidebar {
@@ -66,6 +71,15 @@ onBeforeUnmount(() => clearInterval(slideInterval));
   display: flex;
   align-items: center;
   justify-content: center;
+=======
+@use '@/assets/scss/_variables.scss' as *;
+
+.login-sidebar {
+  flex: 1;
+  display: flex;
+  align-items: center; // ✅ Center horizontally
+  justify-content: center; // ✅ Center vertically
+>>>>>>> origin/main
   padding: 2rem 3rem;
   min-width: 480px;
   color: white;
@@ -90,7 +104,11 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 }
 
 .slide-image-wrapper {
+<<<<<<< HEAD
   width: 40%;
+=======
+  width: 65%;
+>>>>>>> origin/main
   max-width: 400px;
   margin: 0 auto;
   aspect-ratio: 16/15;
@@ -98,7 +116,11 @@ onBeforeUnmount(() => clearInterval(slideInterval));
   .carousel-image {
     width: 100%;
     height: 100%;
+<<<<<<< HEAD
     background: url('/SidebarImage.svg') no-repeat center;
+=======
+    background: url('/floating-docs-man.svg') no-repeat center;
+>>>>>>> origin/main
     background-size: contain;
     opacity: 0.9;
   }
