@@ -96,4 +96,3 @@ import TButton from './../TButton.vue';
   font-weight: $font-semibold;
 }
 </style>
- 

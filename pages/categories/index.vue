@@ -35,7 +35,7 @@ definePageMeta({
 
 .categories-content-wrapper {
   width: 100%;
-  padding: 0 ;
+  padding: 0;
   margin-top: 62px;
   max-width: 1400px;
   margin-left: auto;

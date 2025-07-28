@@ -1,14 +1,15 @@
 <script setup>
-definePageMeta({
-  layout: 'auth'
-});
 import { ref } from 'vue';
 import { useRouter, useState } from '#imports';
 import Logo from '@/components/Logo.vue';
 import AuthLayout from '@/components/auth/AuthLayout.vue';
 import { Eye, EyeOff } from 'lucide-vue-next';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
-
+/* eslint-disable no-undef */
+definePageMeta({
+  layout: 'default'
+});
+/* eslint-enable no-undef */
 const form = ref({
   email: '',
   username: '',
@@ -275,11 +276,11 @@ h1 {
     }
 
     &.has-error {
-      border-color: #dc2626; 
-      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2); 
+      border-color: #dc2626;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
 
       &:focus {
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3); 
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
       }
     }
   }
