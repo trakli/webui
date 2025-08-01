@@ -51,12 +51,18 @@ const buttonClasses = [
 
 <template>
   <NuxtLink v-if="to" :to="to" :class="buttonClasses" :disabled="disabled || loading">
+    <span v-if="$slots['left-icon']" class="button__icon-left">
+      <slot name="left-icon" />
+    </span>
     <span class="button__text">
       <Loader2 v-if="loading" class="spinner" />
       <slot v-else>{{ text }}</slot>
     </span>
   </NuxtLink>
   <button v-else :class="buttonClasses" :type="type" :disabled="disabled || loading">
+    <span v-if="$slots['left-icon']" class="button__icon-left">
+      <slot name="left-icon" />
+    </span>
     <span class="button__text">
       <Loader2 v-if="loading" class="spinner" />
       <slot v-else>{{ text }}</slot>
@@ -127,6 +133,12 @@ const buttonClasses = [
   }
 
   // Text element
+  &__icon-left {
+    margin-right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
   &__text {
     display: inline-flex;
     align-items: center;

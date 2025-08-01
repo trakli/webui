@@ -3,8 +3,11 @@ import { ref, watch } from 'vue';
 import { useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import IconEye from '@/components/icons/IconEye.vue';
+import IconEyeOff from '@/components/icons/IconEyeOff.vue';
 import { useAuth } from '@/composables/useAuth';
+import AuthDivider from '@/components/auth/AuthDivider.vue';
+import AuthSocialLogin from '@/components/auth/AuthSocialLogin.vue';
 
 /* eslint-disable no-undef */
 definePageMeta({
@@ -50,7 +53,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
     <div class="logo-wrapper">
       <Logo size="medium" />
     </div>
-
+    <h1>Login</h1>
     <form @submit.prevent="handleSubmit" class="login-form">
       <div v-if="loginError" class="error-feedback">
         {{ loginError }}
@@ -71,8 +74,8 @@ const { showPassword, togglePassword } = usePasswordToggle();
           />
           <button type="button" class="password-toggle" @click="togglePassword">
             <!-- Eye Icon -->
-            <EyeOff v-if="showPassword" :size="20" />
-            <Eye v-else :size="20" />
+            <IconEyeOff v-if="showPassword" />
+            <IconEye v-else />
           </button>
         </div>
       </div>
@@ -85,11 +88,10 @@ const { showPassword, togglePassword } = usePasswordToggle();
         <a href="#" class="forgot-password">Forgot Password?</a>
       </div>
 
-      <TButton type="submit" :loading="loading" class="submit-button">Login</TButton>
+      <TButton type="submit" :loading="loading" text="Login" class="w-full" />
 
-      <div class="divider">
-        <span class="line"></span>
-      </div>
+      <AuthDivider />
+      <AuthSocialLogin mode="login" />
     </form>
 
     <p class="signup-link">
@@ -102,10 +104,6 @@ const { showPassword, togglePassword } = usePasswordToggle();
 <style lang="scss" scoped>
 @use '@/assets/scss/auth.scss';
 @use '@/assets/scss/_variables.scss' as *;
-
-.form-card {
-  max-width: 520px;
-}
 
 .error-feedback {
   background-color: rgba(239, 68, 68, 0.1);
