@@ -11,7 +11,8 @@ import TransactionFormSection from '@/components/TransactionFormSection.vue';
 
 /* eslint-disable no-undef */
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
+  middleware: 'auth'
 });
 /* eslint-enable no-undef */
 </script>

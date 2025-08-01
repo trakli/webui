@@ -1,32 +1,21 @@
-import { useState, useCookie, useRouter, useApi } from '#imports';
-
 export const useAuth = () => {
   const router = useRouter();
-  const userCookie = useCookie('user');
-  const user = useState('user', () => userCookie.value || null);
-  const api = useApi();
+  const user = useState('auth.user', () => null);
+  const token = useState('auth.token', () => null);
 
-    const login = async (credentials: Record<string, any>) => {
+  const isAuthenticated = computed(() => !!user.value && !!token.value);
+
+  const login = async (credentials: Record<string, any>) => {
     try {
+      const api = useApi();
       const response = await api('/login', {
         method: 'POST',
-        body: credentials,
+        body: credentials
       });
 
       if (response.data) {
-        const cookieOptions: { path: string; maxAge?: number } = {
-          path: '/',
-        };
-
-        if (credentials.remember) {
-          cookieOptions.maxAge = 7 * 24 * 60 * 60; // 7 days
-        }
-
-        const token = useCookie('token', cookieOptions);
-        token.value = response.data.token;
-
-        userCookie.value = response.data.user;
         user.value = response.data.user;
+        token.value = response.data.token;
       }
 
       return response;
@@ -38,16 +27,15 @@ export const useAuth = () => {
 
   const register = async (details: Record<string, any>) => {
     try {
+      const api = useApi();
       const response = await api('/register', {
         method: 'POST',
-        body: details,
+        body: details
       });
 
       if (response.data) {
-        const token = useCookie('token');
-        token.value = response.data.token;
-        userCookie.value = response.data.user;
         user.value = response.data.user;
+        token.value = response.data.token;
       }
 
       return response;
@@ -57,13 +45,47 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
-    const token = useCookie('token');
-    token.value = null;
-    userCookie.value = null;
-    user.value = null;
-    router.push('/login');
+  const logout = async () => {
+    try {
+      const api = useApi();
+      await api('/logout', {
+        method: 'POST'
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      user.value = null;
+      token.value = null;
+      router.push('/login');
+    }
   };
 
-  return { user, login, register, logout };
+  const fetchUser = async () => {
+    try {
+      if (!token.value) {
+        user.value = null;
+        return;
+      }
+
+      const api = useApi();
+      const response = await api('/user');
+
+      if (response?.data) {
+        user.value = response.data;
+      }
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+      user.value = null;
+      token.value = null;
+    }
+  };
+
+  return {
+    user: readonly(user),
+    isAuthenticated,
+    login,
+    register,
+    logout,
+    fetchUser
+  };
 };

@@ -15,8 +15,16 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import TNavbar from '@/components/TNavbar.vue';
 import TSidebar from '@/components/TSidebar.vue';
+import { useAuth } from '@/composables/useAuth';
+
+const { fetchUser } = useAuth();
+
+onMounted(() => {
+  fetchUser();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -50,7 +50,9 @@ onUnmounted(() => {
   background-color: white;
   border: 1px solid #e2e8f0;
   border-radius: 0.375rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   z-index: 10;
   min-width: 12rem;
   padding: 0.5rem 0;

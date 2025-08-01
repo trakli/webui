@@ -30,9 +30,6 @@
         @item-add-complete="handleFormClose"
       />
     </div>
-    <div class="footer-section">
-      <TFooter />
-    </div>
   </div>
 </template>
 
@@ -46,7 +43,6 @@ import PartyForm from './PartiesForm.vue';
 import WalletForm from './WalletForm.vue';
 import ContentTable from './ContentTable.vue';
 import TipsSection from './TipsSection.vue';
-import TFooter from '@/components/TFooter.vue';
 
 const props = defineProps({
   pageName: {

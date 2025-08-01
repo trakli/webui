@@ -31,8 +31,8 @@ onMounted(() => {
   align-items: center;
   min-height: 100vh;
   background-color: #f8faf9;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .loading-content {

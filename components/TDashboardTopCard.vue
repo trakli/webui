@@ -1,6 +1,8 @@
 <template>
   <div class="card-container">
-    <h1 v-if="user" class="card-title">Welcome, <span class="card-title-username">{{ user.first_name }} {{ user.last_name }}</span></h1>
+    <h1 v-if="user" class="card-title">
+      Welcome, <span class="card-title-username">{{ user.first_name }} {{ user.last_name }}</span>
+    </h1>
     <span class="card-subtitle">Are you ready to start track your money?</span>
   </div>
 </template>

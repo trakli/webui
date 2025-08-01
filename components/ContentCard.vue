@@ -47,6 +47,7 @@ const resolvedIcon = computed(() => {
 
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
+@use 'sass:color';
 
 .entity-card {
   display: flex;
@@ -155,7 +156,7 @@ const resolvedIcon = computed(() => {
 
   &:hover {
     color: $error-color;
-    background: lighten($error-color, 45%);
+    background: color.adjust($error-color, $lightness: 45%);
   }
 
   &.edit:hover {

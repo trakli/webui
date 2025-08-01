@@ -11,14 +11,13 @@
     </template>
 
     <div class="dropdown-content">
-      <div class="user-details">
+      <div v-if="user" class="user-details">
         <p class="user-name">{{ user.first_name }} {{ user.last_name }}</p>
         <p class="user-email">{{ user.email }}</p>
       </div>
       <hr class="divider" />
-      <TDropdownItem @click="logout">
-        Logout
-      </TDropdownItem>
+      <TDropdownItem @click="() => $router.push('/settings')"> Settings </TDropdownItem>
+      <TDropdownItem @click="logout"> Logout </TDropdownItem>
     </div>
   </TDropdown>
 </template>

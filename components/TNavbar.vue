@@ -12,7 +12,7 @@
         <LanguageSelector />
       </div>
       <div class="avatar-container">
-        <TAvatar image-url="/userImage.png" :show-dropdown="true" />
+        <TAvatar v-if="user" :image-url="getAvatarUrl(user)" :show-dropdown="true" />
       </div>
     </div>
   </div>
@@ -23,6 +23,11 @@ import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import { MagnifyingGlassIcon, BellIcon } from '@heroicons/vue/24/outline';
+import { useAuth } from '@/composables/useAuth';
+import { useAvatar } from '@/composables/useAvatar';
+
+const { user } = useAuth();
+const { getAvatarUrl } = useAvatar();
 </script>
 
 <style lang="scss" scoped>

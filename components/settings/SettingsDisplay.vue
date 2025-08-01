@@ -53,6 +53,7 @@ const handleSave = () => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+@use 'sass:color';
 
 .toggle-row {
   display: flex;
@@ -78,7 +79,7 @@ const handleSave = () => {
   height: 24px;
   width: 44px;
   border-radius: 999px;
-  background: lighten($primary, 25%);
+  background: color.adjust($primary, $lightness: 25%);
   transition: $transition-base;
 
   &--on {

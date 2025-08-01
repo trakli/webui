@@ -15,7 +15,8 @@ import CategoryContentSection from '~/components/ContentSection.vue';
 
 /* eslint-disable no-undef */
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
+  middleware: 'auth'
 });
 /* eslint-enable no-undef */
 </script>

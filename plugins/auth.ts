@@ -1,18 +1,26 @@
+import { useAuth } from '@/composables/useAuth';
+
 export default defineNuxtPlugin(() => {
-  addRouteMiddleware('global-auth', (to) => {
-    const token = useCookie('token');
-    const guestRoutes = ['/login', '/register'];
+  const { user } = useAuth();
 
-    const isGuestRoute = guestRoutes.includes(to.path);
+  addRouteMiddleware(
+    'global-auth',
+    (to) => {
+      const guestRoutes = ['/login', '/register'];
 
-    if (token.value && isGuestRoute) {
-      // Authenticated users should not access guest routes
-      return navigateTo('/dashboard');
-    }
+      // The auth callback route should also be treated as a guest route
+      const isGuestRoute = guestRoutes.includes(to.path) || to.path.startsWith('/auth/');
 
-    if (!token.value && !isGuestRoute) {
-      // Unauthenticated users should be redirected to login from protected routes
-      return navigateTo('/login');
-    }
-  }, { global: true });
+      if (user.value && isGuestRoute) {
+        // Authenticated users should not access guest routes
+        return navigateTo('/dashboard');
+      }
+
+      if (!user.value && !isGuestRoute) {
+        // Unauthenticated users should be redirected to login from protected routes
+        return navigateTo('/login');
+      }
+    },
+    { global: true }
+  );
 });
