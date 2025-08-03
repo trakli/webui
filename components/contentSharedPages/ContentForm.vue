@@ -1,5 +1,5 @@
 <template>
-  <form class="category-form" @submit.prevent="handleSubmit">
+  <form class="entity-form" @submit.prevent="handleSubmit">
     <div class="form-header">
       <button type="button" class="close-btn" @click="$emit('close')">
         <X class="close-icon" />
@@ -7,42 +7,55 @@
     </div>
 
     <div class="form-group">
-      <label for="category-name" class="form-label">Category Name</label>
+      <label :for="formId('name')" class="form-label">{{ pageName }} Name</label>
       <input
-        id="category-name"
+        :id="formId('name')"
         v-model="form.name"
         type="text"
         class="form-input"
-        placeholder="Enter Group name"
+        :placeholder="`Enter ${pageName.toLowerCase()} name`"
         required
       />
     </div>
 
-    <div class="form-group">
-      <label for="icon-select" class="form-label">Select an Icon</label>
-      <CategoryIconPicker v-model="form.icon" />
+    <div v-if="showIcon" class="form-group">
+      <label :for="formId('icon')" class="form-label">Select an Icon</label>
+      <IconPicker v-model="form.icon" :id="formId('icon')" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 
     <div class="form-group">
-      <label for="category-description" class="form-label">Category Description</label>
+      <label :for="formId('description')" class="form-label">{{ pageName }} Description</label>
       <textarea
-        id="category-description"
+        :id="formId('description')"
         v-model="form.description"
         class="form-textarea"
-        placeholder="Type here ..."
+        :placeholder="`Type ${pageName.toLowerCase()} description here ...`"
         rows="5"
       />
     </div>
 
-    <button type="submit" class="submit-btn">Create Group +</button>
+    <button type="submit" class="submit-btn">Create {{ pageName }} +</button>
   </form>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { X } from 'lucide-vue-next';
-import CategoryIconPicker from './CategoryIconPicker.vue';
+import IconPicker from '../IconPicker.vue';
+
+const props = defineProps({
+  pageName: {
+    type: String,
+    required: true
+  },
+  showIcon: {
+    type: Boolean,
+    default: true
+  }
+});
+
+const emit = defineEmits(['created', 'close']);
 
 const form = ref({
   name: '',
@@ -51,18 +64,23 @@ const form = ref({
 });
 
 const iconError = ref(false);
-const emit = defineEmits(['created', 'close']);
+
+// Generate unique IDs for form elements
+const formId = (field) => `${props.pageName.toLowerCase()}-${field}-${Date.now()}`;
 
 function handleSubmit() {
-  iconError.value = !form.value.icon;
-  if (!form.value.name || !form.value.icon) return;
+  // Only validate icon if showIcon is true
+  iconError.value = props.showIcon && !form.value.icon;
+  if (!form.value.name || iconError.value) return;
 
-  emit('created', {
-    name: form.value.name,
-    icon: form.value.icon,
-    description: form.value.description
-  });
+  // Create a new object without icon if showIcon is false
+  const formData = props.showIcon
+    ? { ...form.value }
+    : { name: form.value.name, description: form.value.description };
 
+  emit('created', formData);
+
+  // Reset form
   form.value = { name: '', icon: '', description: '' };
   iconError.value = false;
 }
@@ -71,7 +89,7 @@ function handleSubmit() {
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
 
-.category-form {
+.entity-form {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -112,7 +130,7 @@ function handleSubmit() {
     background-color: #f3f4f6;
 
     .close-icon {
-      color: #ef4444; // Tailwind's red-500
+      color: #ef4444;
       transform: scale(1.25);
     }
   }
@@ -120,7 +138,7 @@ function handleSubmit() {
   .close-icon {
     width: 20px;
     height: 20px;
-    color: #6b7280; // Tailwind's gray-500
+    color: #6b7280;
     transition:
       color 0.2s ease,
       transform 0.2s ease;
@@ -139,34 +157,24 @@ function handleSubmit() {
   margin-bottom: 0.25rem;
 }
 
-.form-input {
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: #fff;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus {
-  border-color: #047844;
-  outline: none;
-}
-
+.form-input,
 .form-textarea {
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 1rem;
   background: #fff;
-  resize: vertical;
-  min-height: 120px;
   transition: border-color 0.2s;
+
+  &:focus {
+    border-color: $primary;
+    outline: none;
+  }
 }
 
-.form-textarea:focus {
-  border-color: #047844;
-  outline: none;
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
 }
 
 .submit-btn {
@@ -176,14 +184,14 @@ function handleSubmit() {
   font-size: 1rem;
   border: none;
   border-radius: 8px;
-  width: 30%;
+  width: 33%;
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: 0.2s;
-}
 
-.submit-btn:hover {
-  background: #035c32;
+  &:hover {
+    background: $primary-hover;
+  }
 }
 
 .error-text {

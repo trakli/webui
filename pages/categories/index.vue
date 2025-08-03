@@ -2,7 +2,7 @@
   <div class="categories-page">
     <TNavbar />
     <div class="categories-content-wrapper">
-      <CategoryContentSection />
+      <CategoryContentSection :pageName="'Category'" :pageNamePlural="'Categories'" />
     </div>
     <TSidebar />
   </div>
@@ -11,7 +11,7 @@
 <script setup>
 import TNavbar from '@/components/TNavbar.vue';
 import TSidebar from '@/components/TSidebar.vue';
-import CategoryContentSection from '~/components/categories/CategoryContentSection.vue';
+import CategoryContentSection from '~/components/contentSharedPages/ContentContainer.vue';
 
 /* eslint-disable no-undef */
 definePageMeta({
@@ -30,7 +30,7 @@ definePageMeta({
   margin-left: var(--sidebar-width, 250px);
   transition: margin-left 0.3s ease;
   width: calc(100% - var(--sidebar-width, 250px));
-  overflow-x: hidden; /* Prevent horizontal scroll on the page */
+  overflow-x: hidden;
 }
 
 .categories-content-wrapper {
