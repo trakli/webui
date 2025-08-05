@@ -1,8 +1,9 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useState, useRouter } from '#imports';
 import Logo from '@/components/Logo.vue';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import { Eye, EyeOff } from 'lucide-vue-next';
 
 /* eslint-disable no-undef */
@@ -32,6 +33,17 @@ const formErrors = ref({
 const phoneError = ref(false);
 const user = useState('user');
 const router = useRouter();
+
+watch(
+  () => form.value.phone,
+  (newVal) => {
+    if (newVal) {
+      phoneError.value = !isValidPhoneNumber(newVal);
+    } else {
+      phoneError.value = false;
+    }
+  }
+);
 
 const validateForm = () => {
   let isValid = true;
@@ -70,6 +82,9 @@ const validateForm = () => {
   // Phone validation
   if (!form.value.phone) {
     formErrors.value.phone = 'Phone number is required';
+    isValid = false;
+  } else if (!isValidPhoneNumber(form.value.phone)) {
+    formErrors.value.phone = 'Invalid phone number format';
     isValid = false;
   }
 
