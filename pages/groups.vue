@@ -2,7 +2,7 @@
   <div class="entities-page">
     <TNavbar />
     <div class="entities-content-wrapper">
-      <CategoryContentSection :pageName="'Group'" :pageNamePlural="'Groups'" />
+      <ContentSection :pageName="'Group'" :pageNamePlural="'Groups'" />
     </div>
     <TSidebar />
   </div>
@@ -11,7 +11,7 @@
 <script setup>
 import TNavbar from '@/components/TNavbar.vue';
 import TSidebar from '@/components/TSidebar.vue';
-import CategoryContentSection from '~/components/contentSharedPages/ContentContainer.vue';
+import ContentSection from '~/components/ContentSection.vue';
 
 /* eslint-disable no-undef */
 definePageMeta({

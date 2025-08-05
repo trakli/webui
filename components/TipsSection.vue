@@ -1,67 +1,85 @@
 <template>
   <div class="tips-container">
-    <div class="tips-header">
-      <h1 class="tips-title">Tip of adding transaction</h1>
-    </div>
     <div class="tips-content">
-      <p class="tips-text">Always check</p>
-      <p class="tips-text">everything before</p>
-      <p class="tips-text">choose to submit a Trip</p>
-      <p class="tips-text">or not.</p>
+      <div class="tips-header">
+        <h1 class="tips-title">Tips for adding {{ pageName.toLowerCase() }}</h1>
+      </div>
+      <div class="tips-text-content">
+        <p class="tips-text">
+          Always check everything before submitting a new {{ pageName.toLowerCase() }}.
+        </p>
+      </div>
     </div>
     <div class="tips-footer">
-      <img src="/public/bulbIcon.svg" alt="Bulb Icon" class="bulb-image" />
+      <img src="/bulbIcon.svg" alt="Bulb Icon" class="bulb-image" />
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+defineProps({
+  pageName: {
+    type: String,
+    required: true
+  }
+});
+</script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
 .tips-container {
-  width: 350px;
-  height: 570px;
+  width: 500px;
+  min-height: 500px;
   background-color: #fff4e6;
-  padding: 32px;
+  padding: 2rem;
   border-radius: $radius-lg;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: space-between;
+  position: sticky;
+  top: 2rem;
+  margin: 0 $spacing-12;
+  align-self: flex-start;
 }
 
-.tips-header {
-  width: 233px;
-  height: 58px;
+.tips-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .tips-title {
   color: #ff9500;
   font-weight: $font-bold;
-  font-size: 30px;
+  font-size: 1.75rem;
   line-height: 120%;
 }
 
-.tips-content {
-  margin-top: 20px;
+.tips-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .tips-text {
   color: #4a5253;
-  line-height: 100%;
-  font-size: $font-size-xl;
+  line-height: 120%;
+  font-size: $font-size-lg;
   font-weight: $font-normal;
 }
 
 .tips-footer {
   display: flex;
-  justify-content: center;
+  justify-content: right;
+  align-items: flex-end;
+  margin-top: 2rem;
 }
 
 .bulb-image {
-  width: 223px;
-  height: 234.7px;
-  gap: 8px;
+  width: 180px;
+  height: auto;
+  object-fit: contain;
 }
 </style>

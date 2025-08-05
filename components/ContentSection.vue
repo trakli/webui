@@ -3,13 +3,17 @@
     <ContentTopCard :pageName="pageName" :pageNamePlural="pageNamePlural" @add="handleFormToggle" />
 
     <div class="content-area">
-      <div v-if="showForm" class="form-wrapper">
-        <ContentForm
-          :pageName="pageName"
-          :showIcon="showIcon"
-          @created="handleCreate"
-          @close="handleFormClose"
-        />
+      <div v-if="showForm" class="form-section">
+        <div class="form-wrapper">
+          <component
+            :is="currentForm"
+            :pageName="pageName"
+            :showIcon="showIcon"
+            @created="handleCreate"
+            @close="handleFormClose"
+          />
+        </div>
+        <TipsSection v-if="isGroupsPage" :pageName="pageName" />
       </div>
 
       <EmptyState
@@ -35,11 +39,13 @@
 </template>
 
 <script setup>
-import { ref, toRefs } from 'vue';
-import ContentTopCard from './ContentTopCard.vue';
+import { ref, computed, toRefs } from 'vue';
+import ContentTopCard from './TTopCard.vue';
 import EmptyState from './EmptyState.vue';
-import ContentForm from './ContentForm.vue';
-import ContentList from './ContentList.vue';
+import CategoryForm from './categories/CategoryForm.vue';
+import GroupForm from './groups/GroupForm.vue';
+import ContentList from './ContentLIst.vue';
+import TipsSection from './TipsSection.vue';
 import TFooter from '@/components/TFooter.vue';
 
 const props = defineProps({
@@ -63,6 +69,16 @@ const { pageName, pageNamePlural, showIcon } = toRefs(props);
 const showForm = ref(false);
 const items = ref([]);
 let lastClickTime = 0;
+
+const isGroupsPage = computed(() => props.pageName === 'Group');
+
+const formMap = {
+  Category: CategoryForm,
+  Group: GroupForm,
+  Party: CategoryForm // Using CategoryForm as base for parties
+};
+
+const currentForm = computed(() => formMap[props.pageName] || CategoryForm);
 
 const handleFormToggle = () => {
   const now = Date.now();
@@ -124,12 +140,20 @@ const handleDelete = (itemToDelete) => {
   width: 100%;
 }
 
-.form-wrapper {
+.form-section {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 3rem;
   width: 100%;
-  max-width: 1200px;
-  align-self: flex-start;
+  max-width: 1400px;
+  align-self: center;
+  margin: 0 auto;
+}
+
+.form-wrapper {
+  flex: 1;
+  min-width: 0;
+  max-width: 800px;
 }
 
 .footer-section {

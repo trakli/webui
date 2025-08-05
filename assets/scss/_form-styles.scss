@@ -1,0 +1,108 @@
+@use './_variables' as *;
+
+.entity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: $bg-gray;
+  width: min(600px, 100%);
+  max-height: calc(90vh - 4rem);
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 2rem 2rem 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  align-self: flex-start;
+}
+
+.form-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: #f3f4f6;
+
+    .close-icon {
+      color: #ef4444;
+      transform: scale(1.25);
+    }
+  }
+
+  .close-icon {
+    width: 20px;
+    height: 20px;
+    color: #6b7280;
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 0.25rem;
+}
+
+.form-input,
+.form-textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: $primary;
+    outline: none;
+  }
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.submit-btn {
+  background: $primary;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  width: 33%;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+.error-text {
+  color: #eb5757;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}

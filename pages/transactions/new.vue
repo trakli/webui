@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TTopCard />
+    <TTopCard pageName="Transaction" pageNamePlural="Transactions" />
     <TransactionFormSection />
   </div>
 </template>
