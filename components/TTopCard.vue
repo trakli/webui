@@ -1,32 +1,46 @@
 <template>
-  <div class="card-container">
-    <div class="card-header">
-      <div class="card-content">
-        <h1 class="card-title">Add Transaction</h1>
-        <div class="card-subtitle-text">
-          <span class="card-subtitle-green-text">Home </span>
-          <span class="arrow-text"> > </span>
-          <span class="card-subtitle-green-text">Transaction Tracking</span>
-          <span class="arrow-text"> > </span>
-          <span class="card-subtitle-black-text"> Add Transaction</span>
+  <div class="entity-header">
+    <div class="header-content">
+      <div class="content-main">
+        <h1 class="title">Add {{ pageName }}</h1>
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">Home</span>
+          <span class="breadcrumb-separator">&gt;</span>
+          <span class="breadcrumb-item">{{ pageNamePlural }}</span>
+          <span class="breadcrumb-separator">&gt;</span>
+          <span class="breadcrumb-current">Add {{ pageName }}</span>
         </div>
       </div>
-      <div class="card-button-container">
+      <div class="action-buttons">
         <TInfoButton />
-        <TButton text="Add Transaction +" class="add-transaction-button" />
+        <TButton :text="`Add ${pageName} +`" class="add-entity-button" @click="$emit('add')" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import TInfoButton from './TInfoButton.vue';
+import TInfoButton from '@/components/TInfoButton.vue';
+import TButton from '@/components/TButton.vue';
+
+defineProps({
+  pageName: {
+    type: String,
+    required: true
+  },
+  pageNamePlural: {
+    type: String,
+    required: true
+  }
+});
+
+defineEmits(['add']);
 </script>
 
 <style lang="scss" scoped>
-@use '@/assets/scss/_variables.scss' as *;
+@use '~/assets/scss/_variables' as *;
 
-.card-container {
+.entity-header {
   width: 100%;
   background-color: #e6f2ec;
   border-radius: $radius-xl;
@@ -35,60 +49,55 @@ import TInfoButton from './TInfoButton.vue';
   box-sizing: border-box;
 }
 
-.card-header {
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
 }
 
-.card-content {
+.content-main {
   flex: 1;
 }
 
-.card-title {
+.title {
   color: #1d3229;
   font-size: $font-size-lg;
   font-weight: $font-bold;
   margin: 0 0 4px 0;
 }
 
-.card-title-username {
-  color: $primary-hover;
-  font-size: $font-size-lg;
-  font-weight: $font-bold;
-}
-
-.card-subtitle-text {
+.breadcrumb {
   display: flex;
   flex-direction: row;
   gap: 4px;
+  align-items: center;
 }
 
-.card-subtitle-green-text {
+.breadcrumb-item {
   color: $primary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
 }
 
-.arrow-text {
+.breadcrumb-separator {
   color: $text-secondary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
 }
 
-.card-subtitle-black-text {
+.breadcrumb-current {
   color: $text-primary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
 }
 
-.card-button-container {
+.action-buttons {
   display: flex;
   gap: 8px;
 }
 
-.add-transaction-button {
+.add-entity-button {
   width: 162px;
   height: 34px;
   font-size: $font-size-sm;

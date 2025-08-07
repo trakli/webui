@@ -11,6 +11,7 @@
             <span class="text">Home</span>
           </NuxtLink>
         </li>
+
         <li>
           <NuxtLink to="/transactions" class="nav-button" active-class="selected">
             <RectangleGroupIcon class="icon" />
@@ -24,13 +25,13 @@
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/parties" class="nav-button" active-class="selected">
+          <NuxtLink to="/categories" class="nav-button" active-class="selected">
             <BuildingLibraryIcon class="icon" />
-            <span class="text">Parties</span>
+            <span class="text">Categories</span>
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/wallets" class="nav-button" active-class="selected">
+          <NuxtLink to="/parties" class="nav-button" active-class="selected">
             <WalletIcon class="icon" />
             <span class="text">Wallets</span>
           </NuxtLink>
