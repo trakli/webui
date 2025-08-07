@@ -154,13 +154,8 @@ const resolvedIcon = computed(() => {
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.05);
-
-    .tooltip {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(-5px);
-    }
+    color: $error-color;
+    background: lighten($error-color, 45%);
   }
 
   &.edit:hover {

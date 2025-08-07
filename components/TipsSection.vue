@@ -2,7 +2,7 @@
   <div class="tips-container">
     <div class="tips-content">
       <div class="tips-header">
-        <h1 class="tips-title">Tips for adding {{ pageName.toLowerCase() }}</h1>
+        <h2 class="tips-title">Tips for adding {{ pageName.toLowerCase() }}</h2>
       </div>
       <div class="tips-text-content">
         <p class="tips-text">

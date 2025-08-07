@@ -15,6 +15,7 @@
           class="icon-search"
           :placeholder="modelValue ? '' : 'Search an icon here'"
           @input="showDropdown = true"
+          aria-label="Search icon"
         />
         <button class="dropdown-btn" @click="toggleDropdown" type="button">
           <ChevronDown class="dropdown-icon" />

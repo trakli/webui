@@ -22,7 +22,7 @@
         @create="handleFormToggle"
       />
 
-      <ContentList
+      <ContentTable
         v-if="items.length > 0"
         :pageName="pageName"
         :pageNamePlural="pageNamePlural"
@@ -44,7 +44,7 @@ import ContentTopCard from './TTopCard.vue';
 import EmptyState from './EmptyState.vue';
 import CategoryForm from './categories/CategoryForm.vue';
 import GroupForm from './groups/GroupForm.vue';
-import ContentList from './ContentLIst.vue';
+import ContentTable from './ContentTable.vue';
 import TipsSection from './TipsSection.vue';
 import TFooter from '@/components/TFooter.vue';
 
@@ -96,7 +96,7 @@ const handleFormClose = () => {
 const handleCreate = (newItem) => {
   const itemWithId = {
     ...newItem,
-    id: Date.now(),
+    id: crypto.randomUUID(),
     createdAt: new Date().toISOString()
   };
   items.value.push(itemWithId);

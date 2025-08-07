@@ -17,7 +17,7 @@
     </div>
 
     <TransitionGroup name="list" tag="div" class="entities-container">
-      <CategoryCard
+      <ContentCard
         v-for="entity in paginatedEntities"
         :key="entity.id"
         :name="entity.name"
@@ -78,7 +78,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import CategoryCard from './ContentCard.vue';
+import ContentCard from './ContentCard.vue';
 
 const props = defineProps({
   entities: {
