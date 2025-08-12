@@ -3,9 +3,9 @@
 .entity-form {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 0.75rem;
   background: $bg-gray;
-  width: min(600px, 100%);
+  width: min(750px, 100%);
   max-height: calc(90vh - 4rem);
   overflow-y: auto;
   border-radius: 16px;
@@ -15,53 +15,15 @@
   align-self: flex-start;
 }
 
-.form-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.close-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background-color: #f3f4f6;
-
-    .close-icon {
-      color: #ef4444;
-      transform: scale(1.25);
-    }
-  }
-
-  .close-icon {
-    width: 20px;
-    height: 20px;
-    color: #6b7280;
-    transition:
-      color 0.2s ease,
-      transform 0.2s ease;
-  }
-}
-
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
 
 .form-label {
   font-weight: 600;
   color: #222;
-  margin-bottom: 0.25rem;
+  margin: 0;
 }
 
 .form-input,
@@ -80,8 +42,8 @@
 }
 
 .form-textarea {
-  resize: vertical;
-  min-height: 120px;
+  resize: none; // prevents dragging to resize
+  min-height: 28vh; // ensures it won't shrink
 }
 
 .submit-btn {

@@ -16,7 +16,12 @@
       <div class="col-action">Action</div>
     </div>
 
-    <TransitionGroup name="list" tag="div" class="entities-container">
+    <TransitionGroup
+      name="list"
+      tag="div"
+      class="entities-container"
+      @after-enter="$emit('item-add-complete')"
+    >
       <ContentCard
         v-for="entity in paginatedEntities"
         :key="entity.id"
@@ -96,7 +101,7 @@ const props = defineProps({
   }
 });
 
-defineEmits(['edit', 'delete']);
+defineEmits(['edit', 'delete', 'item-add-complete']);
 
 const searchQuery = ref('');
 const currentPage = ref(1);

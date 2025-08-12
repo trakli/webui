@@ -1,27 +1,25 @@
 <template>
   <div class="entity-content">
     <ContentTopCard :pageName="pageName" :pageNamePlural="pageNamePlural" @add="handleFormToggle" />
-
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">
           <component
             :is="currentForm"
             :pageName="pageName"
-            :showIcon="showIcon"
+            :editingItem="editingItem"
             @created="handleCreate"
+            @updated="handleUpdate"
             @close="handleFormClose"
           />
         </div>
         <TipsSection v-if="isGroupsPage" :pageName="pageName" />
       </div>
-
       <EmptyState
         v-if="items.length === 0 && !showForm"
         :pageName="pageName"
         @create="handleFormToggle"
       />
-
       <ContentTable
         v-if="items.length > 0"
         :pageName="pageName"
@@ -29,9 +27,9 @@
         :entities="items"
         @edit="handleEdit"
         @delete="handleDelete"
+        @item-add-complete="handleFormClose"
       />
     </div>
-
     <div class="footer-section">
       <TFooter />
     </div>
@@ -56,34 +54,31 @@ const props = defineProps({
   pageNamePlural: {
     type: String,
     required: true
-  },
-  showIcon: {
-    type: Boolean,
-    default: true
   }
 });
 
 // Destructure props to use them in the setup function
-const { pageName, pageNamePlural, showIcon } = toRefs(props);
+const { pageName, pageNamePlural } = toRefs(props);
 
 const showForm = ref(false);
 const items = ref([]);
+const editingItem = ref(null);
 let lastClickTime = 0;
 
 const isGroupsPage = computed(() => props.pageName === 'Group');
 
 const formMap = {
   Category: CategoryForm,
-  Group: GroupForm,
-  Party: CategoryForm // Using CategoryForm as base for parties
+  Group: GroupForm
 };
 
-const currentForm = computed(() => formMap[props.pageName] || CategoryForm);
+var currentForm = computed(() => formMap[props.pageName]);
 
 const handleFormToggle = () => {
   const now = Date.now();
-  if (now - lastClickTime > 300) {
-    // 300ms debounce
+  // Only open the form if it's currently closed. Do not toggle.
+  if (now - lastClickTime > 300 && !showForm.value) {
+    editingItem.value = null; // Clear any existing editing item
     showForm.value = true;
     lastClickTime = now;
   }
@@ -91,6 +86,7 @@ const handleFormToggle = () => {
 
 const handleFormClose = () => {
   showForm.value = false;
+  editingItem.value = null; // Clear editing item when form closes
 };
 
 const handleCreate = (newItem) => {
@@ -100,10 +96,28 @@ const handleCreate = (newItem) => {
     createdAt: new Date().toISOString()
   };
   items.value.push(itemWithId);
+  // Auto-close form after successful creation
+  handleFormClose();
 };
 
 const handleEdit = (itemToEdit) => {
   console.log('Edit clicked:', itemToEdit);
+
+  // 1. Set the editing item so the form knows what to populate
+  editingItem.value = { ...itemToEdit };
+
+  // 2. Show the form immediately
+  showForm.value = true;
+};
+
+const handleUpdate = (updatedItem) => {
+  const index = items.value.findIndex((item) => item.id === updatedItem.id);
+  if (index !== -1) {
+    // Replace the old item with the updated one
+    items.value[index] = { ...updatedItem };
+  }
+  // Close the form after update
+  handleFormClose();
 };
 
 const handleDelete = (itemToDelete) => {

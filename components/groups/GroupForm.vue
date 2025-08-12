@@ -1,11 +1,6 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
-    <div class="form-header">
-      <button type="button" class="close-btn" @click="$emit('close')">
-        <X class="close-icon" />
-      </button>
-    </div>
-
+    <!-- Group Name -->
     <div class="form-group">
       <label for="group-name" class="form-label">Group Name</label>
       <input
@@ -18,6 +13,7 @@
       />
     </div>
 
+    <!-- Group Description -->
     <div class="form-group">
       <label for="group-description" class="form-label">Group Description</label>
       <textarea
@@ -29,27 +25,74 @@
       />
     </div>
 
-    <button type="submit" class="submit-btn">Create Group +</button>
+    <!-- Submit Button -->
+    <button type="submit" class="submit-btn">
+      {{ isEditing ? 'Update Group' : 'Create Group +' }}
+    </button>
   </form>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { X } from 'lucide-vue-next';
+import { ref, computed, watch, nextTick } from 'vue';
 
-const emit = defineEmits(['created', 'close']);
+const props = defineProps({
+  editingItem: {
+    type: Object,
+    default: null
+  }
+});
+
+const emit = defineEmits(['created', 'updated', 'close']);
 
 const form = ref({
   name: '',
   description: ''
 });
 
-function handleSubmit() {
-  if (!form.value.name) return;
+const isEditing = computed(() => !!props.editingItem);
 
-  emit('created', { ...form.value });
+// Populate form when editing
+watch(
+  () => props.editingItem,
+  (newItem) => {
+    if (newItem) {
+      form.value = {
+        name: newItem.name || '',
+        description: newItem.description || ''
+      };
+    } else {
+      resetForm();
+    }
+  },
+  { immediate: true }
+);
 
+function resetForm() {
   form.value = { name: '', description: '' };
+}
+
+async function handleSubmit() {
+  if (!form.value.name.trim()) return;
+
+  const formData = {
+    ...form.value,
+    name: form.value.name.trim(),
+    description: form.value.description.trim()
+  };
+
+  if (isEditing.value) {
+    const updatedItem = {
+      ...props.editingItem,
+      ...formData
+    };
+    emit('updated', updatedItem);
+  } else {
+    emit('created', formData);
+  }
+
+  await nextTick();
+  emit('close');
+  resetForm();
 }
 </script>
 
