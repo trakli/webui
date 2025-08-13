@@ -1,0 +1,70 @@
+@use './_variables' as *;
+
+.entity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: $bg-gray;
+  width: min(750px, 100%);
+  max-height: calc(90vh - 4rem);
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 2rem 2rem 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  align-self: flex-start;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.form-input,
+.form-textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: $primary;
+    outline: none;
+  }
+}
+
+.form-textarea {
+  resize: none; // prevents dragging to resize
+  min-height: 28vh; // ensures it won't shrink
+}
+
+.submit-btn {
+  background: $primary;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  width: fit-content;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+.error-text {
+  color: #eb5757;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
