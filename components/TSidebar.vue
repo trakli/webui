@@ -32,6 +32,12 @@
         </li>
         <li>
           <NuxtLink to="/parties" class="nav-button" active-class="selected">
+            <UserGroupIcon class="icon" />
+            <span class="text">Parties</span>
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/wallets" class="nav-button" active-class="selected">
             <WalletIcon class="icon" />
             <span class="text">Wallets</span>
           </NuxtLink>
@@ -74,7 +80,8 @@ import {
   HomeIcon,
   RectangleGroupIcon,
   UserGroupIcon,
-  WalletIcon
+  WalletIcon,
+  
 } from '@heroicons/vue/24/outline';
 import Logo from './Logo.vue';
 </script>
