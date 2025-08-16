@@ -6,7 +6,7 @@
   gap: 0.75rem;
   background: $bg-gray;
   width: min(750px, 100%);
-  max-height: calc(90vh - 4rem);
+  height: auto;
   overflow-y: auto;
   border-radius: 16px;
   padding: 2rem 2rem 1.5rem 2rem;
@@ -27,17 +27,35 @@
 }
 
 .form-input,
-.form-textarea {
+.form-textarea,
+.form-select {
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 1rem;
-  background: #fff;
+  background: $bg-white;
   transition: border-color 0.2s;
 
   &:focus {
     border-color: $primary;
     outline: none;
+  }
+
+  &.error {
+    border-color: $error-color;
+  }
+}
+
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+
+  option {
+    padding: 0.5rem;
   }
 }
 
@@ -48,7 +66,7 @@
 
 .submit-btn {
   background: $primary;
-  color: #fff;
+  color: $bg-white;
   font-weight: 700;
   font-size: 1rem;
   border: none;
@@ -64,7 +82,7 @@
 }
 
 .error-text {
-  color: #eb5757;
+  color: $error-color;
   font-size: 0.95rem;
   margin-top: 0.25rem;
 }

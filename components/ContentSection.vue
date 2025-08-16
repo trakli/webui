@@ -42,6 +42,8 @@ import ContentTopCard from './TTopCard.vue';
 import EmptyState from './EmptyState.vue';
 import CategoryForm from './categories/CategoryForm.vue';
 import GroupForm from './groups/GroupForm.vue';
+import PartyForm from './PartiesForm.vue';
+import WalletForm from './WalletForm.vue';
 import ContentTable from './ContentTable.vue';
 import TipsSection from './TipsSection.vue';
 import TFooter from '@/components/TFooter.vue';
@@ -69,10 +71,12 @@ const isGroupsPage = computed(() => props.pageName === 'Group');
 
 const formMap = {
   Category: CategoryForm,
-  Group: GroupForm
+  Group: GroupForm,
+  Party: PartyForm,
+  Wallet: WalletForm
 };
 
-var currentForm = computed(() => formMap[props.pageName]);
+const currentForm = computed(() => formMap[props.pageName]);
 
 const handleFormToggle = () => {
   const now = Date.now();
