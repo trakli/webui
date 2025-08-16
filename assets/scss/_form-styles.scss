@@ -33,28 +33,27 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 1rem;
-  background: #fff;
+  background: $bg-white;
   transition: border-color 0.2s;
-  
+
   &:focus {
     border-color: $primary;
     outline: none;
   }
-  
+
   &.error {
-    border-color: #eb5757;
+    border-color: $error-color;
   }
 }
 
 .form-select {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.75rem center;
   background-repeat: no-repeat;
   background-size: 1.5em 1.5em;
   padding-right: 2.5rem;
-  
+
   option {
     padding: 0.5rem;
   }
@@ -67,7 +66,7 @@
 
 .submit-btn {
   background: $primary;
-  color: #fff;
+  color: $bg-white;
   font-weight: 700;
   font-size: 1rem;
   border: none;
@@ -76,14 +75,14 @@
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: 0.2s;
-  
+
   &:hover {
     background: $primary-hover;
   }
 }
 
 .error-text {
-  color: #eb5757;
+  color: $error-color;
   font-size: 0.95rem;
   margin-top: 0.25rem;
 }

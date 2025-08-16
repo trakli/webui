@@ -64,7 +64,6 @@ import { ref, nextTick, computed, watch } from 'vue';
 import IconPicker from './IconPicker.vue';
 
 const props = defineProps({
-
   editingItem: {
     type: Object,
     default: null
@@ -106,11 +105,11 @@ watch(
 );
 
 function resetForm() {
-  form.value = { 
-    name: '', 
-    partyType: '', 
-    icon: '', 
-    description: '' 
+  form.value = {
+    name: '',
+    partyType: '',
+    icon: '',
+    description: ''
   };
   nameError.value = false;
   partyTypeError.value = false;
@@ -195,4 +194,3 @@ async function handleSubmit() {
 <style scoped lang="scss">
 @use '@/assets/scss/_form-styles.scss';
 </style>
-
