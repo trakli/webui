@@ -15,14 +15,20 @@
         type="text"
         class="icon-search"
         :placeholder="modelValue ? '' : 'Search an icon here'"
-        @blur="handleInputBlur"
       />
       <button v-if="modelValue" type="button" class="clear-icon-btn" @click="clearSelection">
         <XIcon class="clear-icon" />
       </button>
+
+      <!-- chevron toggle button -->
+      <button type="button" class="dropdown-toggle-btn" @click="toggleDropdown">
+        <ChevronDown v-if="!showDropdown" class="chevron-icon" />
+        <ChevronUp v-else class="chevron-icon" />
+      </button>
     </div>
 
-    <div class="icon-grid" ref="iconGrid">
+    <!-- icon grid only visible if dropdown open -->
+    <div v-if="showDropdown" class="icon-grid" ref="iconGrid">
       <button
         v-for="iconName in filteredIcons"
         :key="iconName"
@@ -45,7 +51,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, shallowRef, toRef, nextTick } from 'vue';
 import * as lucideIcons from 'lucide-vue-next';
-import { XIcon } from 'lucide-vue-next';
+import { XIcon, ChevronDown, ChevronUp } from 'lucide-vue-next';
 
 // props / emits
 const props = defineProps({
@@ -62,6 +68,9 @@ const allIconNames = ref([]);
 const searchInput = ref(null);
 const iconGrid = ref(null);
 let blurTimer = null;
+
+// dropdown state
+const showDropdown = ref(false);
 
 // helper accessor for template (unwrap shallowRef safely)
 const loadedIconsValue = computed(() => loadedIcons.value || {});
@@ -133,7 +142,6 @@ function loadIconComponent(iconName) {
 watch(
   modelValue,
   (newValue, oldValue) => {
-    // Only update if the value actually changed
     if (newValue !== oldValue) {
       selectedIconComponent.value = newValue ? loadIconComponent(newValue) : null;
     }
@@ -146,7 +154,6 @@ watch(
   filteredIcons,
   (newList) => {
     if (!modelValue.value && newList && newList.length > 0) {
-      // Limit the number of icons loaded at once to prevent performance issues
       const iconsToLoad = newList.slice(0, 50);
       iconsToLoad.forEach((iconName) => {
         if (iconName) loadIconComponent(iconName);
@@ -156,19 +163,23 @@ watch(
   { flush: 'post' }
 );
 
+function toggleDropdown() {
+  showDropdown.value = !showDropdown.value;
+}
+
 function selectIcon(name) {
   if (!name) return;
 
   emit('update:modelValue', name);
   search.value = '';
+  showDropdown.value = false; // close dropdown after selection
 
-  // blur the input safely (guarded)
   nextTick(() => {
     if (searchInput.value && typeof searchInput.value.blur === 'function') {
       try {
         searchInput.value.blur();
       } catch (e) {
-        // swallow safe blur error
+        console.error('IconPicker: selectIcon blur failed', e);
       }
     }
   });
@@ -182,19 +193,10 @@ function clearSelection() {
       try {
         searchInput.value.blur();
       } catch (e) {
-        // swallow
+        console.error('IconPicker: clearSelection blur failed', e);
       }
     }
   });
-}
-
-function handleInputBlur() {
-  // ensure timer is cleared and recreated; protects against setting state after unmount
-  if (blurTimer) clearTimeout(blurTimer);
-  blurTimer = setTimeout(() => {
-    // small UI state we don't rely on elsewhere; keep safe
-    blurTimer = null;
-  }, 150);
 }
 </script>
 
@@ -250,6 +252,21 @@ function handleInputBlur() {
 
 .clear-icon-btn:hover .clear-icon {
   color: $error-color;
+}
+
+.dropdown-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.chevron-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #6b7280;
 }
 
 .icon-grid {

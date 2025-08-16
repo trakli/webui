@@ -6,7 +6,7 @@
   gap: 0.75rem;
   background: $bg-gray;
   width: min(750px, 100%);
-  max-height: calc(90vh - 4rem);
+  height: auto;
   overflow-y: auto;
   border-radius: 16px;
   padding: 2rem 2rem 1.5rem 2rem;
@@ -27,17 +27,36 @@
 }
 
 .form-input,
-.form-textarea {
+.form-textarea,
+.form-select {
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 1rem;
   background: #fff;
   transition: border-color 0.2s;
-
+  
   &:focus {
     border-color: $primary;
     outline: none;
+  }
+  
+  &.error {
+    border-color: #eb5757;
+  }
+}
+
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  
+  option {
+    padding: 0.5rem;
   }
 }
 
@@ -57,7 +76,7 @@
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: 0.2s;
-
+  
   &:hover {
     background: $primary-hover;
   }

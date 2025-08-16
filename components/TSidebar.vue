@@ -80,7 +80,7 @@ import {
   HomeIcon,
   RectangleGroupIcon,
   UserGroupIcon,
-  WalletIcon,
+  WalletIcon
   
 } from '@heroicons/vue/24/outline';
 import Logo from './Logo.vue';

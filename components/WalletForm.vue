@@ -20,7 +20,7 @@
           id="wallet-description"
           v-model="form.description"
           class="form-textarea"
-          placeholder="Type group description here..."
+          placeholder="Type wallet description here..."
           rows="5"
         />
       </div>
