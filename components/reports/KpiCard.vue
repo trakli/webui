@@ -5,13 +5,19 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+const { label, value, valueClass } = defineProps({
+  label: { type: String, required: true },
+  value: { type: [String, Number], required: true },
+  valueClass: { type: [String, Array, Object], default: '' }
+});
+</script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
 .kpi-card {
-  background: gray;
+  background: $bg-white;
   border-radius: $radius-xl;
   box-shadow: $shadow-md;
   padding: 1rem;
@@ -23,6 +29,7 @@
   text-transform: uppercase;
   letter-spacing: 0.02em;
   margin-bottom: 0.25rem;
+  color: $text-muted;
 }
 
 .kpi-value {
