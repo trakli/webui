@@ -13,6 +13,13 @@
       />
     </div>
 
+    <!-- Icon Picker -->
+    <div class="form-group">
+      <label for="category-icon" class="form-label">Select an Icon </label>
+      <IconPicker v-model="form.icon" id="category-icon" />
+      <div v-if="iconError" class="error-text">Please select an icon.</div>
+    </div>
+
     <!-- Wallet Description -->
     <div class="form-group">
       <label for="wallet-description" class="form-label">Wallet Description</label>
@@ -46,6 +53,7 @@ const emit = defineEmits(['created', 'updated', 'close']);
 
 const form = ref({
   name: '',
+  icon: '',
   description: ''
 });
 
@@ -58,6 +66,7 @@ watch(
     if (newItem) {
       form.value = {
         name: newItem.name || '',
+        icon: newItem.icon || '',
         description: newItem.description || ''
       };
     } else {
@@ -68,7 +77,7 @@ watch(
 );
 
 function resetForm() {
-  form.value = { name: '', description: '' };
+  form.value = { name: '', icon: '', description: '' };
 }
 
 async function handleSubmit() {
@@ -77,6 +86,7 @@ async function handleSubmit() {
   const formData = {
     ...form.value,
     name: form.value.name.trim(),
+    icon: form.value.icon.trim(),
     description: form.value.description.trim()
   };
 

@@ -15,11 +15,13 @@
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
+    "apexcharts": "^5.3.3",
     "country-flag-icons": "^1.5.19",
     "libphonenumber-js": "^1.12.9",
     "lucide-vue-next": "^0.525.0",
     "nuxt": "^3.12.4",
-    "vue": "latest"
+    "vue": "latest",
+    "vue3-apexcharts": "^1.8.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

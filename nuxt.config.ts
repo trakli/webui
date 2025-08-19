@@ -15,7 +15,11 @@ export default defineNuxtConfig({
       ]
     }
   },
-  css: ['@/assets/scss/_variables.scss', '@/assets/scss/base.scss'],
+  css: [
+    '@/assets/scss/_variables.scss',
+    '@/assets/scss/base.scss',
+    '@/assets/scss/_form-styles.scss'
+  ],
   build: {
     transpile: []
   }

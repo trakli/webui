@@ -60,6 +60,27 @@
         <li>
           <button
             class="nav-footer-button"
+            :class="{ selected: $route.path === '/reports' }"
+            @click="$router.push('/reports')"
+          >
+            <Cog8ToothIcon class="icon" />
+            <span class="text">Reports & Stats</span>
+          </button>
+        </li>
+        <li>
+          <button
+            class="nav-footer-button"
+            :class="{ selected: $route.path === '/ai-insights' }"
+            @click="$router.push('/ai-insights')"
+          >
+            <ChatBubbleLeftRightIcon class="icon" />
+            <span class="text">AI Insights</span>
+          </button>
+        </li>
+
+        <li>
+          <button
+            class="nav-footer-button"
             :class="{ selected: $route.path === '/support' }"
             @click="$router.push('/support')"
           >
