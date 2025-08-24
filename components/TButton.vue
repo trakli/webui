@@ -1,4 +1,6 @@
 <script setup>
+import { Loader2 } from 'lucide-vue-next';
+
 const props = defineProps({
   text: {
     type: String,
@@ -22,6 +24,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  loading: {
+    type: Boolean,
+    default: false
+  },
   type: {
     type: String,
     default: 'button'
@@ -38,20 +44,28 @@ const buttonClasses = [
   `button--${props.size}`,
   {
     'button--full-width': props.fullWidth,
-    'button--disabled': props.disabled
+    'button--disabled': props.disabled || props.loading
   }
 ];
 </script>
 
 <template>
-  <NuxtLink v-if="to" :to="to" :class="buttonClasses" :disabled="disabled">
+  <NuxtLink v-if="to" :to="to" :class="buttonClasses" :disabled="disabled || loading">
+    <span v-if="$slots['left-icon']" class="button__icon-left">
+      <slot name="left-icon" />
+    </span>
     <span class="button__text">
-      <slot>{{ text }}</slot>
+      <Loader2 v-if="loading" class="spinner" />
+      <slot v-else>{{ text }}</slot>
     </span>
   </NuxtLink>
-  <button v-else :class="buttonClasses" :type="type" :disabled="disabled">
+  <button v-else :class="buttonClasses" :type="type" :disabled="disabled || loading">
+    <span v-if="$slots['left-icon']" class="button__icon-left">
+      <slot name="left-icon" />
+    </span>
     <span class="button__text">
-      <slot>{{ text }}</slot>
+      <Loader2 v-if="loading" class="spinner" />
+      <slot v-else>{{ text }}</slot>
     </span>
   </button>
 </template>
@@ -119,11 +133,30 @@ const buttonClasses = [
   }
 
   // Text element
+  &__icon-left {
+    margin-right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
   &__text {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 100%;
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 }
 </style>
