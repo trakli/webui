@@ -20,8 +20,19 @@
         :pageName="pageName"
         @create="handleFormToggle"
       />
+      <!-- Party Cards View -->
+      <PartyCardList
+        v-if="items.length > 0 && isPartiesPage"
+        :parties="items"
+        @edit="handleEdit"
+        @delete="handleDelete"
+        @view="handleView"
+        @menu="handleMenu"
+      />
+
+      <!-- Regular Table View for other pages -->
       <ContentTable
-        v-if="items.length > 0"
+        v-if="items.length > 0 && !isPartiesPage"
         :pageName="pageName"
         :pageNamePlural="pageNamePlural"
         :entities="items"
@@ -37,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed, toRefs, nextTick } from 'vue';
 import ContentTopCard from './TTopCard.vue';
 import EmptyState from './EmptyState.vue';
 import CategoryForm from './categories/CategoryForm.vue';
@@ -45,6 +56,7 @@ import GroupForm from './groups/GroupForm.vue';
 import PartyForm from './PartiesForm.vue';
 import WalletForm from './WalletForm.vue';
 import ContentTable from './ContentTable.vue';
+import PartyCardList from './PartyCardList.vue';
 import TipsSection from './TipsSection.vue';
 import TFooter from '@/components/TFooter.vue';
 
@@ -67,7 +79,77 @@ const items = ref([]);
 const editingItem = ref(null);
 let lastClickTime = 0;
 
+// Sample data for parties page demonstration
+const sampleParties = [
+  {
+    id: '1',
+    name: 'John Smith',
+    partyType: 'individual',
+    icon: 'User',
+    description: 'Regular client with monthly payment schedule',
+    receivedAmount: 520,
+    spentAmount: 180,
+    lastUpdated: new Date(Date.now() - 2 * 60 * 1000)
+  },
+  {
+    id: '2',
+    name: 'Sarah Johnson',
+    partyType: 'individual',
+    icon: 'UserCheck',
+    description: 'Contractor with bi-weekly invoices',
+    receivedAmount: 1250,
+    spentAmount: 0,
+    lastUpdated: new Date(Date.now() - 60 * 60 * 1000)
+  },
+  {
+    id: '3',
+    name: 'Acme Corporation',
+    partyType: 'company',
+    icon: 'Building2',
+    description: 'Primary vendor for office supplies and services',
+    receivedAmount: 0,
+    spentAmount: 3750,
+    lastUpdated: new Date(Date.now() - 3 * 60 * 60 * 1000)
+  },
+  {
+    id: '4',
+    name: 'Tech Innovators LLC',
+    partyType: 'company',
+    icon: 'Rocket',
+    description: 'Software subscription and IT services',
+    receivedAmount: 0,
+    spentAmount: 899,
+    lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: '5',
+    name: 'Michael Brown',
+    partyType: 'individual',
+    icon: 'Star',
+    description: 'Investor with quarterly dividend payments',
+    receivedAmount: 4200,
+    spentAmount: 1500,
+    lastUpdated: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: '6',
+    name: 'Global Enterprises Inc',
+    partyType: 'company',
+    icon: 'Globe',
+    description: 'International client with foreign currency transactions',
+    receivedAmount: 8700,
+    spentAmount: 2300,
+    lastUpdated: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+  }
+];
+
+// Initialize with sample data for parties page
+if (props.pageName === 'Party') {
+  items.value = sampleParties;
+}
+
 const isGroupsPage = computed(() => props.pageName === 'Group');
+const isPartiesPage = computed(() => props.pageName === 'Party');
 
 const formMap = {
   Category: CategoryForm,
@@ -85,6 +167,18 @@ const handleFormToggle = () => {
     editingItem.value = null; // Clear any existing editing item
     showForm.value = true;
     lastClickTime = now;
+
+    // Scroll to the form after a brief delay to ensure it's rendered
+    nextTick(() => {
+      const formSection = document.querySelector('.form-section');
+      if (formSection) {
+        formSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    });
   }
 };
 
@@ -97,7 +191,13 @@ const handleCreate = (newItem) => {
   const itemWithId = {
     ...newItem,
     id: crypto.randomUUID(),
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    // Add party-specific fields if this is a party
+    ...(props.pageName === 'Party' && {
+      receivedAmount: Math.floor(Math.random() * 5000),
+      spentAmount: Math.floor(Math.random() * 3000),
+      lastUpdated: new Date()
+    })
   };
   items.value.push(itemWithId);
   // Auto-close form after successful creation
@@ -112,13 +212,38 @@ const handleEdit = (itemToEdit) => {
 
   // 2. Show the form immediately
   showForm.value = true;
+
+  // 3. Scroll to the form after a brief delay to ensure it's rendered
+  nextTick(() => {
+    const formSection = document.querySelector('.form-section');
+    if (formSection) {
+      formSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest'
+      });
+    }
+  });
 };
 
 const handleUpdate = (updatedItem) => {
   const index = items.value.findIndex((item) => item.id === updatedItem.id);
   if (index !== -1) {
-    // Replace the old item with the updated one
-    items.value[index] = { ...updatedItem };
+    // For parties, preserve the additional fields that cards need
+    if (props.pageName === 'Party') {
+      const existingItem = items.value[index];
+      items.value[index] = {
+        ...existingItem,
+        ...updatedItem,
+        // Preserve party-specific fields
+        receivedAmount: existingItem.receivedAmount,
+        spentAmount: existingItem.spentAmount,
+        lastUpdated: existingItem.lastUpdated
+      };
+    } else {
+      // Replace the old item with the updated one for other pages
+      items.value[index] = { ...updatedItem };
+    }
   }
   // Close the form after update
   handleFormClose();
@@ -126,6 +251,16 @@ const handleUpdate = (updatedItem) => {
 
 const handleDelete = (itemToDelete) => {
   items.value = items.value.filter((item) => item.id !== itemToDelete.id);
+};
+
+const handleView = (item) => {
+  console.log('View clicked:', item);
+  // In a real app, this would navigate to a detail page or open a modal
+};
+
+const handleMenu = (item) => {
+  console.log('Menu clicked:', item);
+  // In a real app, this would open a context menu or dropdown
 };
 </script>
 
