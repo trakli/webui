@@ -1,6 +1,10 @@
 <template>
   <div class="entity-content">
-    <ContentTopCard :pageName="pageName" :pageNamePlural="pageNamePlural" @add="handleFormToggle" />
+    <ContentTopCard
+      :pageName="pageName"
+      :pageNamePlural="pageNamePlural"
+      @add="handleOpenFormForCreation"
+    />
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">
@@ -18,7 +22,7 @@
       <EmptyState
         v-if="items.length === 0 && !showForm"
         :pageName="pageName"
-        @create="handleFormToggle"
+        @create="handleOpenFormForCreation"
       />
       <!-- Party Cards View -->
       <PartyCardList
@@ -77,7 +81,6 @@ const { pageName, pageNamePlural } = toRefs(props);
 const showForm = ref(false);
 const items = ref([]);
 const editingItem = ref(null);
-let lastClickTime = 0;
 
 const isGroupsPage = computed(() => props.pageName === 'Group');
 const isPartiesPage = computed(() => props.pageName === 'Party');
@@ -91,13 +94,11 @@ const formMap = {
 
 const currentForm = computed(() => formMap[props.pageName]);
 
-const handleFormToggle = () => {
-  const now = Date.now();
-  // Only open the form if it's currently closed. Do not toggle.
-  if (now - lastClickTime > 300 && !showForm.value) {
+const handleOpenFormForCreation = () => {
+  // Only open the form if it's currently closed.
+  if (!showForm.value) {
     editingItem.value = null; // Clear any existing editing item
     showForm.value = true;
-    lastClickTime = now;
 
     // Scroll to the form after a brief delay to ensure it's rendered
     nextTick(() => {
@@ -115,7 +116,7 @@ const handleFormToggle = () => {
 
 const handleFormClose = () => {
   showForm.value = false;
-  editingItem.value = null; // Clear editing item when form closes
+  editingItem.value = null;
 };
 
 const handleCreate = (newItem) => {
@@ -135,8 +136,6 @@ const handleCreate = (newItem) => {
 };
 
 const handleEdit = (itemToEdit) => {
-  console.log('Edit clicked:', itemToEdit);
-
   // 1. Set the editing item so the form knows what to populate
   editingItem.value = { ...itemToEdit };
 
@@ -167,16 +166,6 @@ const handleUpdate = (updatedItem) => {
 
 const handleDelete = (itemToDelete) => {
   items.value = items.value.filter((item) => item.id !== itemToDelete.id);
-};
-
-const handleView = (item) => {
-  console.log('View clicked:', item);
-  // In a real app, this would navigate to a detail page or open a modal
-};
-
-const handleMenu = (item) => {
-  console.log('Menu clicked:', item);
-  // In a real app, this would open a context menu or dropdown
 };
 </script>
 
