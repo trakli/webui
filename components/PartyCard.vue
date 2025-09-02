@@ -1,5 +1,5 @@
 <template>
-  <div class="party-card" :class="party.partyType">
+  <div class="party-card" :style="statusStyle">
     <div class="card-header">
       <div class="party-info">
         <div class="party-icon" :class="party.partyType">
@@ -121,6 +121,39 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
+// Analysis:
+// - $error-color is a SCSS variable, not available in JS at runtime.
+// - We cannot directly import SCSS variables into JS, but we can hardcode the value from _variables.scss.
+// - $error-color in _variables.scss is #dc2626.
+// - Instead of using blue (#3b82f6) for "spent > received", we will use #dc2626 and treat it as the error color.
+// - For primary, we can still use the fallback hex (#047844) as before, since $primary is also #047844 in _variables.scss.
+
+const statusStyle = computed(() => {
+  const received = Number(props.party.receivedAmount || 0);
+  const spent = Number(props.party.spentAmount || 0);
+
+  // Use $primary and $error-color from _variables.scss directly as hex values
+  const primary = '#047844'; // $primary
+  const errorColor = '#dc2626'; // $error-color
+  const neutral = '#b0b8b4';
+
+  let stripColor = neutral;
+  let accentBg = neutral;
+
+  if (received > spent) {
+    stripColor = primary;
+    accentBg = primary;
+  } else if (spent > received) {
+    stripColor = errorColor;
+    accentBg = errorColor;
+  }
+
+  return {
+    '--party-strip-color': stripColor,
+    '--party-accent-bg': accentBg
+  };
+});
+
 const resolvedIcon = computed(() => {
   if (!props.party.icon) {
     // Default icons based on party type
@@ -171,63 +204,30 @@ const formatLastUpdated = (timestamp) => {
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
 
-// Custom variables for this file
-$party-individual: #3b82f6;
-$party-company: $primary;
-$party-edit: $primary-hover;
-$party-edit-hover: $primary-light;
-$party-delete: $error-color;
-$party-delete-hover: $bg-light;
-$party-card-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
-$party-card-shadow-hover: 0 0.25rem 1rem rgba(0, 0, 0, 0.15);
-$party-card-radius: $radius-xl;
-$party-card-padding: $spacing-6;
-$party-card-border-width: 0.25rem; // 4px
-$party-card-action-radius: $radius-lg;
-$party-card-action-dropdown-radius: $radius-xl;
-$party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
-
 .party-card {
   background: $bg-white;
-  border-radius: $party-card-radius;
-  padding: $party-card-padding;
-  box-shadow: $party-card-shadow;
+  border-radius: $radius-xl;
+  padding: $spacing-6;
+  box-shadow: $shadow-sm;
   transition: $transition-base;
-  border-top: $party-card-border-width solid;
+  border-top: 0.25rem solid var(--party-strip-color, $border-medium);
   cursor: pointer;
 
   &:hover {
     transform: translateY(-0.125rem);
-    box-shadow: $party-card-shadow-hover;
+    box-shadow: $shadow-md;
   }
+}
 
-  &.individual {
-    border-top-color: $party-individual;
+/* Colors adapt via CSS vars from script */
+.party-icon {
+  background: var(--party-accent-bg, $border-medium);
+  color: $bg-white;
+}
 
-    .party-icon {
-      background: $party-individual;
-      color: $bg-white;
-    }
-
-    .party-type-badge {
-      background: $party-individual;
-      color: $bg-white;
-    }
-  }
-
-  &.company {
-    border-top-color: $party-company;
-
-    .party-icon {
-      background: $party-company;
-      color: $bg-white;
-    }
-
-    .party-type-badge {
-      background: $party-company;
-      color: $bg-white;
-    }
-  }
+.party-type-badge {
+  background: var(--party-accent-bg, $border-medium);
+  color: $bg-white;
 }
 
 .card-header {
@@ -270,7 +270,7 @@ $party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
   margin: 0;
   font-size: $font-size-base;
   font-weight: $font-semibold;
-  color: #1f2937; // Not in variables, so keep as is
+  color: #1f2937;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -300,7 +300,7 @@ $party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
   background: transparent;
   border: none;
   padding: 0.5rem;
-  border-radius: $party-card-action-radius;
+  border-radius: $radius-lg;
   cursor: pointer;
   color: $text-muted;
   transition: $transition-base;
@@ -322,8 +322,8 @@ $party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
   right: 0;
   background: $bg-white;
   border: 1px solid $border-color;
-  border-radius: $party-card-action-dropdown-radius;
-  box-shadow: $party-card-action-dropdown-shadow;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-md;
   min-width: 8.75rem;
   z-index: $z-index-dropdown;
   overflow: hidden;
@@ -347,28 +347,28 @@ $party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
   }
 
   &:first-child {
-    border-top-left-radius: $party-card-action-dropdown-radius;
-    border-top-right-radius: $party-card-action-dropdown-radius;
+    border-top-left-radius: $radius-xl;
+    border-top-right-radius: $radius-xl;
   }
 
   &:last-child {
-    border-bottom-left-radius: $party-card-action-dropdown-radius;
-    border-bottom-right-radius: $party-card-action-dropdown-radius;
+    border-bottom-left-radius: $radius-xl;
+    border-bottom-right-radius: $radius-xl;
   }
 
   &.edit {
-    color: $party-edit;
+    color: $primary;
 
     &:hover {
-      background: $party-edit-hover;
+      background: $primary-light;
     }
   }
 
   &.delete {
-    color: $party-delete;
+    color: $error-color;
 
     &:hover {
-      background: $party-delete-hover;
+      background: $bg-light;
     }
   }
 
@@ -390,7 +390,7 @@ $party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
   .insights-header {
     font-size: 0.6875rem;
     font-weight: $font-semibold;
-    color: #9ca3af; // Not in variables, so keep as is
+    color: #9ca3af;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 0 0.75rem 0;
@@ -405,22 +405,22 @@ $party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
 
   &.received {
     .insight-icon {
-      color: $party-company;
+      color: $primary;
     }
 
     .amount {
-      color: $party-company;
+      color: $primary;
       font-weight: $font-semibold;
     }
   }
 
   &.spent {
     .insight-icon {
-      color: $party-delete;
+      color: $error-color;
     }
 
     .amount {
-      color: $party-delete;
+      color: $error-color;
       font-weight: $font-semibold;
     }
   }
@@ -450,12 +450,12 @@ $party-card-action-dropdown-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
   margin-top: 0.75rem;
 
   .insight-icon {
-    color: #9ca3af; // Not in variables, so keep as is
+    color: #9ca3af;
   }
 
   .update-time {
     font-size: 0.75rem;
-    color: #9ca3af; // Not in variables, so keep as is
+    color: #9ca3af;
   }
 }
 </style>

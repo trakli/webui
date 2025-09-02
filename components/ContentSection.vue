@@ -79,75 +79,6 @@ const items = ref([]);
 const editingItem = ref(null);
 let lastClickTime = 0;
 
-// Sample data for parties page demonstration
-const sampleParties = [
-  {
-    id: '1',
-    name: 'John Smith',
-    partyType: 'individual',
-    icon: 'User',
-    description: 'Regular client with monthly payment schedule',
-    receivedAmount: 520,
-    spentAmount: 180,
-    lastUpdated: new Date(Date.now() - 2 * 60 * 1000)
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    partyType: 'individual',
-    icon: 'UserCheck',
-    description: 'Contractor with bi-weekly invoices',
-    receivedAmount: 1250,
-    spentAmount: 0,
-    lastUpdated: new Date(Date.now() - 60 * 60 * 1000)
-  },
-  {
-    id: '3',
-    name: 'Acme Corporation',
-    partyType: 'company',
-    icon: 'Building2',
-    description: 'Primary vendor for office supplies and services',
-    receivedAmount: 0,
-    spentAmount: 3750,
-    lastUpdated: new Date(Date.now() - 3 * 60 * 60 * 1000)
-  },
-  {
-    id: '4',
-    name: 'Tech Innovators LLC',
-    partyType: 'company',
-    icon: 'Rocket',
-    description: 'Software subscription and IT services',
-    receivedAmount: 0,
-    spentAmount: 899,
-    lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: '5',
-    name: 'Michael Brown',
-    partyType: 'individual',
-    icon: 'Star',
-    description: 'Investor with quarterly dividend payments',
-    receivedAmount: 4200,
-    spentAmount: 1500,
-    lastUpdated: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: '6',
-    name: 'Global Enterprises Inc',
-    partyType: 'company',
-    icon: 'Globe',
-    description: 'International client with foreign currency transactions',
-    receivedAmount: 8700,
-    spentAmount: 2300,
-    lastUpdated: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-  }
-];
-
-// Initialize with sample data for parties page
-if (props.pageName === 'Party') {
-  items.value = sampleParties;
-}
-
 const isGroupsPage = computed(() => props.pageName === 'Group');
 const isPartiesPage = computed(() => props.pageName === 'Party');
 
@@ -192,7 +123,6 @@ const handleCreate = (newItem) => {
     ...newItem,
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
-    // Add party-specific fields if this is a party
     ...(props.pageName === 'Party' && {
       receivedAmount: Math.floor(Math.random() * 5000),
       spentAmount: Math.floor(Math.random() * 3000),
@@ -229,21 +159,7 @@ const handleEdit = (itemToEdit) => {
 const handleUpdate = (updatedItem) => {
   const index = items.value.findIndex((item) => item.id === updatedItem.id);
   if (index !== -1) {
-    // For parties, preserve the additional fields that cards need
-    if (props.pageName === 'Party') {
-      const existingItem = items.value[index];
-      items.value[index] = {
-        ...existingItem,
-        ...updatedItem,
-        // Preserve party-specific fields
-        receivedAmount: existingItem.receivedAmount,
-        spentAmount: existingItem.spentAmount,
-        lastUpdated: existingItem.lastUpdated
-      };
-    } else {
-      // Replace the old item with the updated one for other pages
-      items.value[index] = { ...updatedItem };
-    }
+    items.value[index] = { ...items.value[index], ...updatedItem };
   }
   // Close the form after update
   handleFormClose();
