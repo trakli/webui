@@ -1,6 +1,10 @@
 <template>
   <div class="entity-content">
-    <ContentTopCard :pageName="pageName" :pageNamePlural="pageNamePlural" @add="handleFormToggle" />
+    <ContentTopCard
+      :pageName="pageName"
+      :pageNamePlural="pageNamePlural"
+      @add="handleOpenFormForCreation"
+    />
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">
@@ -18,10 +22,21 @@
       <EmptyState
         v-if="items.length === 0 && !showForm"
         :pageName="pageName"
-        @create="handleFormToggle"
+        @create="handleOpenFormForCreation"
       />
+      <!-- Party Cards View -->
+      <PartyCardList
+        v-if="items.length > 0 && isPartiesPage"
+        :parties="items"
+        @edit="handleEdit"
+        @delete="handleDelete"
+        @view="handleView"
+        @menu="handleMenu"
+      />
+
+      <!-- Regular Table View for other pages -->
       <ContentTable
-        v-if="items.length > 0"
+        v-if="items.length > 0 && !isPartiesPage"
         :pageName="pageName"
         :pageNamePlural="pageNamePlural"
         :entities="items"
@@ -37,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, computed, toRefs } from 'vue';
+import { ref, computed, toRefs, nextTick } from 'vue';
 import ContentTopCard from './TTopCard.vue';
 import EmptyState from './EmptyState.vue';
 import CategoryForm from './categories/CategoryForm.vue';
@@ -45,6 +60,7 @@ import GroupForm from './groups/GroupForm.vue';
 import PartyForm from './PartiesForm.vue';
 import WalletForm from './WalletForm.vue';
 import ContentTable from './ContentTable.vue';
+import PartyCardList from './PartyCardList.vue';
 import TipsSection from './TipsSection.vue';
 import TFooter from '@/components/TFooter.vue';
 
@@ -65,9 +81,9 @@ const { pageName, pageNamePlural } = toRefs(props);
 const showForm = ref(false);
 const items = ref([]);
 const editingItem = ref(null);
-let lastClickTime = 0;
 
 const isGroupsPage = computed(() => props.pageName === 'Group');
+const isPartiesPage = computed(() => props.pageName === 'Party');
 
 const formMap = {
   Category: CategoryForm,
@@ -78,26 +94,41 @@ const formMap = {
 
 const currentForm = computed(() => formMap[props.pageName]);
 
-const handleFormToggle = () => {
-  const now = Date.now();
-  // Only open the form if it's currently closed. Do not toggle.
-  if (now - lastClickTime > 300 && !showForm.value) {
+const handleOpenFormForCreation = () => {
+  // Only open the form if it's currently closed.
+  if (!showForm.value) {
     editingItem.value = null; // Clear any existing editing item
     showForm.value = true;
-    lastClickTime = now;
+
+    // Scroll to the form after a brief delay to ensure it's rendered
+    nextTick(() => {
+      const formSection = document.querySelector('.form-section');
+      if (formSection) {
+        formSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    });
   }
 };
 
 const handleFormClose = () => {
   showForm.value = false;
-  editingItem.value = null; // Clear editing item when form closes
+  editingItem.value = null;
 };
 
 const handleCreate = (newItem) => {
   const itemWithId = {
     ...newItem,
     id: crypto.randomUUID(),
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    ...(props.pageName === 'Party' && {
+      receivedAmount: Math.floor(Math.random() * 5000),
+      spentAmount: Math.floor(Math.random() * 3000),
+      lastUpdated: new Date()
+    })
   };
   items.value.push(itemWithId);
   // Auto-close form after successful creation
@@ -105,20 +136,29 @@ const handleCreate = (newItem) => {
 };
 
 const handleEdit = (itemToEdit) => {
-  console.log('Edit clicked:', itemToEdit);
-
   // 1. Set the editing item so the form knows what to populate
   editingItem.value = { ...itemToEdit };
 
   // 2. Show the form immediately
   showForm.value = true;
+
+  // 3. Scroll to the form after a brief delay to ensure it's rendered
+  nextTick(() => {
+    const formSection = document.querySelector('.form-section');
+    if (formSection) {
+      formSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest'
+      });
+    }
+  });
 };
 
 const handleUpdate = (updatedItem) => {
   const index = items.value.findIndex((item) => item.id === updatedItem.id);
   if (index !== -1) {
-    // Replace the old item with the updated one
-    items.value[index] = { ...updatedItem };
+    items.value[index] = { ...items.value[index], ...updatedItem };
   }
   // Close the form after update
   handleFormClose();
