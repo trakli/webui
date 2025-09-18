@@ -3,8 +3,19 @@
 
 // This file contains shared styles for authentication pages (Login, Register, etc.)
 
+.btn-google {
+  background-color: $bg-white;
+  color: $text-secondary;
+  border-color: $border-light;
+
+  &:hover:not(:disabled) {
+    background-color: $bg-light;
+  }
+}
+
 .form-card {
   width: 100%;
+  max-width: 520px;
   background-color: $bg-white;
   padding: $spacing-12;
   border-radius: $radius-xl;

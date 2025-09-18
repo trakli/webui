@@ -1,5 +1,11 @@
 <template>
   <div>
+    <div class="form-group form-group--full">
+      <label class="form-label">Profile Picture</label>
+      <div class="avatar-container">
+        <img v-if="user" :src="getAvatarUrl(user)" alt="User Avatar" class="avatar-image" />
+      </div>
+    </div>
     <div class="section-grid">
       <div class="form-group">
         <label class="form-label">First Name</label>
@@ -53,15 +59,20 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Lock, Save } from 'lucide-vue-next';
+import { useAuth } from '@/composables/useAuth';
+import { useAvatar } from '@/composables/useAvatar';
 
 const props = defineProps({
   isEditMode: { type: Boolean, default: false }
 });
 
-const firstName = ref('John');
-const lastName = ref('Doe');
-const username = ref('user123');
-const email = ref('user@example.com');
+const { user } = useAuth();
+const { getAvatarUrl } = useAvatar();
+
+const firstName = ref(user.value?.first_name || '');
+const lastName = ref(user.value?.last_name || '');
+const username = ref(user.value?.username || '');
+const email = ref(user.value?.email || '');
 
 const message = ref('');
 const isSuccess = ref(false);
@@ -71,6 +82,17 @@ watch(
   () => {
     message.value = '';
   }
+);
+
+watch(
+  user,
+  (newUser) => {
+    firstName.value = newUser?.first_name || '';
+    lastName.value = newUser?.last_name || '';
+    username.value = newUser?.username || '';
+    email.value = newUser?.email || '';
+  },
+  { immediate: true }
 );
 
 const handleSave = () => {
@@ -89,6 +111,21 @@ const handleSave = () => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+
+.avatar-container {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
 .section-grid {
   display: grid;

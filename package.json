@@ -14,6 +14,8 @@
     "format:check": "prettier --check ./"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.4",
+    "@dicebear/core": "^9.2.4",
     "@heroicons/vue": "^2.2.0",
     "apexcharts": "^5.3.3",
     "country-flag-icons": "^1.5.19",

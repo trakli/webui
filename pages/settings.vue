@@ -58,7 +58,8 @@ import TNavbar from '~/components/TNavbar.vue';
 
 /* eslint-disable no-undef */
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
+  middleware: 'auth'
 });
 /* eslint-enable no-undef */
 const showPasswordModal = ref(false);

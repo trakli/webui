@@ -1,22 +1,54 @@
-/* eslint-env node */
-require('@rushstack/eslint-patch/modern-module-resolution');
-
 module.exports = {
   root: true,
+  env: {
+    browser: true,
+    node: true,
+    es2022: true
+  },
   extends: [
-    'plugin:vue/vue3-essential',
     'eslint:recommended',
-    '@vue/eslint-config-prettier/skip-formatting'
+    'plugin:vue/vue3-essential',
+    '@vue/eslint-config-prettier',
+    'prettier'
   ],
   parserOptions: {
-    ecmaVersion: 'latest'
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   },
-  plugins: ['prettier'],
+  plugins: ['vue', 'prettier'],
+  globals: {
+    useCookie: 'readonly',
+    useRoute: 'readonly',
+    useRouter: 'readonly',
+    useHead: 'readonly',
+    useState: 'readonly',
+    useFetch: 'readonly',
+    $fetch: 'readonly',
+    navigateTo: 'readonly',
+    definePageMeta: 'readonly',
+    response: 'readonly'
+  },
   rules: {
     'prettier/prettier': 'error',
-    'vue/multi-word-component-names': 'off'
+    'vue/multi-word-component-names': 'off',
+    'vue/no-multiple-template-root': 'off',
+    'no-unused-vars': 'warn'
   },
-  env: {
-    node: true
-  }
+  overrides: [
+    {
+      files: ['*.vue'],
+      parser: 'vue-eslint-parser',
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module'
+      }
+    },
+    {
+      files: ['*.js', '*.mjs', '*.cjs'],
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module'
+      }
+    }
+  ]
 };

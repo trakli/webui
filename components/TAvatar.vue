@@ -1,15 +1,34 @@
 <template>
-  <button class="t-avatar-button">
-    <img :src="imageUrl" alt="User Avatar" class="avatar-image" />
-    <div v-if="showName && userName" class="user-info">
-      <span class="user-name-text">{{ userName }}</span>
+  <TDropdown>
+    <template #trigger>
+      <button class="t-avatar-button">
+        <img :src="imageUrl" alt="User Avatar" class="avatar-image" />
+        <div v-if="showName && userName" class="user-info">
+          <span class="user-name-text">{{ userName }}</span>
+        </div>
+        <ChevronDownIcon v-if="showDropdown" class="dropdown-icon" />
+      </button>
+    </template>
+
+    <div class="dropdown-content">
+      <div v-if="user" class="user-details">
+        <p class="user-name">{{ user.first_name }} {{ user.last_name }}</p>
+        <p class="user-email">{{ user.email }}</p>
+      </div>
+      <hr class="divider" />
+      <TDropdownItem @click="() => $router.push('/settings')"> Settings </TDropdownItem>
+      <TDropdownItem @click="logout"> Logout </TDropdownItem>
     </div>
-    <ChevronDownIcon v-if="showDropdown" class="dropdown-icon" />
-  </button>
+  </TDropdown>
 </template>
 
 <script setup>
 import { ChevronDownIcon } from '@heroicons/vue/24/outline';
+import TDropdown from './TDropdown.vue';
+import TDropdownItem from './TDropdownItem.vue';
+import { useAuth } from '@/composables/useAuth';
+
+const { user, logout } = useAuth();
 
 defineProps({
   imageUrl: {
@@ -71,6 +90,27 @@ defineProps({
     width: 20px;
     height: 20px;
     color: $text-secondary;
+  }
+}
+
+.dropdown-content {
+  .user-details {
+    padding: 0.5rem 1rem;
+
+    .user-name {
+      font-weight: 600;
+      color: #1a202c;
+    }
+
+    .user-email {
+      font-size: 0.875rem;
+      color: #718096;
+    }
+  }
+
+  .divider {
+    margin: 0.5rem 0;
+    border-color: #e2e8f0;
   }
 }
 </style>

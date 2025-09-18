@@ -27,7 +27,8 @@ import AIChat from '@/components/ai/AIChat.vue';
 
 /* eslint-disable no-undef */
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
+  middleware: 'auth'
 });
 /* eslint-enable no-undef */
 </script>

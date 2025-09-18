@@ -56,6 +56,7 @@ const handleSendMessage = () => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+@use 'sass:color';
 
 .card {
   background: $bg-white;
@@ -102,7 +103,7 @@ const handleSendMessage = () => {
 .bubble.ai {
   background: $primary-light;
   color: $primary;
-  border: 1px solid lighten($primary, 35%);
+  border: 1px solid color.adjust($primary, $lightness: 35%);
 }
 .bubble.user {
   background: $bg-gray;
