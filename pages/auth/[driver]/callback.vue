@@ -2,13 +2,11 @@
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
-import { useAuth } from '@/composables/useAuth';
 import Logo from '@/components/Logo.vue';
 
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
-const auth = useAuth();
 const stateCookie = useCookie('state');
 const driver = route.params.driver;
 

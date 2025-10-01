@@ -42,7 +42,7 @@ const handleGoogleLogin = async () => {
     <template #left-icon>
       <GoogleIcon />
     </template>
-    {{ buttonText[mode] }}
+    {{ buttonText[props.mode] }}
   </TButton>
 </template>
 

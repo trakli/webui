@@ -36,24 +36,38 @@ onMounted(() => {
 }
 
 .main-content {
-  margin-left: var(--sidebar-width, 300px);
   transition: margin-left 0.3s ease;
-  width: calc(100% - var(--sidebar-width, 300px));
   overflow-x: hidden;
+
+  // Desktop - account for sidebar
+  @media (min-width: $breakpoint-md) {
+    margin-left: $sidebar-width;
+    width: calc(100% - #{$sidebar-width});
+  }
+
+  // Mobile - full width
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .content-wrapper {
   width: 100%;
-  padding: 0.5rem 2rem;
   margin-top: $navbar-height;
   box-sizing: border-box;
+  padding: 0.5rem 2rem;
 
   @media (max-width: $breakpoint-lg) {
     padding: 1rem 1.5rem;
   }
 
   @media (max-width: $breakpoint-md) {
-    padding: 1rem;
+    padding: 0.75rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.5rem;
   }
 }
 
@@ -66,8 +80,19 @@ onMounted(() => {
   box-sizing: border-box;
   overflow: hidden;
 
-  @media (min-width: 768px) {
+  @media (max-width: $breakpoint-lg) {
     padding: 1.25rem;
+    border-radius: 1.5rem;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
   }
 
   &-container {

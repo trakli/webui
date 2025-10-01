@@ -7,7 +7,10 @@ export default defineNuxtConfig({
   ssr: true,
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
+      apiBase:
+        process.env.NODE_ENV === 'production'
+          ? process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1'
+          : '/api'
     }
   },
   app: {
@@ -23,9 +26,22 @@ export default defineNuxtConfig({
   css: [
     '@/assets/scss/_variables.scss',
     '@/assets/scss/base.scss',
-    '@/assets/scss/_form-styles.scss'
+    '@/assets/scss/_form-styles.scss',
+    '@/assets/scss/_transaction-form.scss'
   ],
   build: {
     transpile: []
+  },
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: 'https://api.dev.trakli.app/api/v1',
+        changeOrigin: true,
+        prependPath: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    }
   }
 });

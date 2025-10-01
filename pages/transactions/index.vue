@@ -1,26 +1,18 @@
 <template>
   <div>
-    <TTopCard pageName="Transaction" pageNamePlural="Transactions" />
-    <div class="table-wrapper">
-      <TTableComponent />
-    </div>
+    <TransactionsContentSection />
   </div>
 </template>
 
 <script setup>
-import TTopCard from '@/components/TTopCard.vue';
-import TTableComponent from '@/components/TTableComponent.vue';
-
 /* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
 /* eslint-enable no-undef */
+
+import TransactionsContentSection from '@/components/transactions/TransactionsContentSection.vue';
 </script>
 
-<style lang="scss" scoped>
-.table-wrapper {
-  margin-top: 40px;
-}
-</style>
+<style lang="scss" scoped></style>

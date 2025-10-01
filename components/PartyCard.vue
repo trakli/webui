@@ -2,13 +2,13 @@
   <div class="party-card" :style="statusStyle">
     <div class="card-header">
       <div class="party-info">
-        <div class="party-icon" :class="party.partyType">
+        <div class="party-icon" :class="party.type">
           <component :is="resolvedIcon" />
         </div>
         <div class="party-details">
           <h3 class="party-name">{{ party.name }}</h3>
-          <span class="party-type-badge" :class="party.partyType">
-            {{ party.partyType }}
+          <span class="party-type-badge" :class="party.type">
+            {{ party.type }}
           </span>
         </div>
       </div>
@@ -155,13 +155,25 @@ const statusStyle = computed(() => {
 });
 
 const resolvedIcon = computed(() => {
-  if (!props.party.icon) {
+  // Extract icon value - could be from icon.path, icon.content, or direct string
+  let iconValue = '';
+  if (props.party.icon) {
+    if (typeof props.party.icon === 'string') {
+      iconValue = props.party.icon;
+    } else if (props.party.icon.path) {
+      iconValue = props.party.icon.path;
+    } else if (props.party.icon.content) {
+      iconValue = props.party.icon.content;
+    }
+  }
+
+  if (!iconValue) {
     // Default icons based on party type
-    return props.party.partyType === 'individual' ? LucideIcons.User : LucideIcons.Building2;
+    return props.party.type === 'individual' ? LucideIcons.User : LucideIcons.Building2;
   }
 
   // Try to get the icon from Lucide icons library
-  let iconComponent = LucideIcons[props.party.icon];
+  let iconComponent = LucideIcons[iconValue];
 
   if (iconComponent) {
     return iconComponent;
@@ -171,8 +183,8 @@ const resolvedIcon = computed(() => {
   const availableIcons = Object.keys(LucideIcons);
   const similarIcon = availableIcons.find(
     (iconName) =>
-      iconName.toLowerCase().includes(props.party.icon.toLowerCase()) ||
-      props.party.icon.toLowerCase().includes(iconName.toLowerCase())
+      iconName.toLowerCase().includes(iconValue.toLowerCase()) ||
+      iconValue.toLowerCase().includes(iconName.toLowerCase())
   );
 
   if (similarIcon) {
@@ -180,7 +192,7 @@ const resolvedIcon = computed(() => {
   }
 
   // Fallback to default icons based on party type
-  return props.party.partyType === 'individual' ? LucideIcons.User : LucideIcons.Building2;
+  return props.party.type === 'individual' ? LucideIcons.User : LucideIcons.Building2;
 });
 
 const formatLastUpdated = (timestamp) => {
@@ -221,11 +233,31 @@ const formatLastUpdated = (timestamp) => {
 
 /* Colors adapt via CSS vars from script */
 .party-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   background: var(--party-accent-bg, $border-medium);
   color: $bg-white;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 }
 
 .party-type-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: $font-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
   background: var(--party-accent-bg, $border-medium);
   color: $bg-white;
 }
@@ -244,21 +276,6 @@ const formatLastUpdated = (timestamp) => {
   flex: 1;
 }
 
-.party-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-}
-
 .party-details {
   display: flex;
   flex-direction: column;
@@ -275,17 +292,6 @@ const formatLastUpdated = (timestamp) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.party-type-badge {
-  display: inline-block;
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.75rem;
-  font-size: 0.6875rem;
-  font-weight: $font-medium;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  width: fit-content;
 }
 
 .card-actions {

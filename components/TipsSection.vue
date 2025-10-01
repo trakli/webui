@@ -29,7 +29,7 @@ defineProps({
 @use '@/assets/scss/_variables.scss' as *;
 
 .tips-container {
-  width: 500px;
+  width: 380px;
   min-height: 500px;
   background-color: #fff4e6;
   padding: 2rem;
@@ -39,8 +39,25 @@ defineProps({
   justify-content: space-between;
   position: sticky;
   top: 2rem;
-  margin: 0 $spacing-12;
+  margin: 0;
   align-self: flex-start;
+
+  @media (max-width: 1200px) {
+    width: 340px;
+  }
+
+  @media (max-width: $breakpoint-lg) {
+    width: 320px;
+    min-height: 450px;
+    padding: 1.5rem;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    width: 100%;
+    min-height: auto;
+    position: static;
+    padding: 1.25rem;
+  }
 }
 
 .tips-content {
@@ -55,19 +72,31 @@ defineProps({
   font-weight: $font-bold;
   font-size: 1.75rem;
   line-height: 120%;
+
+  @media (max-width: $breakpoint-lg) {
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.25rem;
+  }
 }
 
 .tips-text-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .tips-text {
   color: #4a5253;
-  line-height: 120%;
+  line-height: 1.4;
   font-size: $font-size-lg;
   font-weight: $font-normal;
+
+  @media (max-width: $breakpoint-lg) {
+    font-size: $font-size-base;
+  }
 }
 
 .tips-footer {
@@ -75,11 +104,23 @@ defineProps({
   justify-content: right;
   align-items: flex-end;
   margin-top: 2rem;
+
+  @media (max-width: $breakpoint-md) {
+    margin-top: 1.5rem;
+  }
 }
 
 .bulb-image {
-  width: 180px;
+  width: 160px;
   height: auto;
   object-fit: contain;
+
+  @media (max-width: $breakpoint-lg) {
+    width: 140px;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    width: 120px;
+  }
 }
 </style>
