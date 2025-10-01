@@ -1,5 +1,11 @@
 import { ref, readonly } from 'vue';
-import type { Party, PartyCreatePayload, PartyUpdatePayload, PartiesResponse, ApiResponse } from '~/types/party';
+import type {
+  Party,
+  PartyCreatePayload,
+  PartyUpdatePayload,
+  PartiesResponse,
+  ApiResponse
+} from '~/types/party';
 
 export const useParties = () => {
   const api = useApi();
@@ -38,9 +44,9 @@ export const useParties = () => {
 
       const queryString = params.toString();
       const url = queryString ? `/parties?${queryString}` : '/parties';
-      
+
       const response = await api<ApiResponse<PartiesResponse>>(url);
-      
+
       if (response?.data) {
         parties.value = response.data.data || [];
         lastSync.value = response.data.last_sync || new Date().toISOString();
@@ -105,7 +111,7 @@ export const useParties = () => {
       });
 
       // Update local state
-      const index = parties.value.findIndex(party => party.id === id);
+      const index = parties.value.findIndex((party) => party.id === id);
       if (index !== -1 && response?.data) {
         parties.value[index] = response.data;
       }
@@ -130,7 +136,7 @@ export const useParties = () => {
       });
 
       // Remove from local state
-      parties.value = parties.value.filter(party => party.id !== id);
+      parties.value = parties.value.filter((party) => party.id !== id);
     } catch (err: any) {
       const msg = extractApiErrors(err);
       console.error('Error deleting party:', msg, err);

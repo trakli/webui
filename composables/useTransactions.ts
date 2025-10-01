@@ -42,7 +42,7 @@ function extractApiErrors(err: any): string {
 // Load dependencies needed for API mode
 async function loadDependencies() {
   if (typeof window === 'undefined') return;
-  
+
   try {
     isLoading.value = true;
     console.log('[loadDependencies] Starting...');
@@ -55,29 +55,34 @@ async function loadDependencies() {
     await fetchCategories('income');
     const incomeCategories = [...cats.value];
     console.log('Income categories loaded:', incomeCategories.length);
-    
+
     // Fetch expense categories
     await fetchCategories('expense');
     const expenseCategories = [...cats.value];
     console.log('Expense categories loaded:', expenseCategories.length);
-    
+
     // Combine both types
     categories.value = [...incomeCategories, ...expenseCategories];
-    
+
     // Fetch parties, wallets and groups in parallel
-    await Promise.all([
-      fetchParties(),
-      fetchWallets(),
-      fetchGroups()
-    ]);
+    await Promise.all([fetchParties(), fetchWallets(), fetchGroups()]);
 
     // Store in local refs (spread to avoid readonly conflicts)
     parties.value = [...pts.value];
     wallets.value = [...wts.value];
     // Map to minimal shape used by mapper
     groups.value = grps.value.map((g: any) => ({ id: g.id, name: g.name }));
-    
-    console.log('All dependencies loaded - Categories:', categories.value.length, 'Parties:', parties.value.length, 'Wallets:', wallets.value.length, 'Groups:', groups.value.length);
+
+    console.log(
+      'All dependencies loaded - Categories:',
+      categories.value.length,
+      'Parties:',
+      parties.value.length,
+      'Wallets:',
+      wallets.value.length,
+      'Groups:',
+      groups.value.length
+    );
   } catch (err) {
     console.error('Error loading dependencies:', err);
     error.value = extractApiErrors(err);
@@ -89,17 +94,24 @@ async function loadDependencies() {
 // Fetch transactions from API
 async function fetchTransactionsFromApi() {
   if (typeof window === 'undefined') return;
-  
+
   try {
     console.log('[API MODE] Fetching transactions from API...');
     isLoading.value = true;
     error.value = null;
 
     // Ensure dependencies are loaded
-    if (parties.value.length === 0 || categories.value.length === 0 || wallets.value.length === 0 || groups.value.length === 0) {
+    if (
+      parties.value.length === 0 ||
+      categories.value.length === 0 ||
+      wallets.value.length === 0 ||
+      groups.value.length === 0
+    ) {
       console.log('Loading dependencies (parties, categories, wallets)...');
       await loadDependencies();
-      console.log(`Dependencies loaded: ${parties.value.length} parties, ${categories.value.length} categories, ${wallets.value.length} wallets, ${groups.value.length} groups`);
+      console.log(
+        `Dependencies loaded: ${parties.value.length} parties, ${categories.value.length} categories, ${wallets.value.length} wallets, ${groups.value.length} groups`
+      );
     }
 
     // Fetch transactions
@@ -159,12 +171,15 @@ export const useTransactions = () => {
         t.type.toLowerCase().includes(q) ||
         t.amount.toLowerCase().includes(q) ||
         (t.date || '').toLowerCase().includes(q);
-      const matchesFilter = !f || t.category.toLowerCase().includes(f) || t.type.toLowerCase().includes(f);
+      const matchesFilter =
+        !f || t.category.toLowerCase().includes(f) || t.type.toLowerCase().includes(f);
       return matchesSearch && matchesFilter;
     });
   });
 
-  const totalPages = computed(() => Math.max(1, Math.ceil(filteredTransactions.value.length / itemsPerPage.value)));
+  const totalPages = computed(() =>
+    Math.max(1, Math.ceil(filteredTransactions.value.length / itemsPerPage.value))
+  );
 
   const paginatedTransactions = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
@@ -179,20 +194,29 @@ export const useTransactions = () => {
       error.value = null;
 
       // Ensure dependencies are loaded before mapping (prevents wallet_id/party_id = 0 and missing groups)
-      if (parties.value.length === 0 || categories.value.length === 0 || wallets.value.length === 0 || groups.value.length === 0) {
+      if (
+        parties.value.length === 0 ||
+        categories.value.length === 0 ||
+        wallets.value.length === 0 ||
+        groups.value.length === 0
+      ) {
         console.log('Dependencies not ready. Loading...');
         await loadDependencies();
-        console.log(`Deps ready -> parties=${parties.value.length}, categories=${categories.value.length}, wallets=${wallets.value.length}, groups=${groups.value.length}`);
+        console.log(
+          `Deps ready -> parties=${parties.value.length}, categories=${categories.value.length}, wallets=${wallets.value.length}, groups=${groups.value.length}`
+        );
       }
 
       // Transform to API format (pass parties and wallets for ID lookup)
-      const payload = transactionMapper.toApi(
-        transaction,
-        parties.value,
-        wallets.value
-      );
-      
-      console.log('Payload summary', { amount: payload.amount, type: payload.type, party_id: payload.party_id, wallet_id: payload.wallet_id, group_id: payload.group_id });
+      const payload = transactionMapper.toApi(transaction, parties.value, wallets.value);
+
+      console.log('Payload summary', {
+        amount: payload.amount,
+        type: payload.type,
+        party_id: payload.party_id,
+        wallet_id: payload.wallet_id,
+        group_id: payload.group_id
+      });
       console.log('API Payload:', payload);
       const created = await transactionApi.create(payload);
       console.log('Transaction created:', created);
@@ -200,13 +224,18 @@ export const useTransactions = () => {
       if (created) {
         // If files were provided, upload them and use the updated transaction
         let createdOrUpdated = created;
-        const filesToUpload = Array.isArray(transaction.filesToUpload) ? transaction.filesToUpload : [];
+        const filesToUpload = Array.isArray(transaction.filesToUpload)
+          ? transaction.filesToUpload
+          : [];
         if (filesToUpload.length > 0) {
           try {
             const updatedWithFiles = await transactionApi.addFilesBulk(created.id, filesToUpload);
             if (updatedWithFiles) {
               createdOrUpdated = updatedWithFiles;
-              console.log('[addTransaction] Files attached to transaction:', updatedWithFiles.files?.length || 0);
+              console.log(
+                '[addTransaction] Files attached to transaction:',
+                updatedWithFiles.files?.length || 0
+              );
             }
           } catch (e) {
             console.error('[addTransaction] Error uploading files:', e);
@@ -226,7 +255,7 @@ export const useTransactions = () => {
       }
     } catch (err: any) {
       console.error('Error adding transaction:', err);
-      
+
       // Log detailed validation errors if available
       if (err?.response?._data?.errors) {
         console.error('Validation errors:', err.response._data.errors);
@@ -234,7 +263,7 @@ export const useTransactions = () => {
       if (err?._data?.errors) {
         console.error('Validation errors:', err._data.errors);
       }
-      
+
       error.value = extractApiErrors(err);
       throw err;
     } finally {
@@ -248,20 +277,29 @@ export const useTransactions = () => {
       error.value = null;
 
       // Ensure dependencies are loaded before mapping
-      if (parties.value.length === 0 || categories.value.length === 0 || wallets.value.length === 0 || groups.value.length === 0) {
+      if (
+        parties.value.length === 0 ||
+        categories.value.length === 0 ||
+        wallets.value.length === 0 ||
+        groups.value.length === 0
+      ) {
         console.log('Dependencies not ready. Loading...');
         await loadDependencies();
-        console.log(`Deps ready -> parties=${parties.value.length}, categories=${categories.value.length}, wallets=${wallets.value.length}, groups=${groups.value.length}`);
+        console.log(
+          `Deps ready -> parties=${parties.value.length}, categories=${categories.value.length}, wallets=${wallets.value.length}, groups=${groups.value.length}`
+        );
       }
 
       const numericId = parseInt(id);
-      const payload = transactionMapper.toApi(
-        updates,
-        parties.value,
-        wallets.value
-      );
+      const payload = transactionMapper.toApi(updates, parties.value, wallets.value);
       console.log('Updating transaction', numericId, 'payload:', payload);
-      console.log('Payload summary', { amount: payload.amount, type: payload.type, party_id: payload.party_id, wallet_id: payload.wallet_id, group_id: payload.group_id });
+      console.log('Payload summary', {
+        amount: payload.amount,
+        type: payload.type,
+        party_id: payload.party_id,
+        wallet_id: payload.wallet_id,
+        group_id: payload.group_id
+      });
       const updated = await transactionApi.update(numericId, payload);
 
       if (updated) {
@@ -333,7 +371,7 @@ export const useTransactions = () => {
     filteredTransactions,
     totalPages,
     paginatedTransactions,
-    
+
     // Actions
     addTransaction,
     updateTransaction,

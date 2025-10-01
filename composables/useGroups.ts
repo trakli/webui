@@ -63,7 +63,7 @@ export const useGroups = () => {
       }
 
       const response = await api<ApiResponse<GroupsResponse>>(`/groups?${params.toString()}`);
-      
+
       if (response.success && response.data) {
         groups.value = response.data.data || [];
         lastSync.value = response.data.last_sync || null;
@@ -90,7 +90,7 @@ export const useGroups = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json'
         },
         body: JSON.stringify(payload)
       });
@@ -122,7 +122,7 @@ export const useGroups = () => {
       });
 
       if (response.success && response.data) {
-        const index = groups.value.findIndex(g => g.id === id);
+        const index = groups.value.findIndex((g) => g.id === id);
         if (index !== -1) {
           groups.value[index] = response.data;
         }
@@ -144,7 +144,7 @@ export const useGroups = () => {
       });
 
       if (response.success || response.status === 204) {
-        groups.value = groups.value.filter(g => g.id !== id);
+        groups.value = groups.value.filter((g) => g.id !== id);
       } else {
         throw new Error(response.errors?.[0] || response.message || 'Failed to delete group');
       }

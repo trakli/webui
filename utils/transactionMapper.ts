@@ -1,4 +1,8 @@
-import type { ApiTransaction, FrontendTransaction, TransactionCreatePayload } from '~/types/transaction';
+import type {
+  ApiTransaction,
+  FrontendTransaction,
+  TransactionCreatePayload
+} from '~/types/transaction';
 import type { Party } from '~/types/party';
 import type { Category } from '~/types/category';
 import type { Wallet } from '~/types/wallet';
@@ -111,19 +115,23 @@ export const transactionMapper = {
     // Find party by UUID or numeric ID string
     if (frontend.partyId) {
       console.log('[Mapper] Looking for party with ID:', frontend.partyId);
-      console.log('[Mapper] Available parties:', parties.length, parties.map(p => ({ name: p.name, id: p.id, uuid: p.sync_state?.client_generated_id })));
-      
+      console.log(
+        '[Mapper] Available parties:',
+        parties.length,
+        parties.map((p) => ({ name: p.name, id: p.id, uuid: p.sync_state?.client_generated_id }))
+      );
+
       // Try to find by UUID first, then by numeric ID
-      let party = parties.find(p => p.sync_state?.client_generated_id === frontend.partyId);
-      
+      let party = parties.find((p) => p.sync_state?.client_generated_id === frontend.partyId);
+
       // If not found by UUID, try matching by numeric ID
       if (!party) {
         const numericId = parseInt(frontend.partyId);
         if (!isNaN(numericId)) {
-          party = parties.find(p => p.id === numericId);
+          party = parties.find((p) => p.id === numericId);
         }
       }
-      
+
       if (party) {
         partyId = party.id; // Use the numeric ID
         console.log('[Mapper] Found party:', party.name, 'ID:', partyId);
@@ -137,19 +145,23 @@ export const transactionMapper = {
     // Find wallet by UUID or numeric ID string
     if (frontend.walletId) {
       console.log('[Mapper] Looking for wallet with ID:', frontend.walletId);
-      console.log('[Mapper] Available wallets:', wallets.length, wallets.map(w => ({ name: w.name, id: w.id, uuid: w.sync_state?.client_generated_id })));
-      
+      console.log(
+        '[Mapper] Available wallets:',
+        wallets.length,
+        wallets.map((w) => ({ name: w.name, id: w.id, uuid: w.sync_state?.client_generated_id }))
+      );
+
       // Try to find by UUID first, then by numeric ID
-      let wallet = wallets.find(w => w.sync_state?.client_generated_id === frontend.walletId);
-      
+      let wallet = wallets.find((w) => w.sync_state?.client_generated_id === frontend.walletId);
+
       // If not found by UUID, try matching by numeric ID
       if (!wallet) {
         const numericId = parseInt(frontend.walletId);
         if (!isNaN(numericId)) {
-          wallet = wallets.find(w => w.id === numericId);
+          wallet = wallets.find((w) => w.id === numericId);
         }
       }
-      
+
       if (wallet) {
         walletId = wallet.id; // Use the numeric ID
         console.log('[Mapper] Found wallet:', wallet.name, 'ID:', walletId);
@@ -167,7 +179,7 @@ export const transactionMapper = {
     }
 
     // Determine group id strictly from explicit groupId; do not infer from categories
-    const groupId = (typeof frontend.groupId === 'number') ? frontend.groupId : 0;
+    const groupId = typeof frontend.groupId === 'number' ? frontend.groupId : 0;
 
     const payload = {
       amount,
@@ -178,9 +190,8 @@ export const transactionMapper = {
       wallet_id: walletId,
       group_id: groupId,
       // Optional: send categories as provided (do not include group here)
-      categories: (frontend.categoryIds && frontend.categoryIds.length > 0)
-        ? frontend.categoryIds
-        : undefined
+      categories:
+        frontend.categoryIds && frontend.categoryIds.length > 0 ? frontend.categoryIds : undefined
     };
 
     // Validation warnings
@@ -218,9 +229,7 @@ export const transactionMapper = {
     wallets: Wallet[],
     groups: GroupLite[]
   ): FrontendTransaction[] {
-    return apiTransactions.map((api) =>
-      this.toFrontend(api, parties, categories, wallets, groups)
-    );
+    return apiTransactions.map((api) => this.toFrontend(api, parties, categories, wallets, groups));
   },
 
   /**

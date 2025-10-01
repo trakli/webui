@@ -1,5 +1,11 @@
 import { ref, readonly } from 'vue';
-import type { Category, CategoryCreatePayload, CategoryUpdatePayload, CategoriesResponse, ApiResponse } from '~/types/category';
+import type {
+  Category,
+  CategoryCreatePayload,
+  CategoryUpdatePayload,
+  CategoriesResponse,
+  ApiResponse
+} from '~/types/category';
 
 export const useCategories = () => {
   const api = useApi();
@@ -31,9 +37,9 @@ export const useCategories = () => {
     error.value = null;
     try {
       const url = `/categories?type=${type}`;
-      
+
       const response = await api<ApiResponse<CategoriesResponse>>(url);
-      
+
       let newCategories: Category[] = [];
       if (response?.data) {
         newCategories = response.data.data || [];
@@ -43,12 +49,14 @@ export const useCategories = () => {
         newCategories = (response as any).data || [];
         lastSync.value = (response as any).last_sync || new Date().toISOString();
       }
-      
+
       // Remove existing categories of this type, then add new ones
-      const otherTypeCategories = categories.value.filter(cat => cat.type !== type);
+      const otherTypeCategories = categories.value.filter((cat) => cat.type !== type);
       categories.value = [...otherTypeCategories, ...newCategories];
-      
-      console.log(`✅ Fetched ${newCategories.length} ${type} categories. Total: ${categories.value.length}`);
+
+      console.log(
+        `✅ Fetched ${newCategories.length} ${type} categories. Total: ${categories.value.length}`
+      );
     } catch (err: any) {
       const msg = extractApiErrors(err);
       console.error('Error fetching categories:', msg, err);
@@ -105,7 +113,7 @@ export const useCategories = () => {
       });
 
       // Update local state
-      const index = categories.value.findIndex(cat => cat.id === id);
+      const index = categories.value.findIndex((cat) => cat.id === id);
       if (index !== -1 && response?.data) {
         categories.value[index] = response.data;
       }
@@ -130,7 +138,7 @@ export const useCategories = () => {
       });
 
       // Remove from local state
-      categories.value = categories.value.filter(cat => cat.id !== id);
+      categories.value = categories.value.filter((cat) => cat.id !== id);
     } catch (err: any) {
       const msg = extractApiErrors(err);
       console.error('Error deleting category:', msg, err);

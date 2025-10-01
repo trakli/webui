@@ -130,8 +130,12 @@
       color: var(--primary-color);
     }
 
-    .search-icon { left: 10px; }
-    .dropdown-icon { right: 10px; }
+    .search-icon {
+      left: 10px;
+    }
+    .dropdown-icon {
+      right: 10px;
+    }
   }
 
   .party-dropdown {
@@ -151,10 +155,17 @@
       cursor: pointer;
       transition: background 0.2s ease;
 
-      .text-highlight { color: $text-secondary; font-weight: 500; }
-      .text-secondary { color: $text-muted; }
+      .text-highlight {
+        color: $text-secondary;
+        font-weight: 500;
+      }
+      .text-secondary {
+        color: $text-muted;
+      }
 
-      &:hover { background-color: #f5f5f5; }
+      &:hover {
+        background-color: #f5f5f5;
+      }
     }
   }
 }
@@ -165,7 +176,9 @@
   gap: 8px;
   position: relative;
 
-  span { font-weight: $font-medium; }
+  span {
+    font-weight: $font-medium;
+  }
 
   .category-search {
     display: flex;
@@ -182,7 +195,10 @@
       color: $text-primary;
       background-color: $bg-white;
 
-      &:focus { border-color: var(--focus-color); outline: none; }
+      &:focus {
+        border-color: var(--focus-color);
+        outline: none;
+      }
     }
 
     .search-icon,
@@ -193,8 +209,12 @@
       color: var(--primary-color);
     }
 
-    .search-icon { left: 10px; }
-    .dropdown-icon { right: 10px; }
+    .search-icon {
+      left: 10px;
+    }
+    .dropdown-icon {
+      right: 10px;
+    }
   }
 
   .category-dropdown {
@@ -214,10 +234,17 @@
       cursor: pointer;
       transition: background 0.2s ease;
 
-      .text-highlight { color: $text-secondary; font-weight: 500; }
-      .text-secondary { color: $text-muted; }
+      .text-highlight {
+        color: $text-secondary;
+        font-weight: 500;
+      }
+      .text-secondary {
+        color: $text-muted;
+      }
 
-      &:hover { background-color: #f5f5f5; }
+      &:hover {
+        background-color: #f5f5f5;
+      }
 
       &.selected-option {
         background-color: $primary-light;
@@ -237,7 +264,9 @@
   gap: 8px;
   position: relative;
 
-  span { font-weight: $font-medium; }
+  span {
+    font-weight: $font-medium;
+  }
 
   .wallet-search {
     display: flex;
@@ -254,7 +283,10 @@
       color: $text-primary;
       background-color: $bg-white;
 
-      &:focus { border-color: var(--focus-color); outline: none; }
+      &:focus {
+        border-color: var(--focus-color);
+        outline: none;
+      }
     }
 
     .search-icon,
@@ -265,8 +297,12 @@
       color: var(--primary-color);
     }
 
-    .search-icon { left: 10px; }
-    .dropdown-icon { right: 10px; }
+    .search-icon {
+      left: 10px;
+    }
+    .dropdown-icon {
+      right: 10px;
+    }
   }
 
   .wallet-dropdown {
@@ -286,10 +322,17 @@
       cursor: pointer;
       transition: background 0.2s ease;
 
-      .text-highlight { color: $text-secondary; font-weight: 500; }
-      .text-secondary { color: $text-muted; }
+      .text-highlight {
+        color: $text-secondary;
+        font-weight: 500;
+      }
+      .text-secondary {
+        color: $text-muted;
+      }
 
-      &:hover { background-color: #f5f5f5; }
+      &:hover {
+        background-color: #f5f5f5;
+      }
     }
   }
 }
@@ -299,7 +342,9 @@
   flex-direction: column;
   gap: 8px;
 
-  span { font-weight: $font-medium; }
+  span {
+    font-weight: $font-medium;
+  }
 
   .upload-box {
     display: flex;
@@ -311,7 +356,9 @@
     padding: 12px;
   }
 
-  #file-input { display: none; }
+  #file-input {
+    display: none;
+  }
 
   .upload-button {
     display: inline-block;
@@ -324,7 +371,10 @@
     cursor: pointer;
   }
 
-  .hint { color: $text-muted; font-size: 12px; }
+  .hint {
+    color: $text-muted;
+    font-size: 12px;
+  }
 
   .file-list {
     display: flex;
@@ -374,8 +424,13 @@
     resize: none;
     color: $text-primary;
 
-    &:focus { border: 1px solid var(--focus-color) !important; outline: none; }
-    &::placeholder { color: $text-muted; }
+    &:focus {
+      border: 1px solid var(--focus-color) !important;
+      outline: none;
+    }
+    &::placeholder {
+      color: $text-muted;
+    }
   }
 }
 

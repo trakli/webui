@@ -1,5 +1,11 @@
 import { ref, readonly } from 'vue';
-import type { Wallet, WalletCreatePayload, WalletUpdatePayload, WalletsResponse, ApiResponse } from '~/types/wallet';
+import type {
+  Wallet,
+  WalletCreatePayload,
+  WalletUpdatePayload,
+  WalletsResponse,
+  ApiResponse
+} from '~/types/wallet';
 
 export const useWallets = () => {
   const api = useApi();
@@ -38,9 +44,9 @@ export const useWallets = () => {
 
       const queryString = params.toString();
       const url = queryString ? `/wallets?${queryString}` : '/wallets';
-      
+
       const response = await api<ApiResponse<WalletsResponse>>(url);
-      
+
       if (response?.data) {
         wallets.value = response.data.data || [];
         lastSync.value = response.data.last_sync || new Date().toISOString();
@@ -106,7 +112,7 @@ export const useWallets = () => {
       });
 
       // Update local state
-      const index = wallets.value.findIndex(wallet => wallet.id === id);
+      const index = wallets.value.findIndex((wallet) => wallet.id === id);
       if (index !== -1 && response?.data) {
         wallets.value[index] = response.data;
       }
@@ -131,7 +137,7 @@ export const useWallets = () => {
       });
 
       // Remove from local state
-      wallets.value = wallets.value.filter(wallet => wallet.id !== id);
+      wallets.value = wallets.value.filter((wallet) => wallet.id !== id);
     } catch (err: any) {
       const msg = extractApiErrors(err);
       console.error('Error deleting wallet:', msg, err);
