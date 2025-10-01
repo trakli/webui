@@ -4,11 +4,23 @@
       <h1 class="table-heading-text">All Transactions</h1>
       <div class="input-controls">
         <div class="search-container">
-          <input type="text" placeholder="Search..." class="search-input" v-model="searchQuery" />
+          <input
+            type="text"
+            placeholder="Search..."
+            class="search-input"
+            :value="searchQuery"
+            @input="$emit('update:searchQuery', $event.target.value)"
+          />
           <MagnifyingGlassIcon class="search-icon" />
         </div>
         <div class="filter-container">
-          <input type="text" placeholder="Filter..." class="filter-input" v-model="filterQuery" />
+          <input
+            type="text"
+            placeholder="Filter..."
+            class="filter-input"
+            :value="filterQuery"
+            @input="$emit('update:filterQuery', $event.target.value)"
+          />
           <FunnelIcon class="filter-icon" />
         </div>
       </div>
@@ -28,10 +40,10 @@
             </tr>
           </thead>
           <tbody class="table-body">
-            <tr v-for="(txn, index) in transactions" :key="index">
+            <tr v-for="(txn, index) in displayedTransactions" :key="index">
               <td>
-                <div class="date-main">{{ txn.date }}</div>
-                <div class="date-sub">2 min ago</div>
+                <div class="date-main">{{ formatDate(txn) }}</div>
+                <div class="date-sub">{{ formatTimeAgo(txn) }}</div>
               </td>
               <td>
                 <span :class="['type-badge', txn.type === 'INCOME' ? 'income' : 'outcome']">
@@ -49,10 +61,10 @@
               <td>{{ txn.category }}</td>
               <td>
                 <div class="actions">
-                  <button class="action-btn">
+                  <button class="action-btn" @click="$emit('edit', txn)">
                     <PencilSquareIcon class="action-icon" />
                   </button>
-                  <button class="action-btn">
+                  <button class="action-btn" @click="$emit('delete', txn)">
                     <TrashIcon class="action-icon" />
                   </button>
                 </div>
@@ -66,7 +78,7 @@
                     <button
                       class="pagination-btn"
                       :disabled="currentPage === 1"
-                      @click="goToPage(currentPage - 1)"
+                      @click="$emit('page-change', currentPage - 1)"
                     >
                       Previous
                     </button>
@@ -75,14 +87,14 @@
                       :key="page"
                       class="pagination-btn"
                       :class="{ active: page === currentPage }"
-                      @click="goToPage(page)"
+                      @click="$emit('page-change', page)"
                     >
                       {{ page }}
                     </button>
                     <button
                       class="pagination-btn"
-                      :disabled="currentPage === totalPages"
-                      @click="goToPage(currentPage + 1)"
+                      :disabled="currentPage === pagesTotal"
+                      @click="$emit('page-change', currentPage + 1)"
                     >
                       Next
                     </button>
@@ -103,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -111,100 +123,78 @@ import {
   TrashIcon
 } from '@heroicons/vue/24/outline';
 
-const searchQuery = ref('');
-const filterQuery = ref('');
-const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const props = defineProps({
+  transactions: { type: Array, default: () => [] },
+  searchQuery: { type: String, default: '' },
+  filterQuery: { type: String, default: '' },
+  currentPage: { type: Number, default: 1 },
+  itemsPerPage: { type: Number, default: 10 },
+  totalPages: { type: Number, default: 1 },
+  totalEntries: { type: Number, default: 0 }
+});
 
-const transactions = ref([
+defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery', 'update:filterQuery']);
+
+// Internal demo dataset to keep dashboard working when no data provided
+const demoTransactions = [
   {
-    date: 'Feb 02, 2021',
+    date: '2021-02-02',
+    time: '10:00',
     type: 'OUTCOME',
     party: 'Paul Erica',
     amount: '254,000 XAF',
     category: 'Food'
   },
   {
-    date: 'Feb 02, 2021',
+    date: '2021-02-02',
+    time: '10:10',
     type: 'INCOME',
     party: 'Eric Mbia',
     amount: '50,701 XAF',
     category: 'Rent'
   },
   {
-    date: 'Feb 02, 2021',
+    date: '2021-02-02',
+    time: '10:15',
     type: 'OUTCOME',
     party: 'Paul Tchoua',
     amount: '64,709 XAF',
     category: 'Food'
-  },
-  {
-    date: 'Feb 02, 2021',
-    type: 'INCOME',
-    party: 'Michel Ngwane',
-    amount: '77,732 XAF',
-    category: 'Girls 🤣'
-  },
-  {
-    date: 'Feb 02, 2021',
-    type: 'INCOME',
-    party: 'Laure Tchouamou',
-    amount: '71,934 XAF',
-    category: 'Rent'
-  },
-  {
-    date: 'Feb 02, 2021',
-    type: 'INCOME',
-    party: 'Isabelle Njomo',
-    amount: '60,049 XAF',
-    category: 'Food'
-  },
-  {
-    date: 'Feb 02, 2021',
-    type: 'OUTCOME',
-    party: 'Thierry Ndifor',
-    amount: '94,744 XAF',
-    category: 'Girls 🤣'
-  },
-  {
-    date: 'Feb 02, 2021',
-    type: 'OUTCOME',
-    party: 'Jacqueline Nkelle',
-    amount: '70,068 XAF',
-    category: 'Food'
-  },
-  {
-    date: 'Feb 02, 2021',
-    type: 'INCOME',
-    party: 'David Ngwa',
-    amount: '89,245 XAF',
-    category: 'School'
   }
-]);
+];
 
-// Pagination computed properties
-const totalPages = computed(() => {
-  return Math.ceil(transactions.value.length / itemsPerPage.value);
+const isUsingDemo = computed(() => props.transactions.length === 0);
+const displayedTransactions = computed(() =>
+  isUsingDemo.value ? demoTransactions : props.transactions
+);
+
+const computedTotalEntries = computed(() => {
+  if (props.totalEntries && props.totalEntries > 0) return props.totalEntries;
+  return displayedTransactions.value.length;
 });
 
-const totalEntries = computed(() => {
-  return transactions.value.length;
+const pagesTotal = computed(() => {
+  // If consumer provided totalPages > 1, honor it; otherwise derive
+  if (props.totalPages && props.totalPages > 1 && !isUsingDemo.value) return props.totalPages;
+  return Math.max(1, Math.ceil(computedTotalEntries.value / props.itemsPerPage));
 });
 
 const startEntry = computed(() => {
-  return (currentPage.value - 1) * itemsPerPage.value + 1;
+  if (computedTotalEntries.value === 0) return 0;
+  return (props.currentPage - 1) * props.itemsPerPage + 1;
 });
 
 const endEntry = computed(() => {
-  const end = currentPage.value * itemsPerPage.value;
-  return Math.min(end, totalEntries.value);
+  const end = props.currentPage * props.itemsPerPage;
+  return Math.min(end, computedTotalEntries.value);
 });
 
 const visiblePages = computed(() => {
   const pages = [];
   const maxVisible = 5;
-  let start = Math.max(1, currentPage.value - Math.floor(maxVisible / 2));
-  let end = Math.min(totalPages.value, start + maxVisible - 1);
+  const total = pagesTotal.value;
+  let start = Math.max(1, props.currentPage - Math.floor(maxVisible / 2));
+  let end = Math.min(total, start + maxVisible - 1);
 
   if (end - start + 1 < maxVisible) {
     start = Math.max(1, end - maxVisible + 1);
@@ -217,11 +207,25 @@ const visiblePages = computed(() => {
   return pages;
 });
 
-// Pagination methods
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
+const formatDate = (txn) => {
+  const iso = txn?.date || '';
+  const dateObj = new Date(`${iso}T${txn?.time || '00:00'}:00`);
+  if (isNaN(dateObj.getTime())) return iso;
+  const options = { year: 'numeric', month: 'short', day: '2-digit' };
+  return dateObj.toLocaleDateString(undefined, options).replace(/,/g, ',');
+};
+
+const formatTimeAgo = (txn) => {
+  const dateObj = new Date(`${txn?.date || ''}T${txn?.time || '00:00'}:00`);
+  if (isNaN(dateObj.getTime())) return '';
+  const diffMs = Date.now() - dateObj.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days > 1 ? 's' : ''} ago`;
 };
 </script>
 
@@ -405,32 +409,47 @@ const goToPage = (page) => {
   .actions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
     font-size: 16px;
     color: #047857;
     cursor: pointer;
   }
 
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 28px;
+    height: 28px;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+
   .action-icon {
-    &-eye,
-    &-attach {
-      width: 20px;
-      height: 20px;
+    width: 16px;
+    height: 16px;
+    color: #047857;
+    transition: color 0.2s ease;
 
-      svg {
-        width: 100%;
-        height: 100%;
-        stroke: currentColor;
-        fill: none;
-      }
+    &:hover {
+      color: #065f46;
     }
+  }
 
-    &-eye {
-      color: #047844;
-    }
+  // Make delete icon red
+  .action-btn:nth-child(2) .action-icon {
+    color: #ef4444;
 
-    &-attach {
-      color: #2d9cdb;
+    &:hover {
+      color: #dc2626;
     }
   }
 }

@@ -43,7 +43,7 @@ const props = defineProps({
 
 .transaction-sub-card {
   flex: 1;
-  min-width: 0; /* Prevents flex items from overflowing */
+  min-width: 0;
   border-radius: $radius-xl;
   background-color: $bg-white;
   padding: 0.75rem 1rem;
@@ -51,12 +51,33 @@ const props = defineProps({
   display: flex;
   flex-direction: column;
   justify-content: center;
+  transition: all 0.2s ease;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 0.625rem 0.875rem;
+    border-radius: $radius-lg;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.5rem 0.75rem;
+    border-radius: $radius-md;
+    min-height: 60px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .transaction-sub-card-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 2px;
+  }
 }
 
 .transaction-sub-card-title {
@@ -66,6 +87,14 @@ const props = defineProps({
   font-size: $font-size-lg;
   line-height: 1.2;
   position: relative;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-base;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-sm;
+  }
 }
 
 .currency-superscript {
@@ -76,6 +105,17 @@ const props = defineProps({
   margin-left: 4px;
   position: relative;
   top: -5px;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-xs;
+    top: -4px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+    top: -3px;
+    margin-left: 2px;
+  }
 }
 
 .transaction-sub-card-text {
@@ -83,5 +123,14 @@ const props = defineProps({
   font-weight: $font-normal;
   font-size: $font-size-sm;
   color: #371e48;
+  line-height: 1.3;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-xs;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
 }
 </style>

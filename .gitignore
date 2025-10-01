@@ -22,3 +22,14 @@ logs
 .env
 .env.*
 !.env.example
+
+# Playwright tests
+.github/workflows/playwright.yml
+docs/
+e2e/
+playwright-report/
+playwright.config.js
+playwright.config.ts
+test-results/
+tests-examples/
+tests/
