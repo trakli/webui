@@ -26,7 +26,7 @@
         v-for="entity in paginatedEntities"
         :key="entity.id"
         :name="entity.name"
-        :icon="entity.icon"
+        :icon="entity.icon?.path || entity.icon?.content || entity.icon"
         :description="entity.description"
         :pageName="pageName"
         @edit="$emit('edit', entity)"
@@ -184,6 +184,14 @@ const visiblePages = computed(() => {
   padding: 1rem;
   box-sizing: border-box;
   border-radius: 8px;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 0.75rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.5rem;
+  }
 }
 
 .header-row {
@@ -192,6 +200,28 @@ const visiblePages = computed(() => {
   align-items: center;
   margin-bottom: 1rem;
   background: white;
+  gap: 1rem;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-primary;
+
+    @media (max-width: $breakpoint-md) {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 1.125rem;
+    }
+  }
 }
 
 .search-input {
@@ -201,6 +231,10 @@ const visiblePages = computed(() => {
   width: 250px;
   transition: border-color 0.2s;
 
+  @media (max-width: $breakpoint-md) {
+    width: 100%;
+  }
+
   &:focus {
     border-color: $primary;
     outline: none;
@@ -208,8 +242,8 @@ const visiblePages = computed(() => {
 }
 
 .table-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1.8fr 2.5fr auto;
   background: $primary;
   color: white;
   font-weight: bold;
@@ -217,25 +251,66 @@ const visiblePages = computed(() => {
   border-radius: 8px 8px 0 0;
   margin: 0 -1rem;
   width: calc(100% + 2rem);
+  gap: 1rem;
+  align-items: center;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1.6fr 2.2fr auto;
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1.5fr 2fr auto;
+    padding: 0.5rem;
+    gap: 0.375rem;
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
 }
 
 .col-name {
-  width: 15%;
-  gap: $spacing-4;
-  padding: $spacing-2 $spacing-4;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+
+  @media (max-width: $breakpoint-sm) {
+    white-space: normal;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
 }
 
 .col-description {
-  flex: 1;
-  gap: $spacing-4;
-  padding: $spacing-2 $spacing-4;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+
+  @media (max-width: $breakpoint-sm) {
+    white-space: normal;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
 }
 
 .col-action {
-  width: 10%;
-  text-align: left;
-  gap: $spacing-4;
-  padding: $spacing-2 $spacing-4;
+  padding: 0;
+  text-align: right;
+  white-space: nowrap;
+  min-width: 80px;
+  justify-self: end;
+
+  @media (max-width: $breakpoint-md) {
+    min-width: 70px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    min-width: 65px;
+    font-size: 0.75rem;
+  }
 }
 
 .entities-container {
@@ -254,12 +329,43 @@ const visiblePages = computed(() => {
   border-top: 1px solid #e5e7eb;
   margin: 0 -1rem -1rem -1rem;
   width: calc(100% + 2rem);
+  gap: 1rem;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column-reverse;
+    gap: 1rem;
+    padding: 0.75rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
 }
 
 .pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  @media (max-width: $breakpoint-md) {
+    order: 2;
+    width: 100%;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 0.25rem;
+    order: unset;
+    width: auto;
+    flex: 1;
+    justify-content: center;
+  }
 }
 
 .pagination-button {
@@ -267,24 +373,43 @@ const visiblePages = computed(() => {
   color: #374151;
   background: white;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
+  min-width: 44px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.75rem;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 4px;
+  }
 
   &:hover:not(.disabled):not(.ellipsis) {
     background: #f3f4f6;
     border-color: #9ca3af;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   &.active {
     background: $primary;
     color: white;
     border-color: $primary;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
   }
 
   &.disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    background: #f9fafb;
   }
 
   &.ellipsis {
@@ -293,6 +418,7 @@ const visiblePages = computed(() => {
     cursor: default;
     pointer-events: none;
     padding: 0 0.25rem;
+    min-width: auto;
   }
 }
 
@@ -302,12 +428,25 @@ const visiblePages = computed(() => {
   gap: 0.5rem;
   color: #6b7280;
   font-size: 0.875rem;
+  white-space: nowrap;
+
+  @media (max-width: $breakpoint-md) {
+    order: 1;
+    justify-content: center;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 0.75rem;
+    gap: 0.25rem;
+    order: unset;
+    flex-shrink: 0;
+  }
 }
 
 .per-page-select {
-  padding: 0.25rem 1.5rem 0.25rem 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
   background: white;
   color: #374151;
   font-size: 0.875rem;
@@ -316,11 +455,27 @@ const visiblePages = computed(() => {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 0.5rem center;
   background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
+  background-size: 1.2em 1.2em;
+  min-width: 70px;
+  height: 36px;
+  transition: all 0.2s ease;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 0.7rem;
+    padding: 0.125rem 1.25rem 0.125rem 0.375rem;
+    height: 28px;
+    min-width: 45px;
+    border-radius: 4px;
+  }
 
   &:focus {
     outline: none;
     border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  }
+
+  &:hover {
+    border-color: #9ca3af;
   }
 }
 

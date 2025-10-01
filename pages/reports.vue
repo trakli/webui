@@ -132,32 +132,61 @@ const sourceBreakdown = [
   transition: margin-left 0.3s ease;
   width: calc(100% - var(--sidebar-width, 300px));
   overflow-x: hidden;
-  padding: 3.5rem 1rem 1rem;
+  padding: 6rem 1rem 1rem;
+
+  @media (max-width: $breakpoint-lg) {
+    padding: 5.5rem 1rem 1rem;
+  }
 
   @media (max-width: $breakpoint-md) {
     width: 100%;
     margin-left: 0;
-    padding: $spacing-5 $spacing-3;
+    padding: 5rem 0.75rem 1rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 4.5rem 0.5rem 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 4rem 0.25rem 1rem;
   }
 }
 
 .settings-content-card {
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 120px);
   background-color: $bg-white;
   border-radius: 2rem;
   border: 1px solid $bg-gray;
-  padding: 2rem 0.5rem 0.5rem;
+  padding: 2rem 1rem;
   box-sizing: border-box;
   overflow: hidden;
 
-  @media (min-width: $breakpoint-md) {
-    padding: 1.5rem 1rem;
+  @media (max-width: $breakpoint-md) {
+    border-radius: 1.5rem;
+    padding: 1.5rem 0.75rem;
+    min-height: calc(100vh - 100px);
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    border-radius: 1rem;
+    padding: 1rem 0.5rem;
+    min-height: calc(100vh - 80px);
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.25rem;
   }
 }
 
 .settings-page {
   width: 95%;
   margin: auto;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+  }
 }
 
 .page-header {
@@ -177,11 +206,25 @@ const sourceBreakdown = [
   font-size: 1.75rem;
   font-weight: $font-bold + 100; // 800
   color: $text-primary;
+  margin: 0;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1.25rem;
+  }
 }
 
 .page-subtitle {
   color: $text-muted;
   font-size: $font-size-sm;
+  margin: 0.25rem 0 0 0;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
 }
 
 .page-header-right {
@@ -189,6 +232,11 @@ const sourceBreakdown = [
   align-items: center;
   gap: $spacing-3;
   flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: $spacing-2;
+    justify-content: flex-start;
+  }
 }
 
 .chip {
@@ -203,6 +251,17 @@ const sourceBreakdown = [
   box-shadow: $shadow-sm;
   font-size: $font-size-sm;
   font-weight: $font-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-1 $spacing-2;
+    font-size: $font-size-xs;
+  }
+
+  &:hover {
+    background: $bg-gray;
+  }
 }
 
 .chip--primary {
@@ -245,6 +304,10 @@ const sourceBreakdown = [
   gap: $spacing-3;
   margin-bottom: $spacing-4;
 
+  @media (min-width: $breakpoint-sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   @media (min-width: $breakpoint-md) {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -256,7 +319,7 @@ const sourceBreakdown = [
   gap: $spacing-3;
   margin-top: $spacing-4;
 
-  @media (min-width: $breakpoint-lg) {
+  @media (min-width: $breakpoint-md) {
     grid-template-columns: 1fr 1fr;
   }
 }

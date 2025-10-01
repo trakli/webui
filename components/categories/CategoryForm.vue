@@ -22,6 +22,23 @@
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 
+    <!-- Category Type -->
+    <div class="form-group">
+      <label for="category-type" class="form-label">Category Type</label>
+      <select
+        id="category-type"
+        v-model="form.type"
+        class="form-select"
+        :class="{ error: typeError }"
+        required
+      >
+        <option value="">Select type</option>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <div v-if="typeError" class="error-text">Please select a category type.</div>
+    </div>
+
     <!-- Category Description -->
     <div class="form-group">
       <label for="category-description" class="form-label">Category Description </label>
@@ -63,11 +80,13 @@ const emit = defineEmits(['created', 'updated', 'close']);
 const form = ref({
   name: '',
   icon: '',
+  type: '',
   description: ''
 });
 
 const nameError = ref(false);
 const iconError = ref(false);
+const typeError = ref(false);
 const descriptionError = ref(false);
 
 const isEditing = computed(() => !!props.editingItem);
@@ -77,9 +96,25 @@ watch(
   () => props.editingItem,
   (newEditingItem) => {
     if (newEditingItem) {
+      // Extract icon value - could be from icon.path, icon.content, or direct icon value
+      let iconValue = '';
+      if (newEditingItem.icon) {
+        if (typeof newEditingItem.icon === 'string') {
+          iconValue = newEditingItem.icon;
+        } else if (newEditingItem.icon.path) {
+          iconValue = newEditingItem.icon.path;
+        } else if (newEditingItem.icon.content) {
+          iconValue = newEditingItem.icon.content;
+        }
+      }
+
+      console.log('Editing item:', newEditingItem);
+      console.log('Extracted icon value:', iconValue);
+
       form.value = {
         name: newEditingItem.name || '',
-        icon: newEditingItem.icon || '',
+        icon: iconValue,
+        type: newEditingItem.type || '',
         description: newEditingItem.description || ''
       };
     } else {
@@ -90,9 +125,10 @@ watch(
 );
 
 function resetForm() {
-  form.value = { name: '', icon: '', description: '' };
+  form.value = { name: '', icon: '', type: '', description: '' };
   nameError.value = false;
   iconError.value = false;
+  typeError.value = false;
   descriptionError.value = false;
 }
 
@@ -102,6 +138,7 @@ function validateForm() {
   // Reset errors
   nameError.value = false;
   iconError.value = false;
+  typeError.value = false;
   descriptionError.value = false;
 
   // Validate name
@@ -113,6 +150,12 @@ function validateForm() {
   // Validate icon
   if (!form.value.icon || form.value.icon.trim() === '') {
     iconError.value = true;
+    isValid = false;
+  }
+
+  // Validate type
+  if (!form.value.type || form.value.type.trim() === '') {
+    typeError.value = true;
     isValid = false;
   }
 
@@ -133,9 +176,11 @@ async function handleSubmit() {
 
   try {
     const formData = {
-      ...form.value,
       name: form.value.name.trim(),
-      description: form.value.description.trim()
+      description: form.value.description.trim(),
+      type: form.value.type,
+      icon: form.value.icon,
+      icon_type: 'image'
     };
 
     if (isEditing.value) {

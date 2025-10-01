@@ -47,6 +47,16 @@ defineEmits(['add']);
   padding: 0.75rem 1rem;
   margin: 0;
   box-sizing: border-box;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 0.5rem 0.75rem;
+    border-radius: $radius-lg;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.5rem;
+    border-radius: $radius-md;
+  }
 }
 
 .header-content {
@@ -54,6 +64,12 @@ defineEmits(['add']);
   justify-content: space-between;
   align-items: center;
   width: 100%;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 }
 
 .content-main {
@@ -65,6 +81,15 @@ defineEmits(['add']);
   font-size: $font-size-lg;
   font-weight: $font-bold;
   margin: 0 0 4px 0;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-base;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-sm;
+    margin-bottom: 2px;
+  }
 }
 
 .breadcrumb {
@@ -72,29 +97,52 @@ defineEmits(['add']);
   flex-direction: row;
   gap: 4px;
   align-items: center;
+  flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 2px;
+  }
 }
 
 .breadcrumb-item {
   color: $primary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
 }
 
 .breadcrumb-separator {
   color: $text-secondary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
 }
 
 .breadcrumb-current {
   color: $text-primary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
 }
 
 .action-buttons {
   display: flex;
   gap: 8px;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 6px;
+  }
 }
 
 .add-entity-button {
@@ -102,5 +150,18 @@ defineEmits(['add']);
   height: 34px;
   font-size: $font-size-sm;
   font-weight: $font-semibold;
+
+  @media (max-width: $breakpoint-md) {
+    width: 140px;
+    height: 32px;
+    font-size: $font-size-xs;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 120px;
+    height: 30px;
+    font-size: $font-size-xs;
+    padding: 0.25rem 0.5rem;
+  }
 }
 </style>
