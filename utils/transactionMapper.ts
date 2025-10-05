@@ -25,7 +25,7 @@ export const transactionMapper = {
   toFrontend(
     api: ApiTransaction,
     parties: Party[] = [],
-    categories: Category[] = [],
+    _categories: Category[] = [],
     wallets: Wallet[] = [],
     groups: GroupLite[] = []
   ): FrontendTransaction {

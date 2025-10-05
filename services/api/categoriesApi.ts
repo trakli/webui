@@ -23,9 +23,9 @@ const categoriesApi = {
 
     if (response?.data) {
       return response.data;
-    } else if (response?.last_sync && response?.data) {
-      // Direct response format
-      return response as any;
+    } else if (response?.last_sync) {
+      // Direct response format without nested data
+      return response as CategoriesResponse;
     }
 
     // Fallback
@@ -45,8 +45,8 @@ const categoriesApi = {
 
     if (response?.data) {
       return response.data;
-    } else if (response?.last_sync && response?.data) {
-      return response as any;
+    } else if (response?.last_sync) {
+      return response as CategoriesResponse;
     }
 
     return {

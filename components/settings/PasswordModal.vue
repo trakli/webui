@@ -11,15 +11,15 @@
 
       <div class="form-group">
         <label class="form-label">Old Password</label>
-        <input type="password" class="form-input" v-model="oldPassword" />
+        <input v-model="oldPassword" type="password" class="form-input" />
       </div>
       <div class="form-group">
         <label class="form-label">New Password</label>
-        <input type="password" class="form-input" v-model="newPassword" />
+        <input v-model="newPassword" type="password" class="form-input" />
       </div>
       <div class="form-group">
         <label class="form-label">Confirm New Password</label>
-        <input type="password" class="form-input" v-model="confirmNewPassword" />
+        <input v-model="confirmNewPassword" type="password" class="form-input" />
       </div>
 
       <p
@@ -76,7 +76,6 @@ const handleUpdate = () => {
     confirmNewPassword.value = '';
     message.value = '';
     // notify parent to close modal
-    // eslint-disable-next-line vue/require-explicit-emits
   }, 1200);
 };
 </script>

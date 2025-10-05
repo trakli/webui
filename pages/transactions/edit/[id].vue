@@ -1,11 +1,11 @@
 <template>
   <div>
     <TTopCard
-      pageName="Transaction"
-      pageNamePlural="Transactions"
+      page-name="Transaction"
+      page-name-plural="Transactions"
       action="Edit"
-      :showAddButton="false"
-      :breadcrumbItems="[
+      :show-add-button="false"
+      :breadcrumb-items="[
         { text: 'Home', clickable: false },
         { text: 'Transactions', clickable: true, action: 'back' },
         { text: 'Edit Transaction', current: true }
@@ -28,11 +28,11 @@
     </div>
     <div class="edit-form-section">
       <TransactionFormContainer
-        :editingItem="transactionToEdit"
-        :isOutcomeSelected="transactionToEdit?.type === 'EXPENSE'"
+        :editing-item="transactionToEdit"
+        :is-outcome-selected="transactionToEdit?.type === 'EXPENSE'"
         @submit="handleSubmit"
       />
-      <TipsSection pageName="Transaction" />
+      <TipsSection page-name="Transaction" />
     </div>
   </div>
 </template>

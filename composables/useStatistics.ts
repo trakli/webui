@@ -2,6 +2,7 @@ import { ref, computed, watch } from 'vue';
 import { useTransactions } from '~/composables/useTransactions';
 import { useWallets } from '~/composables/useWallets';
 import { useSharedData } from '~/composables/useSharedData';
+import type { FrontendTransaction } from '~/types/transaction';
 
 export interface PartyBreakdown {
   party: string;
@@ -170,13 +171,14 @@ export const useStatistics = () => {
       case 'all_time':
         start = new Date(2000, 0, 1);
         break;
-      case 'current_week':
+      case 'current_week': {
         // Get the start of the current week (Monday)
         const dayOfWeek = now.getDay();
         const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 0, Monday = 1
         start = new Date(now.getTime() - daysToMonday * 24 * 60 * 60 * 1000);
         start.setHours(0, 0, 0, 0);
         break;
+      }
       case 'current_month':
         start = new Date(now.getFullYear(), now.getMonth(), 1);
         break;
@@ -212,20 +214,6 @@ export const useStatistics = () => {
     };
   };
 
-  const groupAmountsByCurrency = (transactions: any[], type?: 'INCOME' | 'EXPENSE') => {
-    const currencyGroups = new Map<string, number>();
-
-    const filteredTransactions = type ? transactions.filter((t) => t.type === type) : transactions;
-
-    filteredTransactions.forEach((t) => {
-      const { value, currency } = parseAmount(t.amount);
-      const existing = currencyGroups.get(currency) || 0;
-      currencyGroups.set(currency, existing + value);
-    });
-
-    return currencyGroups;
-  };
-
   const getPrimaryCurrency = (walletId: number | null): string => {
     if (walletId) {
       const wallet = wallets.value.find((w) => w.id === walletId);
@@ -247,7 +235,7 @@ export const useStatistics = () => {
   };
 
   const calculatePartyBreakdown = (
-    filteredTransactions: any[],
+    filteredTransactions: FrontendTransaction[],
     type: 'INCOME' | 'EXPENSE',
     primaryCurrency: string,
     walletId: number | null = null
@@ -289,7 +277,7 @@ export const useStatistics = () => {
 
   // Helper to calculate category breakdown (currency-aware)
   const calculateCategoryBreakdown = (
-    filteredTransactions: any[],
+    filteredTransactions: FrontendTransaction[],
     type: 'INCOME' | 'EXPENSE',
     primaryCurrency: string,
     walletId: number | null = null
@@ -330,7 +318,7 @@ export const useStatistics = () => {
       .sort((a, b) => b.amount - a.amount);
   };
 
-  const calculateMonthlyTrends = (filteredTransactions: any[]): MonthlyTrend[] => {
+  const calculateMonthlyTrends = (filteredTransactions: FrontendTransaction[]): MonthlyTrend[] => {
     const monthMap = new Map<string, { income: number; expenses: number }>();
 
     filteredTransactions.forEach((t) => {
@@ -359,17 +347,22 @@ export const useStatistics = () => {
       .sort((a, b) => a.month.localeCompare(b.month));
   };
 
-  const calculateWalletDistribution = (filteredTransactions: any[]): WalletBreakdown[] => {
+  const calculateWalletDistribution = (
+    filteredTransactions: FrontendTransaction[],
+    targetCurrency: string
+  ): WalletBreakdown[] => {
     const walletMap = new Map<string, { income: number; expenses: number; count: number }>();
 
     filteredTransactions.forEach((t) => {
-      const amount = parseAmount(t.amount);
+      const { value, currency } = parseAmount(t.amount);
+      // Convert to target currency for aggregated wallet view
+      const convertedAmount = convertCurrency(value, currency, targetCurrency);
       const existing = walletMap.get(t.wallet) || { income: 0, expenses: 0, count: 0 };
 
       if (t.type === 'INCOME') {
-        existing.income += amount.value;
+        existing.income += convertedAmount;
       } else {
-        existing.expenses += amount.value;
+        existing.expenses += convertedAmount;
       }
       existing.count += 1;
 
@@ -612,7 +605,9 @@ export const useStatistics = () => {
       },
 
       // Wallet distribution (only for aggregated stats)
-      wallet_distribution: walletId ? undefined : calculateWalletDistribution(filteredTransactions),
+      wallet_distribution: walletId
+        ? undefined
+        : calculateWalletDistribution(filteredTransactions, primaryCurrency),
 
       time_analysis: {
         monthly_trends: monthlyTrends,
@@ -700,7 +695,10 @@ export const useStatistics = () => {
     }
   };
 
-  watch([selectedWalletId, currentPeriod], updateCurrentStatistics, { immediate: true });
+  // Watch for changes in selected wallet, period, AND when the underlying data becomes available
+  watch([selectedWalletId, currentPeriod, transactions, wallets], updateCurrentStatistics, {
+    immediate: true
+  });
 
   const formatCurrency = (amount: number, currency: string = 'USD'): string => {
     return `${amount.toLocaleString()} ${currency}`;

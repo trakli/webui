@@ -53,7 +53,7 @@ function deduplicateById<T extends { id: number }>(items: T[]): T[] {
 }
 
 // Helper function to extract API errors
-function extractApiErrors(err: any): string {
+function extractApiErrors(err: unknown): string {
   if (typeof err === 'string') return err;
   if (err?.response?._data?.message) return err.response._data.message;
   if (err?.response?._data?.errors?.length) return err.response._data.errors.join(', ');

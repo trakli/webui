@@ -20,7 +20,7 @@ export const useApi = () => {
         userCookie.value = null;
         tokenCookieRef.value = null;
 
-        if (process.client && !window.location.pathname.includes('/login')) {
+        if (import.meta.client && !window.location.pathname.includes('/login')) {
           navigateTo('/login');
         }
       }

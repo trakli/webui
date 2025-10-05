@@ -16,7 +16,7 @@
 
     <div class="form-group">
       <label for="wallet-icon" class="form-label">Select an Icon </label>
-      <IconPicker v-model="form.icon" id="wallet-icon" />
+      <IconPicker id="wallet-icon" v-model="form.icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 

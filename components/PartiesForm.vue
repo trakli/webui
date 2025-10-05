@@ -37,7 +37,7 @@
 
     <div class="form-group">
       <label for="party-icon" class="form-label">Select an Icon </label>
-      <IconPicker v-model="form.icon" id="party-icon" />
+      <IconPicker id="party-icon" v-model="form.icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 

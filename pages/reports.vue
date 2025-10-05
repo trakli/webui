@@ -137,12 +137,10 @@ import { useStatistics } from '@/composables/useStatistics';
 import { useAuth } from '@/composables/useAuth';
 import { getChartColors } from '@/utils/colors';
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'default',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 
 const { user } = useAuth();
 const {

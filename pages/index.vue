@@ -18,7 +18,7 @@ onMounted(() => {
   <div class="loading-container">
     <div class="loading-content">
       <Logo size="large" />
-      <div class="spinner"></div>
+      <div class="spinner" />
       <p class="loading-text">Loading Trakli...</p>
     </div>
   </div>

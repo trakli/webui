@@ -14,7 +14,7 @@
     <div class="tab-content">
       <TransactionFormContainer
         :is-outcome-selected="isExpenseSelected"
-        :editingItem="props.editingItem"
+        :editing-item="props.editingItem"
         @submit="handleSubmit"
       />
     </div>

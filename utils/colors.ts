@@ -95,13 +95,13 @@ export function generateColorPalette(
 /**
  * Get colors specifically for chart data with consistent assignment
  */
-export function getChartColors(
-  data: Array<{ name: string; [key: string]: any }>,
+export function getChartColors<T extends { name: string }>(
+  data: T[],
   options: {
     saturation?: number;
     lightness?: number;
   } = {}
-): Array<{ name: string; color: string; [key: string]: any }> {
+): Array<T & { color: string }> {
   return data.map((item, index) => ({
     ...item,
     color: getColorForItem(item.name, index, options)

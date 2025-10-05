@@ -9,25 +9,25 @@
     <div class="section-grid">
       <div class="form-group">
         <label class="form-label">First Name</label>
-        <input v-if="isEditMode" type="text" class="form-input" v-model="firstName" />
+        <input v-if="isEditMode" v-model="firstName" type="text" class="form-input" />
         <p v-else class="text-display">{{ firstName }}</p>
       </div>
 
       <div class="form-group">
         <label class="form-label">Last Name</label>
-        <input v-if="isEditMode" type="text" class="form-input" v-model="lastName" />
+        <input v-if="isEditMode" v-model="lastName" type="text" class="form-input" />
         <p v-else class="text-display">{{ lastName }}</p>
       </div>
 
       <div class="form-group">
         <label class="form-label">Username</label>
-        <input v-if="isEditMode" type="text" class="form-input" v-model="username" />
+        <input v-if="isEditMode" v-model="username" type="text" class="form-input" />
         <p v-else class="text-display">{{ username }}</p>
       </div>
 
       <div class="form-group">
         <label class="form-label">Email Address</label>
-        <input v-if="isEditMode" type="email" class="form-input" v-model="email" />
+        <input v-if="isEditMode" v-model="email" type="email" class="form-input" />
         <p v-else class="text-display">{{ email }}</p>
       </div>
 

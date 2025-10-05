@@ -5,9 +5,9 @@
         <span>Amount</span>
         <div class="transaction-amount">
           <input
+            v-model="formAmount"
             type="number"
             placeholder="Ex: 250 000"
-            v-model="formAmount"
             min="1"
             step="any"
             required
@@ -34,31 +34,31 @@
       <div class="form-transaction">
         <div class="transaction-date">
           <span>Transaction date</span>
-          <input type="date" v-model="formDate" required />
+          <input v-model="formDate" type="date" required />
           <div v-if="dateError" class="error-text">Date is required.</div>
         </div>
 
         <div class="transaction-date">
           <span>Transaction time</span>
-          <input type="time" v-model="formTime" required />
+          <input v-model="formTime" type="time" required />
           <div v-if="timeError" class="error-text">Time is required.</div>
         </div>
       </div>
 
       <div class="form-transaction">
         <SearchableDropdown
+          v-model="searchQuery"
           :label="isOutcomeSelected ? 'Party (sent to)' : 'Party (received from)'"
           placeholder="Search party..."
           :options="parties"
-          v-model="searchQuery"
           @select="handlePartySelect"
         />
 
         <SearchableDropdown
+          v-model="walletSearchQuery"
           :label="isOutcomeSelected ? 'Wallet (sent from)' : 'Wallet (received to)'"
           placeholder="Search wallet..."
           :options="wallets"
-          v-model="walletSearchQuery"
           :error="walletError ? 'Wallet is required.' : ''"
           @select="handleWalletSelect"
         />
@@ -66,19 +66,19 @@
 
       <div class="form-transaction">
         <SearchableDropdown
+          v-model="groupSearchQuery"
           label="Group"
           placeholder="Search group..."
           :options="groups"
-          v-model="groupSearchQuery"
           :error="categoryError ? 'Group is required.' : ''"
           @select="handleGroupSelect"
         />
 
         <SearchableDropdown
+          v-model="categorySearchQuery"
           label="Categories"
           placeholder="Search categories..."
           :options="categories"
-          v-model="categorySearchQuery"
           :multiple="true"
           :disabled="isSameAsGroup"
           @select="handleCategorySelect"

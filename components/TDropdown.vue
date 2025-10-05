@@ -1,11 +1,11 @@
 <template>
-  <div class="dropdown-container" ref="dropdownRef">
+  <div ref="dropdownRef" class="dropdown-container">
     <div @click="toggleDropdown">
-      <slot name="trigger"></slot>
+      <slot name="trigger" />
     </div>
     <transition name="fade">
       <div v-if="isOpen" class="dropdown-menu">
-        <slot></slot>
+        <slot />
       </div>
     </transition>
   </div>

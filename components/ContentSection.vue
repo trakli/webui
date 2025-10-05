@@ -1,7 +1,7 @@
 <template>
   <ContentTopCard
-    :pageName="pageName"
-    :pageNamePlural="pageNamePlural"
+    :page-name="pageName"
+    :page-name-plural="pageNamePlural"
     @add="handleOpenFormForCreation"
   />
   <div class="content-area">
@@ -9,18 +9,18 @@
       <div class="form-wrapper">
         <component
           :is="currentForm"
-          :pageName="pageName"
-          :editingItem="editingItem"
+          :page-name="pageName"
+          :editing-item="editingItem"
           @created="handleCreate"
           @updated="handleUpdate"
           @close="handleFormClose"
         />
       </div>
-      <TipsSection v-if="isGroupsPage && !isMobile" :pageName="pageName" />
+      <TipsSection v-if="isGroupsPage && !isMobile" :page-name="pageName" />
     </div>
     <EmptyState
       v-if="items.length === 0 && !showForm"
-      :pageName="pageName"
+      :page-name="pageName"
       @create="handleOpenFormForCreation"
     />
     <PartyCardList
@@ -34,8 +34,8 @@
 
     <ContentTable
       v-if="items.length > 0 && !isPartiesPage"
-      :pageName="pageName"
-      :pageNamePlural="pageNamePlural"
+      :page-name="pageName"
+      :page-name-plural="pageNamePlural"
       :entities="items"
       @edit="handleEdit"
       @delete="handleDelete"

@@ -75,9 +75,7 @@ export interface TransactionCreatePayload {
   files?: string[]; // File paths/URLs for attachments
 }
 
-export interface TransactionUpdatePayload extends Partial<TransactionCreatePayload> {
-  // All fields optional for update
-}
+export type TransactionUpdatePayload = Partial<TransactionCreatePayload>;
 
 // Transactions List API Response
 export interface TransactionsResponse {

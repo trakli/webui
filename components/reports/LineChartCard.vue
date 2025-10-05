@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <h2 class="title">Income Trend Line (Last 6 Months)</h2>
-    <div class="chart-container" ref="containerRef">
+    <div ref="containerRef" class="chart-container">
       <svg
         ref="svgRef"
         :viewBox="`0 0 ${width} ${height}`"

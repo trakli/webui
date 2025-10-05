@@ -1,12 +1,11 @@
-import { readonly } from 'vue';
 import { api } from '~/services/api';
 import { useSharedData } from '~/composables/useSharedData';
-import type { Category, CategoryCreatePayload, CategoryUpdatePayload } from '~/types/category';
+import type { CategoryCreatePayload, CategoryUpdatePayload } from '~/types/category';
 
 export const useCategories = () => {
   const sharedData = useSharedData();
 
-  const fetchCategories = async (type: 'income' | 'expense') => {
+  const fetchCategories = async (_type: 'income' | 'expense') => {
     return sharedData.loadCategories();
   };
 

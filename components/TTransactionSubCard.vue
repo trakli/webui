@@ -13,8 +13,7 @@
 </template>
 
 <script setup>
-// eslint-disable-next-line no-unused-vars
-const props = defineProps({
+const _props = defineProps({
   title: {
     type: [String, Number],
     default: '48'

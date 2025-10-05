@@ -1,17 +1,17 @@
 <template>
   <div>
-    <ContentTopCard pageName="Party" pageNamePlural="Parties" @add="handleOpenFormForCreation" />
+    <ContentTopCard page-name="Party" page-name-plural="Parties" @add="handleOpenFormForCreation" />
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">
           <PartiesForm
-            :editingItem="editingItem"
+            :editing-item="editingItem"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" pageName="Party" />
+        <TipsSection v-if="!isMobile" page-name="Party" />
       </div>
 
       <div v-if="isLoading" class="loading-state">Loading parties...</div>
@@ -19,7 +19,7 @@
 
       <EmptyState
         v-if="!showForm && !isLoading && parties.length === 0"
-        pageName="Party"
+        page-name="Party"
         @create="handleOpenFormForCreation"
       />
 
@@ -127,12 +127,10 @@ onMounted(() => {
   loadParties();
 });
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 </script>
 
 <style lang="scss" scoped>

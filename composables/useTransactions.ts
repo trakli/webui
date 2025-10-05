@@ -22,7 +22,7 @@ const sharedData = useSharedData();
 let initialized = false;
 
 // Helper to extract API errors
-function extractApiErrors(err: any): string {
+function extractApiErrors(err: unknown): string {
   if (typeof err === 'string') return err;
   if (err?.response?._data?.message) return err.response._data.message;
   if (err?.response?._data?.errors?.length) return err.response._data.errors.join(', ');
@@ -229,7 +229,7 @@ export const useTransactions = () => {
         transactions.value = [frontendTransaction, ...transactions.value];
         console.log('Transaction created and added to local state');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding transaction:', err);
 
       // Log detailed validation errors if available

@@ -30,9 +30,9 @@ const walletsApi = {
 
     if (response?.data) {
       return response.data;
-    } else if (response?.last_sync && response?.data) {
-      // Direct response format
-      return response as any;
+    } else if (response?.last_sync) {
+      // Direct response format without nested data
+      return response as WalletsResponse;
     }
 
     return {

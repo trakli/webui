@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isMobile && isSidebarOpen" class="sidebar-overlay" @click="closeSidebar"></div>
+  <div v-if="isMobile && isSidebarOpen" class="sidebar-overlay" @click="closeSidebar" />
 
   <div
     class="sidebar"
@@ -13,8 +13,8 @@
       <button
         v-if="isMobile && isSidebarOpen"
         class="close-button"
-        @click="closeSidebar"
         aria-label="Close navigation menu"
+        @click="closeSidebar"
       >
         <XMarkIcon class="close-icon" />
       </button>

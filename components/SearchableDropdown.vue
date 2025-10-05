@@ -1,5 +1,5 @@
 <template>
-  <div class="searchable-dropdown" ref="dropdownRef">
+  <div ref="dropdownRef" class="searchable-dropdown">
     <span v-if="label">{{ label }}</span>
     <div class="dropdown-search">
       <MagnifyingGlassIcon class="search-icon" />
@@ -17,9 +17,9 @@
           type="text"
           :value="searchQuery"
           :placeholder="multiple && selectedItems.length ? '' : placeholder"
+          :class="{ 'has-chips': multiple && selectedItems.length }"
           @input="handleInput"
           @focus="showDropdown = true"
-          :class="{ 'has-chips': multiple && selectedItems.length }"
         />
       </div>
       <ChevronDownIcon class="dropdown-icon" @click="toggleDropdown" />
@@ -28,11 +28,11 @@
       <li
         v-for="option in filteredOptions"
         :key="getOptionKey(option)"
-        @mousedown.prevent="selectOption(option)"
         :class="{
           'selected-option': isSelected(option),
           disabled: isDisabled(option)
         }"
+        @mousedown.prevent="selectOption(option)"
       >
         <span class="option-content">
           <template

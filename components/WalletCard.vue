@@ -1,7 +1,7 @@
 <template>
   <div class="wallet-card-wrapper">
     <div class="card-container">
-      <div class="background-ellipse"></div>
+      <div class="background-ellipse" />
       <div class="card-content">
         <div class="card-header-content">
           <div class="card-header">

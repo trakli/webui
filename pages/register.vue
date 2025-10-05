@@ -11,12 +11,10 @@ import { Eye, EyeOff, CheckCircle } from 'lucide-vue-next';
 import Logo from '@/components/Logo.vue';
 import TButton from '@/components/TButton.vue';
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'auth',
   middleware: 'guest'
 });
-/* eslint-enable no-undef */
 
 const router = useRouter();
 const { register } = useAuth();
@@ -150,7 +148,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
     </div>
     <h1>Create an account</h1>
 
-    <form @submit.prevent="handleSubmit" class="register-form">
+    <form class="register-form" @submit.prevent="handleSubmit">
       <div class="form-group">
         <label for="contact" class="contact-label">
           Email
@@ -159,8 +157,8 @@ const { showPassword, togglePassword } = usePasswordToggle();
         <div class="input-with-button">
           <input
             id="contact"
-            type="email"
             v-model="form.contact"
+            type="email"
             placeholder="Enter your email"
             :disabled="isContactInputDisabled"
             required
@@ -171,8 +169,8 @@ const { showPassword, togglePassword } = usePasswordToggle();
             :loading="verificationLoading"
             :disabled="!form.contact || isContactInputDisabled"
             text="Start Sign Up"
-            @click="handleRequestVerification"
             class="verify-button"
+            @click="handleRequestVerification"
           />
         </div>
         <small v-if="serverErrors && serverErrors.contact" class="error-text">
@@ -185,8 +183,8 @@ const { showPassword, togglePassword } = usePasswordToggle();
         <div class="input-with-button">
           <input
             id="code"
-            type="text"
             v-model="verificationCode"
+            type="text"
             placeholder="Enter code"
             required
           />
@@ -195,12 +193,12 @@ const { showPassword, togglePassword } = usePasswordToggle();
             :loading="codeVerificationLoading"
             :disabled="!verificationCode"
             text="Submit Code"
-            @click="handleVerifyCode"
             class="verify-button"
+            @click="handleVerifyCode"
           />
         </div>
         <div class="form-actions">
-          <button type="button" @click="handleResendCode" class="link-button">Resend Code</button>
+          <button type="button" class="link-button" @click="handleResendCode">Resend Code</button>
         </div>
         <small v-if="serverErrors && serverErrors.code" class="error-text">
           {{ serverErrors.code[0] }}
@@ -213,8 +211,8 @@ const { showPassword, togglePassword } = usePasswordToggle();
             <label for="first_name">First Name <span class="required-asterisk">*</span></label>
             <input
               id="first_name"
-              type="text"
               v-model="form.first_name"
+              type="text"
               placeholder="Enter your first name"
               required
             />
@@ -226,8 +224,8 @@ const { showPassword, togglePassword } = usePasswordToggle();
             <label for="last_name">Last Name</label>
             <input
               id="last_name"
-              type="text"
               v-model="form.last_name"
+              type="text"
               placeholder="Enter your last name"
             />
             <small v-if="serverErrors && serverErrors.last_name" class="error-text">
@@ -241,8 +239,8 @@ const { showPassword, togglePassword } = usePasswordToggle();
           <div class="password-wrapper">
             <input
               id="password"
-              :type="showPassword ? 'text' : 'password'"
               v-model="form.password"
+              :type="showPassword ? 'text' : 'password'"
               placeholder="Enter your password"
               required
             />

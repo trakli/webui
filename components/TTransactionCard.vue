@@ -70,16 +70,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { computed } from 'vue';
 import { ArrowDownLeftIcon, ArrowUpLeftIcon } from '@heroicons/vue/24/outline';
 import { useStatistics } from '@/composables/useStatistics';
 import { useSharedData } from '@/composables/useSharedData';
 import KpiCard from '@/components/reports/KpiCard.vue';
 
-const { currentPeriod, selectedWalletId, getStatistics, formatCompactCurrency } = useStatistics();
+const { selectedWalletId, currentStatistics, formatCompactCurrency } = useStatistics();
 
-// Local state
-const statistics = ref(null);
+// Use the shared statistics from the composable instead of local state
+const statistics = currentStatistics;
 
 // Get primary currency (should match WalletCard selection)
 const primaryCurrency = computed(() => {
@@ -92,25 +92,6 @@ const primaryCurrency = computed(() => {
   const { wallets } = useSharedData();
   const wallet = wallets.value.find((w) => w.id === selectedWalletId.value);
   return wallet?.currency || 'USD';
-});
-
-// Load statistics
-const loadStatistics = async () => {
-  try {
-    statistics.value = await getStatistics(selectedWalletId.value, currentPeriod.value);
-  } catch (err) {
-    console.error('Error loading transaction statistics:', err);
-  }
-};
-
-// Watch for changes
-watch([selectedWalletId, currentPeriod], () => {
-  loadStatistics();
-});
-
-// Load on mount
-onMounted(() => {
-  loadStatistics();
 });
 </script>
 

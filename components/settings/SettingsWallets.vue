@@ -3,7 +3,7 @@
     <div class="section-grid">
       <div class="form-group">
         <label class="form-label">Default Wallet</label>
-        <select v-if="isEditMode" class="form-select" v-model="wallet">
+        <select v-if="isEditMode" v-model="wallet" class="form-select">
           <option value="Main Wallet">Main Wallet</option>
           <option value="Savings">Savings</option>
           <option value="Credit Card">Credit Card</option>
@@ -13,7 +13,7 @@
 
       <div class="form-group">
         <label class="form-label">Default Group</label>
-        <select v-if="isEditMode" class="form-select" v-model="group">
+        <select v-if="isEditMode" v-model="group" class="form-select">
           <option value="Personal">Personal</option>
           <option value="Family">Family</option>
           <option value="Work">Work</option>

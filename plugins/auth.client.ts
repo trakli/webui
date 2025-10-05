@@ -1,5 +1,5 @@
 export default defineNuxtPlugin(() => {
-  if (process.client) {
+  if (import.meta.client) {
     const { fetchUser } = useAuth();
     fetchUser();
   }

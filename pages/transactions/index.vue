@@ -5,12 +5,12 @@
 </template>
 
 <script setup>
+import TransactionsContentSection from '@/components/transactions/TransactionsContentSection.vue';
+
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-
-import TransactionsContentSection from '@/components/transactions/TransactionsContentSection.vue';
 </script>
 
 <style lang="scss" scoped></style>

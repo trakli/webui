@@ -36,7 +36,7 @@ const handleError = () => {
             <AlertTriangle class="error-icon" />
             <h1 class="error-title">Error {{ error.statusCode }}</h1>
             <p class="error-message">{{ error.message || 'Something went wrong' }}</p>
-            <TButton @click="handleError" class="error-button">
+            <TButton class="error-button" @click="handleError">
               <template #left-icon>
                 <HomeIcon />
               </template>

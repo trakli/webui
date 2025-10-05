@@ -19,7 +19,7 @@
     <!-- Icon Picker -->
     <div class="form-group">
       <label for="group-icon" class="form-label">Select an Icon</label>
-      <IconPicker v-model="form.icon" id="group-icon" />
+      <IconPicker id="group-icon" v-model="form.icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 

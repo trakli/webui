@@ -1,8 +1,8 @@
 <template>
   <div class="card">
     <h2 class="title">Income Sources Breakdown</h2>
-    <div class="donut-wrapper" ref="wrapperRef" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
-      <div class="donut" :style="{ background: gradient }"></div>
+    <div ref="wrapperRef" class="donut-wrapper" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
+      <div class="donut" :style="{ background: gradient }" />
       <div class="donut-center">
         <p class="center-label">Total Income</p>
         <p class="center-value">${{ total }}</p>

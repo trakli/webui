@@ -2,7 +2,7 @@
   <div class="form-container">
     <TransactionForm
       :is-outcome-selected="isOutcomeSelected"
-      :editingItem="editingItem"
+      :editing-item="editingItem"
       @submit="handleSubmit"
     />
   </div>
