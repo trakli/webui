@@ -127,7 +127,9 @@ const resultText = computed(
   grid-template-columns: 1fr;
   gap: $spacing-4;
   margin-top: $spacing-2;
-  @media (min-width: $breakpoint-md) {
+
+  // Only use two columns on very wide screens when not in narrow context
+  @media (min-width: $breakpoint-xl) {
     grid-template-columns: 1fr 1fr;
   }
 }

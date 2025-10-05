@@ -10,7 +10,7 @@
             <h1>App Settings</h1>
           </div>
 
-          <CollapsibleSection title="Account Information" :icon="User" :defaultOpen="true">
+          <CollapsibleSection title="Account Information" :icon="User" :default-open="true">
             <template #default="{ isEditMode }">
               <SettingsAccount
                 :is-edit-mode="isEditMode"
@@ -31,7 +31,7 @@
             </template>
           </CollapsibleSection>
 
-          <CollapsibleSection title="Display Settings" :icon="Sun" :defaultOpen="false">
+          <CollapsibleSection title="Display Settings" :icon="Sun" :default-open="false">
             <template #default="{ isEditMode }">
               <SettingsDisplay :is-edit-mode="isEditMode" />
             </template>
@@ -56,12 +56,11 @@ import PasswordModal from '@/components/settings/PasswordModal.vue';
 import TSidebar from '@/components/TSidebar.vue';
 import TNavbar from '~/components/TNavbar.vue';
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'default',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
+
 const showPasswordModal = ref(false);
 </script>
 

@@ -2,12 +2,12 @@
   <button
     class="hamburger-menu"
     :class="{ 'is-active': isOpen }"
-    @click="$emit('toggle')"
     aria-label="Toggle navigation menu"
+    @click="$emit('toggle')"
   >
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
+    <span class="hamburger-line" />
+    <span class="hamburger-line" />
+    <span class="hamburger-line" />
   </button>
 </template>
 

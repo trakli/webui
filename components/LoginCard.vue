@@ -19,7 +19,6 @@ const showPassword = ref(false);
 
         <div class="login-form-container">
           <form class="login-form">
-            <!-- Username field -->
             <div class="form-group">
               <label for="username" class="form-label">Username</label>
               <input
@@ -31,7 +30,6 @@ const showPassword = ref(false);
               />
             </div>
 
-            <!-- Password field with toggle visibility -->
             <div class="form-group">
               <label for="password" class="form-label">Password</label>
               <div class="password-container">
@@ -49,12 +47,10 @@ const showPassword = ref(false);
               </div>
             </div>
 
-            <!-- Login button -->
             <div class="button-container">
               <TButton text="Login" width="100%" :height="53" />
             </div>
 
-            <!-- Sign up link -->
             <AuthFooterLink text="Don't have an account?" link-text="Sign up" to="/register" />
           </form>
         </div>

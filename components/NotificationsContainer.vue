@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Notifications -->
     <div class="notifications-container">
       <div
         v-for="notification in notifications"
@@ -25,7 +24,6 @@
       </div>
     </div>
 
-    <!-- Confirmation Modal -->
     <ConfirmModal
       :is-open="isConfirmModalOpen"
       :title="confirmModalData.title"

@@ -1,38 +1,35 @@
 <template>
   <div>
     <ContentTopCard
-      pageName="Category"
-      pageNamePlural="Categories"
+      page-name="Category"
+      page-name-plural="Categories"
       @add="handleOpenFormForCreation"
     />
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">
           <CategoryForm
-            :editingItem="editingItem"
+            :editing-item="editingItem"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" pageName="Category" />
+        <TipsSection v-if="!isMobile" page-name="Category" />
       </div>
 
-      <!-- Loading State -->
       <div v-if="isLoading" class="loading-state">
         <div class="loader">
-          <div class="spinner"></div>
+          <div class="spinner" />
           <p>Loading categories...</p>
         </div>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="error-state">
         <p>Error: {{ error }}</p>
-        <button @click="loadCategories" class="retry-button">Try Again</button>
+        <button class="retry-button" @click="loadCategories">Try Again</button>
       </div>
 
-      <!-- Category Tabs - Only show when not loading and no error -->
       <div v-else-if="!showForm" class="category-tabs">
         <div class="tab-buttons">
           <button
@@ -55,20 +52,19 @@
           </button>
         </div>
 
-        <!-- Tab Content -->
         <div class="tab-content">
           <EmptyState
             v-if="currentCategories.length === 0"
-            :pageName="`${currentCategoryType} Category`"
+            :page-name="`${currentCategoryType} Category`"
             @create="handleOpenFormForCreation"
           />
 
           <ContentTable
             v-if="currentCategories.length > 0"
-            :pageName="`${currentCategoryType} Category`"
-            :pageNamePlural="`${currentCategoryType} Categories`"
+            :page-name="`${currentCategoryType} Category`"
+            :page-name-plural="`${currentCategoryType} Categories`"
             :entities="currentCategories"
-            :headerType="activeTab === 'expense' ? 'expense' : 'default'"
+            :header-type="activeTab === 'expense' ? 'expense' : 'default'"
             @edit="handleEdit"
             @delete="handleDelete"
           />
@@ -181,12 +177,10 @@ onMounted(() => {
   loadCategories();
 });
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 </script>
 
 <style lang="scss" scoped>

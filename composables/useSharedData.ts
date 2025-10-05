@@ -53,7 +53,7 @@ function deduplicateById<T extends { id: number }>(items: T[]): T[] {
 }
 
 // Helper function to extract API errors
-function extractApiErrors(err: any): string {
+function extractApiErrors(err: unknown): string {
   if (typeof err === 'string') return err;
   if (err?.response?._data?.message) return err.response._data.message;
   if (err?.response?._data?.errors?.length) return err.response._data.errors.join(', ');
@@ -247,6 +247,12 @@ export const useSharedData = () => {
       (wallets.value.length > 0 ? wallets.value[0] : null)
   );
 
+  // TODO: Replace with backend user preferences API call to get default currency
+  // For now, use default wallet's currency or fallback to USD
+  const getDefaultCurrency = computed(() => {
+    return getDefaultWallet.value?.currency || 'USD';
+  });
+
   // Category management functions
   const addCategory = (category: Category) => {
     categories.value = deduplicateById([category, ...categories.value]);
@@ -341,6 +347,7 @@ export const useSharedData = () => {
     getExpenseCategories,
     getDefaultGroup,
     getDefaultWallet,
+    getDefaultCurrency,
 
     // Load functions
     loadCategories,

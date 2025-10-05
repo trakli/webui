@@ -6,11 +6,16 @@
       moment!
     </h2>
     <p class="empty-subtitle">Please add at least one {{ pageName }} to be able to view it.</p>
-    <button class="add-entity-btn" @click="$emit('create')">Add {{ pageName }} +</button>
+    <button class="add-entity-btn" @click="$emit('create')">
+      <PlusIcon class="button-icon" />
+      Add {{ pageName.toLowerCase() }}
+    </button>
   </div>
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
+
 defineProps({
   pageName: {
     type: String,
@@ -129,6 +134,13 @@ defineEmits(['create']);
   justify-content: center;
   gap: 0.5rem;
   min-width: 160px;
+
+  .button-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex-shrink: 0;
+    stroke-width: 2;
+  }
 
   @media (max-width: $breakpoint-md) {
     font-size: 1.1rem;

@@ -25,12 +25,10 @@ import TSidebar from '@/components/TSidebar.vue';
 import TNavbar from '@/components/TNavbar.vue';
 import AIChat from '@/components/ai/AIChat.vue';
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'default',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 </script>
 
 <style lang="scss" scoped>

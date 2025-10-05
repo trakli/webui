@@ -137,6 +137,11 @@ const buttonClasses = [
     margin-right: 0.5rem;
     display: inline-flex;
     align-items: center;
+
+    :deep(svg) {
+      width: 1rem;
+      height: 1rem;
+    }
   }
 
   &__text {

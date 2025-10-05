@@ -18,7 +18,7 @@ export const useAuth = () => {
 
   const isAuthenticated = computed(() => !!user.value && !!token.value);
 
-  const login = async (credentials: Record<string, any>) => {
+  const login = async (credentials: { email: string; password: string }) => {
     try {
       const api = useApi();
       const response = await api('/login', {
@@ -40,7 +40,12 @@ export const useAuth = () => {
     }
   };
 
-  const register = async (details: Record<string, any>) => {
+  const register = async (details: {
+    email: string;
+    password: string;
+    name: string;
+    phone?: string;
+  }) => {
     try {
       const api = useApi();
       const response = await api('/register', {

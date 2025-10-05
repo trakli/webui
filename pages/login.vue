@@ -8,12 +8,10 @@ import { useAuth } from '@/composables/useAuth';
 import AuthDivider from '@/components/auth/AuthDivider.vue';
 import AuthSocialLogin from '@/components/auth/AuthSocialLogin.vue';
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'auth',
   middleware: 'guest'
 });
-/* eslint-enable no-undef */
 
 const form = ref({
   email: '',
@@ -43,7 +41,7 @@ const handleSubmit = async () => {
   try {
     await login(form.value);
     router.push('/dashboard');
-  } catch (error) {
+  } catch {
     loginError.value = 'Invalid credentials. Please try again.';
   } finally {
     loading.value = false;
@@ -65,26 +63,25 @@ onMounted(() => {
       <Logo size="medium" />
     </div>
     <h1>Login</h1>
-    <form @submit.prevent="handleSubmit" class="login-form">
+    <form class="login-form" @submit.prevent="handleSubmit">
       <div v-if="loginError" class="error-feedback">
         {{ loginError }}
       </div>
       <div class="form-group">
         <label>Email</label>
-        <input type="email" v-model="form.email" placeholder="Enter your email" required />
+        <input v-model="form.email" type="email" placeholder="Enter your email" required />
       </div>
 
       <div class="form-group">
         <label>Password</label>
         <div class="password-input">
           <input
-            :type="showPassword ? 'text' : 'password'"
             v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
             placeholder="Enter your password"
             required
           />
           <button type="button" class="password-toggle" @click="togglePassword">
-            <!-- Eye Icon -->
             <EyeOff v-if="showPassword" class="w-5 h-5" />
             <Eye v-else class="w-5 h-5" />
           </button>
@@ -93,7 +90,7 @@ onMounted(() => {
 
       <div class="form-actions">
         <label class="remember-me">
-          <input type="checkbox" v-model="form.remember" />
+          <input v-model="form.remember" type="checkbox" />
           Remember me
         </label>
         <a href="#" class="forgot-password">Forgot Password?</a>

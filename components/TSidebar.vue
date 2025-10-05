@@ -1,6 +1,5 @@
 <template>
-  <!-- Mobile overlay -->
-  <div v-if="isMobile && isSidebarOpen" class="sidebar-overlay" @click="closeSidebar"></div>
+  <div v-if="isMobile && isSidebarOpen" class="sidebar-overlay" @click="closeSidebar" />
 
   <div
     class="sidebar"
@@ -14,8 +13,8 @@
       <button
         v-if="isMobile && isSidebarOpen"
         class="close-button"
-        @click="closeSidebar"
         aria-label="Close navigation menu"
+        @click="closeSidebar"
       >
         <XMarkIcon class="close-icon" />
       </button>
@@ -92,16 +91,6 @@
         <li>
           <button
             class="nav-footer-button"
-            :class="{ selected: $route.path === '/settings' }"
-            @click="handleButtonNavClick('/settings')"
-          >
-            <Cog8ToothIcon class="icon" />
-            <span class="text">Settings</span>
-          </button>
-        </li>
-        <li>
-          <button
-            class="nav-footer-button"
             :class="{ selected: $route.path === '/reports' }"
             @click="handleButtonNavClick('/reports')"
           >
@@ -119,15 +108,14 @@
             <span class="text">AI Insights</span>
           </button>
         </li>
-
         <li>
           <button
             class="nav-footer-button"
-            :class="{ selected: $route.path === '/support' }"
-            @click="handleButtonNavClick('/support')"
+            :class="{ selected: $route.path === '/settings' }"
+            @click="handleButtonNavClick('/settings')"
           >
-            <ChatBubbleLeftRightIcon class="icon" />
-            <span class="text">Support</span>
+            <Cog8ToothIcon class="icon" />
+            <span class="text">Settings</span>
           </button>
         </li>
       </ul>
@@ -238,7 +226,7 @@ const handleButtonNavClick = (path) => {
   .nav-button {
     display: flex;
     align-items: center;
-    width: 100%;
+    width: calc(100% - 20px);
     height: 56px;
     border-radius: 12px;
     padding: 16px 8px;
@@ -248,24 +236,17 @@ const handleButtonNavClick = (path) => {
     color: #495057;
     text-align: left;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
     margin-left: 10px;
 
-    &:hover {
-      width: calc(#{$sidebar-width} - 20px);
-      background-color: #bcdccc;
+    &:hover:not(.selected) {
+      background-color: rgba(188, 220, 204, 0.5);
+      margin: 2px 10px;
+      height: 52px;
     }
 
     &.selected {
-      width: calc(#{$sidebar-width} - 20px);
       background-color: #bcdccc;
-    }
-
-    @media (max-width: #{$breakpoint-md - 1px}) {
-      &:hover,
-      &.selected {
-        width: calc(#{$sidebar-mobile-width} - 20px);
-      }
     }
   }
 
@@ -332,7 +313,7 @@ const handleButtonNavClick = (path) => {
   .nav-footer-button {
     display: flex;
     align-items: center;
-    width: 100%;
+    width: calc(100% - 20px);
     min-height: 56px;
     border-radius: 12px;
     padding: 12px 16px;
@@ -342,11 +323,17 @@ const handleButtonNavClick = (path) => {
     color: #495057;
     text-align: left;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
     margin-left: 10px;
     margin-top: 10px;
 
-    &:hover {
+    &:hover:not(.selected) {
+      background-color: rgba(188, 220, 204, 0.5);
+      margin: 12px 10px 8px;
+      min-height: 52px;
+    }
+
+    &.selected {
       background-color: #bcdccc;
     }
   }

@@ -18,7 +18,7 @@
     <!-- Icon Picker -->
     <div class="form-group">
       <label for="category-icon" class="form-label">Select an Icon </label>
-      <IconPicker v-model="form.icon" id="category-icon" />
+      <IconPicker id="category-icon" v-model="form.icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 
@@ -55,7 +55,7 @@
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Save Category' : 'Create Category +' }}
+      {{ isEditing ? 'Save category' : 'Create category' }}
     </button>
   </form>
 </template>

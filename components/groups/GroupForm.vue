@@ -19,7 +19,7 @@
     <!-- Icon Picker -->
     <div class="form-group">
       <label for="group-icon" class="form-label">Select an Icon</label>
-      <IconPicker v-model="form.icon" id="group-icon" />
+      <IconPicker id="group-icon" v-model="form.icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 
@@ -40,7 +40,7 @@
 
     <button type="submit" class="submit-btn" :disabled="isLoading">
       <span v-if="isLoading">{{ isEditing ? 'Updating...' : 'Creating...' }}</span>
-      <span v-else>{{ isEditing ? 'Update Group' : 'Create Group +' }}</span>
+      <span v-else>{{ isEditing ? 'Update group' : 'Create group' }}</span>
     </button>
   </form>
 </template>

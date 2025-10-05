@@ -1,6 +1,5 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
-    <!-- Party Name -->
     <div class="form-group">
       <label for="party-name" class="form-label">Party Name </label>
       <input
@@ -14,7 +13,6 @@
       <div v-if="nameError" class="error-text">Party Name is required.</div>
     </div>
 
-    <!-- Party Type -->
     <div class="form-group">
       <label for="party-type" class="form-label">Party Type</label>
       <select
@@ -37,14 +35,12 @@
       <div v-if="partyTypeError" class="error-text">Please select a party type.</div>
     </div>
 
-    <!-- Icon Picker -->
     <div class="form-group">
       <label for="party-icon" class="form-label">Select an Icon </label>
-      <IconPicker v-model="form.icon" id="party-icon" />
+      <IconPicker id="party-icon" v-model="form.icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 
-    <!-- Party Description -->
     <div class="form-group">
       <label for="party-description" class="form-label">Party Description </label>
       <textarea
@@ -60,7 +56,7 @@
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Save Party' : 'Create Party +' }}
+      {{ isEditing ? 'Save party' : 'Create party' }}
     </button>
   </form>
 </template>

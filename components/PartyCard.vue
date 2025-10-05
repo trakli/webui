@@ -14,7 +14,7 @@
       </div>
       <div class="card-actions">
         <div class="action-menu-container" @click.stop>
-          <button class="action-menu" @click="toggleMenu" title="More actions">
+          <button class="action-menu" title="More actions" @click="toggleMenu">
             <LucideMoreVertical />
           </button>
 
@@ -173,7 +173,7 @@ const resolvedIcon = computed(() => {
   }
 
   // Try to get the icon from Lucide icons library
-  let iconComponent = LucideIcons[iconValue];
+  const iconComponent = LucideIcons[iconValue];
 
   if (iconComponent) {
     return iconComponent;

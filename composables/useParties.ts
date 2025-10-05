@@ -1,11 +1,11 @@
-import type { Party, PartyCreatePayload, PartyUpdatePayload } from '~/types/party';
+import type { PartyCreatePayload, PartyUpdatePayload } from '~/types/party';
 import { api } from '~/services/api';
 import { useSharedData } from '~/composables/useSharedData';
 
 export const useParties = () => {
   const sharedData = useSharedData();
 
-  const normalizeIcon = (icon: any): string => {
+  const normalizeIcon = (icon: string | { path?: string } | undefined): string => {
     if (typeof icon === 'string') return icon;
     if (typeof icon === 'object' && icon?.path) return icon.path;
     return '';

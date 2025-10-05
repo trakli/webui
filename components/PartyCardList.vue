@@ -1,6 +1,5 @@
 <template>
   <div class="party-card-list">
-    <!-- Header Section -->
     <div class="list-header">
       <div class="header-content">
         <div class="header-text">
@@ -9,7 +8,6 @@
         </div>
       </div>
 
-      <!-- Search and Filter Section -->
       <div class="search-filter-section">
         <div class="search-container">
           <div class="search-icon">

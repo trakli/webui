@@ -5,24 +5,33 @@
     <div class="settings-content">
       <div class="settings-content-card">
         <div class="settings-page">
-          <div class="page-header">
-            <div class="page-header-left">
-              <h1 class="page-title">Dashboard</h1>
-              <p class="page-subtitle">
-                Hello, Jane. Here's your financial overview for June 2024.
-              </p>
-            </div>
-            <div class="page-header-right">
-              <button class="chip chip--primary">This month</button>
-              <button class="chip">Last month</button>
-              <button class="chip">
-                <span>Custom</span>
-                <ChevronDown class="chip-icon" />
-              </button>
-              <button class="chip chip--report">
-                <FileText class="chip-icon" />
-                <span>Report</span>
-              </button>
+          <div class="page-header-wrapper">
+            <div class="page-header">
+              <div class="page-header-left">
+                <h1 class="page-title">Financial Reports</h1>
+                <p class="page-subtitle">
+                  {{ pageSubtitle }}
+                </p>
+              </div>
+              <div class="page-header-right">
+                <button
+                  v-for="period in availablePeriods.slice(0, 3)"
+                  :key="period.value"
+                  class="chip"
+                  :class="{ 'chip--primary': currentPeriod === period.value }"
+                  @click="setPeriod(period.value)"
+                >
+                  {{ period.label }}
+                </button>
+                <button class="chip">
+                  <span>Custom</span>
+                  <ChevronDown class="chip-icon" />
+                </button>
+                <button class="chip chip--report">
+                  <FileText class="chip-icon" />
+                  <span>Report</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -35,37 +44,78 @@
           </div>
 
           <div class="kpis">
-            <KpiCard label="Total Income" :value="`$${kpis.totalIncome}`" />
-            <KpiCard label="Avg. Monthly Income" :value="`$${kpis.averageMonthlyIncome}`" />
-            <KpiCard label="Top Income Source" :value="kpis.topIncomeSource" />
             <KpiCard
-              label="% Growth vs Last Month"
-              :value="`${kpis.growthPercentage}%`"
+              label="Total Income"
+              :value="isLoading ? 'Loading...' : formatCompactCurrency(kpis.totalIncome, 'USD')"
+            />
+            <KpiCard
+              label="Avg. Monthly Income"
+              :value="
+                isLoading
+                  ? 'Loading...'
+                  : formatCompactCurrency(Math.round(kpis.averageMonthlyIncome), 'USD')
+              "
+            />
+            <KpiCard
+              label="Top Income Source"
+              :value="isLoading ? 'Loading...' : kpis.topIncomeSource"
+            />
+            <KpiCard
+              label="% Growth vs Last Period"
+              :value="isLoading ? 'Loading...' : `${kpis.growthPercentage}%`"
               :value-class="kpis.growthPercentage >= 0 ? 'is-positive' : 'is-negative'"
             />
           </div>
 
-          <NarrativeInsights class="section-spacing">
-            Your income grew <strong>12%</strong> this month, driven mainly by consulting fees. If
-            this trend continues, you’ll hit your yearly goal two months early. The dip in March was
-            due to a delayed freelance payment, which was recovered in April. Keep an eye on your
-            income source diversity to reduce concentration risk.
-          </NarrativeInsights>
+          <div class="content-layout">
+            <div class="charts-column">
+              <DonutChartCard :data="sourceBreakdown" :total="kpis.totalIncome">
+                <template #note>
+                  <span class="bold">AI Insight:</span>
+                  {{
+                    statistics?.income_insights?.top_sources?.length > 1
+                      ? `${Math.round(statistics.income_insights.top_sources[0]?.percentage || 0)}% of your income comes from ${statistics.income_insights.top_sources[0]?.party || 'your top source'}.`
+                      : 'Diversify your income sources to reduce risk.'
+                  }}
+                </template>
+              </DonutChartCard>
+              <LineChartCard :data="lineData" />
+            </div>
 
-          <ForecastsPanel
-            :total-income="kpis.totalIncome"
-            :average-monthly-income="kpis.averageMonthlyIncome"
-            :disable-input="true"
-          />
+            <div class="insights-column">
+              <NarrativeInsights class="insights-card">
+                <span v-if="!isLoading && statistics">
+                  Your income
+                  <strong
+                    >{{ kpis.growthPercentage >= 0 ? 'grew' : 'declined' }}
+                    {{ Math.abs(kpis.growthPercentage) }}%</strong
+                  >
+                  this period{{
+                    kpis.topIncomeSource !== 'N/A'
+                      ? `, driven mainly by ${kpis.topIncomeSource}`
+                      : ''
+                  }}.
+                  {{
+                    statistics.income_insights?.top_sources?.length > 0
+                      ? `You have ${statistics.income_insights.top_sources.length} active income sources.`
+                      : 'Consider diversifying your income sources.'
+                  }}
+                  {{
+                    statistics.expense_insights?.budget_analysis?.savings_rate > 0.2
+                      ? ' Your savings rate is healthy.'
+                      : ' Focus on improving your savings rate.'
+                  }}
+                </span>
+                <span v-else> Loading insights... </span>
+              </NarrativeInsights>
 
-          <div class="charts">
-            <LineChartCard :data="lineData" />
-            <DonutChartCard :data="sourceBreakdown" :total="kpis.totalIncome">
-              <template #note>
-                <span class="bold">AI Insight:</span> 80% of your income currently depends on two
-                clients, representing a moderate concentration risk.
-              </template>
-            </DonutChartCard>
+              <ForecastsPanel
+                :total-income="kpis.totalIncome"
+                :average-monthly-income="kpis.averageMonthlyIncome"
+                :disable-input="true"
+                class="forecasts-card forecasts-card--narrow"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -82,39 +132,104 @@ import NarrativeInsights from '@/components/reports/NarrativeInsights.vue';
 import ForecastsPanel from '@/components/reports/ForecastsPanel.vue';
 import LineChartCard from '@/components/reports/LineChartCard.vue';
 import DonutChartCard from '@/components/reports/DonutChartCard.vue';
-import { ref } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useStatistics } from '@/composables/useStatistics';
+import { useAuth } from '@/composables/useAuth';
+import { getChartColors } from '@/utils/colors';
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'default',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
+
+const { user } = useAuth();
+const {
+  currentPeriod,
+  selectedWalletId,
+  availablePeriods,
+  setPeriod,
+  getStatistics,
+  formatCompactCurrency
+} = useStatistics();
 
 const showReportMessage = ref(false);
+const statistics = ref(null);
+const isLoading = ref(false);
 
-const kpis = {
-  totalIncome: 7540,
-  averageMonthlyIncome: 6500,
-  topIncomeSource: 'Consulting',
-  growthPercentage: 12
+// Load statistics data
+const loadStatistics = async () => {
+  try {
+    isLoading.value = true;
+    statistics.value = await getStatistics(selectedWalletId.value, currentPeriod.value);
+  } catch (err) {
+    console.error('Error loading statistics:', err);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
-const lineData = [
-  { name: 'Jan', value: 6000, insight: 'Consistent income' },
-  { name: 'Feb', value: 6200, insight: 'Small increase from side projects' },
-  { name: 'Mar', value: 5500, insight: 'Freelance payment delayed → explains dip' },
-  { name: 'Apr', value: 6800, insight: 'Delayed payment received' },
-  { name: 'May', value: 6500, insight: 'Steady performance' },
-  { name: 'Jun', value: 7540, insight: 'Significant increase from new client' }
-];
+// Watch for changes
+watch([selectedWalletId, currentPeriod], () => {
+  loadStatistics();
+});
 
-const sourceBreakdown = [
-  { name: 'Consulting', value: 4500, color: '#3b82f6' },
-  { name: 'Freelance', value: 2000, color: '#f97316' },
-  { name: 'Investments', value: 500, color: '#10b981' },
-  { name: 'Side Hustle', value: 540, color: '#f43f5e' }
-];
+// Load on mount
+onMounted(() => {
+  loadStatistics();
+});
+
+// Computed properties for real data
+const kpis = computed(() => {
+  if (!statistics.value)
+    return {
+      totalIncome: 0,
+      averageMonthlyIncome: 0,
+      topIncomeSource: 'N/A',
+      growthPercentage: 0
+    };
+
+  const stats = statistics.value;
+  return {
+    totalIncome: stats.total_income || 0,
+    averageMonthlyIncome: stats.income_insights?.frequency_analysis?.monthly_average || 0,
+    topIncomeSource: stats.income_insights?.biggest_source?.party || 'N/A',
+    growthPercentage: stats.performance?.growth_percentage || 0
+  };
+});
+
+const lineData = computed(() => {
+  if (!statistics.value?.time_analysis?.monthly_trends) return [];
+
+  return statistics.value.time_analysis.monthly_trends.map((trend) => ({
+    name: new Date(trend.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+    value: trend.income,
+    insight: trend.net >= 0 ? 'Positive balance' : 'Deficit'
+  }));
+});
+
+const sourceBreakdown = computed(() => {
+  if (!statistics.value?.income_insights?.top_sources) return [];
+
+  const sources = statistics.value.income_insights.top_sources.slice(0, 5);
+
+  return getChartColors(
+    sources.map((source) => ({
+      name: source.party,
+      value: source.amount
+    }))
+  );
+});
+
+// Page header computed properties
+const currentPeriodLabel = computed(() => {
+  const period = availablePeriods.find((p) => p.value === currentPeriod.value);
+  return period ? period.label.toLowerCase() : 'this period';
+});
+
+const pageSubtitle = computed(() => {
+  const userName = user.value ? `${user.value.first_name}` : 'User';
+  return `Hello, ${userName}. Here's your financial overview for ${currentPeriodLabel.value}.`;
+});
 </script>
 
 <style lang="scss" scoped>
@@ -189,11 +304,51 @@ const sourceBreakdown = [
   }
 }
 
+.page-header-wrapper {
+  background: linear-gradient(135deg, #e6f2ec 0%, #f0f8f2 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-3 $spacing-4;
+  margin-bottom: $spacing-3;
+  position: relative;
+  overflow: hidden;
+
+  // Add smaller decorative ellipse
+  &::before {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: rgba(4, 120, 68, 0.06);
+    border-radius: 50%;
+    top: -60px;
+    right: -30px;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: rgba(4, 120, 68, 0.04);
+    border-radius: 50%;
+    bottom: -40px;
+    left: -20px;
+    z-index: 0;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-2 $spacing-3;
+    margin-bottom: $spacing-2;
+  }
+}
+
 .page-header {
   display: flex;
   flex-direction: column;
-  gap: $spacing-3;
-  margin-bottom: $spacing-4;
+  gap: $spacing-2;
+  position: relative;
+  z-index: 1;
 
   @media (min-width: $breakpoint-sm) {
     flex-direction: row;
@@ -203,27 +358,27 @@ const sourceBreakdown = [
 }
 
 .page-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: $font-bold + 100; // 800
-  color: $text-primary;
+  color: #1d3229; // Match dashboard green text
   margin: 0;
 
   @media (max-width: $breakpoint-md) {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   @media (max-width: $breakpoint-sm) {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 }
 
 .page-subtitle {
   color: $text-muted;
-  font-size: $font-size-sm;
-  margin: 0.25rem 0 0 0;
+  font-size: $font-size-xs;
+  margin: 0.125rem 0 0 0;
 
   @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-xs;
+    font-size: 0.625rem;
   }
 }
 
@@ -243,24 +398,28 @@ const sourceBreakdown = [
   display: inline-flex;
   align-items: center;
   gap: $spacing-1;
-  padding: $spacing-2 $spacing-3;
+  padding: $spacing-1 $spacing-2;
   border-radius: 999px;
-  background: $bg-white;
+  background: rgba(255, 255, 255, 0.8);
   color: $text-secondary;
-  border: 1px solid $border-light;
-  box-shadow: $shadow-sm;
-  font-size: $font-size-sm;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: $font-size-xs;
   font-weight: $font-medium;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 
   @media (max-width: $breakpoint-sm) {
-    padding: $spacing-1 $spacing-2;
-    font-size: $font-size-xs;
+    padding: 6px 8px;
+    font-size: 10px;
   }
 
   &:hover {
-    background: $bg-gray;
+    background: rgba(255, 255, 255, 0.9);
+    color: $text-primary;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -298,6 +457,40 @@ const sourceBreakdown = [
   margin-bottom: $spacing-4;
 }
 
+// Enhanced narrative insights styling
+:deep(.narrative-insights) {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 249, 0.8) 100%);
+  border: 1px solid rgba(4, 120, 68, 0.1);
+  border-radius: $radius-xl;
+  padding: $spacing-6;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+
+  // Add subtle pattern
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, $primary 0%, rgba(4, 120, 68, 0.5) 50%, $primary 100%);
+  }
+
+  // Text styling
+  font-size: $font-size-base;
+  line-height: 1.6;
+  color: $text-primary;
+
+  strong {
+    color: $primary;
+    font-weight: $font-bold;
+  }
+}
+
 .kpis {
   display: grid;
   grid-template-columns: 1fr;
@@ -313,14 +506,147 @@ const sourceBreakdown = [
   }
 }
 
-.charts {
+// Override KPI card styles for reports page
+:deep(.kpi-card) {
+  background: linear-gradient(135deg, $bg-white 0%, #fefefe 100%);
+  border: 1px solid rgba(4, 120, 68, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 25px -5px rgba(4, 120, 68, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: rgba(4, 120, 68, 0.2);
+  }
+}
+
+:deep(.kpi-value) {
+  font-size: 1.5rem !important;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: 1.25rem !important;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1.1rem !important;
+  }
+
+  &.is-positive {
+    background: linear-gradient(135deg, $primary, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  &.is-negative {
+    background: linear-gradient(135deg, $error-color, #b91c1c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.content-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: $spacing-3;
+  gap: $spacing-4;
   margin-top: $spacing-4;
 
-  @media (min-width: $breakpoint-md) {
+  @media (min-width: $breakpoint-lg) {
     grid-template-columns: 1fr 1fr;
+    gap: $spacing-6;
+  }
+}
+
+.charts-column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+
+  // Add subtle background pattern for charts area
+  position: relative;
+  padding: $spacing-4;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(4, 120, 68, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(4, 120, 68, 0.02) 0%, transparent 50%), $bg-light;
+  border-radius: $radius-xl;
+  border: 1px solid rgba(4, 120, 68, 0.05);
+
+  // Make chart cards blend better
+  :deep(.chart-card) {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      0 1px 1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 16px 64px rgba(0, 0, 0, 0.1),
+        0 1px 1px rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.insights-column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.insights-card {
+  margin-bottom: 0 !important;
+}
+
+.forecasts-card {
+  // Add some styling to match the overall theme
+  :deep(.card) {
+    border: 1px solid rgba(4, 120, 68, 0.1);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+
+  // Force single column layout for narrow context
+  &.forecasts-card--narrow {
+    :deep(.panel-grid) {
+      grid-template-columns: 1fr !important;
+      gap: $spacing-3;
+    }
+
+    // Optimize form input for narrow space
+    :deep(.whatif-row) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: $spacing-2;
+
+      .form-input {
+        width: 100%;
+        margin-bottom: $spacing-1;
+      }
+
+      .submit-btn {
+        align-self: flex-start;
+        padding: $spacing-1 $spacing-3;
+        font-size: $font-size-sm;
+      }
+    }
+
+    // Adjust spacing for better vertical layout
+    :deep(.sub-title) {
+      margin-bottom: $spacing-2;
+    }
+
+    :deep(.muted) {
+      margin-bottom: $spacing-3;
+    }
   }
 }
 

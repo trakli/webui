@@ -41,9 +41,9 @@ const transactionApi = {
     // Handle different response formats
     if (response?.data) {
       return response.data;
-    } else if (response?.last_sync && response?.data) {
-      // Direct response format
-      return response as any;
+    } else if (response?.last_sync) {
+      // Direct response format without nested data
+      return response as TransactionsResponse;
     }
 
     // Fallback
@@ -145,7 +145,10 @@ const transactionApi = {
    * Add file to a transaction
    * POST /transactions/{id}/files
    */
-  async addFile(id: number, file: File): Promise<any> {
+  async addFile(
+    id: number,
+    file: File
+  ): Promise<{ success: boolean; data?: unknown; message?: string }> {
     const api = useApi();
     const formData = new FormData();
     formData.append('file', file);

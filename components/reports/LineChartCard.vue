@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <h2 class="title">Income Trend Line (Last 6 Months)</h2>
-    <div class="chart-container" ref="containerRef">
+    <div ref="containerRef" class="chart-container">
       <svg
         ref="svgRef"
         :viewBox="`0 0 ${width} ${height}`"
@@ -21,7 +21,6 @@
             />
           </filter>
         </defs>
-        <!-- Grid lines -->
         <g>
           <template v-for="(t, i) in yTicks" :key="`y-${i}`">
             <line
@@ -50,7 +49,6 @@
             </text>
           </template>
         </g>
-        <!-- Hover guideline -->
         <line
           v-if="hoverIndex >= 0"
           :x1="pointArray[hoverIndex].x"
@@ -60,9 +58,7 @@
           stroke="#93c5fd"
           stroke-dasharray="3 3"
         />
-        <!-- Smooth line path -->
         <path :d="smoothPath" fill="none" stroke="#3b82f6" stroke-width="2.5" />
-        <!-- Markers -->
         <template v-for="(p, idx) in pointArray" :key="`pt-${idx}`">
           <circle
             :cx="p.x"
@@ -74,7 +70,6 @@
             filter="url(#markerShadow)"
           />
         </template>
-        <!-- Transparent overlay to capture pointer events in plot area -->
         <rect
           :x="paddingLeft"
           :y="paddingTop"

@@ -1,8 +1,8 @@
 import { createAvatar } from '@dicebear/core';
-import { personas, notionists } from '@dicebear/collection';
+import { personas } from '@dicebear/collection';
 
 export const useAvatar = () => {
-  const generateFallbackAvatar = (user: any): string => {
+  const generateFallbackAvatar = (user: { email?: string; id?: number }): string => {
     if (!user) return '';
 
     // Use personas style for gender-neutral people avatars
@@ -30,7 +30,7 @@ export const useAvatar = () => {
     return avatar.toDataUri();
   };
 
-  const getAvatarUrl = (user: any): string => {
+  const getAvatarUrl = (user: { email?: string; id?: number; avatar_url?: string }): string => {
     // Return the user's avatar_url if it exists, otherwise generate a fallback
     return user?.avatar_url || generateFallbackAvatar(user);
   };

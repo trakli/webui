@@ -1,6 +1,5 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
-    <!-- Wallet Name -->
     <div class="form-group">
       <label for="wallet-name" class="form-label">Wallet Name</label>
       <input
@@ -15,14 +14,12 @@
       <div v-if="nameError" class="error-text">Wallet name is required.</div>
     </div>
 
-    <!-- Icon Picker -->
     <div class="form-group">
       <label for="wallet-icon" class="form-label">Select an Icon </label>
-      <IconPicker v-model="form.icon" id="wallet-icon" />
+      <IconPicker id="wallet-icon" v-model="form.icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 
-    <!-- Wallet Type -->
     <div class="form-group">
       <label for="wallet-type" class="form-label">Wallet Type</label>
       <select
@@ -41,7 +38,6 @@
       <div v-if="typeError" class="error-text">Please select a wallet type.</div>
     </div>
 
-    <!-- Currency -->
     <div class="form-group">
       <label for="wallet-currency" class="form-label">Currency</label>
       <select
@@ -65,7 +61,6 @@
       <div v-if="currencyError" class="error-text">Please select a currency.</div>
     </div>
 
-    <!-- Initial Balance -->
     <div class="form-group">
       <label for="wallet-balance" class="form-label">Initial Balance</label>
       <input
@@ -78,7 +73,6 @@
       />
     </div>
 
-    <!-- Wallet Description -->
     <div class="form-group">
       <label for="wallet-description" class="form-label">Wallet Description</label>
       <textarea
@@ -93,9 +87,8 @@
       <div v-if="descriptionError" class="error-text">Wallet description is required.</div>
     </div>
 
-    <!-- Submit Button -->
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Update Wallet' : 'Create Wallet +' }}
+      {{ isEditing ? 'Update wallet' : 'Create wallet' }}
     </button>
   </form>
 </template>

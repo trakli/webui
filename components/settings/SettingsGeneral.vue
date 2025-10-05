@@ -3,7 +3,7 @@
     <div class="section-grid">
       <div class="form-group">
         <label class="form-label">Default Language</label>
-        <select v-if="isEditMode" class="form-select" v-model="language">
+        <select v-if="isEditMode" v-model="language" class="form-select">
           <option value="English">English</option>
           <option value="Spanish">Spanish</option>
           <option value="French">French</option>
@@ -13,7 +13,7 @@
 
       <div class="form-group">
         <label class="form-label">Current Currency</label>
-        <select v-if="isEditMode" class="form-select" v-model="currency">
+        <select v-if="isEditMode" v-model="currency" class="form-select">
           <option value="USD">USD ($) - US Dollar</option>
           <option value="EUR">EUR (€) - Euro</option>
           <option value="JPY">JPY (¥) - Japanese Yen</option>

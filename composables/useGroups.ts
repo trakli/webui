@@ -1,31 +1,6 @@
 import { api } from '~/services/api';
 import { useSharedData } from '~/composables/useSharedData';
 
-interface GroupIcon {
-  id: number;
-  path: string;
-  type: string;
-}
-
-interface SyncState {
-  id: number;
-  syncable_id: number;
-  client_generated_id: number;
-  syncable_type: string;
-  source: string;
-  last_synced_at: string;
-  created_at: string;
-  deleted_at: string | null;
-}
-
-interface Group {
-  id: number;
-  name: string;
-  description: string;
-  icon: GroupIcon;
-  sync_state: SyncState;
-}
-
 interface CreateGroupPayload {
   client_id: string;
   name: string;
@@ -33,19 +8,6 @@ interface CreateGroupPayload {
   icon: string;
   icon_type: string;
   created_at: string;
-}
-
-interface ApiResponse<T> {
-  data?: T;
-  message?: string;
-  status: number;
-  success: boolean;
-  errors?: string[];
-}
-
-interface GroupsResponse {
-  last_sync: string;
-  data: Group[];
 }
 
 export const useGroups = () => {

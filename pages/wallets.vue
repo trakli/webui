@@ -1,17 +1,21 @@
 <template>
   <div>
-    <ContentTopCard pageName="Wallet" pageNamePlural="Wallets" @add="handleOpenFormForCreation" />
+    <ContentTopCard
+      page-name="Wallet"
+      page-name-plural="Wallets"
+      @add="handleOpenFormForCreation"
+    />
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">
           <WalletForm
-            :editingItem="editingItem"
+            :editing-item="editingItem"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" pageName="Wallet" />
+        <TipsSection v-if="!isMobile" page-name="Wallet" />
       </div>
 
       <div v-if="isLoading" class="loading-state">Loading wallets...</div>
@@ -19,14 +23,14 @@
 
       <EmptyState
         v-if="!showForm && !isLoading && wallets.length === 0"
-        pageName="Wallet"
+        page-name="Wallet"
         @create="handleOpenFormForCreation"
       />
 
       <ContentTable
         v-if="!showForm && !isLoading && wallets.length > 0"
-        pageName="Wallet"
-        pageNamePlural="Wallets"
+        page-name="Wallet"
+        page-name-plural="Wallets"
         :entities="wallets"
         @edit="handleEdit"
         @delete="handleDelete"
@@ -117,12 +121,10 @@ onMounted(() => {
   loadWallets();
 });
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 </script>
 
 <style lang="scss" scoped>

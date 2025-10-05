@@ -1,17 +1,17 @@
 <template>
   <div>
-    <ContentTopCard pageName="Group" pageNamePlural="Groups" @add="handleOpenFormForCreation" />
+    <ContentTopCard page-name="Group" page-name-plural="Groups" @add="handleOpenFormForCreation" />
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">
           <GroupForm
-            :editingItem="editingItem"
+            :editing-item="editingItem"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" pageName="Group" />
+        <TipsSection v-if="!isMobile" page-name="Group" />
       </div>
 
       <div v-if="isLoading" class="loading-state">Loading groups...</div>
@@ -19,14 +19,14 @@
 
       <EmptyState
         v-if="!showForm && !isLoading && groups.length === 0"
-        pageName="Group"
+        page-name="Group"
         @create="handleOpenFormForCreation"
       />
 
       <ContentTable
         v-if="!showForm && !isLoading && groups.length > 0"
-        pageName="Group"
-        pageNamePlural="Groups"
+        page-name="Group"
+        page-name-plural="Groups"
         :entities="groups"
         @edit="handleEdit"
         @delete="handleDelete"
@@ -114,12 +114,10 @@ onMounted(() => {
   loadGroups();
 });
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 </script>
 
 <style lang="scss" scoped>

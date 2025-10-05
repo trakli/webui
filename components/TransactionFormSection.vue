@@ -1,7 +1,7 @@
 <template>
   <div class="form-section">
-    <FormSection :editingItem="editingItem" @submit="handleSubmit" />
-    <TipsSection pageName="Transaction" />
+    <FormSection :editing-item="editingItem" @submit="handleSubmit" />
+    <TipsSection page-name="Transaction" />
   </div>
 </template>
 

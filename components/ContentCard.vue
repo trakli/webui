@@ -1,7 +1,7 @@
 <template>
   <div class="entity-card">
     <div class="entity-icon-name" :class="{ 'no-icon': !icon }">
-      <component v-if="icon" :is="resolvedIcon" class="entity-icon" />
+      <component :is="resolvedIcon" v-if="icon" class="entity-icon" />
       <span class="name">{{ name }}</span>
     </div>
     <div class="entity-description">

@@ -1,24 +1,24 @@
 <template>
   <div class="content-area">
-    <TTopCard :pageName="'Transaction'" :pageNamePlural="'Transactions'" @add="navigateToNew" />
+    <TTopCard :page-name="'Transaction'" :page-name-plural="'Transactions'" @add="navigateToNew" />
 
     <EmptyState
       v-if="paginatedTransactions.length === 0"
-      :pageName="'Transaction'"
+      :page-name="'Transaction'"
       @create="navigateToNew"
     />
 
     <TTableComponent
       v-if="paginatedTransactions.length > 0"
       :transactions="paginatedTransactions"
-      :searchQuery="searchQuery"
-      :filterQuery="filterQuery"
-      :currentPage="currentPage"
-      :itemsPerPage="itemsPerPage"
-      :totalPages="totalPages"
-      :totalEntries="filteredTransactions.length"
-      @update:searchQuery="searchQuery = $event"
-      @update:filterQuery="filterQuery = $event"
+      :search-query="searchQuery"
+      :filter-query="filterQuery"
+      :current-page="currentPage"
+      :items-per-page="itemsPerPage"
+      :total-pages="totalPages"
+      :total-entries="filteredTransactions.length"
+      @update:search-query="searchQuery = $event"
+      @update:filter-query="filterQuery = $event"
       @page-change="currentPage = $event"
       @edit="handleEdit"
       @delete="handleDelete"

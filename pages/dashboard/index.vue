@@ -12,14 +12,14 @@
     <TTableComponent
       v-else
       :transactions="paginatedTransactions"
-      :searchQuery="searchQuery"
-      :filterQuery="filterQuery"
-      :currentPage="currentPage"
-      :itemsPerPage="itemsPerPage"
-      :totalPages="totalPages"
-      :totalEntries="filteredTransactions.length"
-      @update:searchQuery="searchQuery = $event"
-      @update:filterQuery="filterQuery = $event"
+      :search-query="searchQuery"
+      :filter-query="filterQuery"
+      :current-page="currentPage"
+      :items-per-page="itemsPerPage"
+      :total-pages="totalPages"
+      :total-entries="filteredTransactions.length"
+      @update:search-query="searchQuery = $event"
+      @update:filter-query="filterQuery = $event"
       @page-change="currentPage = $event"
       @edit="handleEdit"
       @delete="handleDelete"
@@ -92,7 +92,7 @@ definePageMeta({
   @media (min-width: 768px) {
     flex-direction: row;
     gap: 1rem;
-    align-items: stretch;
+    align-items: center; // Center vertically instead of stretch
   }
 
   // WalletCard - 40% width
@@ -112,6 +112,8 @@ definePageMeta({
     @media (min-width: 768px) {
       flex: 0 0 58%;
       max-width: 58%;
+      display: flex;
+      align-items: center; // Center the stats content
     }
   }
 }

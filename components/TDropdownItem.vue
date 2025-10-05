@@ -1,6 +1,6 @@
 <template>
   <button class="dropdown-item">
-    <slot></slot>
+    <slot />
   </button>
 </template>
 

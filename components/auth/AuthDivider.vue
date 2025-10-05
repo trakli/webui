@@ -1,8 +1,8 @@
 <template>
   <div class="separator">
-    <span class="line"></span>
+    <span class="line" />
     <span class="text">OR</span>
-    <span class="line"></span>
+    <span class="line" />
   </div>
 </template>
 

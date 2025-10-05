@@ -1,10 +1,10 @@
 <template>
   <div>
     <TTopCard
-      pageName="Transaction"
-      pageNamePlural="Transactions"
-      :showAddButton="false"
-      :breadcrumbItems="[
+      page-name="Transaction"
+      page-name-plural="Transactions"
+      :show-add-button="false"
+      :breadcrumb-items="[
         { text: 'Home', clickable: false },
         { text: 'Transactions', clickable: true, action: 'back' },
         { text: 'New Transaction', current: true }

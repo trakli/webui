@@ -3,8 +3,8 @@
     <div class="header-row">
       <h1>All {{ pageNamePlural }}</h1>
       <input
-        type="text"
         v-model="searchQuery"
+        type="text"
         :placeholder="`Search ${pageNamePlural.toLowerCase()}...`"
         class="search-input"
       />
@@ -28,7 +28,7 @@
         :name="entity.name"
         :icon="entity.icon?.path || entity.icon?.content || entity.icon"
         :description="entity.description"
-        :pageName="pageName"
+        :page-name="pageName"
         @edit="$emit('edit', entity)"
         @delete="$emit('delete', entity)"
       />
@@ -38,9 +38,9 @@
       <div class="pagination-controls">
         <button
           :disabled="currentPage === 1"
-          @click="currentPage--"
           class="pagination-button"
           :class="{ disabled: currentPage === 1 }"
+          @click="currentPage--"
         >
           &lt; Prev
         </button>
@@ -48,21 +48,21 @@
         <button
           v-for="page in visiblePages"
           :key="page"
-          @click="currentPage = typeof page === 'number' ? page : currentPage"
           class="pagination-button"
           :class="{
             active: page === currentPage,
             ellipsis: page === '...'
           }"
+          @click="currentPage = typeof page === 'number' ? page : currentPage"
         >
           {{ page }}
         </button>
 
         <button
           :disabled="currentPage === totalPages"
-          @click="currentPage++"
           class="pagination-button"
           :class="{ disabled: currentPage === totalPages }"
+          @click="currentPage++"
         >
           Next &gt;
         </button>
