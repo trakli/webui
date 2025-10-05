@@ -7,34 +7,32 @@
       <div class="transaction-cards-grid">
         <div class="transaction-cards-row">
           <TTransactionSubCard
-            :title="transactionCards[0].title"
-            :text="transactionCards[0].text"
-            :title-color="transactionCards[0].titleColor"
-            :text-color="transactionCards[0].textColor"
-            :currency="transactionCards[0].currency"
+            :title="totalTransactions"
+            text="Transactions"
+            title-color="#047844"
+            text-color="#371e48"
           />
           <TTransactionSubCard
-            :title="transactionCards[1].title"
-            :text="transactionCards[1].text"
-            :title-color="transactionCards[1].titleColor"
-            :text-color="transactionCards[1].textColor"
-            :currency="transactionCards[1].currency"
+            :title="totalIncome"
+            text="Total Income"
+            title-color="#FF3B30"
+            text-color="#371e48"
+            currency="XAF"
           />
         </div>
         <div class="transaction-cards-row">
           <TTransactionSubCard
-            :title="transactionCards[2].title"
-            :text="transactionCards[2].text"
-            :title-color="transactionCards[2].titleColor"
-            :text-color="transactionCards[2].textColor"
-            :currency="transactionCards[2].currency"
+            :title="totalExpenses"
+            text="Total Expenses"
+            title-color="#2F8F64"
+            text-color="#371e48"
+            currency="XAF"
           />
           <TTransactionSubCard
-            :title="transactionCards[3].title"
-            :text="transactionCards[3].text"
-            :title-color="transactionCards[3].titleColor"
-            :text-color="transactionCards[3].textColor"
-            :currency="transactionCards[3].currency"
+            :title="uniqueParties"
+            text="Total Parties"
+            title-color="#047844"
+            text-color="#371e48"
           />
         </div>
       </div>
@@ -43,52 +41,66 @@
 </template>
 
 <script setup>
-const transactionCards = [
-  {
-    id: 0,
-    title: '48',
-    text: 'Transactions',
-    titleColor: '#047844',
-    textColor: '#371e48',
-    currency: ''
-  },
-  {
-    id: 1,
-    title: '35k',
-    text: 'Total Income',
-    titleColor: '#FF3B30',
-    textColor: '#371e48',
-    currency: 'XAF'
-  },
-  {
-    id: 2,
-    title: '24k',
-    text: 'Total Expenses',
-    titleColor: '#2F8F64',
-    textColor: '#371e48',
-    currency: 'XAF'
-  },
-  {
-    id: 3,
-    title: '124',
-    text: 'Total Companies',
-    titleColor: '#047844',
-    textColor: '#371e48',
-    currency: ''
-  }
-];
+import { computed } from 'vue';
+import { useTransactions } from '@/composables/useTransactions';
+import TTransactionSubCard from './TTransactionSubCard.vue';
+
+const { transactions } = useTransactions();
+
+// Filter transactions from the last 30 days
+const recentTransactions = computed(() => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  return transactions.value.filter((t) => {
+    const txnDate = new Date(t.date);
+    return txnDate >= thirtyDaysAgo;
+  });
+});
+
+const totalTransactions = computed(() => recentTransactions.value.length);
+
+const totalIncome = computed(() => {
+  const sum = recentTransactions.value
+    .filter((t) => t.type === 'INCOME')
+    .reduce((acc, t) => acc + parseInt(t.amount.replace(/[^\d]/g, '')), 0);
+  return (sum / 1000).toFixed(0) + 'k';
+});
+
+const totalExpenses = computed(() => {
+  const sum = recentTransactions.value
+    .filter((t) => t.type === 'EXPENSE')
+    .reduce((acc, t) => acc + parseInt(t.amount.replace(/[^\d]/g, '')), 0);
+  return (sum / 1000).toFixed(0) + 'k';
+});
+
+const uniqueParties = computed(() => {
+  const parties = new Set(recentTransactions.value.map((t) => t.party));
+  return parties.size;
+});
 </script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
 .transaction-card {
-  width: 655px;
-  height: 220px;
+  width: 100%;
+  max-width: 655px;
+  min-height: 220px;
   background-color: $bg-gray;
   border-radius: $radius-lg;
   padding: 16px;
   gap: 8px;
+  box-sizing: border-box;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 12px;
+    min-height: auto;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 8px;
+    border-radius: $radius-md;
+  }
 }
 
 .transaction-card-header {
@@ -97,6 +109,14 @@ const transactionCards = [
   justify-content: flex-start;
   align-items: center;
   margin-bottom: 16px;
+
+  @media (max-width: $breakpoint-md) {
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    margin-bottom: 8px;
+  }
 }
 
 .transaction-card-title {
@@ -104,6 +124,15 @@ const transactionCards = [
   font-weight: $font-bold;
   font-family: $font-family-sans;
   margin: 0;
+  color: $text-primary;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-base;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-sm;
+  }
 }
 
 .transaction-card-content {
@@ -114,12 +143,29 @@ const transactionCards = [
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  @media (max-width: $breakpoint-md) {
+    gap: 12px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 8px;
+  }
 }
 
 .transaction-cards-row {
   display: flex;
   flex-direction: row;
   gap: 12px;
+
+  @media (max-width: $breakpoint-md) {
+    gap: 8px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    gap: 6px;
+  }
 }
 
 .transaction-cards-row > * {

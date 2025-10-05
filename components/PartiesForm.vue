@@ -19,22 +19,28 @@
       <label for="party-type" class="form-label">Party Type</label>
       <select
         id="party-type"
-        v-model="form.partyType"
+        v-model="form.type"
         class="form-select"
         :class="{ error: partyTypeError }"
         required
       >
         <option value="">Select Party Type</option>
         <option value="individual">Individual</option>
-        <option value="company">Company</option>
+        <option value="organization">Organization</option>
+        <option value="business">Business</option>
+        <option value="partnership">Partnership</option>
+        <option value="non_profit">Non-Profit</option>
+        <option value="government_agency">Government Agency</option>
+        <option value="educational_institution">Educational Institution</option>
+        <option value="healthcare_provider">Healthcare Provider</option>
       </select>
       <div v-if="partyTypeError" class="error-text">Please select a party type.</div>
     </div>
 
     <!-- Icon Picker -->
     <div class="form-group">
-      <label for="category-icon" class="form-label">Select an Icon </label>
-      <IconPicker v-model="form.icon" id="category-icon" />
+      <label for="party-icon" class="form-label">Select an Icon </label>
+      <IconPicker v-model="form.icon" id="party-icon" />
       <div v-if="iconError" class="error-text">Please select an icon.</div>
     </div>
 
@@ -74,7 +80,7 @@ const emit = defineEmits(['created', 'updated', 'close']);
 
 const form = ref({
   name: '',
-  partyType: '', // Empty default for dropdown
+  type: '', // Empty default for dropdown
   icon: '',
   description: ''
 });
@@ -91,10 +97,25 @@ watch(
   () => props.editingItem,
   (newEditingItem) => {
     if (newEditingItem) {
+      // Extract icon value - could be from icon.path, icon.content, or direct icon value
+      let iconValue = '';
+      if (newEditingItem.icon) {
+        if (typeof newEditingItem.icon === 'string') {
+          iconValue = newEditingItem.icon;
+        } else if (newEditingItem.icon.path) {
+          iconValue = newEditingItem.icon.path;
+        } else if (newEditingItem.icon.content) {
+          iconValue = newEditingItem.icon.content;
+        }
+      }
+
+      console.log('Editing party:', newEditingItem);
+      console.log('Extracted icon value:', iconValue);
+
       form.value = {
         name: newEditingItem.name || '',
-        partyType: newEditingItem.partyType || '',
-        icon: newEditingItem.icon || '',
+        type: newEditingItem.type || '',
+        icon: iconValue,
         description: newEditingItem.description || ''
       };
     } else {
@@ -107,7 +128,7 @@ watch(
 function resetForm() {
   form.value = {
     name: '',
-    partyType: '',
+    type: '',
     icon: '',
     description: ''
   };
@@ -133,7 +154,7 @@ function validateForm() {
   }
 
   // Validate party type
-  if (!form.value.partyType) {
+  if (!form.value.type) {
     partyTypeError.value = true;
     isValid = false;
   }
@@ -161,9 +182,11 @@ async function handleSubmit() {
 
   try {
     const formData = {
-      ...form.value,
       name: form.value.name.trim(),
-      description: form.value.description.trim()
+      type: form.value.type,
+      description: form.value.description.trim(),
+      icon: form.value.icon,
+      icon_type: 'image'
     };
 
     if (isEditing.value) {

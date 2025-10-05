@@ -1,46 +1,153 @@
 <template>
-  <div class="entities-page">
-    <TNavbar />
-    <div class="entities-content-wrapper">
-      <ContentSection :pageName="'Group'" :pageNamePlural="'Groups'" />
+  <div>
+    <ContentTopCard pageName="Group" pageNamePlural="Groups" @add="handleOpenFormForCreation" />
+    <div class="content-area">
+      <div v-if="showForm" class="form-section">
+        <div class="form-wrapper">
+          <GroupForm
+            :editingItem="editingItem"
+            @created="handleCreate"
+            @updated="handleUpdate"
+            @close="handleFormClose"
+          />
+        </div>
+        <TipsSection v-if="!isMobile" pageName="Group" />
+      </div>
+
+      <div v-if="isLoading" class="loading-state">Loading groups...</div>
+      <div v-if="error" class="error-state">Error: {{ error }}</div>
+
+      <EmptyState
+        v-if="!showForm && !isLoading && groups.length === 0"
+        pageName="Group"
+        @create="handleOpenFormForCreation"
+      />
+
+      <ContentTable
+        v-if="!showForm && !isLoading && groups.length > 0"
+        pageName="Group"
+        pageNamePlural="Groups"
+        :entities="groups"
+        @edit="handleEdit"
+        @delete="handleDelete"
+      />
     </div>
-    <TSidebar />
   </div>
 </template>
 
 <script setup>
-import TNavbar from '@/components/TNavbar.vue';
-import TSidebar from '@/components/TSidebar.vue';
-import ContentSection from '~/components/ContentSection.vue';
+import { ref, onMounted } from 'vue';
+import { useGroups } from '@/composables/useGroups';
+import { useSidebar } from '@/composables/useSidebar';
+import { useNotifications } from '@/composables/useNotifications';
+import ContentTopCard from '@/components/TTopCard.vue';
+import EmptyState from '@/components/EmptyState.vue';
+import GroupForm from '@/components/groups/GroupForm.vue';
+import ContentTable from '@/components/ContentTable.vue';
+import TipsSection from '@/components/TipsSection.vue';
+
+const showForm = ref(false);
+const editingItem = ref(null);
+const { isMobile } = useSidebar();
+
+const { groups, isLoading, error, fetchGroups, createGroup, updateGroup, deleteGroup } =
+  useGroups();
+
+const { confirmDelete, showSuccess, showError } = useNotifications();
+
+async function loadGroups() {
+  await fetchGroups();
+}
+
+function handleOpenFormForCreation() {
+  editingItem.value = null;
+  showForm.value = true;
+}
+
+function handleFormClose() {
+  showForm.value = false;
+  editingItem.value = null;
+}
+
+async function handleCreate(data) {
+  try {
+    await createGroup(data);
+    handleFormClose();
+  } catch (err) {
+    console.error('Failed to create group:', err);
+    // Optionally, display a notification to the user
+  }
+}
+
+async function handleUpdate(data) {
+  if (!data.id) return;
+  try {
+    // Extract id and pass the rest as update data
+    const { id, ...updateData } = data;
+    await updateGroup(id, updateData);
+    handleFormClose();
+  } catch (err) {
+    console.error('Failed to update group:', err);
+    // Optionally, display a notification to the user
+  }
+}
+
+async function handleEdit(item) {
+  editingItem.value = item;
+  showForm.value = true;
+}
+
+async function handleDelete(item) {
+  const confirmed = await confirmDelete('group');
+  if (!confirmed) return;
+
+  try {
+    await deleteGroup(item.id);
+    showSuccess('Group deleted', `${item.name} has been deleted successfully`);
+  } catch (err) {
+    showError('Delete failed', 'Failed to delete group. Please try again.');
+    console.error('Failed to delete group:', err);
+  }
+}
+
+onMounted(() => {
+  loadGroups();
+});
 
 /* eslint-disable no-undef */
 definePageMeta({
-  layout: 'default',
+  layout: 'dashboard',
   middleware: 'auth'
 });
 /* eslint-enable no-undef */
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/scss/_variables' as *;
+@use '@/assets/scss/_variables' as *;
 
-.entities-page {
+.content-area {
+  margin-top: 2rem;
   display: flex;
-  min-height: 100vh;
-  background-color: $bg-gray;
-  margin-left: var(--sidebar-width, 250px);
-  transition: margin-left 0.3s ease;
-  width: calc(100% - var(--sidebar-width, 250px));
-  overflow-x: hidden;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  width: 100%;
 }
 
-.entities-content-wrapper {
+.form-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 3rem;
   width: 100%;
-  padding: 0;
-  margin-top: 62px;
   max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
+  align-self: center;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.form-wrapper {
+  flex: 1;
+  min-width: 0;
+  max-width: 800px;
 }
 </style>

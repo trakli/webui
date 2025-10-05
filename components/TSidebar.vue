@@ -1,43 +1,85 @@
 <template>
-  <div class="sidebar">
+  <!-- Mobile overlay -->
+  <div v-if="isMobile && isSidebarOpen" class="sidebar-overlay" @click="closeSidebar"></div>
+
+  <div
+    class="sidebar"
+    :class="{
+      'sidebar--mobile-open': isMobile && isSidebarOpen,
+      'sidebar--mobile-closed': isMobile && !isSidebarOpen
+    }"
+  >
     <div class="sidebar-header">
       <Logo size="small" alt="Trakli Logo" />
+      <button
+        v-if="isMobile && isSidebarOpen"
+        class="close-button"
+        @click="closeSidebar"
+        aria-label="Close navigation menu"
+      >
+        <XMarkIcon class="close-icon" />
+      </button>
     </div>
     <nav class="sidebar-nav">
       <ul>
         <li>
-          <NuxtLink to="/dashboard" class="nav-button" active-class="selected">
+          <NuxtLink
+            to="/dashboard"
+            class="nav-button"
+            active-class="selected"
+            @click="handleNavClick"
+          >
             <HomeIcon class="icon" />
             <span class="text">Home</span>
           </NuxtLink>
         </li>
 
         <li>
-          <NuxtLink to="/transactions" class="nav-button" active-class="selected">
+          <NuxtLink
+            to="/transactions"
+            class="nav-button"
+            active-class="selected"
+            @click="handleNavClick"
+          >
             <RectangleGroupIcon class="icon" />
             <span class="text">Transactions</span>
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/groups" class="nav-button" active-class="selected">
-            <UserGroupIcon class="icon" />
-            <span class="text">Groups</span>
-          </NuxtLink>
-        </li>
-        <li>
-          <NuxtLink to="/categories" class="nav-button" active-class="selected">
+          <NuxtLink
+            to="/categories"
+            class="nav-button"
+            active-class="selected"
+            @click="handleNavClick"
+          >
             <BuildingLibraryIcon class="icon" />
             <span class="text">Categories</span>
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/parties" class="nav-button" active-class="selected">
+          <NuxtLink to="/groups" class="nav-button" active-class="selected" @click="handleNavClick">
+            <UserGroupIcon class="icon" />
+            <span class="text">Groups</span>
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink
+            to="/parties"
+            class="nav-button"
+            active-class="selected"
+            @click="handleNavClick"
+          >
             <UserGroupIcon class="icon" />
             <span class="text">Parties</span>
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/wallets" class="nav-button" active-class="selected">
+          <NuxtLink
+            to="/wallets"
+            class="nav-button"
+            active-class="selected"
+            @click="handleNavClick"
+          >
             <WalletIcon class="icon" />
             <span class="text">Wallets</span>
           </NuxtLink>
@@ -51,7 +93,7 @@
           <button
             class="nav-footer-button"
             :class="{ selected: $route.path === '/settings' }"
-            @click="$router.push('/settings')"
+            @click="handleButtonNavClick('/settings')"
           >
             <Cog8ToothIcon class="icon" />
             <span class="text">Settings</span>
@@ -61,7 +103,7 @@
           <button
             class="nav-footer-button"
             :class="{ selected: $route.path === '/reports' }"
-            @click="$router.push('/reports')"
+            @click="handleButtonNavClick('/reports')"
           >
             <Cog8ToothIcon class="icon" />
             <span class="text">Reports & Stats</span>
@@ -71,7 +113,7 @@
           <button
             class="nav-footer-button"
             :class="{ selected: $route.path === '/ai-insights' }"
-            @click="$router.push('/ai-insights')"
+            @click="handleButtonNavClick('/ai-insights')"
           >
             <ChatBubbleLeftRightIcon class="icon" />
             <span class="text">AI Insights</span>
@@ -82,7 +124,7 @@
           <button
             class="nav-footer-button"
             :class="{ selected: $route.path === '/support' }"
-            @click="$router.push('/support')"
+            @click="handleButtonNavClick('/support')"
           >
             <ChatBubbleLeftRightIcon class="icon" />
             <span class="text">Support</span>
@@ -101,17 +143,39 @@ import {
   HomeIcon,
   RectangleGroupIcon,
   UserGroupIcon,
-  WalletIcon
+  WalletIcon,
+  XMarkIcon
 } from '@heroicons/vue/24/outline';
 import Logo from './Logo.vue';
+import { useSidebar } from '@/composables/useSidebar';
+import { useRouter } from 'vue-router';
+
+const { isSidebarOpen, isMobile, closeSidebar } = useSidebar();
+const router = useRouter();
+
+// Handle navigation link clicks (NuxtLink components)
+const handleNavClick = () => {
+  // Only close sidebar on mobile
+  if (isMobile.value) {
+    closeSidebar();
+  }
+};
+
+// Handle button navigation clicks
+const handleButtonNavClick = (path) => {
+  router.push(path);
+  // Only close sidebar on mobile
+  if (isMobile.value) {
+    closeSidebar();
+  }
+};
 </script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
 .sidebar {
-  width: var(--sidebar-width);
-  min-width: var(--sidebar-min-width);
+  width: $sidebar-width;
   height: 100vh;
   background-color: $bg-gray;
   border-right: 1px solid #e9ecef;
@@ -121,16 +185,40 @@ import Logo from './Logo.vue';
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
-  transition: width 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    width 0.3s ease;
   display: flex;
   flex-direction: column;
+  z-index: $z-index-fixed;
+
+  // Desktop behavior
+  @media (min-width: $breakpoint-md) {
+    transform: translateX(0);
+  }
+
+  // Mobile behavior
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    width: $sidebar-mobile-width;
+    transform: translateX(-100%);
+    z-index: $z-index-modal;
+
+    &--mobile-open {
+      transform: translateX(0);
+    }
+
+    &--mobile-closed {
+      transform: translateX(-100%);
+    }
+  }
 
   &-header {
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
+    justify-content: space-between;
+    align-items: center;
     margin: 16px;
-    width: 100%;
+    width: calc(100% - 32px);
+    padding: 0;
   }
 
   &-nav {
@@ -164,13 +252,20 @@ import Logo from './Logo.vue';
     margin-left: 10px;
 
     &:hover {
-      width: calc(var(--sidebar-width) - 20px);
+      width: calc(#{$sidebar-width} - 20px);
       background-color: #bcdccc;
     }
 
     &.selected {
-      width: calc(var(--sidebar-width) - 20px);
+      width: calc(#{$sidebar-width} - 20px);
       background-color: #bcdccc;
+    }
+
+    @media (max-width: #{$breakpoint-md - 1px}) {
+      &:hover,
+      &.selected {
+        width: calc(#{$sidebar-mobile-width} - 20px);
+      }
     }
   }
 
@@ -179,13 +274,45 @@ import Logo from './Logo.vue';
     height: 24px;
   }
 
+  .close-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus {
+      outline: none;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .close-icon {
+    width: 20px;
+    height: 20px;
+    color: $text-primary;
+  }
+
   .divider {
     display: flex;
     justify-items: center;
     border: 1px solid #b9b1bf;
-    width: 296px;
+    width: calc(#{$sidebar-width} - 20px);
     margin-left: 10px;
     margin-top: 20px;
+
+    @media (max-width: #{$breakpoint-md - 1px}) {
+      width: calc(#{$sidebar-mobile-width} - 20px);
+    }
   }
 
   .nav-footer {
@@ -223,5 +350,16 @@ import Logo from './Logo.vue';
       background-color: #bcdccc;
     }
   }
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: $z-index-modal-backdrop;
+  backdrop-filter: blur(2px);
 }
 </style>

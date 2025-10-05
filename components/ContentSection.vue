@@ -1,50 +1,48 @@
 <template>
-  <div class="entity-content">
-    <ContentTopCard
+  <ContentTopCard
+    :pageName="pageName"
+    :pageNamePlural="pageNamePlural"
+    @add="handleOpenFormForCreation"
+  />
+  <div class="content-area">
+    <div v-if="showForm" class="form-section">
+      <div class="form-wrapper">
+        <component
+          :is="currentForm"
+          :pageName="pageName"
+          :editingItem="editingItem"
+          @created="handleCreate"
+          @updated="handleUpdate"
+          @close="handleFormClose"
+        />
+      </div>
+      <TipsSection v-if="isGroupsPage && !isMobile" :pageName="pageName" />
+    </div>
+    <EmptyState
+      v-if="items.length === 0 && !showForm"
+      :pageName="pageName"
+      @create="handleOpenFormForCreation"
+    />
+    <!-- Party Cards View -->
+    <PartyCardList
+      v-if="items.length > 0 && isPartiesPage"
+      :parties="items"
+      @edit="handleEdit"
+      @delete="handleDelete"
+      @view="handleView"
+      @menu="handleMenu"
+    />
+
+    <!-- Regular Table View for other pages -->
+    <ContentTable
+      v-if="items.length > 0 && !isPartiesPage"
       :pageName="pageName"
       :pageNamePlural="pageNamePlural"
-      @add="handleOpenFormForCreation"
+      :entities="items"
+      @edit="handleEdit"
+      @delete="handleDelete"
+      @item-add-complete="handleFormClose"
     />
-    <div class="content-area">
-      <div v-if="showForm" class="form-section">
-        <div class="form-wrapper">
-          <component
-            :is="currentForm"
-            :pageName="pageName"
-            :editingItem="editingItem"
-            @created="handleCreate"
-            @updated="handleUpdate"
-            @close="handleFormClose"
-          />
-        </div>
-        <TipsSection v-if="isGroupsPage" :pageName="pageName" />
-      </div>
-      <EmptyState
-        v-if="items.length === 0 && !showForm"
-        :pageName="pageName"
-        @create="handleOpenFormForCreation"
-      />
-      <!-- Party Cards View -->
-      <PartyCardList
-        v-if="items.length > 0 && isPartiesPage"
-        :parties="items"
-        @edit="handleEdit"
-        @delete="handleDelete"
-        @view="handleView"
-        @menu="handleMenu"
-      />
-
-      <!-- Regular Table View for other pages -->
-      <ContentTable
-        v-if="items.length > 0 && !isPartiesPage"
-        :pageName="pageName"
-        :pageNamePlural="pageNamePlural"
-        :entities="items"
-        @edit="handleEdit"
-        @delete="handleDelete"
-        @item-add-complete="handleFormClose"
-      />
-    </div>
   </div>
 </template>
 
@@ -59,6 +57,7 @@ import WalletForm from './WalletForm.vue';
 import ContentTable from './ContentTable.vue';
 import PartyCardList from './PartyCardList.vue';
 import TipsSection from './TipsSection.vue';
+import { useSidebar } from '@/composables/useSidebar';
 
 const props = defineProps({
   pageName: {
@@ -73,6 +72,9 @@ const props = defineProps({
 
 // Destructure props to use them in the setup function
 const { pageName, pageNamePlural } = toRefs(props);
+
+// Mobile detection
+const { isMobile } = useSidebar();
 
 const showForm = ref(false);
 const items = ref([]);
@@ -168,23 +170,6 @@ const handleDelete = (itemToDelete) => {
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
 
-.entity-content {
-  width: calc(100% - 0.5rem);
-  max-width: 1400px;
-  min-height: 100vh;
-  background-color: $bg-white;
-  border-radius: 2rem;
-  border: 1px solid $bg-gray;
-  margin: 0 1.5rem 1rem;
-  padding: 1.5rem;
-  box-sizing: border-box;
-  overflow: hidden;
-
-  @media (min-width: 768px) {
-    padding: 1.25rem;
-  }
-}
-
 .content-area {
   margin-top: 2rem;
   display: flex;
@@ -192,6 +177,16 @@ const handleDelete = (itemToDelete) => {
   gap: 2rem;
   align-items: center;
   width: 100%;
+
+  @media (max-width: $breakpoint-md) {
+    margin-top: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    margin-top: 1rem;
+    gap: 1rem;
+  }
 }
 
 .form-section {
@@ -202,12 +197,34 @@ const handleDelete = (itemToDelete) => {
   max-width: 1400px;
   align-self: center;
   margin: 0 auto;
+  padding: 0 1rem;
+
+  @media (max-width: $breakpoint-lg) {
+    gap: 2rem;
+    padding: 0 0.75rem;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 0.25rem;
+  }
 }
 
 .form-wrapper {
   flex: 1;
   min-width: 0;
   max-width: 800px;
+
+  @media (max-width: $breakpoint-sm) {
+    max-width: 100%;
+    width: 100%;
+  }
 }
 
 .footer-section {

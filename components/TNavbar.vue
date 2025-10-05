@@ -1,8 +1,16 @@
 <template>
   <div class="navbar">
+    <div class="navbar-left">
+      <HamburgerMenu v-if="isMobile" :is-open="isSidebarOpen" @toggle="toggleSidebar" />
+    </div>
     <div class="navbar-right">
       <div class="search-container">
-        <TButton size="small" text="Add Transaction +" to="/transactions/new" />
+        <TButton
+          class="add-transaction-btn"
+          size="small"
+          text="Add Transaction +"
+          to="/transactions/new"
+        />
         <button class="icon-button">
           <BellIcon class="icon" />
         </button>
@@ -22,45 +30,57 @@
 import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
+import HamburgerMenu from './HamburgerMenu.vue';
 import { MagnifyingGlassIcon, BellIcon } from '@heroicons/vue/24/outline';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
+import { useSidebar } from '@/composables/useSidebar';
 
 const { user } = useAuth();
 const { getAvatarUrl } = useAvatar();
+const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
 </script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
 .navbar {
-  --sidebar-width: min(300px, 30vw);
-  --sidebar-min-width: 200px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: $navbar-height;
-  padding: 0 5rem;
+  padding: 0 2rem;
   background-color: $bg-gray;
   border-bottom: 1px solid #e9ecef;
   position: fixed;
   top: 0;
   right: 0;
-  left: var(--sidebar-width, 300px);
-  z-index: 10;
+  z-index: $z-index-sticky;
   transition: left 0.3s ease;
 
-  @media (max-width: 1200px) {
-    left: 250px;
+  // Desktop - account for sidebar
+  @media (min-width: $breakpoint-md) {
+    left: $sidebar-width;
+    padding: 0 2rem;
   }
 
-  @media (max-width: 992px) {
-    left: 200px;
-  }
-
-  @media (max-width: 768px) {
+  // Mobile - full width
+  @media (max-width: #{$breakpoint-md - 1px}) {
     left: 0;
     padding: 0 1rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0 0.75rem;
+  }
+
+  .navbar-left {
+    display: flex;
+    align-items: center;
+
+    @media (min-width: $breakpoint-md) {
+      display: none;
+    }
   }
 
   .navbar-right {
@@ -80,6 +100,26 @@ const { getAvatarUrl } = useAvatar();
     gap: 16px;
     position: relative;
     width: 396px;
+
+    @media (max-width: #{$breakpoint-lg - 1px}) {
+      width: auto;
+      gap: 8px;
+    }
+
+    @media (max-width: #{$breakpoint-md - 1px}) {
+      width: auto;
+      gap: 6px;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      gap: 8px;
+
+      // Hide Add Transaction button and search icon on mobile
+      .add-transaction-btn,
+      .icon-button:last-child {
+        display: none;
+      }
+    }
   }
 
   .icon {
@@ -99,16 +139,24 @@ const { getAvatarUrl } = useAvatar();
     background-color: #dee1e0;
     border: none;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    @media (max-width: $breakpoint-sm) {
+      width: 32px;
+      height: 32px;
+      padding: 6px;
+    }
+
+    &:hover {
+      background-color: #d0d3d2;
+    }
   }
 
   .avatar-container {
     display: flex;
     flex-direction: row;
     align-items: center;
-
-    @media (max-width: 480px) {
-      display: none;
-    }
+    flex-shrink: 0;
   }
 }
 </style>

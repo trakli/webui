@@ -212,17 +212,25 @@ function clearSelection() {
 .input-container {
   display: flex;
   align-items: center;
-  border: 1px solid $border-light;
-  border-radius: 6px;
-  padding: 0.4rem 0.6rem;
+  border: 1.5px solid $border-light;
+  border-radius: 8px;
+  padding: 0.5rem;
   background: $bg-white;
-}
+  min-height: 44px;
+  gap: 0.375rem;
+  transition: border-color 0.2s ease;
+  position: relative;
 
-.selected-icon {
-  width: 1.75rem;
-  height: 1.75rem;
-  margin: 0 $spacing-2;
-  color: $text-muted;
+  &:focus-within {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.375rem;
+    min-height: 40px;
+    gap: 0.25rem;
+  }
 }
 
 .icon-search {
@@ -230,24 +238,54 @@ function clearSelection() {
   border: none;
   outline: none;
   font-size: 0.9rem;
-  color: #111827;
-  padding: 0.5rem 0.75rem;
+  color: $text-primary;
+  background: transparent;
+  min-width: 0;
+  padding: 0;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 0.875rem;
+  }
 }
 
 .clear-icon-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.2rem;
+  padding: 0.125rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .clear-icon {
-  width: 1rem;
-  height: 1rem;
-  color: #9ca3af;
+  width: 14px;
+  height: 14px;
+  color: $text-muted;
   transition: color 0.2s;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 12px;
+    height: 12px;
+  }
 }
 
 .clear-icon-btn:hover .clear-icon {
@@ -258,15 +296,35 @@ function clearSelection() {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.2rem;
+  padding: 0.125rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .chevron-icon {
-  width: 1rem;
-  height: 1rem;
-  color: #6b7280;
+  width: 14px;
+  height: 14px;
+  color: $text-muted;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 12px;
+    height: 12px;
+  }
 }
 
 .icon-grid {
@@ -283,6 +341,26 @@ function clearSelection() {
   height: 18vh;
   overflow-y: auto;
   overflow-x: hidden;
+
+  @media (max-width: $breakpoint-md) {
+    width: 70%;
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+    grid-template-columns: repeat(7, 1fr);
+    height: 21vh;
+    gap: 0.25rem;
+    padding: 0.375rem;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(7, 1fr);
+    height: 20vh;
+    gap: 0.2rem;
+    padding: 0.25rem;
+  }
 }
 
 .icon-btn {
@@ -296,6 +374,17 @@ function clearSelection() {
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s ease;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 480px) {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
 }
 
 .icon-btn:hover {
@@ -311,6 +400,16 @@ function clearSelection() {
   width: 1.1rem;
   height: 1.1rem;
   color: $text-muted;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
 }
 
 .icon-btn.selected .icon-svg {

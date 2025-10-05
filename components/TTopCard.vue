@@ -2,18 +2,42 @@
   <div class="entity-header">
     <div class="header-content">
       <div class="content-main">
-        <h1 class="title">Add {{ pageName }}</h1>
+        <h1 class="title">{{ action }} {{ pageName }}</h1>
         <div class="breadcrumb">
-          <span class="breadcrumb-item">Home</span>
-          <span class="breadcrumb-separator">&gt;</span>
-          <span class="breadcrumb-item">{{ pageNamePlural }}</span>
-          <span class="breadcrumb-separator">&gt;</span>
-          <span class="breadcrumb-current">Add {{ pageName }}</span>
+          <template v-if="breadcrumbItems.length > 0">
+            <template v-for="(item, index) in breadcrumbItems" :key="index">
+              <span
+                :class="{
+                  'breadcrumb-item': !item.current,
+                  'breadcrumb-current': item.current,
+                  'breadcrumb-clickable': item.clickable
+                }"
+                @click="item.clickable ? $emit(item.action || 'back', item) : null"
+              >
+                {{ item.text }}
+              </span>
+              <span v-if="index < breadcrumbItems.length - 1" class="breadcrumb-separator"
+                >&gt;</span
+              >
+            </template>
+          </template>
+          <template v-else>
+            <span class="breadcrumb-item">Home</span>
+            <span class="breadcrumb-separator">&gt;</span>
+            <span class="breadcrumb-item">{{ pageNamePlural }}</span>
+            <span class="breadcrumb-separator">&gt;</span>
+            <span class="breadcrumb-current">{{ action }} {{ pageName }}</span>
+          </template>
         </div>
       </div>
       <div class="action-buttons">
         <TInfoButton />
-        <TButton :text="`Add ${pageName} +`" class="add-entity-button" @click="$emit('add')" />
+        <TButton
+          v-if="showAddButton"
+          :text="buttonText || `Add ${pageName} +`"
+          class="add-entity-button"
+          @click="$emit(buttonAction)"
+        />
       </div>
     </div>
   </div>
@@ -28,13 +52,33 @@ defineProps({
     type: String,
     required: true
   },
+  action: {
+    type: String,
+    default: 'Add'
+  },
   pageNamePlural: {
     type: String,
     required: true
+  },
+  showAddButton: {
+    type: Boolean,
+    default: true
+  },
+  buttonText: {
+    type: String,
+    default: null
+  },
+  buttonAction: {
+    type: String,
+    default: 'add'
+  },
+  breadcrumbItems: {
+    type: Array,
+    default: () => []
   }
 });
 
-defineEmits(['add']);
+defineEmits(['add', 'back', 'custom']);
 </script>
 
 <style lang="scss" scoped>
@@ -47,6 +91,16 @@ defineEmits(['add']);
   padding: 0.75rem 1rem;
   margin: 0;
   box-sizing: border-box;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 0.5rem 0.75rem;
+    border-radius: $radius-lg;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.5rem;
+    border-radius: $radius-md;
+  }
 }
 
 .header-content {
@@ -54,6 +108,12 @@ defineEmits(['add']);
   justify-content: space-between;
   align-items: center;
   width: 100%;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 }
 
 .content-main {
@@ -65,6 +125,15 @@ defineEmits(['add']);
   font-size: $font-size-lg;
   font-weight: $font-bold;
   margin: 0 0 4px 0;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-base;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-sm;
+    margin-bottom: 2px;
+  }
 }
 
 .breadcrumb {
@@ -72,29 +141,61 @@ defineEmits(['add']);
   flex-direction: row;
   gap: 4px;
   align-items: center;
+  flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 2px;
+  }
 }
 
 .breadcrumb-item {
   color: $primary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
 }
 
 .breadcrumb-separator {
   color: $text-secondary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
 }
 
 .breadcrumb-current {
   color: $text-primary;
   font-weight: $font-normal;
   font-size: $font-size-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
+}
+
+.breadcrumb-clickable {
+  cursor: pointer;
+
+  &:hover {
+    color: $primary;
+    text-decoration: underline;
+  }
 }
 
 .action-buttons {
   display: flex;
   gap: 8px;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 6px;
+  }
 }
 
 .add-entity-button {
@@ -102,5 +203,18 @@ defineEmits(['add']);
   height: 34px;
   font-size: $font-size-sm;
   font-weight: $font-semibold;
+
+  @media (max-width: $breakpoint-md) {
+    width: 140px;
+    height: 32px;
+    font-size: $font-size-xs;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 120px;
+    height: 30px;
+    font-size: $font-size-xs;
+    padding: 0.25rem 0.5rem;
+  }
 }
 </style>

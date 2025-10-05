@@ -1,504 +1,439 @@
 <template>
   <div class="transaction-form">
     <div class="form">
-      <div class="form-transaction">
-        <!-- Date Input Field -->
-        <div class="transaction-date">
-          <span>Transaction Date</span>
-          <input type="date" />
-        </div>
-
-        <!-- Time Input Field -->
-        <div class="transaction-date">
-          <span>Transaction Time</span>
-          <input type="time" />
-        </div>
-      </div>
-
-      <!-- Amount Input Field -->
       <div class="transaction-date">
         <span>Amount</span>
         <div class="transaction-amount">
-          <input type="number" placeholder="Ex: 250 000" />
-          <button class="amount-currency-button">XAF</button>
-        </div>
-      </div>
-
-      <!-- Party Dropdown -->
-      <div class="transaction-party">
-        <span>Party</span>
-        <div class="party-search">
-          <MagnifyingGlassIcon class="search-icon" />
           <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Search party..."
-            @focus="showDropdown = true"
-            @blur="hideDropdownWithDelay"
-            @input="filterParties"
+            type="number"
+            placeholder="Ex: 250 000"
+            v-model="formAmount"
+            min="1"
+            step="any"
+            required
           />
-          <ChevronDownIcon class="dropdown-icon" />
+          <select
+            v-model="selectedCurrency"
+            class="amount-currency-select"
+            @change="handleCurrencyChange"
+          >
+            <option v-for="currency in availableCurrencies" :key="currency" :value="currency">
+              {{ currency }}
+            </option>
+          </select>
         </div>
-        <ul v-if="showDropdown && filteredParties.length" class="party-dropdown">
-          <li v-for="party in filteredParties" :key="party" @mousedown.prevent="selectParty(party)">
-            <span>
-              <template v-for="(part, index) in getHighlightedParts(party)" :key="index">
-                <span :class="part.isMatch ? 'text-highlight' : 'text-secondary'">
-                  {{ part.text }}
-                </span>
-              </template>
-            </span>
-          </li>
-        </ul>
+        <div v-if="amountError" class="error-text">Enter a valid amount greater than 0.</div>
       </div>
 
-      <!-- Category Selection -->
-      <div class="transaction-category">
-        <span>Category</span>
-        <div class="category-options">
-          <div
-            v-for="category in categories"
-            :key="category"
-            class="category-option"
-            :class="{ selected: selectedCategory === category }"
-            @click="selectedCategory = category"
-          >
-            <span class="category-label">{{ category }}</span>
-            <span class="radio-indicator" />
-          </div>
+      <div class="transaction-description">
+        <span>Description</span>
+        <textarea v-model="formDescription" placeholder="Type here ..." required />
+        <div v-if="descriptionError" class="error-text">Description is required.</div>
+      </div>
+
+      <div class="form-transaction">
+        <div class="transaction-date">
+          <span>Transaction date</span>
+          <input type="date" v-model="formDate" required />
+          <div v-if="dateError" class="error-text">Date is required.</div>
         </div>
 
-        <!-- Description -->
-        <div class="transaction-description">
-          <span>Description</span>
-          <textarea placeholder="Type here ..." />
+        <div class="transaction-date">
+          <span>Transaction time</span>
+          <input type="time" v-model="formTime" required />
+          <div v-if="timeError" class="error-text">Time is required.</div>
         </div>
+      </div>
 
-        <!-- Attachment -->
-        <div class="transaction-attachment">
-          <span>Attachment</span>
-          <div class="upload-box">
-            <ArrowUpOnSquareIcon class="upload-icon" />
-            <p class="upload-text">Upload Here</p>
-            <p class="upload-subtext">File type : jpg, jpeg, png, pdf<br />Max size: 5Mo</p>
-          </div>
+      <div class="form-transaction">
+        <SearchableDropdown
+          :label="isOutcomeSelected ? 'Party (sent to)' : 'Party (received from)'"
+          placeholder="Search party..."
+          :options="parties"
+          v-model="searchQuery"
+          @select="handlePartySelect"
+        />
+
+        <SearchableDropdown
+          :label="isOutcomeSelected ? 'Wallet (sent from)' : 'Wallet (received to)'"
+          placeholder="Search wallet..."
+          :options="wallets"
+          v-model="walletSearchQuery"
+          :error="walletError ? 'Wallet is required.' : ''"
+          @select="handleWalletSelect"
+        />
+      </div>
+
+      <div class="form-transaction">
+        <SearchableDropdown
+          label="Group"
+          placeholder="Search group..."
+          :options="groups"
+          v-model="groupSearchQuery"
+          :error="categoryError ? 'Group is required.' : ''"
+          @select="handleGroupSelect"
+        />
+
+        <SearchableDropdown
+          label="Categories"
+          placeholder="Search categories..."
+          :options="categories"
+          v-model="categorySearchQuery"
+          :multiple="true"
+          :disabled="isSameAsGroup"
+          @select="handleCategorySelect"
+        />
+      </div>
+
+      <div class="transaction-files">
+        <span>Attachments</span>
+        <div class="upload-box">
+          <input id="file-input" type="file" multiple @change="onFilesSelected" />
+          <label for="file-input" class="upload-button">Browse files</label>
+          <span class="hint">Images, PDFs or docs. Max 5 files.</span>
+        </div>
+        <div v-if="selectedFileNames.length" class="file-list">
+          <span v-for="(f, i) in selectedFileNames" :key="f.name + i" class="chip">
+            {{ f.name }}
+            <button type="button" class="remove" @click="removeFile(i)">×</button>
+          </span>
         </div>
       </div>
     </div>
     <TButton
-      :text="isOutcomeSelected ? 'Add Outcome +' : 'Add Income +'"
+      :text="
+        props.editingItem
+          ? isOutcomeSelected
+            ? 'Update expense'
+            : 'Update income'
+          : isOutcomeSelected
+            ? 'Record expense'
+            : 'Record income'
+      "
       class="submit-button"
-      :class="{ 'submit-button--outcome': isOutcomeSelected }"
+      :class="{ 'submit-button--expense': isOutcomeSelected }"
+      @click="onSubmit"
     />
   </div>
 </template>
 
-<script setup>
-import { defineProps, toRefs, ref, computed } from 'vue';
+<script setup lang="ts">
+import { toRefs, ref, computed, watch, onMounted } from 'vue';
 import TButton from './TButton.vue';
-import {
-  MagnifyingGlassIcon,
-  ChevronDownIcon,
-  ArrowUpOnSquareIcon
-} from '@heroicons/vue/24/outline';
+import SearchableDropdown from './SearchableDropdown.vue';
+import { useSharedData } from '~/composables/useSharedData';
 
-// Props to receive the selected transaction type from parent
+const emit = defineEmits(['submit', 'error']);
+
 const props = defineProps({
   isOutcomeSelected: {
     type: Boolean,
     default: false
+  },
+  editingItem: {
+    type: Object,
+    default: null
   }
 });
 
-// Destructure props for easier access
 const { isOutcomeSelected } = toRefs(props);
 
-// Computed properties for dynamic colors
-const focusColor = computed(() => (isOutcomeSelected.value ? '#EB5757' : '#4caf50'));
-const primaryColor = computed(() => (isOutcomeSelected.value ? '#EB5757' : '#047844'));
-const lightBgColor = computed(() => (isOutcomeSelected.value ? '#fce8e8' : '#e9f5ec'));
+const now = new Date();
+const formDate = ref(now.toISOString().slice(0, 10));
+const formTime = ref(now.toTimeString().slice(0, 5));
+const formAmount = ref('');
+const formParty = ref('');
+const formCategory = ref('');
+const formDescription = ref('');
 
-// Party dropdown functionality
+const selectedPartyId = ref('');
+const selectedWalletId = ref('');
+const selectedGroupId = ref(null);
+const selectedAdditionalCategoryIds = ref([]);
+const filesBase64 = ref([]);
+const selectedCurrency = ref('XAF');
+
+const dateError = ref(false);
+const timeError = ref(false);
+const amountError = ref(false);
+const partyError = ref(false);
+const categoryError = ref(false);
+const walletError = ref(false);
+const descriptionError = ref(false);
+
+function validateRequiredFields() {
+  let valid = true;
+
+  const amountNum = Number(formAmount.value);
+  amountError.value = !Number.isFinite(amountNum) || amountNum <= 0;
+  if (amountError.value) valid = false;
+
+  dateError.value = !formDate.value || formDate.value.trim() === '';
+  timeError.value = !formTime.value || formTime.value.trim() === '';
+  if (dateError.value || timeError.value) valid = false;
+
+  partyError.value = false;
+  categoryError.value = false;
+  walletError.value = false;
+  descriptionError.value = false;
+
+  const partyValue = (formParty.value || searchQuery.value || '').trim();
+  if (partyValue) formParty.value = partyValue;
+
+  return valid;
+}
+
+function onSubmit() {
+  const isValid = validateRequiredFields();
+  if (!isValid) {
+    return;
+  }
+
+  const now = new Date();
+  const date = formDate.value || now.toISOString().slice(0, 10);
+  const time = formTime.value || now.toTimeString().slice(0, 5);
+
+  const amountNum = Number(formAmount.value);
+
+  const payload = {
+    date,
+    time,
+    type: isOutcomeSelected.value ? 'EXPENSE' : 'INCOME',
+    party: formParty.value,
+    partyId: selectedPartyId.value,
+    amount: `${amountNum} ${selectedCurrency.value}`,
+    category: formCategory.value,
+    categoryIds: selectedAdditionalCategoryIds.value,
+    groupId: selectedGroupId.value ?? undefined,
+    walletId: selectedWalletId.value,
+    description: formDescription.value.trim(),
+    filesToUpload: filesBase64.value
+  };
+
+  if (props.editingItem?.id) {
+    payload.id = props.editingItem.id;
+  }
+
+  emit('submit', payload);
+}
+
+const sharedData = useSharedData();
+
+const parties = computed(() => sharedData.parties.value);
+const groups = computed(() => sharedData.groups.value);
+const categories = computed(() => {
+  const type = isOutcomeSelected.value ? 'expense' : 'income';
+  if (type === 'expense') {
+    return sharedData.getExpenseCategories.value;
+  } else {
+    return sharedData.getIncomeCategories.value;
+  }
+});
+
+const availableCurrencies = computed(() => {
+  const currencies = new Set(['XAF', 'USD', 'EUR', 'GBP', 'NGN']);
+  sharedData.wallets.value.forEach((wallet) => {
+    if (wallet.currency) {
+      currencies.add(wallet.currency);
+    }
+  });
+  return Array.from(currencies).sort();
+});
+
+const wallets = computed(() => {
+  return sharedData.wallets.value.filter((wallet) => {
+    return !wallet.currency || wallet.currency === selectedCurrency.value;
+  });
+});
+
+function handlePartySelect(party) {
+  formParty.value = party.name;
+  const partyId = party.sync_state?.client_generated_id || String(party.id);
+  selectedPartyId.value = partyId;
+  partyError.value = false;
+}
+
+function handleWalletSelect(wallet) {
+  const walletId = wallet.sync_state?.client_generated_id || String(wallet.id);
+  selectedWalletId.value = walletId;
+  walletError.value = false;
+
+  if (wallet.currency && wallet.currency !== selectedCurrency.value) {
+    selectedCurrency.value = wallet.currency;
+  }
+}
+
+function handleCurrencyChange() {
+  if (selectedWalletId.value) {
+    const currentWallet = sharedData.wallets.value.find(
+      (w) => (w.sync_state?.client_generated_id || String(w.id)) === selectedWalletId.value
+    );
+
+    if (
+      currentWallet &&
+      currentWallet.currency &&
+      currentWallet.currency !== selectedCurrency.value
+    ) {
+      selectedWalletId.value = '';
+      walletSearchQuery.value = '';
+
+      const defaultWallet = sharedData.getDefaultWallet.value;
+      if (defaultWallet) {
+        const walletId = defaultWallet.sync_state?.client_generated_id || String(defaultWallet.id);
+        selectedWalletId.value = walletId;
+        walletSearchQuery.value = defaultWallet.name; // Show in dropdown input
+      }
+    }
+  }
+}
+
+function handleGroupSelect(group) {
+  selectedGroupId.value = group.id;
+  formCategory.value = group.name;
+  categoryError.value = false;
+}
+
 const searchQuery = ref('');
-const showDropdown = ref(false);
-const allParties = ['Isaac Fomo', 'Erica Isabela', 'Isa Dora Decca'];
-const filteredParties = ref([...allParties]);
+const groupSearchQuery = ref('');
+const categorySearchQuery = ref('');
+const walletSearchQuery = ref('');
 
-function filterParties() {
-  const query = searchQuery.value.toLowerCase();
-  filteredParties.value = allParties.filter((p) => p.toLowerCase().includes(query));
+function handleCategorySelect(categoryIds) {
+  selectedAdditionalCategoryIds.value = categoryIds;
 }
 
-function selectParty(party) {
-  searchQuery.value = party;
-  showDropdown.value = false;
+onMounted(async () => {
+  try {
+    await sharedData.loadAllData();
+
+    if (!props.editingItem) {
+      const defaultGroup = sharedData.getDefaultGroup.value;
+      if (defaultGroup && !selectedGroupId.value) {
+        selectedGroupId.value = defaultGroup.id;
+        formCategory.value = defaultGroup.name;
+        groupSearchQuery.value = defaultGroup.name; // Show in dropdown input
+      }
+
+      const defaultWallet = sharedData.getDefaultWallet.value;
+      if (defaultWallet && !selectedWalletId.value) {
+        selectedWalletId.value =
+          defaultWallet.sync_state?.client_generated_id || String(defaultWallet.id);
+        walletSearchQuery.value = defaultWallet.name; // Show in dropdown input
+        if (defaultWallet.currency) {
+          selectedCurrency.value = defaultWallet.currency;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('[TransactionForm] Failed to load shared data', e);
+  }
+});
+
+function isSameAsGroup(category) {
+  if (!selectedGroupId.value) return false;
+  return category.id === selectedGroupId.value;
 }
 
-function hideDropdownWithDelay() {
-  setTimeout(() => {
-    showDropdown.value = false;
-  }, 200);
+const selectedFileNames = ref([]);
+
+function onFilesSelected(event) {
+  const input = event.target;
+  const files = input.files;
+  if (!files) return;
+  filesBase64.value = [];
+  selectedFileNames.value = [];
+  const tasks = [];
+  for (const file of Array.from(files)) {
+    tasks.push(
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          const base64 = result.includes(',') ? result.split(',')[1] : result;
+          filesBase64.value.push(base64);
+          selectedFileNames.value.push({ name: file.name, size: file.size });
+          resolve();
+        };
+        reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(file);
+      })
+    );
+  }
+  Promise.all(tasks)
+    .then(() => {
+      console.log('Files processed successfully');
+    })
+    .catch((err) => console.error('Failed to read files', err));
 }
 
-function getHighlightedParts(name) {
-  const query = searchQuery.value.trim();
-  if (!query) return [{ text: name, isMatch: false }];
+function removeFile(index) {
+  filesBase64.value.splice(index, 1);
+  selectedFileNames.value.splice(index, 1);
+}
 
-  const regex = new RegExp(query, 'gi');
-  const matches = [...name.matchAll(regex)];
+watch(
+  () => props.editingItem,
+  async (item) => {
+    if (!item) return;
 
-  if (matches.length === 0) return [{ text: name, isMatch: false }];
+    dateError.value = false;
+    timeError.value = false;
+    amountError.value = false;
+    partyError.value = false;
+    categoryError.value = false;
+    descriptionError.value = false;
 
-  const result = [];
-  let lastIndex = 0;
+    if (item.date) formDate.value = item.date;
+    if (item.time) formTime.value = item.time;
 
-  for (const match of matches) {
-    const start = match.index;
-    const end = start + match[0].length;
-
-    if (start > lastIndex) {
-      result.push({ text: name.slice(lastIndex, start), isMatch: false });
+    if (item.party) {
+      formParty.value = item.party;
+      searchQuery.value = item.party;
+    }
+    if (item.partyId) {
+      selectedPartyId.value = item.partyId;
     }
 
-    result.push({ text: name.slice(start, end), isMatch: true });
-    lastIndex = end;
-  }
+    if (item.groupId) {
+      selectedGroupId.value = item.groupId;
+      const group = sharedData.groups.value.find((g) => g.id === item.groupId);
+      if (group) {
+        formCategory.value = group.name;
+        groupSearchQuery.value = group.name;
+      }
+    }
 
-  if (lastIndex < name.length) {
-    result.push({ text: name.slice(lastIndex), isMatch: false });
-  }
+    if (item.categoryIds && item.categoryIds.length > 0) {
+      selectedAdditionalCategoryIds.value = item.categoryIds;
+    }
 
-  return result;
-}
+    if (item.walletId) {
+      selectedWalletId.value = item.walletId;
+      const wallet = sharedData.wallets.value.find(
+        (w) => (w.sync_state?.client_generated_id || String(w.id)) === item.walletId
+      );
+      if (wallet) {
+        walletSearchQuery.value = wallet.name;
+        if (wallet.currency) {
+          selectedCurrency.value = wallet.currency;
+        }
+      }
+    }
 
-// Category selection
-const categories = ['Food', 'Girls 🤣', 'Rent', 'School', 'Tuition', 'Other'];
-const selectedCategory = ref('Food');
+    if (item.description) {
+      formDescription.value = item.description;
+    }
+
+    if (item.amount) {
+      const num = parseFloat(String(item.amount).replace(/[^\d.]/g, ''));
+      formAmount.value = Number.isFinite(num) ? String(num) : '';
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
-
-.transaction-form {
-  --focus-color: v-bind(focusColor);
-  --primary-color: v-bind(primaryColor);
-  --light-bg-color: v-bind(lightBgColor);
-
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 40px;
-}
-
-// Global input focus styles
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--focus-color) !important;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  width: 576px;
-  gap: 20px;
-}
-
-.form-transaction {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-}
-
-.transaction-date {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  span {
-    font-weight: $font-medium;
-  }
-
-  input {
-    padding: 12px;
-    border: 1px solid #fff;
-    border-radius: 8px;
-    font-size: 16px;
-    width: 280px;
-    height: 50px;
-
-    &:focus {
-      border-color: var(--focus-color);
-      outline: none;
-    }
-  }
-
-  input::placeholder {
-    color: #79828e;
-  }
-}
-
-.transaction-amount {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-
-  input {
-    width: 510px;
-    height: 50px;
-    border-radius: $radius-lg;
-    padding: 12px;
-    border: 1px solid #fff;
-
-    &:focus {
-      border-color: var(--focus-color);
-      outline: none;
-    }
-  }
-
-  .amount-currency-button {
-    width: 58px;
-    height: 50px;
-    background-color: #fafafa;
-    border-radius: $radius-lg;
-    font-weight: $font-normal;
-    font-size: $font-size-sm;
-    line-height: 100%;
-    border: 1px solid #e0e0e0;
-    cursor: pointer;
-  }
-}
-
-.transaction-party {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  position: relative;
-
-  span {
-    font-weight: $font-medium;
-  }
-
-  .party-search {
-    display: flex;
-    align-items: center;
-    position: relative;
-
-    input {
-      width: 100%;
-      padding: 12px 40px 12px 36px;
-      height: 50px;
-      border: 1px solid var(--focus-color);
-      border-radius: 8px;
-      font-size: 16px;
-      color: #1a1a1a;
-      background-color: #fff;
-
-      &:focus {
-        border-color: var(--focus-color);
-        outline: none;
-      }
-    }
-
-    .search-icon,
-    .dropdown-icon {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      color: var(--primary-color);
-    }
-
-    .search-icon {
-      left: 10px;
-    }
-
-    .dropdown-icon {
-      right: 10px;
-    }
-  }
-
-  .party-dropdown {
-    position: absolute;
-    top: 85px;
-    width: 100%;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    list-style: none;
-    padding: 8px 0;
-    z-index: 10;
-
-    li {
-      padding: 10px 16px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-
-      .text-highlight {
-        color: #464b5c;
-        font-weight: 500;
-      }
-
-      .text-secondary {
-        color: #8f929c;
-      }
-
-      &:hover {
-        background-color: #f5f5f5;
-      }
-    }
-  }
-}
-
-.transaction-category {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  span {
-    font-weight: $font-medium;
-    margin-bottom: 8px;
-  }
-
-  .category-options {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-
-  .category-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 2px solid transparent;
-    background-color: #fff;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-
-    .category-label {
-      font-weight: 500;
-      color: #1a1a1a;
-    }
-
-    .radio-indicator {
-      width: 16px;
-      height: 16px;
-      border: 2px solid #d2d5db;
-      border-radius: 9999px;
-      background-color: transparent;
-    }
-
-    &.selected {
-      border-color: var(--primary-color);
-      background-color: var(--light-bg-color);
-
-      .category-label {
-        color: var(--primary-color);
-      }
-
-      .radio-indicator {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-      }
-    }
-  }
-}
-
-.transaction-description {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  span {
-    font-weight: $font-medium;
-    margin-bottom: 8px;
-  }
-
-  textarea {
-    width: 576px;
-    border-radius: 12px;
-    padding: 16px;
-    font-size: 16px;
-    border: 1px solid #e0e0e0;
-    background-color: #ffffff;
-    resize: none;
-    color: #1a1a1a;
-
-    &:focus {
-      border: 1px solid var(--focus-color) !important;
-      outline: none;
-    }
-
-    &::placeholder {
-      color: #79828e;
-    }
-  }
-}
-
-.transaction-attachment {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-
-  span {
-    font-weight: $font-medium;
-    margin-bottom: 8px;
-  }
-
-  .upload-box {
-    width: 576px;
-    height: 120px;
-    border: 1px dashed #acb7b8;
-    border-radius: $radius-lg;
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 16px;
-    cursor: pointer;
-    transition: border-color 0.2s ease;
-
-    &:hover {
-      border-color: var(--primary-color);
-    }
-
-    .upload-icon {
-      width: 24px;
-      height: 24px;
-      color: var(--primary-color);
-    }
-
-    .upload-text {
-      margin-top: 10px;
-      font-weight: $font-normal;
-      font-size: $font-size-sm;
-      color: var(--primary-color);
-    }
-
-    .upload-subtext {
-      font-size: 9px;
-      color: #8f929c;
-      margin-top: 4px;
-    }
-  }
-}
-
-.submit-button {
-  width: 179px;
-  height: 53px;
-  border-radius: $radius-lg;
-  padding: 16px 32px 16px 32px;
-  gap: 8px;
-
-  &--outcome {
-    background-color: #eb5757 !important;
-    border-color: #eb5757 !important;
-  }
-}
+@use '@/assets/scss/_transaction-form.scss' as *;
 </style>
