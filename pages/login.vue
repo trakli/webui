@@ -84,7 +84,6 @@ onMounted(() => {
             required
           />
           <button type="button" class="password-toggle" @click="togglePassword">
-            <!-- Eye Icon -->
             <EyeOff v-if="showPassword" class="w-5 h-5" />
             <Eye v-else class="w-5 h-5" />
           </button>

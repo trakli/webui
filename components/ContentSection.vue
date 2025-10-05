@@ -23,7 +23,6 @@
       :pageName="pageName"
       @create="handleOpenFormForCreation"
     />
-    <!-- Party Cards View -->
     <PartyCardList
       v-if="items.length > 0 && isPartiesPage"
       :parties="items"
@@ -33,7 +32,6 @@
       @menu="handleMenu"
     />
 
-    <!-- Regular Table View for other pages -->
     <ContentTable
       v-if="items.length > 0 && !isPartiesPage"
       :pageName="pageName"

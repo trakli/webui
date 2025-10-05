@@ -14,7 +14,6 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
     </div>
 
     <form class="form">
-      <!-- Name row -->
       <div class="form-row">
         <div class="form-group">
           <label
@@ -33,7 +32,6 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
         </div>
       </div>
 
-      <!-- Email and Phone row -->
       <div class="form-row">
         <div class="form-group">
           <label
@@ -47,7 +45,6 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
         </div>
       </div>
 
-      <!-- Username and Password row -->
       <div class="form-row">
         <div class="form-group">
           <label>Username </label>

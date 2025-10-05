@@ -1,7 +1,6 @@
 <template>
   <div class="icon-picker">
     <div class="input-container">
-      <!-- show selected icon component -->
       <component
         v-if="modelValue && selectedIconComponent"
         :is="selectedIconComponent"
@@ -20,14 +19,12 @@
         <XIcon class="clear-icon" />
       </button>
 
-      <!-- chevron toggle button -->
       <button type="button" class="dropdown-toggle-btn" @click="toggleDropdown">
         <ChevronDown v-if="!showDropdown" class="chevron-icon" />
         <ChevronUp v-else class="chevron-icon" />
       </button>
     </div>
 
-    <!-- icon grid only visible if dropdown open -->
     <div v-if="showDropdown" class="icon-grid" ref="iconGrid">
       <button
         v-for="iconName in filteredIcons"

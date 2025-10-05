@@ -18,7 +18,6 @@
         <TipsSection v-if="!isMobile" pageName="Category" />
       </div>
 
-      <!-- Loading State -->
       <div v-if="isLoading" class="loading-state">
         <div class="loader">
           <div class="spinner"></div>
@@ -26,13 +25,11 @@
         </div>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="error-state">
         <p>Error: {{ error }}</p>
         <button @click="loadCategories" class="retry-button">Try Again</button>
       </div>
 
-      <!-- Category Tabs - Only show when not loading and no error -->
       <div v-else-if="!showForm" class="category-tabs">
         <div class="tab-buttons">
           <button
@@ -55,7 +52,6 @@
           </button>
         </div>
 
-        <!-- Tab Content -->
         <div class="tab-content">
           <EmptyState
             v-if="currentCategories.length === 0"

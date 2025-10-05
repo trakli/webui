@@ -1,5 +1,4 @@
 <template>
-  <!-- Mobile overlay -->
   <div v-if="isMobile && isSidebarOpen" class="sidebar-overlay" @click="closeSidebar"></div>
 
   <div

@@ -70,7 +70,6 @@
                 </div>
               </td>
             </tr>
-            <!-- Pagination Row -->
             <tr class="pagination-row">
               <td colspan="6">
                 <div class="pagination-container">
