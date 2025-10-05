@@ -1,7 +1,20 @@
 export const useAuth = () => {
   const router = useRouter();
-  const user = useState('auth.user', () => null);
-  const token = useState('auth.token', () => null);
+
+  const userCookie = useCookie('auth.user', {
+    default: () => null,
+    serialize: JSON.stringify,
+    deserialize: JSON.parse
+  });
+  const tokenCookie = useCookie('auth.token', {
+    default: () => null,
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7
+  });
+  const user = useState('auth.user', () => userCookie.value);
+  const token = useState('auth.token', () => tokenCookie.value);
 
   const isAuthenticated = computed(() => !!user.value && !!token.value);
 
@@ -16,6 +29,8 @@ export const useAuth = () => {
       if (response.data) {
         user.value = response.data.user;
         token.value = response.data.token;
+        userCookie.value = response.data.user;
+        tokenCookie.value = response.data.token;
       }
 
       return response;
@@ -36,6 +51,8 @@ export const useAuth = () => {
       if (response.data) {
         user.value = response.data.user;
         token.value = response.data.token;
+        userCookie.value = response.data.user;
+        tokenCookie.value = response.data.token;
       }
 
       return response;
@@ -56,6 +73,8 @@ export const useAuth = () => {
     } finally {
       user.value = null;
       token.value = null;
+      userCookie.value = null;
+      tokenCookie.value = null;
       router.push('/login');
     }
   };
@@ -77,6 +96,8 @@ export const useAuth = () => {
       console.error('Failed to fetch user:', error);
       user.value = null;
       token.value = null;
+      userCookie.value = null;
+      tokenCookie.value = null;
     }
   };
 
