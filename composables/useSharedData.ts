@@ -247,6 +247,12 @@ export const useSharedData = () => {
       (wallets.value.length > 0 ? wallets.value[0] : null)
   );
 
+  // TODO: Replace with backend user preferences API call to get default currency
+  // For now, use default wallet's currency or fallback to USD
+  const getDefaultCurrency = computed(() => {
+    return getDefaultWallet.value?.currency || 'USD';
+  });
+
   // Category management functions
   const addCategory = (category: Category) => {
     categories.value = deduplicateById([category, ...categories.value]);
@@ -341,6 +347,7 @@ export const useSharedData = () => {
     getExpenseCategories,
     getDefaultGroup,
     getDefaultWallet,
+    getDefaultCurrency,
 
     // Load functions
     loadCategories,

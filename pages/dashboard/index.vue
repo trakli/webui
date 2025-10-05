@@ -92,7 +92,7 @@ definePageMeta({
   @media (min-width: 768px) {
     flex-direction: row;
     gap: 1rem;
-    align-items: stretch;
+    align-items: center; // Center vertically instead of stretch
   }
 
   // WalletCard - 40% width
@@ -112,6 +112,8 @@ definePageMeta({
     @media (min-width: 768px) {
       flex: 0 0 58%;
       max-width: 58%;
+      display: flex;
+      align-items: center; // Center the stats content
     }
   }
 }

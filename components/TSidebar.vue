@@ -92,16 +92,6 @@
         <li>
           <button
             class="nav-footer-button"
-            :class="{ selected: $route.path === '/settings' }"
-            @click="handleButtonNavClick('/settings')"
-          >
-            <Cog8ToothIcon class="icon" />
-            <span class="text">Settings</span>
-          </button>
-        </li>
-        <li>
-          <button
-            class="nav-footer-button"
             :class="{ selected: $route.path === '/reports' }"
             @click="handleButtonNavClick('/reports')"
           >
@@ -119,15 +109,14 @@
             <span class="text">AI Insights</span>
           </button>
         </li>
-
         <li>
           <button
             class="nav-footer-button"
-            :class="{ selected: $route.path === '/support' }"
-            @click="handleButtonNavClick('/support')"
+            :class="{ selected: $route.path === '/settings' }"
+            @click="handleButtonNavClick('/settings')"
           >
-            <ChatBubbleLeftRightIcon class="icon" />
-            <span class="text">Support</span>
+            <Cog8ToothIcon class="icon" />
+            <span class="text">Settings</span>
           </button>
         </li>
       </ul>
