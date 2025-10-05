@@ -22,6 +22,13 @@ const handleCallback = async (code) => {
       const tokenState = useState('auth.token');
       userState.value = response.data.user;
       tokenState.value = response.data.token;
+      const userCookie = useCookie('auth.user', {
+        serialize: JSON.stringify,
+        deserialize: JSON.parse
+      });
+      const tokenCookie = useCookie('auth.token');
+      userCookie.value = response.data.user;
+      tokenCookie.value = response.data.token;
 
       router.push('/dashboard');
     }
