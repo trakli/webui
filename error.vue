@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useCookie, useHead, clearError } from 'nuxt/app';
 import { AlertTriangle } from 'lucide-vue-next';
+import { HomeIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
   error: Object
@@ -35,7 +36,12 @@ const handleError = () => {
             <AlertTriangle class="error-icon" />
             <h1 class="error-title">Error {{ error.statusCode }}</h1>
             <p class="error-message">{{ error.message || 'Something went wrong' }}</p>
-            <TButton @click="handleError" class="error-button">Go to Homepage</TButton>
+            <TButton @click="handleError" class="error-button">
+              <template #left-icon>
+                <HomeIcon />
+              </template>
+              Go to Homepage
+            </TButton>
           </div>
         </TCard>
       </div>

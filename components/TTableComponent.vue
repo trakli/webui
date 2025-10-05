@@ -222,7 +222,7 @@ const formatTimeAgo = (txn) => {
 
     &-text {
       font-weight: $font-bold;
-      font-size: $font-size-2xl;
+      font-size: $font-size-xl;
       margin-bottom: 0;
     }
   }
@@ -244,11 +244,11 @@ const formatTimeAgo = (txn) => {
 .filter-container {
   position: relative;
   width: 100%;
-  height: 44px;
-  min-width: 160px;
+  height: 36px;
+  min-width: 140px;
 
   @media (min-width: 640px) {
-    width: 184px;
+    width: 160px;
   }
 
   .search-input,

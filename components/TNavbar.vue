@@ -8,9 +8,13 @@
         <TButton
           class="add-transaction-btn"
           size="small"
-          text="Add Transaction +"
+          text="Add transaction"
           to="/transactions/new"
-        />
+        >
+          <template #left-icon>
+            <PlusIcon />
+          </template>
+        </TButton>
         <button class="icon-button">
           <BellIcon class="icon" />
         </button>
@@ -31,7 +35,7 @@ import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
-import { MagnifyingGlassIcon, BellIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, BellIcon, PlusIcon } from '@heroicons/vue/24/outline';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
 import { useSidebar } from '@/composables/useSidebar';
@@ -157,6 +161,14 @@ const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
+  }
+
+  .add-transaction-btn {
+    text-decoration: none !important;
+
+    &:hover {
+      text-decoration: none !important;
+    }
   }
 }
 </style>

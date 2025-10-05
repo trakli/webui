@@ -34,10 +34,14 @@
         <TInfoButton />
         <TButton
           v-if="showAddButton"
-          :text="buttonText || `Add ${pageName} +`"
+          :text="buttonText || `Add ${pageName.toLowerCase()}`"
           class="add-entity-button"
           @click="$emit(buttonAction)"
-        />
+        >
+          <template #left-icon>
+            <PlusIcon />
+          </template>
+        </TButton>
       </div>
     </div>
   </div>
@@ -46,6 +50,7 @@
 <script setup>
 import TInfoButton from '@/components/TInfoButton.vue';
 import TButton from '@/components/TButton.vue';
+import { PlusIcon } from '@heroicons/vue/24/outline';
 
 defineProps({
   pageName: {

@@ -172,6 +172,8 @@ const toggleCustomPeriod = () => {
 .chip-icon {
   width: 12px;
   height: 12px;
+  flex-shrink: 0;
+  stroke-width: 2;
 
   @media (max-width: $breakpoint-sm) {
     width: 10px;

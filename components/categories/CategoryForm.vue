@@ -55,7 +55,7 @@
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Save Category' : 'Create Category +' }}
+      {{ isEditing ? 'Save category' : 'Create category' }}
     </button>
   </form>
 </template>

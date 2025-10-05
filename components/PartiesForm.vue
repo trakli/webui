@@ -56,7 +56,7 @@
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Save Party' : 'Create Party +' }}
+      {{ isEditing ? 'Save party' : 'Create party' }}
     </button>
   </form>
 </template>

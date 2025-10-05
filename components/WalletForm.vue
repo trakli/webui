@@ -88,7 +88,7 @@
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Update Wallet' : 'Create Wallet +' }}
+      {{ isEditing ? 'Update wallet' : 'Create wallet' }}
     </button>
   </form>
 </template>

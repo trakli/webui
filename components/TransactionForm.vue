@@ -113,7 +113,12 @@
       class="submit-button"
       :class="{ 'submit-button--expense': isOutcomeSelected }"
       @click="onSubmit"
-    />
+    >
+      <template #left-icon>
+        <CheckIcon v-if="!props.editingItem" />
+        <PencilIcon v-else />
+      </template>
+    </TButton>
   </div>
 </template>
 
@@ -121,6 +126,7 @@
 import { toRefs, ref, computed, watch, onMounted } from 'vue';
 import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
+import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '~/composables/useSharedData';
 
 const emit = defineEmits(['submit', 'error']);

@@ -40,7 +40,7 @@
 
     <button type="submit" class="submit-btn" :disabled="isLoading">
       <span v-if="isLoading">{{ isEditing ? 'Updating...' : 'Creating...' }}</span>
-      <span v-else>{{ isEditing ? 'Update Group' : 'Create Group +' }}</span>
+      <span v-else>{{ isEditing ? 'Update group' : 'Create group' }}</span>
     </button>
   </form>
 </template>
