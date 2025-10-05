@@ -1,6 +1,6 @@
 <template>
   <div class="form-section">
-    <FormSection @submit="handleSubmit" />
+    <FormSection :editingItem="editingItem" @submit="handleSubmit" />
     <TipsSection pageName="Transaction" />
   </div>
 </template>
@@ -8,7 +8,13 @@
 <script setup>
 import FormSection from './FormSection.vue';
 import TipsSection from './TipsSection.vue';
-import { defineEmits } from 'vue';
+
+defineProps({
+  editingItem: {
+    type: Object,
+    default: null
+  }
+});
 
 const emit = defineEmits(['submit']);
 

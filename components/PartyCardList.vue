@@ -90,7 +90,7 @@ const filteredParties = computed(() => {
 
   // Apply type filter
   if (selectedFilter.value !== 'all') {
-    filtered = filtered.filter((party) => party.partyType === selectedFilter.value);
+    filtered = filtered.filter((party) => party.type === selectedFilter.value);
   }
 
   // Apply search filter
@@ -124,6 +124,7 @@ const handleMenu = (party) => {
 
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
+@use 'sass:color';
 
 .party-card-list {
   width: 100%;
@@ -234,7 +235,7 @@ const handleMenu = (party) => {
   }
 
   &:hover {
-    border-color: darken($border-light, 10%);
+    border-color: color.adjust($border-light, $lightness: -10%);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   }
 
@@ -300,7 +301,7 @@ const handleMenu = (party) => {
   }
 
   &:hover {
-    border-color: darken($border-light, 10%);
+    border-color: color.adjust($border-light, $lightness: -10%);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   }
 

@@ -11,7 +11,7 @@ import type {
  * Transaction API Service
  * Handles all HTTP requests to the transactions endpoints
  */
-export const transactionApi = {
+const transactionApi = {
   /**
    * Fetch all transactions
    * GET /transactions
@@ -179,3 +179,6 @@ export const transactionApi = {
     }
   }
 };
+
+export default transactionApi;
+export { transactionApi };

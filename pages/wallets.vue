@@ -39,6 +39,7 @@
 import { ref, onMounted } from 'vue';
 import { useWallets } from '@/composables/useWallets';
 import { useSidebar } from '@/composables/useSidebar';
+import { useNotifications } from '@/composables/useNotifications';
 import ContentTopCard from '@/components/TTopCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import WalletForm from '@/components/WalletForm.vue';
@@ -51,6 +52,8 @@ const { isMobile } = useSidebar();
 
 const { wallets, isLoading, error, fetchWallets, createWallet, updateWallet, deleteWallet } =
   useWallets();
+
+const { confirmDelete, showSuccess, showError } = useNotifications();
 
 async function loadWallets() {
   try {
@@ -98,10 +101,14 @@ async function handleEdit(item) {
 }
 
 async function handleDelete(item) {
-  if (!confirm('Are you sure you want to delete this wallet?')) return;
+  const confirmed = await confirmDelete('wallet');
+  if (!confirmed) return;
+
   try {
     await deleteWallet(item.id);
+    showSuccess('Wallet deleted', `${item.name} has been deleted successfully`);
   } catch (err) {
+    showError('Delete failed', 'Failed to delete wallet. Please try again.');
     console.error('Failed to delete wallet:', err);
   }
 }

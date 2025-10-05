@@ -1,12 +1,8 @@
 import { ref, computed } from 'vue';
-import { transactionApi } from '~/services/transactionApi';
+import { api } from '~/services/api';
 import { transactionMapper } from '~/utils/transactionMapper';
 import type { FrontendTransaction } from '~/types/transaction';
-import type { Party } from '~/types/party';
-import type { Category } from '~/types/category';
-import type { Wallet } from '~/types/wallet';
-type GroupLite = { id: number; name: string };
-import { useGroups } from '~/composables/useGroups';
+import { useSharedData } from '~/composables/useSharedData';
 
 // Use FrontendTransaction as the main interface
 type Transaction = FrontendTransaction;
@@ -19,11 +15,8 @@ const isLoading = ref(false);
 const error = ref<string | null>(null);
 const lastSync = ref<string | null>(null);
 
-// Dependency data (needed for API mode)
-const parties = ref<Party[]>([]);
-const categories = ref<Category[]>([]);
-const wallets = ref<Wallet[]>([]);
-const groups = ref<GroupLite[]>([]);
+// Get shared data from centralized composable
+const sharedData = useSharedData();
 
 // Simple guard to ensure one-time init on client
 let initialized = false;
@@ -39,49 +32,26 @@ function extractApiErrors(err: any): string {
   return 'An unknown error occurred';
 }
 
-// Load dependencies needed for API mode
+// Load dependencies using shared data composable
 async function loadDependencies() {
   if (typeof window === 'undefined') return;
 
   try {
     isLoading.value = true;
-    console.log('[loadDependencies] Starting...');
-    const { fetchCategories, categories: cats } = useCategories();
-    const { fetchParties, parties: pts } = useParties();
-    const { fetchWallets, wallets: wts } = useWallets();
-    const { fetchGroups, groups: grps } = useGroups();
+    console.log('[loadDependencies] Starting with shared data...');
 
-    // Fetch income categories first
-    await fetchCategories('income');
-    const incomeCategories = [...cats.value];
-    console.log('Income categories loaded:', incomeCategories.length);
-
-    // Fetch expense categories
-    await fetchCategories('expense');
-    const expenseCategories = [...cats.value];
-    console.log('Expense categories loaded:', expenseCategories.length);
-
-    // Combine both types
-    categories.value = [...incomeCategories, ...expenseCategories];
-
-    // Fetch parties, wallets and groups in parallel
-    await Promise.all([fetchParties(), fetchWallets(), fetchGroups()]);
-
-    // Store in local refs (spread to avoid readonly conflicts)
-    parties.value = [...pts.value];
-    wallets.value = [...wts.value];
-    // Map to minimal shape used by mapper
-    groups.value = grps.value.map((g: any) => ({ id: g.id, name: g.name }));
+    // Load all data through centralized composable
+    await sharedData.loadAllData();
 
     console.log(
       'All dependencies loaded - Categories:',
-      categories.value.length,
+      sharedData.categories.value.length,
       'Parties:',
-      parties.value.length,
+      sharedData.parties.value.length,
       'Wallets:',
-      wallets.value.length,
+      sharedData.wallets.value.length,
       'Groups:',
-      groups.value.length
+      sharedData.groups.value.length
     );
   } catch (err) {
     console.error('Error loading dependencies:', err);
@@ -102,20 +72,20 @@ async function fetchTransactionsFromApi() {
 
     // Ensure dependencies are loaded
     if (
-      parties.value.length === 0 ||
-      categories.value.length === 0 ||
-      wallets.value.length === 0 ||
-      groups.value.length === 0
+      sharedData.parties.value.length === 0 ||
+      sharedData.categories.value.length === 0 ||
+      sharedData.wallets.value.length === 0 ||
+      sharedData.groups.value.length === 0
     ) {
       console.log('Loading dependencies (parties, categories, wallets)...');
       await loadDependencies();
       console.log(
-        `Dependencies loaded: ${parties.value.length} parties, ${categories.value.length} categories, ${wallets.value.length} wallets, ${groups.value.length} groups`
+        `Dependencies loaded: ${sharedData.parties.value.length} parties, ${sharedData.categories.value.length} categories, ${sharedData.wallets.value.length} wallets, ${sharedData.groups.value.length} groups`
       );
     }
 
     // Fetch transactions
-    const response = await transactionApi.fetchAll();
+    const response = await api.transactions.fetchAll();
     console.log(`Received ${response.data.length} transactions from API`);
     lastSync.value = response.last_sync;
     console.log('Last sync:', lastSync.value);
@@ -123,10 +93,10 @@ async function fetchTransactionsFromApi() {
     // Transform to frontend format
     const transformed = transactionMapper.toFrontendBatch(
       response.data,
-      parties.value,
-      categories.value,
-      wallets.value,
-      groups.value
+      sharedData.parties.value,
+      sharedData.categories.value,
+      sharedData.wallets.value,
+      sharedData.groups.value
     );
     console.log('Transformed', transformed.length, 'transactions for display');
 
@@ -195,20 +165,26 @@ export const useTransactions = () => {
 
       // Ensure dependencies are loaded before mapping (prevents wallet_id/party_id = 0 and missing groups)
       if (
-        parties.value.length === 0 ||
-        categories.value.length === 0 ||
-        wallets.value.length === 0 ||
-        groups.value.length === 0
+        sharedData.parties.value.length === 0 ||
+        sharedData.categories.value.length === 0 ||
+        sharedData.wallets.value.length === 0 ||
+        sharedData.groups.value.length === 0
       ) {
         console.log('Dependencies not ready. Loading...');
         await loadDependencies();
         console.log(
-          `Deps ready -> parties=${parties.value.length}, categories=${categories.value.length}, wallets=${wallets.value.length}, groups=${groups.value.length}`
+          `Deps ready -> parties=${sharedData.parties.value.length}, categories=${sharedData.categories.value.length}, wallets=${sharedData.wallets.value.length}, groups=${sharedData.groups.value.length}`
         );
       }
 
-      // Transform to API format (pass parties and wallets for ID lookup)
-      const payload = transactionMapper.toApi(transaction, parties.value, wallets.value);
+      // Transform to API format (pass parties, wallets, and default group for ID lookup)
+      const payload = transactionMapper.toApi(
+        transaction,
+        sharedData.parties.value,
+        sharedData.wallets.value,
+        undefined,
+        sharedData.getDefaultGroup.value
+      );
 
       console.log('Payload summary', {
         amount: payload.amount,
@@ -218,7 +194,7 @@ export const useTransactions = () => {
         group_id: payload.group_id
       });
       console.log('API Payload:', payload);
-      const created = await transactionApi.create(payload);
+      const created = await api.transactions.create(payload);
       console.log('Transaction created:', created);
 
       if (created) {
@@ -229,7 +205,7 @@ export const useTransactions = () => {
           : [];
         if (filesToUpload.length > 0) {
           try {
-            const updatedWithFiles = await transactionApi.addFilesBulk(created.id, filesToUpload);
+            const updatedWithFiles = await api.transactions.addFilesBulk(created.id, filesToUpload);
             if (updatedWithFiles) {
               createdOrUpdated = updatedWithFiles;
               console.log(
@@ -242,16 +218,16 @@ export const useTransactions = () => {
           }
         }
 
-        // Transform back to frontend format and add to list
-        const frontendTx = transactionMapper.toFrontend(
+        // Add to local state instead of full API refetch for better performance
+        const frontendTransaction = transactionMapper.toFrontend(
           createdOrUpdated,
-          parties.value,
-          categories.value,
-          wallets.value,
-          groups.value
+          sharedData.parties.value,
+          sharedData.categories.value,
+          sharedData.wallets.value,
+          sharedData.groups.value
         );
-        transactions.value = [frontendTx, ...transactions.value];
-        console.log('Transaction added to local state');
+        transactions.value = [frontendTransaction, ...transactions.value];
+        console.log('Transaction created and added to local state');
       }
     } catch (err: any) {
       console.error('Error adding transaction:', err);
@@ -278,20 +254,26 @@ export const useTransactions = () => {
 
       // Ensure dependencies are loaded before mapping
       if (
-        parties.value.length === 0 ||
-        categories.value.length === 0 ||
-        wallets.value.length === 0 ||
-        groups.value.length === 0
+        sharedData.parties.value.length === 0 ||
+        sharedData.categories.value.length === 0 ||
+        sharedData.wallets.value.length === 0 ||
+        sharedData.groups.value.length === 0
       ) {
         console.log('Dependencies not ready. Loading...');
         await loadDependencies();
         console.log(
-          `Deps ready -> parties=${parties.value.length}, categories=${categories.value.length}, wallets=${wallets.value.length}, groups=${groups.value.length}`
+          `Deps ready -> parties=${sharedData.parties.value.length}, categories=${sharedData.categories.value.length}, wallets=${sharedData.wallets.value.length}, groups=${sharedData.groups.value.length}`
         );
       }
 
       const numericId = parseInt(id);
-      const payload = transactionMapper.toApi(updates, parties.value, wallets.value);
+      const payload = transactionMapper.toApi(
+        updates,
+        sharedData.parties.value,
+        sharedData.wallets.value,
+        undefined,
+        sharedData.getDefaultGroup.value
+      );
       console.log('Updating transaction', numericId, 'payload:', payload);
       console.log('Payload summary', {
         amount: payload.amount,
@@ -300,21 +282,22 @@ export const useTransactions = () => {
         wallet_id: payload.wallet_id,
         group_id: payload.group_id
       });
-      const updated = await transactionApi.update(numericId, payload);
+      const updated = await api.transactions.update(numericId, payload);
 
       if (updated) {
-        // Transform and update in list
-        const frontendTx = transactionMapper.toFrontend(
+        // Update local state instead of full API refetch for better performance
+        const frontendTransaction = transactionMapper.toFrontend(
           updated,
-          parties.value,
-          categories.value,
-          wallets.value,
-          groups.value
+          sharedData.parties.value,
+          sharedData.categories.value,
+          sharedData.wallets.value,
+          sharedData.groups.value
         );
-        const idx = transactions.value.findIndex((t) => t.id === id);
-        if (idx !== -1) {
-          transactions.value[idx] = frontendTx;
+        const index = transactions.value.findIndex((t) => t.id === id);
+        if (index !== -1) {
+          transactions.value[index] = frontendTransaction;
         }
+        console.log('Transaction updated in local state');
       }
     } catch (err) {
       console.error('Error updating transaction:', err);
@@ -332,7 +315,7 @@ export const useTransactions = () => {
 
       const numericId = parseInt(id);
       console.log('Deleting transaction', numericId);
-      await transactionApi.delete(numericId);
+      await api.transactions.delete(numericId);
       console.log('Deleted transaction', numericId);
 
       // Remove from local state
@@ -351,6 +334,35 @@ export const useTransactions = () => {
     await fetchTransactionsFromApi();
   };
 
+  const getTransactionById = (id: string) => {
+    return transactions.value.find((t) => t.id === id) || null;
+  };
+
+  const getTransactionForEdit = async (id: string) => {
+    try {
+      // Ensure dependencies are loaded
+      if (sharedData.parties.value.length === 0 || sharedData.wallets.value.length === 0) {
+        await loadDependencies();
+      }
+
+      // Fetch from API
+      const apiTransaction = await api.transactions.fetchById(parseInt(id));
+      if (!apiTransaction) {
+        throw new Error('Transaction not found');
+      }
+
+      // Transform for edit form (no display defaults)
+      return transactionMapper.toEditForm(
+        apiTransaction,
+        sharedData.parties.value,
+        sharedData.wallets.value
+      );
+    } catch (err) {
+      console.error('Error fetching transaction for edit:', err);
+      throw err;
+    }
+  };
+
   return {
     // State
     transactions,
@@ -362,10 +374,10 @@ export const useTransactions = () => {
     error,
     lastSync,
 
-    // Dependencies (for form dropdowns)
-    parties,
-    categories,
-    wallets,
+    // Dependencies (for form dropdowns) - from shared data
+    parties: sharedData.parties,
+    categories: sharedData.categories,
+    wallets: sharedData.wallets,
 
     // Computed
     filteredTransactions,
@@ -376,6 +388,8 @@ export const useTransactions = () => {
     addTransaction,
     updateTransaction,
     deleteTransaction,
-    refreshTransactions
+    refreshTransactions,
+    getTransactionById,
+    getTransactionForEdit
   };
 };

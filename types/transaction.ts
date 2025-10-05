@@ -64,9 +64,9 @@ export interface TransactionCreatePayload {
   description: string;
   datetime: string; // ISO 8601 format
   created_at?: string; // ISO 8601 format
-  party_id: number; // Numeric ID (required)
-  wallet_id: number; // Numeric ID (required)
-  group_id: number; // Numeric ID (required) - The primary grouping/category
+  party_id?: number;
+  wallet_id?: number;
+  group_id?: number;
   is_recurring?: boolean;
   recurrence_period?: string;
   recurrence_interval?: number;

@@ -6,6 +6,13 @@
     </div>
     <div class="entity-description">
       {{ description }}
+      <div
+        v-if="type && pageName === 'Category'"
+        class="category-type-badge"
+        :class="`type-${type}`"
+      >
+        {{ type === 'income' ? 'Income' : 'Expense' }}
+      </div>
     </div>
 
     <div class="entity-actions">
@@ -20,7 +27,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed } from 'vue';
+import { computed } from 'vue';
 import { Edit as LucideEdit, Trash as LucideTrash } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
 
@@ -34,6 +41,10 @@ const props = defineProps({
   pageName: {
     type: String,
     required: true
+  },
+  type: {
+    type: String,
+    default: null
   }
 });
 

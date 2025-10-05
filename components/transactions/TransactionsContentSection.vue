@@ -1,21 +1,15 @@
 <template>
   <div class="content-area">
-    <TTopCard :pageName="'Transaction'" :pageNamePlural="'Transactions'" @add="openCreate" />
-
-    <div v-if="showForm" class="form-section">
-      <div class="form-wrapper">
-        <FormSection :editingItem="editingItem" @submit="handleSubmit" />
-      </div>
-    </div>
+    <TTopCard :pageName="'Transaction'" :pageNamePlural="'Transactions'" @add="navigateToNew" />
 
     <EmptyState
-      v-if="!showForm && paginatedTransactions.length === 0"
+      v-if="paginatedTransactions.length === 0"
       :pageName="'Transaction'"
-      @create="openCreate"
+      @create="navigateToNew"
     />
 
     <TTableComponent
-      v-if="!showForm && paginatedTransactions.length > 0"
+      v-if="paginatedTransactions.length > 0"
       :transactions="paginatedTransactions"
       :searchQuery="searchQuery"
       :filterQuery="filterQuery"
@@ -33,20 +27,13 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
 import { useTransactions } from '@/composables/useTransactions';
+import { useNotifications } from '@/composables/useNotifications';
 import TTopCard from '@/components/TTopCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
-import FormSection from '@/components/FormSection.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
 
-const showForm = ref(false);
-const editingItem = ref(null);
-const route = useRoute();
-
 const {
-  transactions,
   paginatedTransactions,
   filteredTransactions,
   searchQuery,
@@ -54,86 +41,41 @@ const {
   currentPage,
   itemsPerPage,
   totalPages,
-  addTransaction,
-  updateTransaction,
   deleteTransaction
 } = useTransactions();
 
-function openCreate() {
-  showForm.value = true;
-  editingItem.value = null;
+const { confirmDelete, showSuccess, showError } = useNotifications();
+
+function navigateToNew() {
+  navigateTo('/transactions/new');
 }
 
 function handleEdit(txn) {
-  editingItem.value = txn;
-  showForm.value = true;
+  navigateTo(`/transactions/edit/${txn.id}`);
 }
 
-function handleSubmit(data) {
-  if (editingItem.value) {
-    const updates = { ...(data || {}) };
-    delete updates.id;
-    updateTransaction(editingItem.value.id, updates);
-  } else {
-    addTransaction(data);
-  }
-  showForm.value = false;
-  editingItem.value = null;
-}
+async function handleDelete(txn) {
+  const confirmed = await confirmDelete('transaction');
+  if (!confirmed) return;
 
-function handleDelete(txn) {
-  if (confirm('Are you sure you want to delete this transaction?')) {
-    deleteTransaction(txn.id);
+  try {
+    await deleteTransaction(txn.id);
+    showSuccess('Transaction deleted', 'Transaction has been deleted successfully');
+  } catch (err) {
+    showError('Delete failed', 'Failed to delete transaction. Please try again.');
+    console.error('Failed to delete transaction:', err);
   }
 }
-
-function openEditById(id) {
-  if (!id) return;
-  const all = [
-    ...filteredTransactions.value,
-    ...paginatedTransactions.value,
-    ...transactions.value
-  ];
-  const found = all.find((t) => String(t.id) === String(id));
-  if (found) {
-    handleEdit(found);
-  }
-}
-
-onMounted(() => {
-  const id = route.query?.edit;
-  if (id) openEditById(id);
-});
-
-watch(
-  () => route.query?.edit,
-  (id) => {
-    if (id) openEditById(id);
-  }
-);
 </script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables' as *;
 
 .content-area {
-  margin-top: 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
   align-items: center;
-  width: 100%;
-}
-
-.form-section {
-  display: flex;
-  justify-content: flex-start;
-  width: 100%;
-  padding: 0 1rem;
-}
-
-.form-wrapper {
-  max-width: 800px;
   width: 100%;
 }
 </style>

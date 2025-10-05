@@ -5,12 +5,10 @@
 </template>
 
 <script setup>
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 
 import TransactionsContentSection from '@/components/transactions/TransactionsContentSection.vue';
 </script>

@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
   width: 100%;
 }
 
@@ -14,26 +14,26 @@
   flex-direction: column;
   width: 100%;
   max-width: 800px;
-  gap: 24px;
+  gap: 16px;
   margin: 0 auto;
 }
 
 .form-transaction {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 16px;
   width: 100%;
 
   @media (max-width: $breakpoint-sm) {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
   }
 }
 
 .transaction-date {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 
   span {
     font-weight: $font-medium;
@@ -48,7 +48,7 @@
     height: 50px;
 
     &:focus {
-      border-color: var(--focus-color);
+      border-color: $primary;
       outline: none;
     }
   }
@@ -73,7 +73,7 @@
     border: 1px solid $border-color;
 
     &:focus {
-      border-color: var(--focus-color);
+      border-color: $primary;
       outline: none;
     }
   }
@@ -88,6 +88,29 @@
     line-height: 100%;
     border: 1px solid $border-color;
     cursor: pointer;
+  }
+
+  .amount-currency-select {
+    width: 80px;
+    height: 50px;
+    background-color: $bg-light;
+    border-radius: $radius-lg;
+    font-weight: $font-normal;
+    font-size: $font-size-sm;
+    line-height: 100%;
+    border: 1px solid $border-color;
+    cursor: pointer;
+    padding: 0 8px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
   }
 }
 
@@ -110,14 +133,14 @@
       width: 100%;
       padding: 12px 40px 12px 36px;
       height: 50px;
-      border: 1px solid var(--focus-color);
+      border: 1px solid $border-color;
       border-radius: 8px;
       font-size: 16px;
       color: $text-primary;
       background-color: $bg-white;
 
       &:focus {
-        border-color: var(--focus-color);
+        border-color: $primary;
         outline: none;
       }
     }
@@ -127,7 +150,7 @@
       position: absolute;
       width: 20px;
       height: 20px;
-      color: var(--primary-color);
+      color: $primary;
     }
 
     .search-icon {
@@ -189,14 +212,14 @@
       width: 100%;
       padding: 12px 40px 12px 36px;
       height: 50px;
-      border: 1px solid var(--focus-color);
+      border: 1px solid $border-color;
       border-radius: 8px;
       font-size: 16px;
       color: $text-primary;
       background-color: $bg-white;
 
       &:focus {
-        border-color: var(--focus-color);
+        border-color: $primary;
         outline: none;
       }
     }
@@ -206,7 +229,7 @@
       position: absolute;
       width: 20px;
       height: 20px;
-      color: var(--primary-color);
+      color: $primary;
     }
 
     .search-icon {
@@ -277,14 +300,14 @@
       width: 100%;
       padding: 12px 40px 12px 36px;
       height: 50px;
-      border: 1px solid var(--focus-color);
+      border: 1px solid $border-color;
       border-radius: 8px;
       font-size: 16px;
       color: $text-primary;
       background-color: $bg-white;
 
       &:focus {
-        border-color: var(--focus-color);
+        border-color: $primary;
         outline: none;
       }
     }
@@ -294,7 +317,7 @@
       position: absolute;
       width: 20px;
       height: 20px;
-      color: var(--primary-color);
+      color: $primary;
     }
 
     .search-icon {
@@ -425,7 +448,7 @@
     color: $text-primary;
 
     &:focus {
-      border: 1px solid var(--focus-color) !important;
+      border: 1px solid $primary !important;
       outline: none;
     }
     &::placeholder {
@@ -447,5 +470,15 @@
 
   @media (max-width: $breakpoint-sm) {
     width: 100%;
+  }
+
+  &.submit-button--expense {
+    background-color: #dc2626;
+    border-color: #dc2626;
+
+    &:hover {
+      background-color: #b91c1c;
+      border-color: #b91c1c;
+    }
   }
 }

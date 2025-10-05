@@ -30,6 +30,7 @@
 <script setup>
 import { useRouter } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
+import { useNotifications } from '@/composables/useNotifications';
 import TDashboardTopCard from '@/components/TDashboardTopCard.vue';
 import WalletCard from '@/components/WalletCard.vue';
 import TTransactionCard from '@/components/TTransactionCard.vue';
@@ -48,23 +49,29 @@ const {
   deleteTransaction
 } = useTransactions();
 
+const { confirmDelete, showSuccess, showError } = useNotifications();
+
 const handleEdit = (transaction) => {
-  // Navigate to transactions page and open editor
-  router.push(`/transactions?edit=${encodeURIComponent(transaction.id)}`);
+  router.push(`/transactions/edit/${transaction.id}`);
 };
 
-const handleDelete = (transaction) => {
-  if (confirm('Are you sure you want to delete this transaction?')) {
-    deleteTransaction(transaction.id);
+const handleDelete = async (transaction) => {
+  const confirmed = await confirmDelete('transaction');
+  if (!confirmed) return;
+
+  try {
+    await deleteTransaction(transaction.id);
+    showSuccess('Transaction deleted', 'Transaction has been deleted successfully');
+  } catch (err) {
+    showError('Delete failed', 'Failed to delete transaction. Please try again.');
+    console.error('Failed to delete transaction:', err);
   }
 };
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 </script>
 
 <style lang="scss" scoped>

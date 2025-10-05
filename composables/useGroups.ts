@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue';
-import { useApi } from './useApi';
+import { api } from '~/services/api';
+import { useSharedData } from '~/composables/useSharedData';
 
 interface GroupIcon {
   id: number;
@@ -49,35 +49,12 @@ interface GroupsResponse {
 }
 
 export const useGroups = () => {
-  const api = useApi();
-  const groups = ref<Group[]>([]);
-  const lastSync = ref<string | null>(null);
+  const sharedData = useSharedData();
 
-  // Fetch all groups
-  const fetchGroups = async (limit = 20, syncedSince?: string) => {
-    try {
-      const params = new URLSearchParams();
-      params.append('limit', limit.toString());
-      if (syncedSince) {
-        params.append('synced_since', syncedSince);
-      }
-
-      const response = await api<ApiResponse<GroupsResponse>>(`/groups?${params.toString()}`);
-
-      if (response.success && response.data) {
-        groups.value = response.data.data || [];
-        lastSync.value = response.data.last_sync || null;
-      } else {
-        throw new Error(response.message || 'Failed to fetch groups');
-      }
-    } catch (err) {
-      console.error('Error fetching groups:', err);
-      groups.value = [];
-      throw err;
-    }
+  const fetchGroups = async () => {
+    return sharedData.loadGroups();
   };
 
-  // Create new group
   const createGroup = async (data: Omit<CreateGroupPayload, 'client_id' | 'created_at'>) => {
     try {
       const payload: CreateGroupPayload = {
@@ -86,68 +63,42 @@ export const useGroups = () => {
         created_at: new Date().toISOString()
       };
 
-      const response = await api<ApiResponse<Group>>('/groups', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.success && response.data) {
-        groups.value = [response.data, ...groups.value];
-        return response.data;
-      } else {
-        throw new Error(response.errors?.[0] || response.message || 'Failed to create group');
+      const created = await api.groups.create(payload);
+      if (created) {
+        sharedData.addGroup(created);
       }
+      return created;
     } catch (err) {
       console.error('Error creating group:', err);
       throw err;
     }
   };
 
-  // Update existing group
   const updateGroup = async (id: number, data: Partial<CreateGroupPayload>) => {
     try {
-      const response = await api<ApiResponse<Group>>(`/groups/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          ...data,
-          client_id: `${crypto.randomUUID()}:${crypto.randomUUID()}`
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const payload = {
+        ...data,
+        client_id: `${crypto.randomUUID()}:${crypto.randomUUID()}`
+      };
 
-      if (response.success && response.data) {
-        const index = groups.value.findIndex((g) => g.id === id);
-        if (index !== -1) {
-          groups.value[index] = response.data;
-        }
-        return response.data;
-      } else {
-        throw new Error(response.errors?.[0] || response.message || 'Failed to update group');
+      const updated = await api.groups.update(id, payload);
+      if (updated) {
+        sharedData.updateGroup(id, updated);
       }
+      return updated;
     } catch (err) {
       console.error('Error updating group:', err);
       throw err;
     }
   };
 
-  // Delete group
   const deleteGroup = async (id: number) => {
     try {
-      const response = await api<ApiResponse<void>>(`/groups/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (response.success || response.status === 204) {
-        groups.value = groups.value.filter((g) => g.id !== id);
-      } else {
-        throw new Error(response.errors?.[0] || response.message || 'Failed to delete group');
+      const success = await api.groups.delete(id);
+      if (success) {
+        sharedData.removeGroup(id);
       }
+      return success;
     } catch (err) {
       console.error('Error deleting group:', err);
       throw err;
@@ -155,8 +106,10 @@ export const useGroups = () => {
   };
 
   return {
-    groups: computed(() => groups.value),
-    lastSync: computed(() => lastSync.value),
+    groups: sharedData.groups,
+    lastSync: sharedData.groupsLastSync,
+    isLoading: sharedData.groupsLoading,
+    error: sharedData.groupsError,
     fetchGroups,
     createGroup,
     updateGroup,

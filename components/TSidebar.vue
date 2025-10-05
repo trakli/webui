@@ -46,12 +46,6 @@
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/groups" class="nav-button" active-class="selected" @click="handleNavClick">
-            <UserGroupIcon class="icon" />
-            <span class="text">Groups</span>
-          </NuxtLink>
-        </li>
-        <li>
           <NuxtLink
             to="/categories"
             class="nav-button"
@@ -60,6 +54,12 @@
           >
             <BuildingLibraryIcon class="icon" />
             <span class="text">Categories</span>
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/groups" class="nav-button" active-class="selected" @click="handleNavClick">
+            <UserGroupIcon class="icon" />
+            <span class="text">Groups</span>
           </NuxtLink>
         </li>
         <li>

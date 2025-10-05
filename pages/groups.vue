@@ -39,6 +39,7 @@
 import { ref, onMounted } from 'vue';
 import { useGroups } from '@/composables/useGroups';
 import { useSidebar } from '@/composables/useSidebar';
+import { useNotifications } from '@/composables/useNotifications';
 import ContentTopCard from '@/components/TTopCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import GroupForm from '@/components/groups/GroupForm.vue';
@@ -51,6 +52,8 @@ const { isMobile } = useSidebar();
 
 const { groups, isLoading, error, fetchGroups, createGroup, updateGroup, deleteGroup } =
   useGroups();
+
+const { confirmDelete, showSuccess, showError } = useNotifications();
 
 async function loadGroups() {
   await fetchGroups();
@@ -95,12 +98,15 @@ async function handleEdit(item) {
 }
 
 async function handleDelete(item) {
-  if (!confirm('Are you sure you want to delete this group?')) return;
+  const confirmed = await confirmDelete('group');
+  if (!confirmed) return;
+
   try {
     await deleteGroup(item.id);
+    showSuccess('Group deleted', `${item.name} has been deleted successfully`);
   } catch (err) {
+    showError('Delete failed', 'Failed to delete group. Please try again.');
     console.error('Failed to delete group:', err);
-    // Optionally, display a notification to the user
   }
 }
 

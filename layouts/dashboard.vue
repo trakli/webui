@@ -11,6 +11,7 @@
         </div>
       </div>
     </div>
+    <NotificationsContainer />
   </div>
 </template>
 
@@ -18,6 +19,7 @@
 import { onMounted } from 'vue';
 import TNavbar from '@/components/TNavbar.vue';
 import TSidebar from '@/components/TSidebar.vue';
+import NotificationsContainer from '@/components/NotificationsContainer.vue';
 import { useAuth } from '@/composables/useAuth';
 
 const { fetchUser } = useAuth();

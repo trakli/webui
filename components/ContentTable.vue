@@ -10,7 +10,7 @@
       />
     </div>
 
-    <div class="table-header">
+    <div class="table-header" :class="{ 'expense-header': headerType === 'expense' }">
       <div class="col-name">{{ pageName }} Name</div>
       <div class="col-description">{{ pageName }} Description</div>
       <div class="col-action">Action</div>
@@ -98,6 +98,10 @@ const props = defineProps({
   pageNamePlural: {
     type: String,
     required: true
+  },
+  headerType: {
+    type: String,
+    default: 'default' // 'default', 'expense'
   }
 });
 
@@ -254,6 +258,10 @@ const visiblePages = computed(() => {
   gap: 1rem;
   align-items: center;
 
+  &.expense-header {
+    background: #dc2626;
+  }
+
   @media (max-width: $breakpoint-md) {
     grid-template-columns: 1.6fr 2.2fr auto;
     padding: 0.5rem 0.75rem;
@@ -406,6 +414,14 @@ const visiblePages = computed(() => {
     box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
   }
 
+  .expense-header ~ .entities-container ~ .pagination-row & {
+    &.active {
+      background: #dc2626;
+      border-color: #dc2626;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    }
+  }
+
   &.disabled {
     opacity: 0.4;
     cursor: not-allowed;
@@ -472,6 +488,13 @@ const visiblePages = computed(() => {
     outline: none;
     border-color: $primary;
     box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  }
+
+  .expense-header ~ .entities-container ~ .pagination-row & {
+    &:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
   }
 
   &:hover {

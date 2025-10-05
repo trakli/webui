@@ -18,31 +18,72 @@
         <TipsSection v-if="!isMobile" pageName="Category" />
       </div>
 
-      <div v-if="isLoading" class="loading-state">Loading categories...</div>
-      <div v-if="error" class="error-state">Error: {{ error }}</div>
+      <!-- Loading State -->
+      <div v-if="isLoading" class="loading-state">
+        <div class="loader">
+          <div class="spinner"></div>
+          <p>Loading categories...</p>
+        </div>
+      </div>
 
-      <EmptyState
-        v-if="!showForm && !isLoading && categories.length === 0"
-        pageName="Category"
-        @create="handleOpenFormForCreation"
-      />
+      <!-- Error State -->
+      <div v-else-if="error" class="error-state">
+        <p>Error: {{ error }}</p>
+        <button @click="loadCategories" class="retry-button">Try Again</button>
+      </div>
 
-      <ContentTable
-        v-if="!showForm && !isLoading && categories.length > 0"
-        pageName="Category"
-        pageNamePlural="Categories"
-        :entities="categories"
-        @edit="handleEdit"
-        @delete="handleDelete"
-      />
+      <!-- Category Tabs - Only show when not loading and no error -->
+      <div v-else-if="!showForm" class="category-tabs">
+        <div class="tab-buttons">
+          <button
+            class="tab-button"
+            :class="{ active: activeTab === 'income' }"
+            @click="activeTab = 'income'"
+          >
+            <span class="tab-icon">💰</span>
+            Income Categories
+            <span class="tab-count">({{ incomeCategories.length }})</span>
+          </button>
+          <button
+            class="tab-button"
+            :class="{ active: activeTab === 'expense' }"
+            @click="activeTab = 'expense'"
+          >
+            <span class="tab-icon">💸</span>
+            Expense Categories
+            <span class="tab-count">({{ expenseCategories.length }})</span>
+          </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <EmptyState
+            v-if="currentCategories.length === 0"
+            :pageName="`${currentCategoryType} Category`"
+            @create="handleOpenFormForCreation"
+          />
+
+          <ContentTable
+            v-if="currentCategories.length > 0"
+            :pageName="`${currentCategoryType} Category`"
+            :pageNamePlural="`${currentCategoryType} Categories`"
+            :entities="currentCategories"
+            :headerType="activeTab === 'expense' ? 'expense' : 'default'"
+            @edit="handleEdit"
+            @delete="handleDelete"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useCategories } from '@/composables/useCategories';
 import { useSidebar } from '@/composables/useSidebar';
+import { useNotifications } from '@/composables/useNotifications';
+import { useSharedData } from '@/composables/useSharedData';
 import ContentTopCard from '@/components/TTopCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import CategoryForm from '@/components/categories/CategoryForm.vue';
@@ -51,24 +92,37 @@ import TipsSection from '@/components/TipsSection.vue';
 
 const showForm = ref(false);
 const editingItem = ref(null);
+const activeTab = ref('income');
 const { isMobile } = useSidebar();
 
-const {
-  categories,
-  isLoading,
-  error,
-  fetchCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory
-} = useCategories();
+// Get shared data for filtered categories
+const sharedData = useSharedData();
+
+const { isLoading, error, createCategory, updateCategory, deleteCategory } = useCategories();
+
+// Computed properties for filtered categories
+const incomeCategories = computed(() => sharedData.getIncomeCategories.value);
+
+const expenseCategories = computed(() => sharedData.getExpenseCategories.value);
+
+const currentCategories = computed(() =>
+  activeTab.value === 'income' ? incomeCategories.value : expenseCategories.value
+);
+
+const currentCategoryType = computed(() => (activeTab.value === 'income' ? 'Income' : 'Expense'));
+
+const { confirmDelete, showSuccess, showError } = useNotifications();
 
 async function loadCategories() {
   try {
-    // Load both income and expense categories
-    await fetchCategories('income');
-    await fetchCategories('expense');
-    console.log('✅ All categories loaded:', categories.value.length);
+    // Load all data through shared data composable
+    await sharedData.loadCategories();
+    console.log(
+      '✅ All categories loaded - Income:',
+      incomeCategories.value.length,
+      'Expense:',
+      expenseCategories.value.length
+    );
   } catch (err) {
     console.error('Failed to load categories:', err);
     // Don't throw the error to prevent page from breaking
@@ -111,10 +165,14 @@ async function handleEdit(item) {
 }
 
 async function handleDelete(item) {
-  if (!confirm('Are you sure you want to delete this category?')) return;
+  const confirmed = await confirmDelete('category');
+  if (!confirmed) return;
+
   try {
     await deleteCategory(item.id);
+    showSuccess('Category deleted', `${item.name} has been deleted successfully`);
   } catch (err) {
+    showError('Delete failed', 'Failed to delete category. Please try again.');
     console.error('Failed to delete category:', err);
   }
 }
@@ -160,14 +218,181 @@ definePageMeta({
   max-width: 800px;
 }
 
-.loading-state,
-.error-state {
-  text-align: center;
-  padding: 2rem;
-  color: $text-secondary;
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  width: 100%;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  p {
+    color: $text-secondary;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid $primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-state {
-  color: $error-color;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+  min-height: 50vh;
+  justify-content: center;
+
+  p {
+    color: $error-color;
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.retry-button {
+  padding: 0.5rem 1rem;
+  background: $primary;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+.category-tabs {
+  width: 100%;
+  max-width: 1400px;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: $text-secondary;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px 8px 0 0;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+
+  &:hover {
+    background: #f8fafc;
+    color: $primary;
+  }
+
+  // Hover state for expense categories button (second child)
+  &:nth-child(2):hover {
+    color: #dc2626;
+  }
+
+  &.active {
+    color: $primary;
+    background: #f0f9ff;
+    border-bottom-color: $primary;
+  }
+
+  // Active state for expense categories button (second child)
+  &:nth-child(2).active {
+    color: #dc2626;
+    background: #fee2e2;
+    border-bottom-color: #dc2626;
+  }
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1rem;
+  }
+}
+
+.tab-count {
+  background: #e5e7eb;
+  color: $text-secondary;
+  padding: 0.125rem 0.375rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 0.7rem;
+    padding: 0.0625rem 0.25rem;
+  }
+
+  .tab-button.active & {
+    background: $primary-light;
+    color: $primary;
+  }
+
+  // Count styling for expense categories tab
+  .tab-button:nth-child(2).active & {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+  }
+}
+
+.tab-content {
+  min-height: 50vh;
+  width: 100%;
 }
 </style>

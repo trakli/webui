@@ -39,6 +39,7 @@
 import { ref, onMounted } from 'vue';
 import { useParties } from '@/composables/useParties';
 import { useSidebar } from '@/composables/useSidebar';
+import { useNotifications } from '@/composables/useNotifications';
 import ContentTopCard from '@/components/TTopCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import PartiesForm from '@/components/PartiesForm.vue';
@@ -51,6 +52,8 @@ const { isMobile } = useSidebar();
 
 const { parties, isLoading, error, fetchParties, createParty, updateParty, deleteParty } =
   useParties();
+
+const { confirmDelete, showSuccess, showError } = useNotifications();
 
 async function loadParties() {
   try {
@@ -98,10 +101,14 @@ function handleEdit(item) {
 }
 
 async function handleDelete(item) {
-  if (!confirm('Are you sure you want to delete this party?')) return;
+  const confirmed = await confirmDelete('party');
+  if (!confirmed) return;
+
   try {
     await deleteParty(item.id);
+    showSuccess('Party deleted', `${item.name} has been deleted successfully`);
   } catch (err) {
+    showError('Delete failed', 'Failed to delete party. Please try again.');
     console.error('Failed to delete party:', err);
   }
 }

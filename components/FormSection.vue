@@ -1,31 +1,18 @@
 <template>
-  <div class="form-container">
-    <div class="form-header">
-      <button
-        type="button"
-        class="income-button"
-        :class="{ 'income-button--selected': isIncomeSelected }"
-        @click="selectIncome"
-      >
-        <ArrowDownTrayIcon class="income-icon" />
-        <span>Income</span>
-        <div v-if="isIncomeSelected" class="income-tab"></div>
+  <div class="transaction-tabs">
+    <div class="tab-buttons">
+      <button class="tab-button" :class="{ active: isIncomeSelected }" @click="selectIncome">
+        <ArrowDownTrayIcon class="tab-icon" />
+        Income Transaction
       </button>
-
-      <button
-        type="button"
-        class="expense-button"
-        :class="{ 'expense-button--selected': isExpenseSelected }"
-        @click="selectExpense"
-      >
-        <ArrowUpTrayIcon class="expense-icon" />
-        <span>Expense</span>
-        <div v-if="isExpenseSelected" class="expense-tab"></div>
+      <button class="tab-button" :class="{ active: isExpenseSelected }" @click="selectExpense">
+        <ArrowUpTrayIcon class="tab-icon" />
+        Expense Transaction
       </button>
     </div>
 
-    <div class="form-content">
-      <TransactionForm
+    <div class="tab-content">
+      <TransactionFormContainer
         :is-outcome-selected="isExpenseSelected"
         :editingItem="props.editingItem"
         @submit="handleSubmit"
@@ -37,7 +24,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/vue/24/outline';
-import TransactionForm from './TransactionForm.vue';
+import TransactionFormContainer from './TransactionFormContainer.vue';
 
 const props = defineProps({
   editingItem: { type: Object, default: null }
@@ -82,115 +69,79 @@ watch(
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
-.form-container {
+.transaction-tabs {
   width: 100%;
   max-width: 800px;
-  min-height: 600px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  background-color: $bg-gray;
-  border-radius: $radius-xl;
-  gap: 40px;
-  padding: 24px;
+}
 
-  @media (max-width: $breakpoint-lg) {
-    padding: 20px;
-    gap: 32px;
+.tab-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 0.25rem;
+    margin-bottom: 1rem;
   }
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: $text-secondary;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px 8px 0 0;
 
   @media (max-width: $breakpoint-md) {
-    padding: 16px;
-    gap: 24px;
-    min-height: auto;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.95rem;
   }
 
   @media (max-width: $breakpoint-sm) {
-    padding: 12px;
-    gap: 20px;
-    border-radius: $radius-lg;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    gap: 0.25rem;
+  }
+
+  &:hover {
+    background: #f8fafc;
+    color: $primary;
+  }
+
+  // Hover state for expense button (second child)
+  &:nth-child(2):hover {
+    color: #dc2626;
+  }
+
+  &.active {
+    color: $primary;
+    background: #f0f9ff;
+    border-bottom-color: $primary;
+  }
+
+  // Active state for expense button (second child)
+  &:nth-child(2).active {
+    color: #dc2626;
+    background: #fee2e2;
+    border-bottom-color: #dc2626;
   }
 }
 
-.form-header {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 576px;
-  height: 53px;
-  border-bottom: 1px solid #767a90;
-  gap: 16px;
-  margin: 0 auto;
-
-  @media (max-width: $breakpoint-sm) {
-    height: 48px;
-    gap: 12px;
-  }
+.tab-icon {
+  width: 16px;
+  height: 16px;
 }
 
-.income-button,
-.expense-button {
-  position: relative;
-  width: 115px;
-  height: 53px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.income-button {
-  &--selected {
-    background-color: #e6f2ec;
-  }
-}
-
-.expense-button {
-  &--selected {
-    background-color: #fce8e8;
-  }
-}
-
-.income-tab {
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 99px;
-  height: 4px;
-  background-color: #047844;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-}
-
-.expense-tab {
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 99px;
-  height: 4px;
-  background-color: #eb5757;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-}
-
-.income-icon,
-.expense-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.form-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.tab-content {
   width: 100%;
 }
 </style>

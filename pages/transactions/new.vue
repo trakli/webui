@@ -1,6 +1,16 @@
 <template>
   <div>
-    <TTopCard pageName="Transaction" pageNamePlural="Transactions" />
+    <TTopCard
+      pageName="Transaction"
+      pageNamePlural="Transactions"
+      :showAddButton="false"
+      :breadcrumbItems="[
+        { text: 'Home', clickable: false },
+        { text: 'Transactions', clickable: true, action: 'back' },
+        { text: 'New Transaction', current: true }
+      ]"
+      @back="$router.push('/transactions')"
+    />
     <div
       v-if="errorMessage"
       style="
@@ -32,15 +42,12 @@ const { addTransaction } = useTransactions();
 const errorMessage = ref('');
 
 const handleSubmit = async (data) => {
-  console.log('[Page] handleSubmit called with:', data);
   errorMessage.value = '';
   try {
     await addTransaction(data);
-    console.log('[Page] Transaction added successfully, navigating...');
     router.push('/transactions');
   } catch (error) {
-    console.error('[Page] Failed to add transaction:', error);
-    // Extract error message
+    console.error('Failed to add transaction:', error);
     if (error?.data?.errors) {
       const errors = error.data.errors;
       errorMessage.value = Object.entries(errors)
@@ -59,10 +66,8 @@ const handleSubmit = async (data) => {
   }
 };
 
-/* eslint-disable no-undef */
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 });
-/* eslint-enable no-undef */
 </script>

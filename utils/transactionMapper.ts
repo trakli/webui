@@ -15,42 +15,41 @@ type GroupLite = { id: number; name: string };
 export const transactionMapper = {
   /**
    * Transform API transaction to Frontend format
-   * @param api - Transaction from API
-   * @param parties - List of parties for name lookup
-   * @param categories - List of categories for name lookup
-   * @param wallets - List of wallets for name lookup
+   * @param api - Transaction from API (now includes nested objects)
+   * @param parties - List of parties for fallback lookup (optional)
+   * @param categories - List of categories for fallback lookup (optional)
+   * @param wallets - List of wallets for fallback lookup (optional)
+   * @param groups - List of groups for fallback lookup (optional)
    * @returns Frontend transaction object
    */
   toFrontend(
     api: ApiTransaction,
-    parties: Party[],
-    categories: Category[],
-    wallets: Wallet[],
-    groups: GroupLite[]
+    parties: Party[] = [],
+    categories: Category[] = [],
+    wallets: Wallet[] = [],
+    groups: GroupLite[] = []
   ): FrontendTransaction {
     // Split ISO datetime into date and time
     const dt = new Date(api.datetime);
     const date = dt.toISOString().slice(0, 10); // YYYY-MM-DD
     const time = dt.toTimeString().slice(0, 5); // HH:mm
 
-    // Find party by client_generated_id (UUID)
-    const party = parties.find(
-      (p) => p.sync_state?.client_generated_id === api.party_client_generated_id
-    );
+    // Use nested party object if available, otherwise lookup
+    const party =
+      api.party ||
+      parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id);
 
-    // Resolve group name
-    const groupName = groups.find((g) => g.id === api.group_id)?.name;
+    // Use nested wallet object if available, otherwise lookup
+    const wallet =
+      api.wallet ||
+      wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id);
 
-    // Resolve additional category names
-    const additionalCategoryNames = (api.categories || [])
-      .map((catId) => categories.find((c) => c.id === catId)?.name)
-      .filter(Boolean)
-      .join(', ');
+    // Use nested group object if available, otherwise lookup
+    const group = api.group || groups.find((g) => g.id === api.group_id);
 
-    // Find wallet by client_generated_id (UUID)
-    const wallet = wallets.find(
-      (w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id
-    );
+    // Use nested categories array if available, otherwise lookup
+    const transactionCategories = api.categories || [];
+    const categoryNames = transactionCategories.map((cat) => cat.name).join(', ');
 
     // Get currency from wallet or default to XAF
     const currency = wallet?.currency || 'XAF';
@@ -60,19 +59,67 @@ export const transactionMapper = {
       date,
       time,
       type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
-      party: party?.name || 'Unknown',
+      party: party?.name || '',
       partyId: api.party_client_generated_id,
       amount: `${api.amount} ${currency}`,
-      // Display: show group then additional categories
-      category: groupName || additionalCategoryNames || 'Uncategorized',
-      // Keep full IDs for edit: [group_id, ...categories]
+      // Display: show group then categories
+      category: group?.name || categoryNames || 'Uncategorized',
       groupId: api.group_id,
-      categoryIds: [api.group_id, ...((api.categories || []) as number[])],
-      wallet: wallet?.name,
+      categoryIds: transactionCategories.map((cat) => cat.id),
+      wallet: wallet?.name || '',
       walletId: api.wallet_client_generated_id,
-      description: api.description,
-      isRecurring: api.is_recurring,
-      files: api.files
+      description: api.description || '',
+      isRecurring: api.is_recurring || false,
+      files: api.files || []
+    };
+  },
+
+  /**
+   * Transform API transaction to Edit Form format (no display defaults)
+   * @param api - Transaction from API
+   * @param parties - List of parties for name lookup
+   * @param wallets - List of wallets for name lookup
+   * @returns Edit form transaction object with empty strings instead of defaults
+   */
+  toEditForm(
+    api: ApiTransaction,
+    parties: Party[] = [],
+    wallets: Wallet[] = []
+  ): FrontendTransaction {
+    // Split ISO datetime into date and time
+    const dt = new Date(api.datetime);
+    const date = dt.toISOString().slice(0, 10); // YYYY-MM-DD
+    const time = dt.toTimeString().slice(0, 5); // HH:mm
+
+    // Use nested party object if available, otherwise lookup
+    const party =
+      api.party ||
+      parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id);
+
+    // Use nested wallet object if available, otherwise lookup
+    const wallet =
+      api.wallet ||
+      wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id);
+
+    // Use nested categories array if available
+    const transactionCategories = api.categories || [];
+
+    return {
+      id: String(api.id),
+      date,
+      time,
+      type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
+      party: party?.name || '', // Empty string for edit form
+      partyId: api.party_client_generated_id,
+      amount: String(api.amount), // Just the number for editing
+      category: '', // Not used in edit form
+      groupId: api.group_id,
+      categoryIds: transactionCategories.map((cat) => cat.id),
+      wallet: wallet?.name || '',
+      walletId: api.wallet_client_generated_id,
+      description: api.description || '',
+      isRecurring: api.is_recurring || false,
+      files: api.files || []
     };
   },
 
@@ -88,7 +135,8 @@ export const transactionMapper = {
     frontend: Partial<FrontendTransaction>,
     parties: Party[] = [],
     wallets: Wallet[] = [],
-    currentDatetime?: string
+    currentDatetime?: string,
+    defaultGroup?: { id: number; name: string }
   ): TransactionCreatePayload {
     // Combine date + time into ISO datetime with timezone
     let datetime: string;
@@ -108,23 +156,12 @@ export const transactionMapper = {
     const amountStr = frontend.amount || '0';
     const amount = parseFloat(amountStr.replace(/[^\d.]/g, '')) || 0;
 
-    // Look up numeric IDs from parties and wallets
-    let partyId = 0;
-    let walletId = 0;
+    let partyId = null;
+    let walletId = null;
 
-    // Find party by UUID or numeric ID string
     if (frontend.partyId) {
-      console.log('[Mapper] Looking for party with ID:', frontend.partyId);
-      console.log(
-        '[Mapper] Available parties:',
-        parties.length,
-        parties.map((p) => ({ name: p.name, id: p.id, uuid: p.sync_state?.client_generated_id }))
-      );
-
-      // Try to find by UUID first, then by numeric ID
       let party = parties.find((p) => p.sync_state?.client_generated_id === frontend.partyId);
 
-      // If not found by UUID, try matching by numeric ID
       if (!party) {
         const numericId = parseInt(frontend.partyId);
         if (!isNaN(numericId)) {
@@ -133,28 +170,13 @@ export const transactionMapper = {
       }
 
       if (party) {
-        partyId = party.id; // Use the numeric ID
-        console.log('[Mapper] Found party:', party.name, 'ID:', partyId);
-      } else {
-        console.error('[Mapper] Party NOT FOUND for ID:', frontend.partyId);
+        partyId = party.id;
       }
-    } else {
-      console.warn('[Mapper] frontend.partyId is empty/undefined');
     }
 
-    // Find wallet by UUID or numeric ID string
     if (frontend.walletId) {
-      console.log('[Mapper] Looking for wallet with ID:', frontend.walletId);
-      console.log(
-        '[Mapper] Available wallets:',
-        wallets.length,
-        wallets.map((w) => ({ name: w.name, id: w.id, uuid: w.sync_state?.client_generated_id }))
-      );
-
-      // Try to find by UUID first, then by numeric ID
       let wallet = wallets.find((w) => w.sync_state?.client_generated_id === frontend.walletId);
 
-      // If not found by UUID, try matching by numeric ID
       if (!wallet) {
         const numericId = parseInt(frontend.walletId);
         if (!isNaN(numericId)) {
@@ -163,23 +185,23 @@ export const transactionMapper = {
       }
 
       if (wallet) {
-        walletId = wallet.id; // Use the numeric ID
-        console.log('[Mapper] Found wallet:', wallet.name, 'ID:', walletId);
-      } else {
-        console.error('[Mapper] Wallet NOT FOUND for ID:', frontend.walletId);
+        walletId = wallet.id;
       }
-    } else {
-      console.warn('[Mapper] frontend.walletId is empty/undefined');
     }
 
-    // If still no wallet, use first available
-    if (walletId === 0 && wallets.length > 0) {
-      walletId = wallets[0].id;
-      console.log('[Mapper] Auto-selected first wallet:', wallets[0].name, 'ID:', walletId);
+    // Only assign default wallet if one is explicitly configured
+    if (walletId === null && wallets.length > 0) {
+      // Try to find a wallet marked as default first
+      const defaultWallet = wallets.find(
+        (wallet) => wallet.name.toLowerCase().includes('default') || wallet.is_default === true
+      );
+      if (defaultWallet) {
+        walletId = defaultWallet.id;
+      }
+      // Otherwise leave as null - backend should handle this case
     }
 
-    // Determine group id strictly from explicit groupId; do not infer from categories
-    const groupId = typeof frontend.groupId === 'number' ? frontend.groupId : 0;
+    const groupId = frontend.groupId || defaultGroup?.id || null;
 
     const payload = {
       amount,
@@ -189,32 +211,10 @@ export const transactionMapper = {
       party_id: partyId,
       wallet_id: walletId,
       group_id: groupId,
-      // Optional: send categories as provided (do not include group here)
       categories:
-        frontend.categoryIds && frontend.categoryIds.length > 0 ? frontend.categoryIds : undefined
+        frontend.categoryIds && frontend.categoryIds.length > 0 ? frontend.categoryIds : [],
+      files: frontend.filesToUpload || []
     };
-
-    // Validation warnings
-    console.log('[Mapper] Validation:');
-    console.log('  - Amount:', amount, '(from:', amountStr + ')');
-    console.log('  - Type:', payload.type);
-    console.log('  - Datetime:', payload.datetime);
-    console.log('  - Party ID:', payload.party_id || 'MISSING (0)');
-    console.log('  - Wallet ID:', payload.wallet_id || 'MISSING (0)');
-    console.log('  - Group ID (primary category):', payload.group_id || 'MISSING (0)');
-    if (payload.categories) {
-      console.log('  - Additional Categories:', payload.categories);
-    }
-
-    if (!payload.party_id) {
-      console.warn('[Mapper] Party ID is 0! Backend might reject this.');
-    }
-    if (!payload.wallet_id) {
-      console.warn('[Mapper] Wallet ID is 0! Backend might reject this.');
-    }
-    if (!payload.group_id) {
-      console.warn('[Mapper] Group ID is 0! Backend might reject this.');
-    }
 
     return payload;
   },

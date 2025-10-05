@@ -28,7 +28,7 @@
 
     <div class="table-wrapper">
       <div class="table">
-        <table class="custom-table">
+        <table class="custom-table" :class="{ 'expense-table': headerType === 'expense' }">
           <thead>
             <tr>
               <th>Date Time</th>
@@ -130,43 +130,13 @@ const props = defineProps({
   currentPage: { type: Number, default: 1 },
   itemsPerPage: { type: Number, default: 10 },
   totalPages: { type: Number, default: 1 },
-  totalEntries: { type: Number, default: 0 }
+  totalEntries: { type: Number, default: 0 },
+  headerType: { type: String, default: 'default' } // 'default', 'expense'
 });
 
 defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery', 'update:filterQuery']);
 
-// Internal demo dataset to keep dashboard working when no data provided
-const demoTransactions = [
-  {
-    date: '2021-02-02',
-    time: '10:00',
-    type: 'OUTCOME',
-    party: 'Paul Erica',
-    amount: '254,000 XAF',
-    category: 'Food'
-  },
-  {
-    date: '2021-02-02',
-    time: '10:10',
-    type: 'INCOME',
-    party: 'Eric Mbia',
-    amount: '50,701 XAF',
-    category: 'Rent'
-  },
-  {
-    date: '2021-02-02',
-    time: '10:15',
-    type: 'OUTCOME',
-    party: 'Paul Tchoua',
-    amount: '64,709 XAF',
-    category: 'Food'
-  }
-];
-
-const isUsingDemo = computed(() => props.transactions.length === 0);
-const displayedTransactions = computed(() =>
-  isUsingDemo.value ? demoTransactions : props.transactions
-);
+const displayedTransactions = computed(() => props.transactions);
 
 const computedTotalEntries = computed(() => {
   if (props.totalEntries && props.totalEntries > 0) return props.totalEntries;
@@ -174,8 +144,7 @@ const computedTotalEntries = computed(() => {
 });
 
 const pagesTotal = computed(() => {
-  // If consumer provided totalPages > 1, honor it; otherwise derive
-  if (props.totalPages && props.totalPages > 1 && !isUsingDemo.value) return props.totalPages;
+  if (props.totalPages && props.totalPages > 1) return props.totalPages;
   return Math.max(1, Math.ceil(computedTotalEntries.value / props.itemsPerPage));
 });
 
@@ -350,6 +319,10 @@ const formatTimeAgo = (txn) => {
     padding: 12px;
   }
 
+  &.expense-table th {
+    background-color: #dc2626;
+  }
+
   td {
     padding: 12px;
     background-color: #f9f9f9;
@@ -384,7 +357,7 @@ const formatTimeAgo = (txn) => {
 
     &.outcome {
       background-color: #fee2e2;
-      color: #b91c1c;
+      color: #dc2626;
     }
   }
 
@@ -401,7 +374,7 @@ const formatTimeAgo = (txn) => {
     }
 
     &-outcome {
-      color: #ef4444;
+      color: #dc2626;
       font-weight: bold;
     }
   }
@@ -446,10 +419,10 @@ const formatTimeAgo = (txn) => {
 
   // Make delete icon red
   .action-btn:nth-child(2) .action-icon {
-    color: #ef4444;
+    color: #dc2626;
 
     &:hover {
-      color: #dc2626;
+      color: #b91c1c;
     }
   }
 }
@@ -518,6 +491,17 @@ const formatTimeAgo = (txn) => {
 
     &:hover {
       background-color: #065f46;
+    }
+  }
+
+  .expense-table & {
+    &.active {
+      background-color: #dc2626;
+      border-color: #dc2626;
+
+      &:hover {
+        background-color: #b91c1c;
+      }
     }
   }
 }
