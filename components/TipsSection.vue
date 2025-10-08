@@ -42,6 +42,11 @@ defineProps({
   margin: 0;
   align-self: flex-start;
 
+  // Hide on tablet and below
+  @media (max-width: $breakpoint-lg) {
+    display: none;
+  }
+
   @media (max-width: 1200px) {
     width: 340px;
   }

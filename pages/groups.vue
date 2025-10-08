@@ -11,7 +11,7 @@
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" page-name="Group" />
+        <TipsSection v-if="!isTabletOrBelow" page-name="Group" />
       </div>
 
       <div v-if="isLoading" class="loading-state">Loading groups...</div>
@@ -48,7 +48,7 @@ import TipsSection from '@/components/TipsSection.vue';
 
 const showForm = ref(false);
 const editingItem = ref(null);
-const { isMobile } = useSidebar();
+const { isTabletOrBelow } = useSidebar();
 
 const { groups, isLoading, error, fetchGroups, createGroup, updateGroup, deleteGroup } =
   useGroups();

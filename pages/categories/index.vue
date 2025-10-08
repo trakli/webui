@@ -15,7 +15,7 @@
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" page-name="Category" />
+        <TipsSection v-if="!isTabletOrBelow" page-name="Category" />
       </div>
 
       <div v-if="isLoading" class="loading-state">
@@ -89,7 +89,7 @@ import TipsSection from '@/components/TipsSection.vue';
 const showForm = ref(false);
 const editingItem = ref(null);
 const activeTab = ref('income');
-const { isMobile } = useSidebar();
+const { isTabletOrBelow } = useSidebar();
 
 // Get shared data for filtered categories
 const sharedData = useSharedData();
