@@ -8,8 +8,28 @@
       @create="navigateToNew"
     />
 
+    <!-- Mobile cards -->
+    <TTransactionsCardList
+      v-if="paginatedTransactions.length > 0"
+      class="only-mobile"
+      :transactions="paginatedTransactions"
+      :search-query="searchQuery"
+      :filter-query="filterQuery"
+      :current-page="currentPage"
+      :items-per-page="itemsPerPage"
+      :total-pages="totalPages"
+      :total-entries="filteredTransactions.length"
+      @update:search-query="searchQuery = $event"
+      @update:filter-query="filterQuery = $event"
+      @page-change="currentPage = $event"
+      @edit="handleEdit"
+      @delete="handleDelete"
+    />
+
+    <!-- Desktop table -->
     <TTableComponent
       v-if="paginatedTransactions.length > 0"
+      class="only-desktop"
       :transactions="paginatedTransactions"
       :search-query="searchQuery"
       :filter-query="filterQuery"
@@ -32,6 +52,7 @@ import { useNotifications } from '@/composables/useNotifications';
 import TTopCard from '@/components/TTopCard.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
+import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 
 const {
   paginatedTransactions,
@@ -77,5 +98,21 @@ async function handleDelete(txn) {
   gap: 2rem;
   align-items: center;
   width: 100%;
+}
+
+.only-mobile {
+  display: block;
+}
+.only-desktop {
+  display: none;
+}
+
+@media (min-width: $breakpoint-md) {
+  .only-mobile {
+    display: none;
+  }
+  .only-desktop {
+    display: block;
+  }
 }
 </style>

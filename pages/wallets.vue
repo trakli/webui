@@ -15,7 +15,7 @@
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" page-name="Wallet" />
+        <TipsSection v-if="!isTabletOrBelow" page-name="Wallet" />
       </div>
 
       <div v-if="isLoading" class="loading-state">Loading wallets...</div>
@@ -52,7 +52,7 @@ import TipsSection from '@/components/TipsSection.vue';
 
 const showForm = ref(false);
 const editingItem = ref(null);
-const { isMobile } = useSidebar();
+const { isTabletOrBelow } = useSidebar();
 
 const { wallets, isLoading, error, fetchWallets, createWallet, updateWallet, deleteWallet } =
   useWallets();
@@ -165,5 +165,12 @@ definePageMeta({
 
 .error-state {
   color: $error-color;
+}
+
+/* Ensure TipsSection is hidden on tablet and below */
+@media (max-width: $breakpoint-lg) {
+  :deep(.tips-container) {
+    display: none;
+  }
 }
 </style>

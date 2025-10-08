@@ -9,21 +9,41 @@
       <p class="empty-title">No transactions yet</p>
       <p class="empty-subtitle">Create your first transaction from the Transactions page.</p>
     </div>
-    <TTableComponent
-      v-else
-      :transactions="paginatedTransactions"
-      :search-query="searchQuery"
-      :filter-query="filterQuery"
-      :current-page="currentPage"
-      :items-per-page="itemsPerPage"
-      :total-pages="totalPages"
-      :total-entries="filteredTransactions.length"
-      @update:search-query="searchQuery = $event"
-      @update:filter-query="filterQuery = $event"
-      @page-change="currentPage = $event"
-      @edit="handleEdit"
-      @delete="handleDelete"
-    />
+    <template v-else>
+      <!-- Mobile cards -->
+      <TTransactionsCardList
+        class="only-mobile"
+        :transactions="paginatedTransactions"
+        :search-query="searchQuery"
+        :filter-query="filterQuery"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total-pages="totalPages"
+        :total-entries="filteredTransactions.length"
+        @update:search-query="searchQuery = $event"
+        @update:filter-query="filterQuery = $event"
+        @page-change="currentPage = $event"
+        @edit="handleEdit"
+        @delete="handleDelete"
+      />
+
+      <!-- Desktop table -->
+      <TTableComponent
+        class="only-desktop"
+        :transactions="paginatedTransactions"
+        :search-query="searchQuery"
+        :filter-query="filterQuery"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total-pages="totalPages"
+        :total-entries="filteredTransactions.length"
+        @update:search-query="searchQuery = $event"
+        @update:filter-query="filterQuery = $event"
+        @page-change="currentPage = $event"
+        @edit="handleEdit"
+        @delete="handleDelete"
+      />
+    </template>
   </div>
 </template>
 
@@ -34,6 +54,7 @@ import { useNotifications } from '@/composables/useNotifications';
 import TDashboardTopCard from '@/components/TDashboardTopCard.vue';
 import WalletCard from '@/components/WalletCard.vue';
 import TTransactionCard from '@/components/TTransactionCard.vue';
+import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
 
 const router = useRouter();
@@ -75,6 +96,7 @@ definePageMeta({
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/scss/_variables.scss' as *;
 .dashboard-index-content {
   display: flex;
   flex-direction: column;
@@ -136,5 +158,21 @@ definePageMeta({
 
 .empty-subtitle {
   margin: 0;
+}
+
+/* Show mobile cards by default, hide desktop table; flip at md breakpoint */
+.only-mobile {
+  display: block;
+}
+.only-desktop {
+  display: none;
+}
+@media (min-width: $breakpoint-md) {
+  .only-mobile {
+    display: none;
+  }
+  .only-desktop {
+    display: block;
+  }
 }
 </style>

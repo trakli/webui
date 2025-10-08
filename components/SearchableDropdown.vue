@@ -232,7 +232,7 @@ watch(
     border: 1px solid $border-color;
     border-radius: 8px;
     background-color: $bg-white;
-    padding: 8px 40px 8px 36px;
+    padding: 8px 10px;
 
     &:focus-within {
       border-color: $primary;
