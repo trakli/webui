@@ -16,7 +16,7 @@
           @close="handleFormClose"
         />
       </div>
-      <TipsSection v-if="isGroupsPage && !isMobile" :page-name="pageName" />
+      <TipsSection v-if="isGroupsPage && !isTabletOrBelow" :page-name="pageName" />
     </div>
     <EmptyState
       v-if="items.length === 0 && !showForm"
@@ -71,8 +71,8 @@ const props = defineProps({
 // Destructure props to use them in the setup function
 const { pageName, pageNamePlural } = toRefs(props);
 
-// Mobile detection
-const { isMobile } = useSidebar();
+// Responsive flags
+const { isTabletOrBelow } = useSidebar();
 
 const showForm = ref(false);
 const items = ref([]);

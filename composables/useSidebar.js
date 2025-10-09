@@ -2,10 +2,12 @@ import { ref, onMounted, onUnmounted, readonly } from 'vue';
 
 const isSidebarOpen = ref(false);
 const isMobile = ref(false);
+const isTabletOrBelow = ref(false);
 
 export const useSidebar = () => {
   const checkMobile = () => {
     isMobile.value = window.innerWidth < 768;
+    isTabletOrBelow.value = window.innerWidth <= 1280;
     // Auto-close sidebar on mobile when screen size changes
     if (!isMobile.value) {
       isSidebarOpen.value = false;
@@ -36,6 +38,7 @@ export const useSidebar = () => {
   return {
     isSidebarOpen: readonly(isSidebarOpen),
     isMobile: readonly(isMobile),
+    isTabletOrBelow: readonly(isTabletOrBelow),
     toggleSidebar,
     closeSidebar,
     openSidebar

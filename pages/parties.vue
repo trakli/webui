@@ -11,7 +11,7 @@
             @close="handleFormClose"
           />
         </div>
-        <TipsSection v-if="!isMobile" page-name="Party" />
+        <TipsSection v-if="!isTabletOrBelow" page-name="Party" />
       </div>
 
       <div v-if="isLoading" class="loading-state">Loading parties...</div>
@@ -48,7 +48,7 @@ import TipsSection from '@/components/TipsSection.vue';
 
 const showForm = ref(false);
 const editingItem = ref(null);
-const { isMobile } = useSidebar();
+const { isTabletOrBelow } = useSidebar();
 
 const { parties, isLoading, error, fetchParties, createParty, updateParty, deleteParty } =
   useParties();
@@ -171,5 +171,12 @@ definePageMeta({
 
 .error-state {
   color: $error-color;
+}
+
+/* Ensure TipsSection is hidden on tablet and below */
+@media (max-width: $breakpoint-lg) {
+  :deep(.tips-container) {
+    display: none;
+  }
 }
 </style>
