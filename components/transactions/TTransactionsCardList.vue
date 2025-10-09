@@ -34,23 +34,35 @@
         :class="txn.type === 'INCOME' ? 'card--income' : 'card--expense'"
       >
         <div class="card__header">
-          <span class="card__badge" :class="txn.type === 'INCOME' ? 'badge--income' : 'badge--expense'">
+          <span
+            class="card__badge"
+            :class="txn.type === 'INCOME' ? 'badge--income' : 'badge--expense'"
+          >
             {{ txn.type }}
           </span>
           <div class="card__title-group">
             <div class="card__title">{{ formatDate(txn) }}</div>
             <div class="card__subtitle">{{ txn.party }}</div>
           </div>
-          <div class="card__amount" :class="txn.type === 'INCOME' ? 'amount--income' : 'amount--expense'">
+          <div
+            class="card__amount"
+            :class="txn.type === 'INCOME' ? 'amount--income' : 'amount--expense'"
+          >
             {{ txn.amount }}
           </div>
-          <button class="card__toggle" @click="toggleExpanded(txn.id ?? idx)" :aria-expanded="isExpanded(txn.id ?? idx)">
-            <ChevronDownIcon class="toggle-icon" :class="{ 'is-open': isExpanded(txn.id ?? idx) }" />
+          <button
+            class="card__toggle"
+            @click="toggleExpanded(txn.id ?? idx)"
+            :aria-expanded="isExpanded(txn.id ?? idx)"
+          >
+            <ChevronDownIcon
+              class="toggle-icon"
+              :class="{ 'is-open': isExpanded(txn.id ?? idx) }"
+            />
           </button>
         </div>
 
         <div class="card__details" v-show="isExpanded(txn.id ?? idx)">
-         
           <div class="details__tiles">
             <div class="tile">
               <div class="tile__label">Party</div>
@@ -67,7 +79,11 @@
               <button class="action-btn" aria-label="Edit" @click="$emit('edit', txn)">
                 <PencilSquareIcon class="action-icon" />
               </button>
-              <button class="action-btn action-btn--delete" aria-label="Delete" @click="$emit('delete', txn)">
+              <button
+                class="action-btn action-btn--delete"
+                aria-label="Delete"
+                @click="$emit('delete', txn)"
+              >
                 <TrashIcon class="action-icon" />
               </button>
             </div>
@@ -78,7 +94,11 @@
 
     <div class="pagination-container">
       <div class="pagination-controls">
-        <button class="pagination-btn" :disabled="currentPage === 1" @click="$emit('page-change', currentPage - 1)">
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === 1"
+          @click="$emit('page-change', currentPage - 1)"
+        >
           Previous
         </button>
         <button
@@ -90,12 +110,18 @@
         >
           {{ page }}
         </button>
-        <button class="pagination-btn" :disabled="currentPage === pagesTotal" @click="$emit('page-change', currentPage + 1)">
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === pagesTotal"
+          @click="$emit('page-change', currentPage + 1)"
+        >
           Next
         </button>
       </div>
       <div class="pagination-info">
-        <span class="entries-text">Showing {{ startEntry }}-{{ endEntry }} of {{ totalEntriesComputed }} entries</span>
+        <span class="entries-text"
+          >Showing {{ startEntry }}-{{ endEntry }} of {{ totalEntriesComputed }} entries</span
+        >
       </div>
     </div>
   </div>
@@ -103,7 +129,13 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { MagnifyingGlassIcon, FunnelIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  ChevronDownIcon,
+  PencilSquareIcon,
+  TrashIcon
+} from '@heroicons/vue/24/outline';
 
 const props = defineProps({
   transactions: { type: Array, default: () => [] },

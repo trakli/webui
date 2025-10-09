@@ -44,15 +44,29 @@
     }
 
     &--income {
-      .card__badge { background: $primary-light; color: $primary; }
-      .card__amount { color: $primary; }
-      &::after { background: radial-gradient(80px 80px at 90% 20%, rgba(4, 120, 68, 0.08), transparent 70%); }
+      .card__badge {
+        background: $primary-light;
+        color: $primary;
+      }
+      .card__amount {
+        color: $primary;
+      }
+      &::after {
+        background: radial-gradient(80px 80px at 90% 20%, rgba(4, 120, 68, 0.08), transparent 70%);
+      }
     }
 
     &--expense {
-      .card__badge { background: rgba($error-color, 0.12); color: $error-color; }
-      .card__amount { color: $error-color; }
-      &::after { background: radial-gradient(80px 80px at 90% 20%, rgba(220, 38, 38, 0.08), transparent 70%); }
+      .card__badge {
+        background: rgba($error-color, 0.12);
+        color: $error-color;
+      }
+      .card__amount {
+        color: $error-color;
+      }
+      &::after {
+        background: radial-gradient(80px 80px at 90% 20%, rgba(220, 38, 38, 0.08), transparent 70%);
+      }
     }
   }
 
@@ -75,8 +89,15 @@
     flex-direction: column;
     gap: 2px;
   }
-  .card__title { font-size: $font-size-lg; font-weight: $font-semibold; color: $text-primary; }
-  .card__subtitle { font-size: $font-size-sm; color: $text-muted; }
+  .card__title {
+    font-size: $font-size-lg;
+    font-weight: $font-semibold;
+    color: $text-primary;
+  }
+  .card__subtitle {
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
 
   .card__amount {
     font-size: $font-size-base;
@@ -93,8 +114,15 @@
     place-items: center;
     border: 1px solid $border-light;
   }
-  .toggle-icon { width: 18px; height: 18px; color: $text-muted; transition: transform $transition-base; }
-  .toggle-icon.is-open { transform: rotate(180deg); }
+  .toggle-icon {
+    width: 18px;
+    height: 18px;
+    color: $text-muted;
+    transition: transform $transition-base;
+  }
+  .toggle-icon.is-open {
+    transform: rotate(180deg);
+  }
 
   .card__details {
     margin-top: $spacing-4;
@@ -108,7 +136,10 @@
     justify-content: space-between;
   }
 
-  .details__timeago { font-size: $font-size-xs; color: $text-muted; }
+  .details__timeago {
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
 
   .details__tiles {
     display: grid;
@@ -116,14 +147,46 @@
     gap: $spacing-3;
   }
 
-  .tile { background: $bg-light; border: 1px solid $border-light; border-radius: $radius-lg; padding: $spacing-3; }
-  .tile__label { font-size: $font-size-xs; color: $text-muted; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
-  .tile__value { font-size: $font-size-sm; color: $text-primary; word-break: break-word; }
+  .tile {
+    background: $bg-light;
+    border: 1px solid $border-light;
+    border-radius: $radius-lg;
+    padding: $spacing-3;
+  }
+  .tile__label {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+  }
+  .tile__value {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    word-break: break-word;
+  }
 
-  .card__actions { display: flex; gap: $spacing-3; }
-  .action-btn { width: 28px; height: 28px; border-radius: $radius-md; border: 1px solid $border-light; background: $bg-white; display: grid; place-items: center; }
-  .action-icon { width: 16px; height: 16px; color: $primary; }
-  .action-btn--delete .action-icon { color: $error-color; }
+  .card__actions {
+    display: flex;
+    gap: $spacing-3;
+  }
+  .action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: $radius-md;
+    border: 1px solid $border-light;
+    background: $bg-white;
+    display: grid;
+    place-items: center;
+  }
+  .action-icon {
+    width: 16px;
+    height: 16px;
+    color: $primary;
+  }
+  .action-btn--delete .action-icon {
+    color: $error-color;
+  }
 
   .pagination-container {
     margin-top: $spacing-6;
@@ -136,7 +199,9 @@
 
 /* Visibility: cards on mobile only */
 @media (min-width: $breakpoint-md) {
-  .transactions-cards { display: none; }
+  .transactions-cards {
+    display: none;
+  }
 }
 
 /* Controls reused styles (scoped in cards component) */
@@ -166,8 +231,14 @@
     transition: border-color 0.2s ease;
     box-sizing: border-box;
 
-    &::placeholder { color: #9ca3af; }
-    &:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+    &::placeholder {
+      color: #9ca3af;
+    }
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
   }
 }
 
@@ -196,9 +267,24 @@
   min-width: 40px;
   text-align: center;
 
-  &:hover:not(:disabled) { background-color: #f3f4f6; border-color: #9ca3af; }
-  &:disabled { opacity: .5; cursor: not-allowed; background-color: #f9fafb; }
-  &.active { background-color: $primary; color: #fff; border-color: $primary; }
+  &:hover:not(:disabled) {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f9fafb;
+  }
+  &.active {
+    background-color: $primary;
+    color: #fff;
+    border-color: $primary;
+  }
 }
 
-.entries-text { font-size: $font-size-sm; color: $text-muted; font-weight: $font-medium; }
+.entries-text {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  font-weight: $font-medium;
+}

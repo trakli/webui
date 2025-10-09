@@ -108,7 +108,11 @@ async function handleDelete(txn) {
 }
 
 @media (min-width: $breakpoint-md) {
-  .only-mobile { display: none; }
-  .only-desktop { display: block; }
+  .only-mobile {
+    display: none;
+  }
+  .only-desktop {
+    display: block;
+  }
 }
 </style>
