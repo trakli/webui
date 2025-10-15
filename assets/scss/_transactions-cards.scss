@@ -210,7 +210,7 @@
   .txn-card__top {
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: $spacing-3;
+    gap: $spacing-2;
     align-items: center;
   }
 
@@ -246,17 +246,19 @@
   .header-line {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
 
     .prefix {
       color: $text-secondary;
       font-size: $font-size-sm;
+      flex-shrink: 0;
     }
     .user-icon {
       width: 16px;
       height: 16px;
       color: $text-secondary;
+      flex-shrink: 0;
     }
     .party {
       font-weight: $font-semibold;
@@ -267,31 +269,39 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .chip {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      font-size: $font-size-xs;
-      border: 1px solid $border-light;
-      white-space: nowrap;
-      flex: 0 0 auto;
+  }
 
-      &.chip--default {
-        background: $primary-light;
-        color: $primary;
-        border-color: rgba($primary, 0.25);
-      }
-      &.chip--wallet {
-        background: $bg-light;
-        color: $text-secondary;
-      }
-      .chip-icon {
-        width: 14px;
-        height: 14px;
-      }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    font-size: $font-size-xs;
+    border: 1px solid $border-light;
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: 100%;
+    overflow: hidden;
+
+    &.chip--default {
+      background: $primary-light;
+      color: $primary;
+      border-color: rgba($primary, 0.25);
+    }
+    &.chip--wallet {
+      background: $bg-light;
+      color: $text-secondary;
+    }
+    .chip-icon {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+    .chip-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -305,6 +315,12 @@
     &.amount--expense {
       color: $error-color;
     }
+  }
+
+  .txn-card__middle {
+    margin-top: $spacing-2;
+    display: flex;
+    align-items: center;
   }
 
   .txn-card__bottom {

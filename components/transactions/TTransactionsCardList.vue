@@ -43,15 +43,19 @@
             <span class="prefix">{{ directionLabel(txn.type) }}</span>
             <UserIcon class="user-icon" />
             <span class="party">{{ txn.party || 'Inconnu' }}</span>
-            <span class="chip" :class="isDefaultWallet(txn) ? 'chip--default' : 'chip--wallet'">
-              <LockClosedIcon v-if="isDefaultWallet(txn)" class="chip-icon" />
-              <CreditCardIcon v-else class="chip-icon" />
-              {{ isDefaultWallet(txn) ? 'Default' : txn.wallet || '—' }}
-            </span>
           </div>
           <div class="amount" :class="txn.type === 'INCOME' ? 'amount--income' : 'amount--expense'">
             {{ formatShortAmount(txn.amount) }}
           </div>
+        </div>
+        <div class="txn-card__middle">
+          <span class="chip" :class="isDefaultWallet(txn) ? 'chip--default' : 'chip--wallet'">
+            <LockClosedIcon v-if="isDefaultWallet(txn)" class="chip-icon" />
+            <CreditCardIcon v-else class="chip-icon" />
+            <span class="chip-text">{{
+              isDefaultWallet(txn) ? 'Default' : txn.wallet || '—'
+            }}</span>
+          </span>
         </div>
         <div class="txn-card__bottom">
           <div class="desc" :title="txn.description">{{ txn.description }}</div>
