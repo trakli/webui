@@ -166,11 +166,4 @@ definePageMeta({
 .error-state {
   color: $error-color;
 }
-
-/* Ensure TipsSection is hidden on tablet and below */
-@media (max-width: $breakpoint-lg) {
-  :deep(.tips-container) {
-    display: none;
-  }
-}
 </style>

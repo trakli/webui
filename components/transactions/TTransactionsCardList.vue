@@ -3,7 +3,7 @@
     <div class="cards-heading">
       <h1 class="cards-heading__text">All Transactions</h1>
       <div class="input-controls">
-        <div class="search-container">
+        <div class="txn-search-container">
           <input
             type="text"
             placeholder="Search..."
@@ -11,9 +11,9 @@
             :value="searchQuery"
             @input="$emit('update:searchQuery', $event.target.value)"
           />
-          <MagnifyingGlassIcon class="search-icon" />
+          <MagnifyingGlassIcon class="txn-search-icon" />
         </div>
-        <div class="filter-container">
+        <div class="txn-filter-container">
           <input
             type="text"
             placeholder="Filter..."
@@ -21,7 +21,7 @@
             :value="filterQuery"
             @input="$emit('update:filterQuery', $event.target.value)"
           />
-          <FunnelIcon class="filter-icon" />
+          <FunnelIcon class="txn-filter-icon" />
         </div>
       </div>
     </div>
@@ -49,10 +49,13 @@
           </div>
         </div>
         <div class="txn-card__middle">
-          <span class="chip" :class="isDefaultWallet(txn) ? 'chip--default' : 'chip--wallet'">
-            <LockClosedIcon v-if="isDefaultWallet(txn)" class="chip-icon" />
-            <CreditCardIcon v-else class="chip-icon" />
-            <span class="chip-text">{{
+          <span
+            class="txn-chip"
+            :class="isDefaultWallet(txn) ? 'txn-chip--default' : 'txn-chip--wallet'"
+          >
+            <LockClosedIcon v-if="isDefaultWallet(txn)" class="txn-chip__icon" />
+            <CreditCardIcon v-else class="txn-chip__icon" />
+            <span class="txn-chip__text">{{
               isDefaultWallet(txn) ? 'Default' : txn.wallet || '—'
             }}</span>
           </span>
@@ -111,6 +114,7 @@ import {
   ArrowDownLeftIcon
 } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
+import { formatShortAmount } from '@/utils/currency';
 
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
@@ -177,27 +181,6 @@ function isDefaultWallet(txn) {
 
 // Helpers for UI formatting
 const directionLabel = (type) => (type === 'INCOME' ? 'From' : 'To');
-
-function formatShortAmount(amountStr) {
-  if (!amountStr || typeof amountStr !== 'string') return amountStr || '';
-  // Robust parsing: remove non-numeric chars except decimal point and optionally parse based on locale
-  // For simplicity, assuming '.' is always the decimal separator for internal parsing.
-  const cleanedAmount = amountStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
-  const num = parseFloat(cleanedAmount) || 0;
-  const parts = amountStr.trim().split(/\s+/);
-  const currencyRaw = parts[parts.length - 1] || '';
-  const currency = currencyRaw === 'XAF' ? 'FCFA' : currencyRaw;
-  // Use Intl.NumberFormat for locale-aware formatting (e.g., for French locale where comma is decimal)
-  const formatter = new Intl.NumberFormat(navigator.language, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  });
-  if (num >= 1000) {
-    const k = Math.round((num / 1000) * 10) / 10;
-    return `${formatter.format(k)} k ${currency}`;
-  }
-  return `${formatter.format(num)} ${currency}`;
-}
 
 function formatShortDate(txn) {
   const iso = txn?.date || '';

@@ -271,7 +271,7 @@
     }
   }
 
-  .chip {
+  .txn-chip {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -284,21 +284,21 @@
     max-width: 100%;
     overflow: hidden;
 
-    &.chip--default {
+    &--default {
       background: $primary-light;
       color: $primary;
       border-color: rgba($primary, 0.25);
     }
-    &.chip--wallet {
+    &--wallet {
       background: $bg-light;
       color: $text-secondary;
     }
-    .chip-icon {
+    .txn-chip__icon {
       width: 12px;
       height: 12px;
       flex-shrink: 0;
     }
-    .chip-text {
+    .txn-chip__text {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -352,13 +352,6 @@
   }
 }
 
-/* Visibility: cards on mobile only */
-@media (min-width: $breakpoint-md) {
-  .transactions-cards {
-    display: none;
-  }
-}
-
 /* Controls reused styles (scoped in cards component) */
 .input-controls {
   display: flex;
@@ -367,8 +360,8 @@
   align-items: center;
 }
 
-.search-container,
-.filter-container {
+.txn-search-container,
+.txn-filter-container {
   position: relative;
   width: 100%;
   height: 36px;
@@ -397,8 +390,8 @@
   }
 }
 
-.search-icon,
-.filter-icon {
+.txn-search-icon,
+.txn-filter-icon {
   position: absolute;
   right: 12px;
   top: 50%;

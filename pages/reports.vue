@@ -46,14 +46,14 @@
           <div class="kpis">
             <KpiCard
               label="Total Income"
-              :value="isLoading ? 'Loading...' : formatCompactCurrency(kpis.totalIncome, 'USD')"
+              :value="isLoading ? 'Loading...' : formatCompactCurrency(kpis.totalIncome, currency)"
             />
             <KpiCard
               label="Avg. Monthly Income"
               :value="
                 isLoading
                   ? 'Loading...'
-                  : formatCompactCurrency(Math.round(kpis.averageMonthlyIncome), 'USD')
+                  : formatCompactCurrency(Math.round(kpis.averageMonthlyIncome), currency)
               "
             />
             <KpiCard
@@ -69,7 +69,11 @@
 
           <div class="content-layout">
             <div class="charts-column">
-              <DonutChartCard :data="sourceBreakdown" :total="kpis.totalIncome">
+              <DonutChartCard
+                :data="sourceBreakdown"
+                :total="kpis.totalIncome"
+                :currency="currency"
+              >
                 <template #note>
                   <span class="bold">AI Insight:</span>
                   {{
@@ -147,6 +151,7 @@ const {
   currentPeriod,
   selectedWalletId,
   availablePeriods,
+  availableWallets,
   setPeriod,
   getStatistics,
   formatCompactCurrency
@@ -176,6 +181,16 @@ watch([selectedWalletId, currentPeriod], () => {
 // Load on mount
 onMounted(() => {
   loadStatistics();
+});
+
+const currency = computed(() => {
+  const selectedWallet = availableWallets.value.find((w) => w.id === selectedWalletId.value);
+
+  if (selectedWallet) {
+    return selectedWallet.currency;
+  }
+
+  return selectedWalletId.value === null ? 'USD' : 'XAF';
 });
 
 // Computed properties for real data
@@ -234,6 +249,7 @@ const pageSubtitle = computed(() => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+@use '@/assets/scss/_utilities.scss' as *;
 
 .settings-layout {
   --sidebar-width: min(300px, 30vw);
@@ -392,52 +408,6 @@ const pageSubtitle = computed(() => {
     gap: $spacing-2;
     justify-content: flex-start;
   }
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-1;
-  padding: $spacing-1 $spacing-2;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
-  color: $text-secondary;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  font-size: $font-size-xs;
-  font-weight: $font-medium;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-
-  @media (max-width: $breakpoint-sm) {
-    padding: 6px 8px;
-    font-size: 10px;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.9);
-    color: $text-primary;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.chip--primary {
-  background: $primary;
-  color: $bg-white;
-  border-color: $primary;
-}
-
-.chip--report {
-  background: $accent-color;
-  color: $bg-white;
-  border-color: $accent-color;
-}
-
-.chip-icon {
-  width: 16px;
-  height: 16px;
 }
 
 .alert {

@@ -56,6 +56,7 @@ const toggleCustomPeriod = () => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+@use '@/assets/scss/_utilities.scss' as *;
 
 .card-container {
   width: 100%;
@@ -136,43 +137,9 @@ const toggleCustomPeriod = () => {
   }
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-1;
-  padding: $spacing-1 $spacing-2;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
-  color: $text-secondary;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  font-size: $font-size-xs;
-  font-weight: $font-medium;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-
-  @media (max-width: $breakpoint-sm) {
-    padding: 6px 8px;
-    font-size: 10px;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.9);
-    color: $text-primary;
-  }
-
-  &--primary {
-    background: $primary;
-    color: white;
-    border-color: $primary;
-  }
-}
-
 .chip-icon {
   width: 12px;
   height: 12px;
-  flex-shrink: 0;
   stroke-width: 2;
 
   @media (max-width: $breakpoint-sm) {

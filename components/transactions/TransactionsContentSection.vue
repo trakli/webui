@@ -91,6 +91,7 @@ async function handleDelete(txn) {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables' as *;
+@use '@/assets/scss/_utilities.scss' as *;
 
 .content-area {
   display: flex;
@@ -98,21 +99,5 @@ async function handleDelete(txn) {
   gap: 2rem;
   align-items: center;
   width: 100%;
-}
-
-.only-mobile {
-  display: block;
-}
-.only-desktop {
-  display: none;
-}
-
-@media (min-width: $breakpoint-md) {
-  .only-mobile {
-    display: none;
-  }
-  .only-desktop {
-    display: block;
-  }
 }
 </style>

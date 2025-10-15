@@ -47,6 +47,7 @@ const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+@use '@/assets/scss/_utilities.scss' as *;
 
 .navbar {
   display: flex;
@@ -99,60 +100,13 @@ const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
   }
 
   .search-container {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-    position: relative;
     width: 396px;
 
-    @media (max-width: #{$breakpoint-lg - 1px}) {
-      width: auto;
-      gap: 8px;
-    }
-
-    @media (max-width: #{$breakpoint-md - 1px}) {
-      width: auto;
-      gap: 6px;
-    }
-
     @media (max-width: $breakpoint-sm) {
-      gap: 8px;
-
-      // Hide Add Transaction button and search icon on mobile
       .add-transaction-btn,
       .icon-button:last-child {
         display: none;
       }
-    }
-  }
-
-  .icon {
-    width: 20px;
-    height: 20px;
-    color: #1d3229;
-  }
-
-  .icon-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    width: 36px;
-    height: $navbar-icon-button-height;
-    border-radius: $radius-lg;
-    background-color: #dee1e0;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    @media (max-width: $breakpoint-sm) {
-      width: 32px;
-      height: 32px;
-      padding: 6px;
-    }
-
-    &:hover {
-      background-color: #d0d3d2;
     }
   }
 

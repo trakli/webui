@@ -1,17 +1,18 @@
-// Transaction API Response Interface (from GET /transactions)
 export interface ApiTransaction {
   id: number;
   type: 'income' | 'expense';
   amount: number;
   description: string;
-  datetime: string; // ISO 8601 format
-  group_id: number; // Primary group/category ID
-  categories: number[]; // Array of category IDs
+  datetime: string;
+  group_id: number;
+  categories: any[];
   is_recurring: boolean;
   user_id: number;
   transfer_id: number;
-  wallet_client_generated_id: string; // UUID
-  party_client_generated_id: string; // UUID
+  wallet_client_generated_id: string;
+  party_client_generated_id: string;
+  wallet?: any;
+  party?: any;
   files?: TransactionFile[];
   recurring_rules?: RecurringRules;
 }

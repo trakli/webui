@@ -6,6 +6,7 @@ import type {
 import type { Party } from '~/types/party';
 import type { Category } from '~/types/category';
 import type { Wallet } from '~/types/wallet';
+import { parseAmount as parseAmountUtil } from '@/utils/currency';
 type GroupLite = { id: number; name: string };
 
 /**
@@ -27,32 +28,38 @@ export const transactionMapper = {
     parties: Party[] = [],
     _categories: Category[] = [],
     wallets: Wallet[] = [],
-    groups: GroupLite[] = []
+    _groups: GroupLite[] = []
   ): FrontendTransaction {
-    // Split ISO datetime into date and time
     const dt = new Date(api.datetime);
-    const date = dt.toISOString().slice(0, 10); // YYYY-MM-DD
-    const time = dt.toTimeString().slice(0, 5); // HH:mm
+    const date = dt.toISOString().slice(0, 10);
+    const time = dt.toTimeString().slice(0, 5);
 
-    // Use nested party object if available, otherwise lookup
     const party =
       api.party ||
       parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id);
 
-    // Use nested wallet object if available, otherwise lookup
     const wallet =
       api.wallet ||
       wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id);
 
-    // Use nested group object if available, otherwise lookup
-    const group = api.group || groups.find((g) => g.id === api.group_id);
-
-    // Use nested categories array if available, otherwise lookup
     const transactionCategories = api.categories || [];
     const categoryNames = transactionCategories.map((cat) => cat.name).join(', ');
-
-    // Get currency from wallet or default to XAF
     const currency = wallet?.currency || 'XAF';
+
+    if (!wallet) {
+      console.warn(
+        `[transactionMapper] No wallet found for transaction ${api.id}, wallet_client_generated_id: ${api.wallet_client_generated_id}`
+      );
+    } else if (api.wallet && !api.wallet.currency) {
+      console.warn(
+        `[transactionMapper] Transaction ${api.id} has api.wallet but no currency:`,
+        api.wallet
+      );
+    }
+
+    const numericAmount =
+      typeof api.amount === 'number' ? api.amount : parseFloat(String(api.amount));
+    const formattedAmount = `${numericAmount.toFixed(2)} ${currency}`;
 
     return {
       id: String(api.id),
@@ -61,9 +68,8 @@ export const transactionMapper = {
       type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
       party: party?.name || '',
       partyId: api.party_client_generated_id,
-      amount: `${api.amount} ${currency}`,
-      // Display: show group then categories
-      category: group?.name || categoryNames || 'Uncategorized',
+      amount: formattedAmount,
+      category: categoryNames || 'Uncategorized',
       groupId: api.group_id,
       categoryIds: transactionCategories.map((cat) => cat.id),
       wallet: wallet?.name || '',
@@ -86,22 +92,18 @@ export const transactionMapper = {
     parties: Party[] = [],
     wallets: Wallet[] = []
   ): FrontendTransaction {
-    // Split ISO datetime into date and time
     const dt = new Date(api.datetime);
-    const date = dt.toISOString().slice(0, 10); // YYYY-MM-DD
-    const time = dt.toTimeString().slice(0, 5); // HH:mm
+    const date = dt.toISOString().slice(0, 10);
+    const time = dt.toTimeString().slice(0, 5);
 
-    // Use nested party object if available, otherwise lookup
     const party =
       api.party ||
       parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id);
 
-    // Use nested wallet object if available, otherwise lookup
     const wallet =
       api.wallet ||
       wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id);
 
-    // Use nested categories array if available
     const transactionCategories = api.categories || [];
 
     return {
@@ -109,10 +111,10 @@ export const transactionMapper = {
       date,
       time,
       type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
-      party: party?.name || '', // Empty string for edit form
+      party: party?.name || '',
       partyId: api.party_client_generated_id,
-      amount: String(api.amount), // Just the number for editing
-      category: '', // Not used in edit form
+      amount: String(api.amount),
+      category: '',
       groupId: api.group_id,
       categoryIds: transactionCategories.map((cat) => cat.id),
       wallet: wallet?.name || '',
@@ -138,23 +140,18 @@ export const transactionMapper = {
     currentDatetime?: string,
     defaultGroup?: { id: number; name: string }
   ): TransactionCreatePayload {
-    // Combine date + time into ISO datetime with timezone
     let datetime: string;
     if (currentDatetime) {
       datetime = currentDatetime;
     } else if (frontend.date && frontend.time) {
-      // Create full ISO 8601 datetime with timezone
-      // Format: YYYY-MM-DDTHH:mm:ss.sssZ or YYYY-MM-DDTHH:mm:ss+00:00
       const localDateTime = new Date(`${frontend.date}T${frontend.time}:00`);
       datetime = localDateTime.toISOString();
     } else {
-      // Fallback to current datetime
       datetime = new Date().toISOString();
     }
 
-    // Parse amount string to number (remove non-numeric except decimal)
     const amountStr = frontend.amount || '0';
-    const amount = parseFloat(amountStr.replace(/[^\d.]/g, '')) || 0;
+    const amount = parseAmountUtil(amountStr).value;
 
     let partyId = null;
     let walletId = null;
@@ -189,16 +186,13 @@ export const transactionMapper = {
       }
     }
 
-    // Only assign default wallet if one is explicitly configured
     if (walletId === null && wallets.length > 0) {
-      // Try to find a wallet marked as default first
       const defaultWallet = wallets.find(
         (wallet) => wallet.name.toLowerCase().includes('default') || wallet.is_default === true
       );
       if (defaultWallet) {
         walletId = defaultWallet.id;
       }
-      // Otherwise leave as null - backend should handle this case
     }
 
     const groupId = frontend.groupId || defaultGroup?.id || null;
@@ -230,22 +224,6 @@ export const transactionMapper = {
     groups: GroupLite[]
   ): FrontendTransaction[] {
     return apiTransactions.map((api) => this.toFrontend(api, parties, categories, wallets, groups));
-  },
-
-  /**
-   * Helper: Parse amount string to number
-   * Handles formats like "5000 XAF", "5,000.50", "$5000"
-   */
-  parseAmount(amountStr: string): number {
-    const cleaned = amountStr.replace(/[^\d.]/g, '');
-    return parseFloat(cleaned) || 0;
-  },
-
-  /**
-   * Helper: Format number to amount string with currency
-   */
-  formatAmount(amount: number, currency: string = 'XAF'): string {
-    return `${amount} ${currency}`;
   },
 
   /**

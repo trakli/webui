@@ -97,6 +97,8 @@ definePageMeta({
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+@use '@/assets/scss/_utilities.scss' as *;
+
 .dashboard-index-content {
   display: flex;
   flex-direction: column;
@@ -114,10 +116,9 @@ definePageMeta({
   @media (min-width: 768px) {
     flex-direction: row;
     gap: 1rem;
-    align-items: center; // Center vertically instead of stretch
+    align-items: center;
   }
 
-  // WalletCard - 40% width
   & > :first-child {
     flex: 0 0 100%;
 
@@ -127,7 +128,6 @@ definePageMeta({
     }
   }
 
-  // TransactionCard - 60% width
   & > :last-child {
     flex: 0 0 100%;
 
@@ -135,7 +135,7 @@ definePageMeta({
       flex: 0 0 58%;
       max-width: 58%;
       display: flex;
-      align-items: center; // Center the stats content
+      align-items: center;
     }
   }
 }
@@ -158,21 +158,5 @@ definePageMeta({
 
 .empty-subtitle {
   margin: 0;
-}
-
-/* Show mobile cards by default, hide desktop table; flip at md breakpoint */
-.only-mobile {
-  display: block;
-}
-.only-desktop {
-  display: none;
-}
-@media (min-width: $breakpoint-md) {
-  .only-mobile {
-    display: none;
-  }
-  .only-desktop {
-    display: block;
-  }
 }
 </style>

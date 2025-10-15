@@ -1,0 +1,155 @@
+@use './_variables' as *;
+
+// Chip Component - Reusable pill-shaped buttons
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-1;
+  padding: $spacing-1 $spacing-2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  color: $text-secondary;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: $font-size-xs;
+  font-weight: $font-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: $text-primary;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  // Modifiers
+  &--primary {
+    background: $primary;
+    color: $bg-white;
+    border-color: $primary;
+  }
+
+  &--report {
+    background: $accent-color;
+    color: $bg-white;
+    border-color: $accent-color;
+  }
+}
+
+.chip-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+// Search Container - Reusable search input wrapper
+.search-container {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  position: relative;
+  width: 100%;
+
+  @media (max-width: #{$breakpoint-lg - 1px}) {
+    width: auto;
+    gap: 8px;
+  }
+
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    width: auto;
+    gap: 6px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 8px;
+  }
+}
+
+// Responsive Display Utilities
+.only-mobile {
+  display: block;
+
+  @media (min-width: $breakpoint-md) {
+    display: none;
+  }
+}
+
+.only-tablet {
+  display: none;
+
+  @media (min-width: $breakpoint-md) and (max-width: #{$breakpoint-lg - 1px}) {
+    display: block;
+  }
+}
+
+.only-desktop {
+  display: none;
+
+  @media (min-width: $breakpoint-md) {
+    display: block;
+  }
+}
+
+// Hide on mobile
+.hide-mobile {
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    display: none;
+  }
+}
+
+// Hide on tablet
+.hide-tablet {
+  @media (min-width: $breakpoint-md) and (max-width: #{$breakpoint-lg - 1px}) {
+    display: none;
+  }
+}
+
+// Hide on desktop
+.hide-desktop {
+  @media (min-width: $breakpoint-lg) {
+    display: none;
+  }
+}
+
+// Icon Button - Reusable icon-only button
+.icon-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  width: 36px;
+  height: $navbar-icon-button-height;
+  border-radius: $radius-lg;
+  background-color: #dee1e0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+  }
+
+  &:hover {
+    background-color: #d0d3d2;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    color: #1d3229;
+  }
+}

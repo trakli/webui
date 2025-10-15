@@ -3,6 +3,7 @@ import { useTransactions } from '~/composables/useTransactions';
 import { useWallets } from '~/composables/useWallets';
 import { useSharedData } from '~/composables/useSharedData';
 import type { FrontendTransaction } from '~/types/transaction';
+import { parseAmount, formatAmount, formatShortAmount } from '@/utils/currency';
 
 export interface PartyBreakdown {
   party: string;
@@ -197,21 +198,6 @@ export const useStatistics = () => {
     }
 
     return { start, end };
-  };
-
-  const parseAmount = (amount: string): { value: number; currency: string } => {
-    const match = amount.match(/^([\d,]+(?:\.\d{2})?)\s*([A-Z]{3})$/);
-    if (match) {
-      return {
-        value: parseFloat(match[1].replace(/,/g, '')) || 0,
-        currency: match[2]
-      };
-    }
-    const numericValue = parseFloat(amount.replace(/[^\d.]/g, '')) || 0;
-    return {
-      value: numericValue,
-      currency: 'USD'
-    };
   };
 
   const getPrimaryCurrency = (walletId: number | null): string => {
@@ -450,38 +436,35 @@ export const useStatistics = () => {
 
     const primaryCurrency = getPrimaryCurrency(walletId);
 
-    // Basic calculations (currency-aware)
     const incomeTransactions = walletFilteredTransactions.filter((t) => t.type === 'INCOME');
     const expenseTransactions = walletFilteredTransactions.filter((t) => t.type === 'EXPENSE');
 
     const totalIncome = incomeTransactions.reduce((sum, t) => {
       const { value, currency } = parseAmount(t.amount);
+      const roundedValue = Math.round(value * 100) / 100;
+
       if (walletId === null) {
-        // For "All Wallets", convert all currencies to USD
-        const convertedAmount = convertCurrency(value, currency, 'USD');
-        return sum + convertedAmount;
+        const convertedAmount = convertCurrency(roundedValue, currency || 'USD', 'USD');
+        return sum + Math.round(convertedAmount * 100) / 100;
       } else {
-        // For specific wallet, use all transactions (they're already filtered by wallet)
-        return sum + value;
+        return sum + roundedValue;
       }
     }, 0);
 
     const totalExpenses = expenseTransactions.reduce((sum, t) => {
       const { value, currency } = parseAmount(t.amount);
+      const roundedValue = Math.round(value * 100) / 100;
+
       if (walletId === null) {
-        // For "All Wallets", convert all currencies to USD
-        const convertedAmount = convertCurrency(value, currency, 'USD');
-        return sum + convertedAmount;
+        const convertedAmount = convertCurrency(roundedValue, currency || 'USD', 'USD');
+        return sum + Math.round(convertedAmount * 100) / 100;
       } else {
-        // For specific wallet, use all transactions (they're already filtered by wallet)
-        return sum + value;
+        return sum + roundedValue;
       }
     }, 0);
 
-    // Calculate statistics from transactions (current implementation)
     const totalBalance = totalIncome - totalExpenses;
 
-    // Party breakdowns (currency-aware)
     const incomeParties = calculatePartyBreakdown(
       walletFilteredTransactions,
       'INCOME',
@@ -495,7 +478,6 @@ export const useStatistics = () => {
       walletId
     );
 
-    // Category breakdowns (currency-aware)
     const incomeCategories = calculateCategoryBreakdown(
       walletFilteredTransactions,
       'INCOME',
@@ -701,16 +683,17 @@ export const useStatistics = () => {
   });
 
   const formatCurrency = (amount: number, currency: string = 'USD'): string => {
-    return `${amount.toLocaleString()} ${currency}`;
+    const rounded = Math.round(amount * 100) / 100;
+    return formatAmount(`${rounded} ${currency}`, {
+      compact: false,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   };
 
   const formatCompactCurrency = (amount: number, currency: string = 'USD'): string => {
-    if (amount >= 1000000) {
-      return `${(amount / 1000000).toFixed(1)}M ${currency}`;
-    } else if (amount >= 1000) {
-      return `${(amount / 1000).toFixed(0)}k ${currency}`;
-    }
-    return `${amount} ${currency}`;
+    const rounded = Math.round(amount * 100) / 100;
+    return formatShortAmount(`${rounded} ${currency}`);
   };
 
   const setSelectedWallet = (walletId: number | null) => {
