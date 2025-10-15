@@ -5,7 +5,7 @@
       <div class="donut" :style="{ background: gradient }" />
       <div class="donut-center">
         <p class="center-label">Total Income</p>
-        <p class="center-value">${{ total }}</p>
+        <p class="center-value">{{ formatShortAmount(`${total} ${currency}`) }}</p>
       </div>
       <div v-if="hoverIndex >= 0" class="tooltip" :style="tooltipStyle">
         <div class="tooltip-title">
@@ -13,7 +13,9 @@
           {{ data[hoverIndex].name }}
         </div>
         <div class="tooltip-value">
-          ${{ data[hoverIndex].value }} ({{ percent(data[hoverIndex].value) }}%)
+          {{ formatShortAmount(`${data[hoverIndex].value} ${currency}`) }} ({{
+            percent(data[hoverIndex].value)
+          }}%)
         </div>
       </div>
     </div>
@@ -25,10 +27,12 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { formatShortAmount } from '@/utils/currency';
 
 const props = defineProps({
   data: { type: Array, required: true }, // [{ name, value, color }]
-  total: { type: Number, required: true }
+  total: { type: Number, required: true },
+  currency: { type: String, default: 'USD' }
 });
 
 const wrapperRef = ref(null);

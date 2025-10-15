@@ -5,7 +5,10 @@ import { AlertTriangle } from 'lucide-vue-next';
 import { HomeIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
-  error: Object
+  error: {
+    type: Object,
+    default: () => ({ statusCode: 500, message: 'Something went wrong' })
+  }
 });
 
 const token = useCookie('token');
