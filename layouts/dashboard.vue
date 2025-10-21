@@ -12,17 +12,29 @@
       </div>
     </div>
     <NotificationsContainer />
+    <LearningModal :is-open="showLearningModal" @close="showLearningModal = false" />
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref, provide } from 'vue';
 import TNavbar from '@/components/TNavbar.vue';
 import TSidebar from '@/components/TSidebar.vue';
 import NotificationsContainer from '@/components/NotificationsContainer.vue';
+import LearningModal from '@/components/modals/LearningModal.vue';
 import { useAuth } from '@/composables/useAuth';
 
 const { fetchUser } = useAuth();
+
+const showLearningModal = ref(false);
+
+const openLearningModal = () => {
+  showLearningModal.value = true;
+};
+
+provide('learningModal', {
+  open: openLearningModal
+});
 
 onMounted(() => {
   fetchUser();

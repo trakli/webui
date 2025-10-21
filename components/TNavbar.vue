@@ -22,6 +22,16 @@
           <MagnifyingGlassIcon class="icon" />
         </button>
         <LanguageSelector />
+        <button
+          class="icon-button info-btn"
+          aria-label="Open learning modal"
+          title="Learn how to use Trakli"
+          @click="openLearningModal"
+          @keydown.enter="openLearningModal"
+          @keydown.space.prevent="openLearningModal"
+        >
+          <InformationCircleIcon class="icon" />
+        </button>
       </div>
       <div class="avatar-container">
         <TAvatar v-if="user" :image-url="getAvatarUrl(user)" :show-dropdown="true" />
@@ -35,14 +45,31 @@ import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
-import { MagnifyingGlassIcon, BellIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import {
+  MagnifyingGlassIcon,
+  BellIcon,
+  PlusIcon,
+  InformationCircleIcon
+} from '@heroicons/vue/24/outline';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
 import { useSidebar } from '@/composables/useSidebar';
 
+import { inject } from 'vue';
+
 const { user } = useAuth();
 const { getAvatarUrl } = useAvatar();
 const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
+
+const learningModal = inject('learningModal', null);
+
+const openLearningModal = () => {
+  if (learningModal?.open) {
+    learningModal.open();
+  } else {
+    console.warn('Learning modal not available in this layout');
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -122,6 +149,28 @@ const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
 
     &:hover {
       text-decoration: none !important;
+    }
+  }
+
+  .info-btn {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background: $primary;
+      border-radius: 50%;
+      border: 2px solid $bg-gray;
+    }
+
+    &:hover {
+      .icon {
+        color: $primary;
+      }
     }
   }
 }

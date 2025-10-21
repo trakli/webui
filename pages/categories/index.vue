@@ -53,9 +53,9 @@
         </div>
 
         <div class="tab-content">
-          <EmptyState
+          <OnboardingEmptyState
             v-if="currentCategories.length === 0"
-            :page-name="`${currentCategoryType} Category`"
+            page-type="categories"
             @create="handleOpenFormForCreation"
           />
 
@@ -81,7 +81,7 @@ import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import { useSharedData } from '@/composables/useSharedData';
 import ContentTopCard from '@/components/TTopCard.vue';
-import EmptyState from '@/components/EmptyState.vue';
+import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import CategoryForm from '@/components/categories/CategoryForm.vue';
 import ContentTable from '@/components/ContentTable.vue';
 import TipsSection from '@/components/TipsSection.vue';

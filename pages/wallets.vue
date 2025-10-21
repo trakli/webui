@@ -21,9 +21,9 @@
       <div v-if="isLoading" class="loading-state">Loading wallets...</div>
       <div v-if="error" class="error-state">Error: {{ error }}</div>
 
-      <EmptyState
+      <OnboardingEmptyState
         v-if="!showForm && !isLoading && wallets.length === 0"
-        page-name="Wallet"
+        page-type="wallets"
         @create="handleOpenFormForCreation"
       />
 
@@ -45,7 +45,7 @@ import { useWallets } from '@/composables/useWallets';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import ContentTopCard from '@/components/TTopCard.vue';
-import EmptyState from '@/components/EmptyState.vue';
+import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import WalletForm from '@/components/WalletForm.vue';
 import ContentTable from '@/components/ContentTable.vue';
 import TipsSection from '@/components/TipsSection.vue';

@@ -1,14 +1,16 @@
 <template>
   <div class="dashboard-index-content">
-    <TDashboardTopCard />
-    <div class="balance-card-container">
+    <TDashboardTopCard :show-filters="filteredTransactions.length > 0" />
+    <div v-if="filteredTransactions.length > 0" class="balance-card-container">
       <WalletCard />
       <TTransactionCard />
     </div>
-    <div v-if="filteredTransactions.length === 0" class="dashboard-empty">
-      <p class="empty-title">No transactions yet</p>
-      <p class="empty-subtitle">Create your first transaction from the Transactions page.</p>
-    </div>
+    <OnboardingWizard
+      v-if="filteredTransactions.length === 0"
+      @start-action="handleWizardAction"
+      @step-action="handleWizardAction"
+      @complete-onboarding="handleCompleteOnboarding"
+    />
     <template v-else>
       <!-- Mobile cards -->
       <TTransactionsCardList
@@ -56,6 +58,7 @@ import WalletCard from '@/components/WalletCard.vue';
 import TTransactionCard from '@/components/TTransactionCard.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
+import OnboardingWizard from '@/components/onboarding/OnboardingWizard.vue';
 
 const router = useRouter();
 
@@ -87,6 +90,24 @@ const handleDelete = async (transaction) => {
     showError('Delete failed', 'Failed to delete transaction. Please try again.');
     console.error('Failed to delete transaction:', err);
   }
+};
+
+const handleWizardAction = (action) => {
+  const actionRoutes = {
+    'add-transaction': '/transactions/new',
+    'setup-wallets': '/wallets',
+    'manage-categories': '/categories',
+    'add-parties': '/parties'
+  };
+
+  if (actionRoutes[action]) {
+    router.push(actionRoutes[action]);
+  }
+};
+
+const handleCompleteOnboarding = () => {
+  localStorage.setItem('onboarding-completed', 'true');
+  showSuccess('Welcome to Trakli!', "You're all set to start tracking your finances.");
 };
 
 definePageMeta({
@@ -138,25 +159,5 @@ definePageMeta({
       align-items: center;
     }
   }
-}
-
-.dashboard-empty {
-  width: 100%;
-  background: #f8faf9;
-  border: 1px dashed #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  color: #6b7280;
-}
-
-.empty-title {
-  margin: 0 0 4px 0;
-  font-weight: 600;
-  color: #374151;
-}
-
-.empty-subtitle {
-  margin: 0;
 }
 </style>
