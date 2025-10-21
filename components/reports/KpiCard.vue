@@ -23,7 +23,8 @@ const { label, value, valueClass } = defineProps({
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  height: fit-content;
 }
 
 .kpi-label {
@@ -38,7 +39,7 @@ const { label, value, valueClass } = defineProps({
   font-size: 2.25rem;
   font-weight: $font-bold;
   color: $text-primary;
-  margin-top: auto;
+  margin-top: 0.5rem;
 
   &.is-positive {
     color: $primary;

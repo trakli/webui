@@ -10,7 +10,7 @@
           Here's your financial overview for {{ currentPeriodLabel }}.
         </span>
       </div>
-      <div class="page-header-right">
+      <div v-if="showFilters" class="page-header-right">
         <button
           v-for="period in availablePeriods.slice(0, 3)"
           :key="period.value"
@@ -34,6 +34,13 @@ import { ref, computed } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useStatistics } from '@/composables/useStatistics';
+
+const _props = defineProps({
+  showFilters: {
+    type: Boolean,
+    default: true
+  }
+});
 
 const { user } = useAuth();
 const { currentPeriod, availablePeriods, setPeriod } = useStatistics();

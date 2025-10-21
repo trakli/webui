@@ -1,0 +1,841 @@
+<template>
+  <div class="onboarding-page">
+    <div class="onboarding-container">
+      <div class="onboarding-header">
+        <div class="welcome-section">
+          <h1 class="main-title">Welcome to Trakli!</h1>
+          <p class="subtitle">Let's set up your account in just a few steps</p>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: `${progressPercentage}%` }" />
+          </div>
+          <span class="progress-text">Step {{ currentStep }} of {{ totalSteps }}</span>
+        </div>
+      </div>
+
+      <div class="onboarding-content">
+        <!-- Step 1: Language Selection -->
+        <div v-if="currentStep === 1" class="step-content">
+          <div class="step-icon">
+            <svg
+              class="language-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"
+                fill="currentColor"
+              />
+            </svg>
+          </div>
+          <div class="step-info">
+            <h2 class="step-title">Choose your language</h2>
+            <p class="step-description">
+              Select your preferred language for Trakli. You can change this later in settings.
+            </p>
+          </div>
+          <div class="step-form">
+            <div class="language-setup">
+              <div class="language-grid">
+                <button
+                  v-for="language in availableLanguages"
+                  :key="language.code"
+                  class="language-option"
+                  :class="{ selected: selectedLanguage === language.code }"
+                  @click="selectedLanguage = language.code"
+                >
+                  <span class="language-flag">{{ language.flag }}</span>
+                  <span class="language-name">{{ language.name }}</span>
+                </button>
+              </div>
+
+              <div class="step-actions">
+                <button
+                  class="primary-btn"
+                  :disabled="!selectedLanguage"
+                  @click="handleLanguageSelection"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Wallet and Currency Setup -->
+        <div v-if="currentStep === 2" class="step-content">
+          <div class="step-icon">
+            <CreditCardIcon />
+          </div>
+          <div class="step-info">
+            <h2 class="step-title">Set up your wallet and currency</h2>
+            <p class="step-description">
+              Configure your default wallet and currency. Your wallet currency and default currency
+              should match for accurate tracking.
+            </p>
+          </div>
+          <div class="step-form">
+            <div class="wallet-currency-setup">
+              <div class="setup-warning">
+                <div class="warning-icon">💡</div>
+                <p class="warning-text">
+                  We've created a default wallet for you. You can use it, rename it, or create a new
+                  one.
+                </p>
+              </div>
+
+              <div class="setup-sections">
+                <div class="setup-section">
+                  <h3>Wallet setup</h3>
+                  <div class="wallet-options">
+                    <div class="wallet-option">
+                      <input
+                        id="use-default"
+                        v-model="walletChoice"
+                        type="radio"
+                        value="use-default"
+                      />
+                      <label for="use-default">Use default wallet</label>
+                    </div>
+                    <div class="wallet-option">
+                      <input
+                        id="rename-default"
+                        v-model="walletChoice"
+                        type="radio"
+                        value="rename-default"
+                      />
+                      <label for="rename-default">Rename default wallet</label>
+                    </div>
+                    <div class="wallet-option">
+                      <input
+                        id="create-new"
+                        v-model="walletChoice"
+                        type="radio"
+                        value="create-new"
+                      />
+                      <label for="create-new">Create new wallet</label>
+                    </div>
+                  </div>
+
+                  <div v-if="walletChoice === 'rename-default'" class="wallet-name-input">
+                    <input
+                      v-model="newWalletName"
+                      type="text"
+                      placeholder="Enter wallet name"
+                      class="wallet-input"
+                    />
+                  </div>
+
+                  <div v-if="walletChoice === 'create-new'" class="new-wallet-form">
+                    <input
+                      v-model="newWalletName"
+                      type="text"
+                      placeholder="Wallet name"
+                      class="wallet-input"
+                    />
+                    <select v-model="newWalletCurrency" class="currency-select">
+                      <option value="">Select currency</option>
+                      <option
+                        v-for="currency in availableCurrencies"
+                        :key="currency.code"
+                        :value="currency.code"
+                      >
+                        {{ currency.code }} - {{ currency.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="setup-section">
+                  <h3>Default currency</h3>
+                  <select v-model="selectedCurrency" class="currency-select">
+                    <option
+                      v-for="currency in availableCurrencies"
+                      :key="currency.code"
+                      :value="currency.code"
+                    >
+                      {{ currency.code }} - {{ currency.name }}
+                    </option>
+                  </select>
+                  <p class="currency-note">
+                    This will be your default currency for all transactions.
+                  </p>
+                </div>
+              </div>
+
+              <div class="step-actions">
+                <button
+                  class="primary-btn"
+                  :disabled="!isWalletCurrencySetupValid"
+                  @click="handleWalletCurrencySetup"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: All Set -->
+        <div v-if="currentStep === 3" class="step-content completion-step">
+          <div class="completion-icon">
+            <CheckCircleIcon />
+          </div>
+          <div class="completion-info">
+            <h2 class="completion-title">🎉 You're all set!</h2>
+            <p class="completion-description">
+              Great job! You've successfully set up your Trakli account. You're ready to start
+              tracking your finances.
+            </p>
+            <div class="completion-stats">
+              <div class="stat-item">
+                <CreditCardIcon class="stat-icon" />
+                <span>{{ walletCount }} wallet{{ walletCount !== 1 ? 's' : '' }}</span>
+              </div>
+              <div class="stat-item">
+                <TagIcon class="stat-icon" />
+                <span>{{ categoryCount }} categories</span>
+              </div>
+              <div class="stat-item">
+                <ArrowsRightLeftIcon class="stat-icon" />
+                <span
+                  >{{ transactionCount }} transaction{{ transactionCount !== 1 ? 's' : '' }}</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="completion-actions">
+            <button class="primary-btn large" @click="completOnboarding">Go to dashboard</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="onboarding-footer">
+        <button v-if="currentStep > 1 && currentStep < 4" class="nav-btn" @click="previousStep">
+          ← Previous
+        </button>
+        <div class="spacer" />
+        <button v-if="currentStep < 3" class="nav-btn skip" @click="skipStep">
+          Skip for now →
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'nuxt/app';
+import { CreditCardIcon, ArrowsRightLeftIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
+import { useSharedData } from '@/composables/useSharedData';
+import { useNotifications } from '@/composables/useNotifications';
+
+definePageMeta({
+  layout: 'onboarding',
+  middleware: 'auth'
+});
+
+const router = useRouter();
+const sharedData = useSharedData();
+const { showSuccess } = useNotifications();
+
+const currentStep = ref(1);
+const totalSteps = 3;
+
+const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100);
+
+// Data from shared state
+const incomeCategories = computed(() => sharedData.getIncomeCategories?.value || []);
+const expenseCategories = computed(() => sharedData.getExpenseCategories?.value || []);
+const wallets = computed(() => sharedData.getWallets?.value || []);
+const walletCount = computed(() => wallets.value.length);
+const categoryCount = computed(
+  () => incomeCategories.value.length + expenseCategories.value.length
+);
+const transactionCount = computed(() => sharedData.getTransactions?.value?.length || 0);
+
+// Language setup
+const selectedLanguage = ref('en');
+const availableLanguages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'pt', name: 'Português', flag: '🇵🇹' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' }
+];
+
+// Wallet and currency setup
+const walletChoice = ref('use-default');
+const newWalletName = ref('');
+const newWalletCurrency = ref('');
+const selectedCurrency = ref('USD');
+
+const availableCurrencies = [
+  { code: 'USD', name: 'US Dollar' },
+  { code: 'EUR', name: 'Euro' },
+  { code: 'GBP', name: 'British Pound' },
+  { code: 'JPY', name: 'Japanese Yen' },
+  { code: 'CAD', name: 'Canadian Dollar' },
+  { code: 'AUD', name: 'Australian Dollar' }
+];
+
+const isWalletCurrencySetupValid = computed(() => {
+  if (!selectedCurrency.value) return false;
+
+  if (walletChoice.value === 'rename-default') {
+    return newWalletName.value.trim().length > 0;
+  }
+
+  if (walletChoice.value === 'create-new') {
+    return newWalletName.value.trim().length > 0 && newWalletCurrency.value;
+  }
+
+  return true; // use-default is always valid
+});
+
+const nextStep = () => {
+  if (currentStep.value < totalSteps) {
+    currentStep.value++;
+  }
+};
+
+const previousStep = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--;
+  }
+};
+
+const skipStep = () => {
+  nextStep();
+};
+
+const handleLanguageSelection = () => {
+  if (!selectedLanguage.value) return;
+
+  showSuccess(
+    'Language Set!',
+    `Language changed to ${availableLanguages.find((l) => l.code === selectedLanguage.value)?.name}.`
+  );
+  nextStep();
+};
+
+const handleWalletCurrencySetup = () => {
+  if (!isWalletCurrencySetupValid.value) return;
+
+  let message = 'Settings saved successfully!';
+
+  if (walletChoice.value === 'rename-default') {
+    message = `Default wallet renamed to "${newWalletName.value}" and currency set to ${selectedCurrency.value}.`;
+  } else if (walletChoice.value === 'create-new') {
+    message = `New wallet "${newWalletName.value}" created with ${newWalletCurrency.value} currency.`;
+  } else {
+    message = `Default wallet configured with ${selectedCurrency.value} currency.`;
+  }
+
+  showSuccess('Setup Complete!', message);
+  nextStep();
+};
+
+const completOnboarding = () => {
+  localStorage.setItem('onboarding-completed', 'true');
+  localStorage.removeItem('onboarding-step');
+  showSuccess('Welcome to Trakli!', "You're ready to take control of your finances!");
+  router.push('/dashboard');
+};
+
+onMounted(() => {
+  const savedStep = localStorage.getItem('onboarding-step');
+  if (savedStep) {
+    currentStep.value = parseInt(savedStep) + 1;
+    localStorage.removeItem('onboarding-step');
+  }
+
+  sharedData.loadCategories();
+  sharedData.loadWallets();
+});
+</script>
+
+<style lang="scss" scoped>
+@use '~/assets/scss/_variables' as *;
+
+.onboarding-page {
+  width: 100%;
+}
+
+.onboarding-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+  overflow: hidden;
+}
+
+.onboarding-header {
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid $border-gray;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 1.5rem;
+  }
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  .main-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 0.25rem 0;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 1.5rem;
+    }
+  }
+
+  .subtitle {
+    color: $text-secondary;
+    margin: 0;
+    font-size: 1rem;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.progress-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: $border-gray;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, $primary 0%, $primary-dark 100%);
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  color: $text-secondary;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.onboarding-content {
+  padding: 2rem;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 1.5rem;
+  }
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 400px;
+
+  &.completion-step {
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+.step-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, $primary-light 0%, rgba(4, 120, 68, 0.1) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    color: $primary;
+  }
+}
+
+.step-info {
+  text-align: center;
+
+  .step-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 0.75rem 0;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 1.25rem;
+    }
+  }
+
+  .step-description {
+    color: $text-secondary;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 1rem;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.step-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.step-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+  }
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 1rem;
+
+  &.large {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+}
+
+.primary-btn {
+  background: $primary;
+  color: white;
+
+  &:hover {
+    background: $primary-hover;
+    transform: translateY(-1px);
+  }
+}
+
+.secondary-btn {
+  background: $bg-slate;
+  color: $text-secondary;
+  border: 1px solid $border-gray;
+
+  &:hover {
+    background: white;
+    color: $primary;
+    border-color: $primary;
+  }
+}
+
+.completion-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, $success 0%, $primary-dark 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    color: white;
+  }
+}
+
+.completion-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $text-primary;
+  margin: 0 0 1rem 0;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1.5rem;
+  }
+}
+
+.completion-description {
+  color: $text-secondary;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: 1rem;
+  }
+}
+
+.completion-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: $text-primary;
+
+  .stat-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: $primary;
+  }
+}
+
+.onboarding-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-top: 1px solid $border-gray;
+  background: $bg-slate;
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 1rem 1.5rem;
+  }
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: $text-secondary;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: $primary;
+    background: rgba(4, 120, 68, 0.05);
+  }
+
+  &.skip {
+    color: $text-muted;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.setup-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: $warning-bg;
+  border: 1px solid $warning;
+  border-radius: 8px;
+  padding: 1rem;
+
+  .warning-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .warning-text {
+    font-size: 0.875rem;
+    color: $warning-text;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.setup-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (min-width: $breakpoint-sm) {
+    flex-direction: row;
+    gap: 2rem;
+  }
+}
+
+.setup-section {
+  flex: 1;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 0.75rem 0;
+  }
+}
+
+.currency-select,
+.wallet-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid $border-gray;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: white;
+  color: $text-primary;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(4, 120, 68, 0.1);
+  }
+
+  &:disabled {
+    background: $bg-slate;
+    color: $text-muted;
+    cursor: not-allowed;
+  }
+}
+
+.language-icon {
+  width: 28px;
+  height: 28px;
+  color: $primary;
+}
+
+.language-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.language-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid $border-gray;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $primary;
+    background: rgba(4, 120, 68, 0.02);
+  }
+
+  &.selected {
+    border-color: $primary;
+    background: rgba(4, 120, 68, 0.05);
+    box-shadow: 0 0 0 3px rgba(4, 120, 68, 0.1);
+  }
+}
+
+.language-flag {
+  font-size: 1.5rem;
+}
+
+.language-name {
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.wallet-currency-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.wallet-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.wallet-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  input[type='radio'] {
+    margin: 0;
+  }
+
+  label {
+    font-weight: 500;
+    color: $text-primary;
+    cursor: pointer;
+  }
+}
+
+.wallet-name-input,
+.new-wallet-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.wallet-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid $border-gray;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: white;
+  color: $text-primary;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(4, 120, 68, 0.1);
+  }
+}
+
+.currency-note {
+  font-size: 0.8rem;
+  color: $text-muted;
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+</style>

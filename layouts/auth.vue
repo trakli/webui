@@ -23,11 +23,12 @@ import AuthCarousel from '@/components/auth/AuthCarousel.vue';
 @use '@/assets/scss/_variables.scss' as *;
 
 .page-wrapper {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: url('/background-floating-docs.svg') no-repeat center;
   background-size: cover;
+  background-attachment: fixed;
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
@@ -78,5 +79,13 @@ import AuthCarousel from '@/components/auth/AuthCarousel.vue';
   @media (max-width: 639px) {
     display: none;
   }
+}
+</style>
+
+<style lang="scss">
+body:has(.page-wrapper) {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 </style>

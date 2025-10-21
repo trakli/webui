@@ -2,9 +2,9 @@
   <div class="content-area">
     <TTopCard :page-name="'Transaction'" :page-name-plural="'Transactions'" @add="navigateToNew" />
 
-    <EmptyState
+    <OnboardingEmptyState
       v-if="paginatedTransactions.length === 0"
-      :page-name="'Transaction'"
+      page-type="transactions"
       @create="navigateToNew"
     />
 
@@ -50,7 +50,7 @@
 import { useTransactions } from '@/composables/useTransactions';
 import { useNotifications } from '@/composables/useNotifications';
 import TTopCard from '@/components/TTopCard.vue';
-import EmptyState from '@/components/EmptyState.vue';
+import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 

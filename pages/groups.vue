@@ -17,9 +17,9 @@
       <div v-if="isLoading" class="loading-state">Loading groups...</div>
       <div v-if="error" class="error-state">Error: {{ error }}</div>
 
-      <EmptyState
+      <OnboardingEmptyState
         v-if="!showForm && !isLoading && groups.length === 0"
-        page-name="Group"
+        page-type="groups"
         @create="handleOpenFormForCreation"
       />
 
@@ -41,7 +41,7 @@ import { useGroups } from '@/composables/useGroups';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import ContentTopCard from '@/components/TTopCard.vue';
-import EmptyState from '@/components/EmptyState.vue';
+import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import GroupForm from '@/components/groups/GroupForm.vue';
 import ContentTable from '@/components/ContentTable.vue';
 import TipsSection from '@/components/TipsSection.vue';
