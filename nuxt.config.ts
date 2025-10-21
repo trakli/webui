@@ -7,10 +7,7 @@ export default defineNuxtConfig({
   ssr: true,
   runtimeConfig: {
     public: {
-      apiBase:
-        process.env.NODE_ENV === 'production'
-          ? process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1'
-          : '/api'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1'
     }
   },
   app: {
