@@ -25,8 +25,8 @@ export interface GroupCreatePayload {
   client_id: string;
   name: string;
   description: string;
-  icon: string;
-  icon_type: string;
+  icon?: string;
+  icon_type?: string;
   created_at: string;
 }
 
@@ -34,6 +34,6 @@ export interface GroupUpdatePayload {
   client_id: string;
   name: string;
   description?: string;
-  icon: string;
-  icon_type: string;
+  icon?: string;
+  icon_type?: string;
 }

@@ -2,22 +2,40 @@
   <form class="entity-form" @submit.prevent="handleSubmit">
     <div class="form-group">
       <label for="wallet-name" class="form-label">Wallet Name</label>
-      <input
-        id="wallet-name"
-        v-model="form.name"
-        type="text"
-        class="form-input"
-        :class="{ error: nameError }"
-        placeholder="Enter wallet name"
-        required
-      />
-      <div v-if="nameError" class="error-text">Wallet name is required.</div>
-    </div>
+      <div class="name-icon-row">
+        <div class="name-col">
+          <input
+            id="wallet-name"
+            v-model="form.name"
+            type="text"
+            class="form-input"
+            :class="{ error: nameError }"
+            placeholder="Enter wallet name"
+            required
+          />
+          <div v-if="nameError" class="error-text">Wallet name is required.</div>
+        </div>
+        <div class="icon-col">
+          <button
+            type="button"
+            class="icon-trigger"
+            :aria-expanded="showIconPicker"
+            aria-label="Choose icon"
+            @click="showIconPicker = !showIconPicker"
+          >
+            <component
+              :is="selectedIconComponent"
+              v-if="selectedIconComponent"
+              class="icon-trigger__icon"
+            />
+            <ImagePlus v-else class="icon-trigger__icon" />
+          </button>
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label for="wallet-icon" class="form-label">Select an Icon </label>
-      <IconPicker id="wallet-icon" v-model="form.icon" />
-      <div v-if="iconError" class="error-text">Please select an icon.</div>
+      <div v-if="showIconPicker" class="icon-popover">
+        <IconPicker v-model="form.icon" @update:model-value="onIconSelected" />
+      </div>
     </div>
 
     <div class="form-group">
@@ -95,6 +113,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import IconPicker from './IconPicker.vue';
+import * as lucideIcons from 'lucide-vue-next';
+import { ImagePlus } from 'lucide-vue-next';
 
 const props = defineProps({
   editingItem: {
@@ -115,10 +136,18 @@ const form = ref({
 });
 
 const nameError = ref(false);
-const iconError = ref(false);
 const typeError = ref(false);
 const currencyError = ref(false);
 const descriptionError = ref(false);
+const showIconPicker = ref(false);
+
+const selectedIconComponent = computed(() => {
+  const key = form.value.icon;
+  if (key && typeof lucideIcons[key] === 'function') {
+    return lucideIcons[key];
+  }
+  return null;
+});
 
 const isEditing = computed(() => !!props.editingItem);
 
@@ -160,10 +189,10 @@ watch(
 function resetForm() {
   form.value = { name: '', icon: '', type: '', currency: '', balance: 0, description: '' };
   nameError.value = false;
-  iconError.value = false;
   typeError.value = false;
   currencyError.value = false;
   descriptionError.value = false;
+  showIconPicker.value = false;
 }
 
 function validateForm() {
@@ -171,7 +200,6 @@ function validateForm() {
 
   // Reset errors
   nameError.value = false;
-  iconError.value = false;
   typeError.value = false;
   currencyError.value = false;
   descriptionError.value = false;
@@ -179,12 +207,6 @@ function validateForm() {
   // Validate name
   if (!form.value.name || form.value.name.trim() === '') {
     nameError.value = true;
-    isValid = false;
-  }
-
-  // Validate icon
-  if (!form.value.icon || form.value.icon.trim() === '') {
-    iconError.value = true;
     isValid = false;
   }
 
@@ -221,10 +243,12 @@ async function handleSubmit() {
       description: form.value.description.trim(),
       type: form.value.type.trim(),
       currency: form.value.currency,
-      balance: form.value.balance || 0,
-      icon: form.value.icon,
-      icon_type: 'image'
+      balance: form.value.balance || 0
     };
+    if (form.value.icon && form.value.icon.trim() !== '') {
+      formData.icon = form.value.icon;
+      formData.icon_type = 'image';
+    }
 
     if (isEditing.value) {
       // Include the original ID for updates
@@ -247,8 +271,13 @@ function handleFormClose() {
   emit('close');
   resetForm();
 }
+
+function onIconSelected() {
+  showIconPicker.value = false;
+}
 </script>
 
 <style scoped lang="scss">
+@use '@/assets/scss/_variables.scss' as *;
 @use '@/assets/scss/_form-styles.scss';
 </style>

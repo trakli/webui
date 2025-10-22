@@ -32,7 +32,7 @@ const walletsApi = {
       return response.data;
     } else if (response?.last_sync) {
       // Direct response format without nested data
-      return response as WalletsResponse;
+      return response as unknown as WalletsResponse;
     }
 
     return {
@@ -50,8 +50,9 @@ const walletsApi = {
 
     const payload = {
       ...data,
-      icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-      icon_type: 'image',
+      ...(typeof data.icon === 'string' && data.icon.trim() !== ''
+        ? { icon: data.icon, icon_type: 'image' }
+        : {}),
       balance: data.balance || 0
     };
 
@@ -76,10 +77,9 @@ const walletsApi = {
 
     const payload = {
       ...data,
-      ...(data.icon && {
-        icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-        icon_type: 'image'
-      })
+      ...(typeof data.icon === 'string' && data.icon.trim() !== ''
+        ? { icon: data.icon, icon_type: 'image' }
+        : {})
     };
 
     try {

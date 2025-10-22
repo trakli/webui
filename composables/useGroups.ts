@@ -5,8 +5,8 @@ interface CreateGroupPayload {
   client_id: string;
   name: string;
   description: string;
-  icon: string;
-  icon_type: string;
+  icon?: string;
+  icon_type?: string;
   created_at: string;
 }
 

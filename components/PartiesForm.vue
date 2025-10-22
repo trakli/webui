@@ -2,15 +2,39 @@
   <form class="entity-form" @submit.prevent="handleSubmit">
     <div class="form-group">
       <label for="party-name" class="form-label">Party Name </label>
-      <input
-        id="party-name"
-        v-model="form.name"
-        type="text"
-        class="form-input"
-        :class="{ error: nameError }"
-        placeholder="Enter Party Name"
-      />
-      <div v-if="nameError" class="error-text">Party Name is required.</div>
+      <div class="name-icon-row">
+        <div class="name-col">
+          <input
+            id="party-name"
+            v-model="form.name"
+            type="text"
+            class="form-input"
+            :class="{ error: nameError }"
+            placeholder="Enter Party Name"
+          />
+          <div v-if="nameError" class="error-text">Party Name is required.</div>
+        </div>
+        <div class="icon-col">
+          <button
+            type="button"
+            class="icon-trigger"
+            :aria-expanded="showIconPicker"
+            aria-label="Choose icon"
+            @click="showIconPicker = !showIconPicker"
+          >
+            <component
+              :is="selectedIconComponent"
+              v-if="selectedIconComponent"
+              class="icon-trigger__icon"
+            />
+            <ImagePlus v-else class="icon-trigger__icon" />
+          </button>
+        </div>
+      </div>
+
+      <div v-if="showIconPicker" class="icon-popover">
+        <IconPicker v-model="form.icon" @update:model-value="onIconSelected" />
+      </div>
     </div>
 
     <div class="form-group">
@@ -36,12 +60,6 @@
     </div>
 
     <div class="form-group">
-      <label for="party-icon" class="form-label">Select an Icon </label>
-      <IconPicker id="party-icon" v-model="form.icon" />
-      <div v-if="iconError" class="error-text">Please select an icon.</div>
-    </div>
-
-    <div class="form-group">
       <label for="party-description" class="form-label">Party Description </label>
       <textarea
         id="party-description"
@@ -64,6 +82,8 @@
 <script setup>
 import { ref, nextTick, computed, watch } from 'vue';
 import IconPicker from './IconPicker.vue';
+import * as lucideIcons from 'lucide-vue-next';
+import { ImagePlus } from 'lucide-vue-next';
 
 const props = defineProps({
   editingItem: {
@@ -83,8 +103,16 @@ const form = ref({
 
 const nameError = ref(false);
 const partyTypeError = ref(false);
-const iconError = ref(false);
 const descriptionError = ref(false);
+const showIconPicker = ref(false);
+
+const selectedIconComponent = computed(() => {
+  const key = form.value.icon;
+  if (key && typeof lucideIcons[key] === 'function') {
+    return lucideIcons[key];
+  }
+  return null;
+});
 
 const isEditing = computed(() => !!props.editingItem);
 
@@ -130,8 +158,8 @@ function resetForm() {
   };
   nameError.value = false;
   partyTypeError.value = false;
-  iconError.value = false;
   descriptionError.value = false;
+  showIconPicker.value = false;
 }
 
 function validateForm() {
@@ -140,7 +168,6 @@ function validateForm() {
   // Reset errors
   nameError.value = false;
   partyTypeError.value = false;
-  iconError.value = false;
   descriptionError.value = false;
 
   // Validate name
@@ -152,12 +179,6 @@ function validateForm() {
   // Validate party type
   if (!form.value.type) {
     partyTypeError.value = true;
-    isValid = false;
-  }
-
-  // Validate icon
-  if (!form.value.icon || form.value.icon.trim() === '') {
-    iconError.value = true;
     isValid = false;
   }
 
@@ -180,10 +201,12 @@ async function handleSubmit() {
     const formData = {
       name: form.value.name.trim(),
       type: form.value.type,
-      description: form.value.description.trim(),
-      icon: form.value.icon,
-      icon_type: 'image'
+      description: form.value.description.trim()
     };
+    if (form.value.icon && form.value.icon.trim() !== '') {
+      formData.icon = form.value.icon;
+      formData.icon_type = 'image';
+    }
 
     if (isEditing.value) {
       // Include the original ID for updates
@@ -208,8 +231,13 @@ async function handleSubmit() {
     resetForm();
   }
 }
+
+function onIconSelected() {
+  showIconPicker.value = false;
+}
 </script>
 
 <style scoped lang="scss">
+@use '@/assets/scss/_variables.scss' as *;
 @use '@/assets/scss/_form-styles.scss';
 </style>

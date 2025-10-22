@@ -50,8 +50,10 @@ const partiesApi = {
 
     const payload = {
       ...data,
-      icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-      icon_type: 'image'
+      ...(data.icon && {
+        icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
+        icon_type: 'image'
+      })
     };
 
     try {

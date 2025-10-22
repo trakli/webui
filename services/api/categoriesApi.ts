@@ -25,7 +25,7 @@ const categoriesApi = {
       return response.data;
     } else if (response?.last_sync) {
       // Direct response format without nested data
-      return response as CategoriesResponse;
+      return response as unknown as CategoriesResponse;
     }
 
     // Fallback
@@ -46,7 +46,7 @@ const categoriesApi = {
     if (response?.data) {
       return response.data;
     } else if (response?.last_sync) {
-      return response as CategoriesResponse;
+      return response as unknown as CategoriesResponse;
     }
 
     return {
@@ -64,8 +64,9 @@ const categoriesApi = {
 
     const payload = {
       ...data,
-      icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-      icon_type: 'image'
+      ...(typeof data.icon === 'string' && data.icon.trim() !== ''
+        ? { icon: data.icon, icon_type: 'image' }
+        : {})
     };
 
     try {
@@ -89,10 +90,9 @@ const categoriesApi = {
 
     const payload = {
       ...data,
-      ...(data.icon && {
-        icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-        icon_type: 'image'
-      })
+      ...(typeof data.icon === 'string' && data.icon.trim() !== ''
+        ? { icon: data.icon, icon_type: 'image' }
+        : {})
     };
 
     try {

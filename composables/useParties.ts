@@ -17,10 +17,10 @@ export const useParties = () => {
 
   const createParty = async (data: PartyCreatePayload) => {
     try {
+      const normalized = normalizeIcon(data.icon);
       const payload = {
         ...data,
-        icon: normalizeIcon(data.icon),
-        icon_type: 'image'
+        ...(normalized && { icon: normalized, icon_type: 'image' })
       };
 
       const created = await api.parties.create(payload);

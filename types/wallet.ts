@@ -32,8 +32,8 @@ export interface WalletCreatePayload {
   description: string;
   currency: string;
   balance?: number;
-  icon: string;
-  icon_type: string;
+  icon?: string;
+  icon_type?: string;
 }
 
 export interface WalletUpdatePayload {

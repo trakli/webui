@@ -24,8 +24,8 @@ export interface CategoryCreatePayload {
   name: string;
   description: string;
   type: 'income' | 'expense';
-  icon: string;
-  icon_type: string;
+  icon?: string;
+  icon_type?: string;
 }
 
 export interface CategoryUpdatePayload {

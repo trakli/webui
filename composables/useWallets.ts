@@ -17,10 +17,10 @@ export const useWallets = () => {
 
   const createWallet = async (data: WalletCreatePayload) => {
     try {
+      const normalized = normalizeIcon(data.icon);
       const payload = {
         ...data,
-        icon: normalizeIcon(data.icon),
-        icon_type: 'image',
+        ...(normalized && { icon: normalized, icon_type: 'image' }),
         balance: data.balance || 0
       };
 

@@ -1,25 +1,41 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
-    <!-- Category Name -->
     <div class="form-group">
       <label for="category-name" class="form-label">Category Name </label>
-      <input
-        id="category-name"
-        v-model="form.name"
-        type="text"
-        class="form-input"
-        :class="{ error: nameError }"
-        placeholder="Enter category name"
-        required
-      />
-      <div v-if="nameError" class="error-text">Category name is required.</div>
-    </div>
+      <div class="name-icon-row">
+        <div class="name-col">
+          <input
+            id="category-name"
+            v-model="form.name"
+            type="text"
+            class="form-input"
+            :class="{ error: nameError }"
+            placeholder="Enter category name"
+            required
+          />
+          <div v-if="nameError" class="error-text">Category name is required.</div>
+        </div>
+        <div class="icon-col">
+          <button
+            type="button"
+            class="icon-trigger"
+            :aria-expanded="showIconPicker"
+            aria-label="Choose icon"
+            @click="showIconPicker = !showIconPicker"
+          >
+            <component
+              :is="selectedIconComponent"
+              v-if="selectedIconComponent"
+              class="icon-trigger__icon"
+            />
+            <ImagePlus v-else class="icon-trigger__icon" />
+          </button>
+        </div>
+      </div>
 
-    <!-- Icon Picker -->
-    <div class="form-group">
-      <label for="category-icon" class="form-label">Select an Icon </label>
-      <IconPicker id="category-icon" v-model="form.icon" />
-      <div v-if="iconError" class="error-text">Please select an icon.</div>
+      <div v-if="showIconPicker" class="icon-popover">
+        <IconPicker v-model="form.icon" @update:model-value="onIconSelected" />
+      </div>
     </div>
 
     <!-- Category Type -->
@@ -63,6 +79,8 @@
 <script setup>
 import { ref, nextTick, computed, watch } from 'vue';
 import IconPicker from '@/components/IconPicker.vue';
+import * as lucideIcons from 'lucide-vue-next';
+import { ImagePlus } from 'lucide-vue-next';
 
 const props = defineProps({
   pageName: {
@@ -85,9 +103,17 @@ const form = ref({
 });
 
 const nameError = ref(false);
-const iconError = ref(false);
 const typeError = ref(false);
 const descriptionError = ref(false);
+const showIconPicker = ref(false);
+
+const selectedIconComponent = computed(() => {
+  const key = form.value.icon;
+  if (key && typeof lucideIcons[key] === 'function') {
+    return lucideIcons[key];
+  }
+  return null;
+});
 
 const isEditing = computed(() => !!props.editingItem);
 
@@ -127,9 +153,9 @@ watch(
 function resetForm() {
   form.value = { name: '', icon: '', type: '', description: '' };
   nameError.value = false;
-  iconError.value = false;
   typeError.value = false;
   descriptionError.value = false;
+  showIconPicker.value = false;
 }
 
 function validateForm() {
@@ -137,19 +163,12 @@ function validateForm() {
 
   // Reset errors
   nameError.value = false;
-  iconError.value = false;
   typeError.value = false;
   descriptionError.value = false;
 
   // Validate name
   if (!form.value.name || form.value.name.trim() === '') {
     nameError.value = true;
-    isValid = false;
-  }
-
-  // Validate icon
-  if (!form.value.icon || form.value.icon.trim() === '') {
-    iconError.value = true;
     isValid = false;
   }
 
@@ -178,10 +197,12 @@ async function handleSubmit() {
     const formData = {
       name: form.value.name.trim(),
       description: form.value.description.trim(),
-      type: form.value.type,
-      icon: form.value.icon,
-      icon_type: 'image'
+      type: form.value.type
     };
+    if (form.value.icon && form.value.icon.trim() !== '') {
+      formData.icon = form.value.icon;
+      formData.icon_type = 'image';
+    }
 
     if (isEditing.value) {
       // Include the original ID for updates
@@ -205,6 +226,10 @@ async function handleSubmit() {
     // reset form and errors
     resetForm();
   }
+}
+
+function onIconSelected() {
+  showIconPicker.value = false;
 }
 </script>
 

@@ -62,6 +62,8 @@
 .form-input,
 .form-textarea,
 .form-select {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -167,4 +169,52 @@
   color: $error-color;
   font-size: 0.95rem;
   margin-top: 0.25rem;
+}
+
+.name-icon-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: $spacing-4;
+}
+
+.name-col {
+  min-width: 0;
+}
+
+.icon-trigger {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  border: 1px solid $border-light;
+  background: rgba($primary, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    background: rgba($primary, 0.18);
+    border-color: rgba($primary, 0.25);
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px $input-focus;
+  }
+}
+
+.icon-trigger__icon {
+  width: 22px;
+  height: 22px;
+  color: $primary;
+}
+
+.icon-popover {
+  margin-top: $spacing-2;
+  padding: $spacing-3;
+  background: $bg-white;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
 }
