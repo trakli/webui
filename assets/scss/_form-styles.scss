@@ -120,11 +120,13 @@
   }
 
   @media (max-width: $breakpoint-sm) {
-    min-height: 20vh;
+    min-height: 5vh;
+    height: 5vh;
   }
 
   @media (max-width: 480px) {
-    min-height: 16vh;
+    min-height: 5vh;
+    height: 5vh;
   }
 }
 
@@ -180,6 +182,19 @@
 
 .name-col {
   min-width: 0;
+}
+
+.two-col-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-4;
+}
+
+@media (min-width: $breakpoint-md) {
+  .two-col-row {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
 }
 
 .icon-trigger {

@@ -38,45 +38,47 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="wallet-type" class="form-label">Wallet Type</label>
-      <select
-        id="wallet-type"
-        v-model="form.type"
-        class="form-select"
-        :class="{ error: typeError }"
-        required
-      >
-        <option value="">Select wallet type</option>
-        <option value="bank">Bank Account</option>
-        <option value="cash">Cash</option>
-        <option value="credit_card">Credit Card</option>
-        <option value="mobile">Mobile Money</option>
-      </select>
-      <div v-if="typeError" class="error-text">Please select a wallet type.</div>
-    </div>
+    <div class="two-col-row">
+      <div class="form-group">
+        <label for="wallet-type" class="form-label">Wallet Type</label>
+        <select
+          id="wallet-type"
+          v-model="form.type"
+          class="form-select"
+          :class="{ error: typeError }"
+          required
+        >
+          <option value="">Select wallet type</option>
+          <option value="bank">Bank Account</option>
+          <option value="cash">Cash</option>
+          <option value="credit_card">Credit Card</option>
+          <option value="mobile">Mobile Money</option>
+        </select>
+        <div v-if="typeError" class="error-text">Please select a wallet type.</div>
+      </div>
 
-    <div class="form-group">
-      <label for="wallet-currency" class="form-label">Currency</label>
-      <select
-        id="wallet-currency"
-        v-model="form.currency"
-        class="form-select"
-        :class="{ error: currencyError }"
-        required
-      >
-        <option value="">Select currency</option>
-        <option value="XAF">XAF - Central African Franc</option>
-        <option value="USD">USD - US Dollar</option>
-        <option value="EUR">EUR - Euro</option>
-        <option value="GBP">GBP - British Pound</option>
-        <option value="JPY">JPY - Japanese Yen</option>
-        <option value="CAD">CAD - Canadian Dollar</option>
-        <option value="AUD">AUD - Australian Dollar</option>
-        <option value="CHF">CHF - Swiss Franc</option>
-        <option value="CNY">CNY - Chinese Yuan</option>
-      </select>
-      <div v-if="currencyError" class="error-text">Please select a currency.</div>
+      <div class="form-group">
+        <label for="wallet-currency" class="form-label">Currency</label>
+        <select
+          id="wallet-currency"
+          v-model="form.currency"
+          class="form-select"
+          :class="{ error: currencyError }"
+          required
+        >
+          <option value="">Select currency</option>
+          <option value="XAF">XAF - Central African Franc</option>
+          <option value="USD">USD - US Dollar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="JPY">JPY - Japanese Yen</option>
+          <option value="CAD">CAD - Canadian Dollar</option>
+          <option value="AUD">AUD - Australian Dollar</option>
+          <option value="CHF">CHF - Swiss Franc</option>
+          <option value="CNY">CNY - Chinese Yuan</option>
+        </select>
+        <div v-if="currencyError" class="error-text">Please select a currency.</div>
+      </div>
     </div>
 
     <div class="form-group">
