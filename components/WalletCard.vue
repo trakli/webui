@@ -64,7 +64,8 @@
         :class="{ selected: selectedWalletId === wallet.id }"
         @click="selectWallet(wallet.id)"
       >
-        {{ wallet.name }}
+        <span class="wallet-option__name">{{ wallet.name }}</span>
+        <span v-if="wallet.id !== null" class="wallet-option__currency">{{ wallet.currency }}</span>
       </div>
     </div>
   </div>
@@ -166,7 +167,6 @@ onUnmounted(() => {
   border-radius: $radius-xl;
   position: relative;
   box-sizing: border-box;
-  padding: 1rem;
   overflow: hidden; // Clip the ellipse to card boundaries
   padding: 16px;
   display: flex;
@@ -370,6 +370,10 @@ onUnmounted(() => {
 
 .wallet-option {
   padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   cursor: pointer;
   font-size: $font-size-sm;
   font-weight: $font-medium;
@@ -389,5 +393,18 @@ onUnmounted(() => {
   &:not(:last-child) {
     border-bottom: 1px solid #f3f4f6;
   }
+}
+
+.wallet-option__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wallet-option__currency {
+  flex: 0 0 auto;
+  opacity: 0.75;
 }
 </style>
