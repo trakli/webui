@@ -112,24 +112,8 @@
 }
 
 .form-textarea {
-  resize: none; // prevents dragging to resize
-  min-height: 6vh; // reduced to 1/4 of previous large-screen height
-  height: 6vh; // explicit height to override rows attribute on large screens
-
-  @media (max-width: $breakpoint-md) {
-    min-height: 6vh;
-    height: 6vh;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    min-height: 6vh;
-    height: 6vh;
-  }
-
-  @media (max-width: 480px) {
-    min-height: 6vh;
-    height: 6vh;
-  }
+  resize: vertical;
+  max-height: 6vh;
 }
 
 .submit-btn {

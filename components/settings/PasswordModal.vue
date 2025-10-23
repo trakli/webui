@@ -42,6 +42,8 @@
 import { ref } from 'vue';
 import { Lock } from 'lucide-vue-next';
 
+defineEmits(['close']);
+
 const oldPassword = ref('');
 const newPassword = ref('');
 const confirmNewPassword = ref('');

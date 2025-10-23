@@ -1,5 +1,6 @@
 import { api } from '~/services/api';
 import { useSharedData } from '~/composables/useSharedData';
+import { buildIconPayload } from '~/services/api/apiHelpers';
 
 interface CreateGroupPayload {
   client_id: string;
@@ -21,6 +22,7 @@ export const useGroups = () => {
     try {
       const payload: CreateGroupPayload = {
         ...data,
+        ...buildIconPayload(data.icon),
         client_id: `${crypto.randomUUID()}:${crypto.randomUUID()}`,
         created_at: new Date().toISOString()
       };
@@ -40,7 +42,7 @@ export const useGroups = () => {
     try {
       const payload = {
         ...data,
-        client_id: `${crypto.randomUUID()}:${crypto.randomUUID()}`
+        ...buildIconPayload(data.icon)
       };
 
       const updated = await api.groups.update(id, payload);

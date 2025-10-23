@@ -5,6 +5,7 @@ import type {
   CategoriesResponse,
   ApiResponse
 } from '~/types/category';
+import { buildIconPayload, extractResponseData } from './apiHelpers';
 
 /**
  * Categories API Service
@@ -21,18 +22,10 @@ const categoriesApi = {
 
     const response = await api<ApiResponse<CategoriesResponse>>(url);
 
-    if (response?.data) {
-      return response.data;
-    } else if (response?.last_sync) {
-      // Direct response format without nested data
-      return response as unknown as CategoriesResponse;
-    }
-
-    // Fallback
-    return {
+    return extractResponseData(response, {
       last_sync: new Date().toISOString(),
       data: []
-    };
+    });
   },
 
   /**
@@ -43,16 +36,10 @@ const categoriesApi = {
     const api = useApi();
     const response = await api<ApiResponse<CategoriesResponse>>('/categories');
 
-    if (response?.data) {
-      return response.data;
-    } else if (response?.last_sync) {
-      return response as unknown as CategoriesResponse;
-    }
-
-    return {
+    return extractResponseData(response, {
       last_sync: new Date().toISOString(),
       data: []
-    };
+    });
   },
 
   /**
@@ -64,9 +51,7 @@ const categoriesApi = {
 
     const payload = {
       ...data,
-      ...(typeof data.icon === 'string' && data.icon.trim() !== ''
-        ? { icon: data.icon, icon_type: 'image' }
-        : {})
+      ...buildIconPayload(data.icon)
     };
 
     try {
@@ -90,9 +75,7 @@ const categoriesApi = {
 
     const payload = {
       ...data,
-      ...(typeof data.icon === 'string' && data.icon.trim() !== ''
-        ? { icon: data.icon, icon_type: 'image' }
-        : {})
+      ...buildIconPayload(data.icon)
     };
 
     try {

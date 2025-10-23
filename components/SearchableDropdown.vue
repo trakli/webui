@@ -56,12 +56,12 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
-  label: String,
-  placeholder: String,
+  label: { type: String, default: '' },
+  placeholder: { type: String, default: '' },
   options: { type: Array, default: () => [] },
   modelValue: { type: [String, Array], default: '' },
   multiple: { type: Boolean, default: false },
-  error: String,
+  error: { type: String, default: '' },
   optionLabel: { type: String, default: 'name' },
   optionKey: { type: String, default: 'id' },
   disabled: { type: Function, default: () => false }

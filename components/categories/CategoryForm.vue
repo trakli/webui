@@ -134,9 +134,6 @@ watch(
         }
       }
 
-      console.log('Editing item:', newEditingItem);
-      console.log('Extracted icon value:', iconValue);
-
       form.value = {
         name: newEditingItem.name || '',
         icon: iconValue,

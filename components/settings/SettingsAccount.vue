@@ -62,6 +62,8 @@ import { Lock, Save } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
 
+defineEmits(['open-password-modal']);
+
 const props = defineProps({
   isEditMode: { type: Boolean, default: false }
 });
