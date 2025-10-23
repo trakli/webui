@@ -5,6 +5,7 @@ import type {
   WalletsResponse,
   ApiResponse
 } from '~/types/wallet';
+import { buildIconPayload, extractResponseData } from './apiHelpers';
 
 /**
  * Wallets API Service
@@ -28,17 +29,10 @@ const walletsApi = {
 
     const response = await api<ApiResponse<WalletsResponse>>(url);
 
-    if (response?.data) {
-      return response.data;
-    } else if (response?.last_sync) {
-      // Direct response format without nested data
-      return response as WalletsResponse;
-    }
-
-    return {
+    return extractResponseData(response, {
       last_sync: new Date().toISOString(),
       data: []
-    };
+    });
   },
 
   /**
@@ -50,8 +44,7 @@ const walletsApi = {
 
     const payload = {
       ...data,
-      icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-      icon_type: 'image',
+      ...buildIconPayload(data.icon),
       balance: data.balance || 0
     };
 
@@ -76,10 +69,7 @@ const walletsApi = {
 
     const payload = {
       ...data,
-      ...(data.icon && {
-        icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-        icon_type: 'image'
-      })
+      ...buildIconPayload(data.icon)
     };
 
     try {

@@ -5,6 +5,7 @@ import type {
   PartiesResponse,
   ApiResponse
 } from '~/types/party';
+import { buildIconPayload, extractResponseData } from './apiHelpers';
 
 /**
  * Parties API Service
@@ -28,17 +29,10 @@ const partiesApi = {
 
     const response = await api<ApiResponse<PartiesResponse>>(url);
 
-    if (response?.data) {
-      return response.data;
-    } else if (response?.last_sync) {
-      // Direct response format without nested data
-      return response as PartiesResponse;
-    }
-
-    return {
+    return extractResponseData(response, {
       last_sync: new Date().toISOString(),
       data: []
-    };
+    });
   },
 
   /**
@@ -50,8 +44,7 @@ const partiesApi = {
 
     const payload = {
       ...data,
-      icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-      icon_type: 'image'
+      ...buildIconPayload(data.icon)
     };
 
     try {
@@ -75,10 +68,7 @@ const partiesApi = {
 
     const payload = {
       ...data,
-      ...(data.icon && {
-        icon: typeof data.icon === 'string' ? data.icon : data.icon?.path || '',
-        icon_type: 'image'
-      })
+      ...buildIconPayload(data.icon)
     };
 
     try {

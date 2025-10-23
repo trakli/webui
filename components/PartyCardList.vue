@@ -113,10 +113,9 @@ const handleFilter = () => {
   // Filter is handled reactively through computed property
 };
 
-const handleMenu = (party) => {
+const handleMenu = (_party) => {
   // Emit menu event for parent to handle
   // This could open a dropdown menu or context menu
-  console.log('Menu clicked for party:', party);
 };
 </script>
 

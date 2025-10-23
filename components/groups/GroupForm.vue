@@ -1,29 +1,44 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
-    <!-- Group Name -->
     <div class="form-group">
       <label for="group-name" class="form-label">Group Name</label>
-      <input
-        id="group-name"
-        v-model="form.name"
-        type="text"
-        class="form-input"
-        :class="{ error: nameError || apiError }"
-        placeholder="Enter group name"
-        required
-      />
-      <div v-if="nameError" class="error-text">Group name is required.</div>
-      <div v-if="apiError" class="error-text">{{ apiError }}</div>
+      <div class="name-icon-row">
+        <div class="name-col">
+          <input
+            id="group-name"
+            v-model="form.name"
+            type="text"
+            class="form-input"
+            :class="{ error: nameError || apiError }"
+            placeholder="Enter group name"
+            required
+          />
+          <div v-if="nameError" class="error-text">Group name is required.</div>
+          <div v-if="apiError" class="error-text">{{ apiError }}</div>
+        </div>
+        <div class="icon-col">
+          <button
+            type="button"
+            class="icon-trigger"
+            :aria-expanded="showIconPicker"
+            aria-label="Choose icon"
+            @click="showIconPicker = !showIconPicker"
+          >
+            <component
+              :is="selectedIconComponent"
+              v-if="selectedIconComponent"
+              class="icon-trigger__icon"
+            />
+            <ImagePlus v-else class="icon-trigger__icon" />
+          </button>
+        </div>
+      </div>
+
+      <div v-if="showIconPicker" class="icon-popover">
+        <IconPicker v-model="form.icon" @update:model-value="onIconSelected" />
+      </div>
     </div>
 
-    <!-- Icon Picker -->
-    <div class="form-group">
-      <label for="group-icon" class="form-label">Select an Icon</label>
-      <IconPicker id="group-icon" v-model="form.icon" />
-      <div v-if="iconError" class="error-text">Please select an icon.</div>
-    </div>
-
-    <!-- Group Description -->
     <div class="form-group">
       <label for="group-description" class="form-label">Group Description</label>
       <textarea
@@ -48,6 +63,8 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import IconPicker from '../IconPicker.vue';
+import * as lucideIcons from 'lucide-vue-next';
+import { ImagePlus } from 'lucide-vue-next';
 
 const props = defineProps({
   editingItem: {
@@ -65,10 +82,18 @@ const form = ref({
 });
 
 const nameError = ref(false);
-const iconError = ref(false);
 const descriptionError = ref(false);
 const isLoading = ref(false);
 const apiError = ref(null);
+const showIconPicker = ref(false);
+
+const selectedIconComponent = computed(() => {
+  const key = form.value.icon;
+  if (key && typeof lucideIcons[key] === 'function') {
+    return lucideIcons[key];
+  }
+  return null;
+});
 
 const isEditing = computed(() => !!props.editingItem);
 
@@ -95,9 +120,9 @@ watch(
 function resetForm() {
   form.value = { name: '', description: '', icon: '' };
   nameError.value = false;
-  iconError.value = false;
   descriptionError.value = false;
   apiError.value = null;
+  showIconPicker.value = false;
 }
 
 function validateForm() {
@@ -105,19 +130,12 @@ function validateForm() {
 
   // Reset errors
   nameError.value = false;
-  iconError.value = false;
   descriptionError.value = false;
   apiError.value = null;
 
   // Validate name
   if (!form.value.name || form.value.name.trim() === '') {
     nameError.value = true;
-    isValid = false;
-  }
-
-  // Validate icon
-  if (!form.value.icon) {
-    iconError.value = true;
     isValid = false;
   }
 
@@ -137,10 +155,12 @@ async function handleSubmit() {
     isLoading.value = true;
     const formData = {
       name: form.value.name.trim(),
-      description: form.value.description.trim(),
-      icon: form.value.icon,
-      icon_type: 'image'
+      description: form.value.description.trim()
     };
+    if (form.value.icon && form.value.icon.trim() !== '') {
+      formData.icon = form.value.icon;
+      formData.icon_type = 'image';
+    }
 
     if (isEditing.value && props.editingItem) {
       emit('updated', { id: props.editingItem.id, ...formData });
@@ -157,9 +177,14 @@ async function handleSubmit() {
     isLoading.value = false;
   }
 }
+
+function onIconSelected() {
+  showIconPicker.value = false;
+}
 </script>
 
 <style scoped lang="scss">
+@use '@/assets/scss/_variables.scss' as *;
 @use '@/assets/scss/_form-styles.scss';
 
 .submit-btn {
