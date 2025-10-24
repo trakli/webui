@@ -16,30 +16,42 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ChevronDownIcon } from '@heroicons/vue/24/outline';
 
+const { locale, locales } = useI18n();
 const isOpen = ref(false);
-// To add more languages:
-// 1. Find the 2-letter country code (e.g., 'US' for United States).
-// 2. Add a new object to this 'languages' array below.
-// 3. Copy the corresponding SVG file from 'node_modules/country-flag-icons/3x2/'
-//    to the 'public/flags/' directory.
-//    Example command: cp node_modules/country-flag-icons/3x2/US.svg public/flags/us.svg
-const languages = ref([
-  { code: 'GB', name: 'English', flagUrl: '/flags/gb.svg' },
-  { code: 'FR', name: 'French', flagUrl: '/flags/fr.svg' },
-  { code: 'DE', name: 'German', flagUrl: '/flags/de.svg' },
-  { code: 'ES', name: 'Spanish', flagUrl: '/flags/es.svg' }
-]);
-const selectedLanguage = ref(languages.value[0]);
+
+// Language mapping with flags and names
+const languageInfo = {
+  en: { name: 'English', flagUrl: '/flags/gb.svg' },
+  fr: { name: 'French', flagUrl: '/flags/fr.svg' },
+  de: { name: 'German', flagUrl: '/flags/de.svg' },
+  es: { name: 'Spanish', flagUrl: '/flags/es.svg' }
+};
+
+const languages = computed(() => {
+  return locales.value.map((loc) => {
+    const code = typeof loc === 'string' ? loc : loc.code;
+    return {
+      code,
+      name: languageInfo[code]?.name || code,
+      flagUrl: languageInfo[code]?.flagUrl || '/flags/gb.svg'
+    };
+  });
+});
+
+const selectedLanguage = computed(() => {
+  const current = languages.value.find((lang) => lang.code === locale.value);
+  return current || languages.value[0];
+});
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
 const selectLanguage = (lang) => {
-  selectedLanguage.value = lang;
+  locale.value = lang.code;
   isOpen.value = false;
 };
 

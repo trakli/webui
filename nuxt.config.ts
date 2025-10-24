@@ -5,6 +5,18 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
   ssr: true,
+  modules: ['@nuxtjs/i18n'],
+  i18n: {
+    restructureDir: false,
+    locales: [
+      { code: 'en', file: 'en.json' },
+      { code: 'fr', file: 'fr.json' },
+      { code: 'de', file: 'de.json' },
+      { code: 'es', file: 'es.json' }
+    ],
+    defaultLocale: 'en',
+    langDir: 'locales'
+  },
   runtimeConfig: {
     public: {
       apiBase:

@@ -3,11 +3,11 @@
     <div class="page-header">
       <div class="page-header-left">
         <h1 v-if="user" class="card-title">
-          Welcome,
+          {{ t('dashboard.welcome') }}
           <span class="card-title-username">{{ user.first_name }} {{ user.last_name }}</span>
         </h1>
         <span class="card-subtitle">
-          Here's your financial overview for {{ currentPeriodLabel }}.
+          {{ t('dashboard.financialOverview', { period: currentPeriodLabel }) }}
         </span>
       </div>
       <div class="page-header-right">
@@ -18,10 +18,10 @@
           :class="{ 'chip--primary': currentPeriod === period.value }"
           @click="setPeriod(period.value)"
         >
-          {{ period.label }}
+          {{ t(period.label) }}
         </button>
         <button class="chip" @click="toggleCustomPeriod">
-          <span>Custom</span>
+          <span>{{ t('common.custom') }}</span>
           <ChevronDown class="chip-icon" />
         </button>
       </div>
@@ -35,6 +35,7 @@ import { ChevronDown } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useStatistics } from '@/composables/useStatistics';
 
+const { t } = useI18n();
 const { user } = useAuth();
 const { currentPeriod, availablePeriods, setPeriod } = useStatistics();
 

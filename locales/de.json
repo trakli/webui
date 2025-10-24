@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "Wird geladen...",
+    "custom": "Benutzerdefiniert",
+    "income": "Einnahmen",
+    "expense": "Ausgaben",
+    "allWallets": "Alle Geldbörsen"
+  },
+  "dashboard": {
+    "welcome": "Willkommen,",
+    "financialOverview": "Hier ist Ihre finanzielle Übersicht für {period}.",
+    "noTransactions": "Noch keine Transaktionen",
+    "noTransactionsSubtitle": "Erstellen Sie Ihre erste Transaktion auf der Transaktionsseite.",
+    "periods": {
+      "thisWeek": "Diese Woche",
+      "thisMonth": "Diesen Monat",
+      "thisYear": "Dieses Jahr",
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "last7Days": "Letzte 7 Tage",
+      "last30Days": "Letzte 30 Tage",
+      "thisQuarter": "Dieses Quartal",
+      "lastQuarter": "Letztes Quartal"
+    },
+    "kpis": {
+      "totalTransactions": "Gesamttransaktionen",
+      "totalIncome": "Gesamteinnahmen",
+      "totalExpenses": "Gesamtausgaben",
+      "netBalance": "Nettobilanz"
+    },
+    "insights": {
+      "topIncomeSource": "Haupteinnahmequelle",
+      "biggestExpense": "Größte Ausgabe"
+    }
+  },
+  "notifications": {
+    "transactionDeleted": "Transaktion gelöscht",
+    "transactionDeletedSuccess": "Die Transaktion wurde erfolgreich gelöscht",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "deleteFailedMessage": "Fehler beim Löschen der Transaktion. Bitte versuchen Sie es erneut.",
+    "confirmDelete": "Sind Sie sicher, dass Sie dieses {item} löschen möchten?"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "custom": "Custom",
+    "income": "Income",
+    "expense": "Expense",
+    "allWallets": "All Wallets"
+  },
+  "dashboard": {
+    "welcome": "Welcome,",
+    "financialOverview": "Here's your financial overview for {period}.",
+    "noTransactions": "No transactions yet",
+    "noTransactionsSubtitle": "Create your first transaction from the Transactions page.",
+    "periods": {
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "thisYear": "This Year",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "thisQuarter": "This Quarter",
+      "lastQuarter": "Last Quarter"
+    },
+    "kpis": {
+      "totalTransactions": "Total Transactions",
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netBalance": "Net Balance"
+    },
+    "insights": {
+      "topIncomeSource": "Top Income Source",
+      "biggestExpense": "Biggest Expense"
+    }
+  },
+  "notifications": {
+    "transactionDeleted": "Transaction deleted",
+    "transactionDeletedSuccess": "Transaction has been deleted successfully",
+    "deleteFailed": "Delete failed",
+    "deleteFailedMessage": "Failed to delete transaction. Please try again.",
+    "confirmDelete": "Are you sure you want to delete this {item}?"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "custom": "Personnalisé",
+    "income": "Revenu",
+    "expense": "Dépense",
+    "allWallets": "Tous les portefeuilles"
+  },
+  "dashboard": {
+    "welcome": "Bienvenue,",
+    "financialOverview": "Voici votre aperçu financier pour {period}.",
+    "noTransactions": "Aucune transaction pour le moment",
+    "noTransactionsSubtitle": "Créez votre première transaction depuis la page Transactions.",
+    "periods": {
+      "thisWeek": "Cette semaine",
+      "thisMonth": "Ce mois-ci",
+      "thisYear": "Cette année",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "last7Days": "7 derniers jours",
+      "last30Days": "30 derniers jours",
+      "thisQuarter": "Ce trimestre",
+      "lastQuarter": "Dernier trimestre"
+    },
+    "kpis": {
+      "totalTransactions": "Total des transactions",
+      "totalIncome": "Revenu total",
+      "totalExpenses": "Dépenses totales",
+      "netBalance": "Solde net"
+    },
+    "insights": {
+      "topIncomeSource": "Principale source de revenus",
+      "biggestExpense": "Plus grande dépense"
+    }
+  },
+  "notifications": {
+    "transactionDeleted": "Transaction supprimée",
+    "transactionDeletedSuccess": "La transaction a été supprimée avec succès",
+    "deleteFailed": "Échec de la suppression",
+    "deleteFailedMessage": "Échec de la suppression de la transaction. Veuillez réessayer.",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce {item} ?"
+  }
+}

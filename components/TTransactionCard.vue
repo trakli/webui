@@ -1,19 +1,19 @@
 <template>
   <div class="stats-section">
     <div class="kpis">
-      <KpiCard label="Total Transactions" :value="statistics?.transaction_count || 0" />
+      <KpiCard :label="t('dashboard.kpis.totalTransactions')" :value="statistics?.transaction_count || 0" />
       <KpiCard
-        label="Total Income"
+        :label="t('dashboard.kpis.totalIncome')"
         :value="formatCompactCurrency(statistics?.total_income || 0, primaryCurrency)"
         value-class="is-positive"
       />
       <KpiCard
-        label="Total Expenses"
+        :label="t('dashboard.kpis.totalExpenses')"
         :value="formatCompactCurrency(statistics?.total_expenses || 0, primaryCurrency)"
         value-class="is-negative"
       />
       <KpiCard
-        label="Net Balance"
+        :label="t('dashboard.kpis.netBalance')"
         :value="formatCompactCurrency(statistics?.total_balance || 0, primaryCurrency)"
         :value-class="(statistics?.total_balance || 0) >= 0 ? 'is-positive' : 'is-negative'"
       />
@@ -25,7 +25,7 @@
           <div class="insight-icon income-icon">
             <ArrowDownLeftIcon />
           </div>
-          <span class="insight-label">Top Income Source</span>
+          <span class="insight-label">{{ t('dashboard.insights.topIncomeSource') }}</span>
         </div>
         <div class="insight-chips">
           <div class="insight-chip name-chip income-chip">
@@ -49,7 +49,7 @@
           <div class="insight-icon expense-icon">
             <ArrowUpLeftIcon />
           </div>
-          <span class="insight-label">Biggest Expense</span>
+          <span class="insight-label">{{ t('dashboard.insights.biggestExpense') }}</span>
         </div>
         <div class="insight-chips">
           <div class="insight-chip name-chip expense-chip">
@@ -76,6 +76,7 @@ import { useStatistics } from '@/composables/useStatistics';
 import { useSharedData } from '@/composables/useSharedData';
 import KpiCard from '@/components/reports/KpiCard.vue';
 
+const { t } = useI18n();
 const { selectedWalletId, currentStatistics, formatCompactCurrency } = useStatistics();
 
 // Use the shared statistics from the composable instead of local state

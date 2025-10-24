@@ -6,8 +6,8 @@
       <TTransactionCard />
     </div>
     <div v-if="filteredTransactions.length === 0" class="dashboard-empty">
-      <p class="empty-title">No transactions yet</p>
-      <p class="empty-subtitle">Create your first transaction from the Transactions page.</p>
+      <p class="empty-title">{{ t('dashboard.noTransactions') }}</p>
+      <p class="empty-subtitle">{{ t('dashboard.noTransactionsSubtitle') }}</p>
     </div>
     <template v-else>
       <!-- Mobile cards -->
@@ -57,6 +57,7 @@ import TTransactionCard from '@/components/TTransactionCard.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
 
+const { t } = useI18n();
 const router = useRouter();
 
 const {
@@ -82,9 +83,12 @@ const handleDelete = async (transaction) => {
 
   try {
     await deleteTransaction(transaction.id);
-    showSuccess('Transaction deleted', 'Transaction has been deleted successfully');
+    showSuccess(
+      t('notifications.transactionDeleted'),
+      t('notifications.transactionDeletedSuccess')
+    );
   } catch (err) {
-    showError('Delete failed', 'Failed to delete transaction. Please try again.');
+    showError(t('notifications.deleteFailed'), t('notifications.deleteFailedMessage'));
     console.error('Failed to delete transaction:', err);
   }
 };

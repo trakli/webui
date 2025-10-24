@@ -146,15 +146,14 @@ const CURRENCY_RATES: Record<string, number> = {
 };
 
 // Available time periods
+// Note: These values are translation keys that will be resolved in components
 const AVAILABLE_PERIODS: StatisticsPeriod[] = [
-  { label: 'All time', value: 'all_time', days: 0 },
-  { label: 'This week', value: 'current_week', days: 0 },
-  { label: 'This month', value: 'current_month', days: 0 },
-  { label: 'Last 3 months', value: '90d', days: 90 },
-  { label: 'Custom', value: 'custom', days: 0 }
+  { label: 'dashboard.periods.thisWeek', value: 'current_week', days: 0 },
+  { label: 'dashboard.periods.thisMonth', value: 'current_month', days: 0 },
+  { label: 'dashboard.periods.thisYear', value: 'current_year', days: 0 }
 ];
 
-const currentPeriod = ref<string>('all_time');
+const currentPeriod = ref<string>('current_month');
 const selectedWalletId = ref<number | null>(null); // null = all wallets
 const isLoading = ref(false);
 const error = ref<string | null>(null);

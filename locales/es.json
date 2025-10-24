@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "custom": "Personalizado",
+    "income": "Ingreso",
+    "expense": "Gasto",
+    "allWallets": "Todas las carteras"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido,",
+    "financialOverview": "Aquí está su resumen financiero para {period}.",
+    "noTransactions": "Aún no hay transacciones",
+    "noTransactionsSubtitle": "Crea tu primera transacción desde la página de Transacciones.",
+    "periods": {
+      "thisWeek": "Esta semana",
+      "thisMonth": "Este mes",
+      "thisYear": "Este año",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "last7Days": "Últimos 7 días",
+      "last30Days": "Últimos 30 días",
+      "thisQuarter": "Este trimestre",
+      "lastQuarter": "Último trimestre"
+    },
+    "kpis": {
+      "totalTransactions": "Total de transacciones",
+      "totalIncome": "Ingresos totales",
+      "totalExpenses": "Gastos totales",
+      "netBalance": "Balance neto"
+    },
+    "insights": {
+      "topIncomeSource": "Principal fuente de ingresos",
+      "biggestExpense": "Mayor gasto"
+    }
+  },
+  "notifications": {
+    "transactionDeleted": "Transacción eliminada",
+    "transactionDeletedSuccess": "La transacción se ha eliminado correctamente",
+    "deleteFailed": "Error al eliminar",
+    "deleteFailedMessage": "No se pudo eliminar la transacción. Por favor, inténtelo de nuevo.",
+    "confirmDelete": "¿Está seguro de que desea eliminar este {item}?"
+  }
+}

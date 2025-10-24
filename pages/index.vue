@@ -5,6 +5,7 @@ import { onMounted } from 'vue';
 import Logo from '@/components/Logo.vue';
 
 const router = useRouter();
+const { t } = useI18n();
 
 onMounted(() => {
   // Add a small delay to show the loading state
@@ -19,7 +20,7 @@ onMounted(() => {
     <div class="loading-content">
       <Logo size="large" />
       <div class="spinner" />
-      <p class="loading-text">Loading Trakli...</p>
+      <p class="loading-text">{{ t('common.loading') }} Trakli...</p>
     </div>
   </div>
 </template>
