@@ -3,9 +3,9 @@
     <TTopCard :page-name="'Transaction'" :page-name-plural="'Transactions'" @add="navigateToNew" />
 
     <ComponentLoader
-      :is-loading="isLoading"
+      :is-loading="isLoadingOrNotReady"
       :error="error"
-      :has-data="!isLoading && transactions.length > 0"
+      :has-data="transactions.length > 0"
       :show-empty="true"
       skeleton-variant="table"
       :skeleton-count="6"
@@ -72,10 +72,14 @@ const {
   itemsPerPage,
   totalPages,
   deleteTransaction,
-  isLoading,
-  error,
   transactions
 } = useTransactions();
+
+// Use centralized data manager states and initialization
+const { isLoading, error, isInitialized } = useDataManagerStates();
+useDataInitialization();
+
+const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
 

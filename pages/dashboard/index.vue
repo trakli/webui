@@ -2,9 +2,9 @@
   <div class="dashboard-index-content">
     <TDashboardTopCard :show-filters="hasTransactions" />
 
-    <div v-if="hasTransactions || isLoading" class="balance-card-container">
+    <div v-if="hasTransactions || isLoadingOrNotReady" class="balance-card-container">
       <ComponentLoader
-        :is-loading="isLoading"
+        :is-loading="isLoadingOrNotReady"
         :has-data="hasTransactions"
         :show-empty="false"
         skeleton-variant="card"
@@ -13,7 +13,7 @@
       </ComponentLoader>
 
       <ComponentLoader
-        :is-loading="isLoading"
+        :is-loading="isLoadingOrNotReady"
         :has-data="hasTransactions"
         :show-empty="false"
         skeleton-variant="card"
@@ -30,9 +30,9 @@
     />
 
     <ComponentLoader
-      :is-loading="isLoading"
+      :is-loading="isLoadingOrNotReady"
       :error="error"
-      :has-data="!isLoading && transactions.length > 0"
+      :has-data="!isLoadingOrNotReady && transactions.length > 0"
       :show-empty="false"
       skeleton-variant="table"
       :skeleton-count="6"
@@ -102,22 +102,24 @@ const {
   itemsPerPage,
   totalPages,
   deleteTransaction,
-  isLoading,
-  error,
   transactions
 } = useTransactions();
 
-const hasDataLoaded = computed(() => !isLoading.value);
+// Use centralized data manager states and initialization
+const { isLoading, error, isInitialized } = useDataManagerStates();
+useDataInitialization();
+
+const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
+const hasDataLoaded = computed(() => isInitialized.value && !isLoading.value);
 const hasTransactions = computed(
   () => hasDataLoaded.value && filteredTransactions.value.length > 0
 );
+
 const shouldShowWizard = computed(() => {
-  // Only show wizard when we're definitely authenticated, not loading, no errors, and have no transactions
-  // This prevents flash on refresh by ensuring we have auth context
   if (typeof window === 'undefined') return false;
   if (!checkAuth()) return false;
-  if (error.value) return false; // Don't show wizard when there's an error
-  return !isLoading.value && transactions.value.length === 0;
+  if (error.value) return false;
+  return isInitialized.value && !isLoading.value && transactions.value.length === 0;
 });
 
 const { confirmDelete, showSuccess, showError } = useNotifications();

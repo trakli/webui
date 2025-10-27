@@ -137,6 +137,7 @@ export interface StatisticsPeriod {
 // Configuration for statistics source
 const USE_API_STATISTICS = false; // TODO: Set to true when backend endpoint is ready
 
+// TODO: Replace with API call to fetch real-time currency conversion rates
 // Simple currency conversion rates (should come from API in production)
 const CURRENCY_RATES: Record<string, number> = {
   USD: 1.0,

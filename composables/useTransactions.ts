@@ -4,6 +4,7 @@ import { transactionMapper } from '~/utils/transactionMapper';
 import type { FrontendTransaction } from '~/types/transaction';
 import { useSharedData } from '~/composables/useSharedData';
 import { checkAuth } from '~/utils/auth';
+import { extractApiErrors } from '~/utils/apiErrors';
 
 // Use FrontendTransaction as the main interface
 type Transaction = FrontendTransaction;
@@ -12,7 +13,7 @@ type Transaction = FrontendTransaction;
 
 // Module-scoped shared state
 const transactions = ref<Transaction[]>([]);
-const isLoading = ref(typeof window !== 'undefined' && checkAuth());
+const isLoading = ref(false);
 const error = ref<string | null>(null);
 const lastSync = ref<string | null>(null);
 
@@ -21,17 +22,7 @@ const sharedData = useSharedData();
 
 // Simple guard to ensure one-time init on client
 let initialized = false;
-
-// Helper to extract API errors
-function extractApiErrors(err: unknown): string {
-  if (typeof err === 'string') return err;
-  if (err?.response?._data?.message) return err.response._data.message;
-  if (err?.response?._data?.errors?.length) return err.response._data.errors.join(', ');
-  if (err?.message) return err.message;
-  if (err?._data?.message) return err._data.message;
-  if (err?._data?.errors?.length) return err._data.errors.join(', ');
-  return 'An unknown error occurred';
-}
+let hasAttemptedLoad = false;
 
 // Load dependencies using shared data composable
 async function loadDependencies() {
@@ -52,11 +43,13 @@ async function fetchTransactionsFromApi() {
   try {
     if (!checkAuth()) {
       isLoading.value = false;
+      hasAttemptedLoad = true;
       return;
     }
 
     isLoading.value = true;
     error.value = null;
+    hasAttemptedLoad = true;
 
     if (
       sharedData.parties.value.length === 0 ||
@@ -87,22 +80,9 @@ async function fetchTransactionsFromApi() {
   }
 }
 
-function ensureInit() {
-  if (initialized) return;
-  if (typeof window === 'undefined') return;
-  initialized = true;
-
-  if (!checkAuth()) {
-    return;
-  }
-
-  isLoading.value = true;
-  fetchTransactionsFromApi();
-}
-
 export const useTransactions = () => {
-  // Ensure storage-backed state is initialized on client
-  ensureInit();
+  // REMOVED: Auto-initialization - now controlled by data manager
+  // ensureInit();
 
   // View-scoped state
   const searchQuery = ref('');
@@ -247,14 +227,6 @@ export const useTransactions = () => {
         undefined,
         sharedData.getDefaultGroup.value
       );
-      console.log('Updating transaction', numericId, 'payload:', payload);
-      console.log('Payload summary', {
-        amount: payload.amount,
-        type: payload.type,
-        party_id: payload.party_id,
-        wallet_id: payload.wallet_id,
-        group_id: payload.group_id
-      });
       const updated = await api.transactions.update(numericId, payload);
 
       if (updated) {
@@ -335,10 +307,21 @@ export const useTransactions = () => {
 
   const clearTransactions = () => {
     transactions.value = [];
-    isLoading.value = false;
     error.value = null;
     lastSync.value = null;
     initialized = false;
+    hasAttemptedLoad = false;
+    isLoading.value = false;
+
+    // REMOVED: Auto-reinitialization - now controlled by data manager
+    // Re-initialize on next tick to allow auth state to propagate
+    // if (typeof window !== 'undefined') {
+    //   nextTick(() => {
+    //     if (checkAuth()) {
+    //       forceInit();
+    //     }
+    //   });
+    // }
   };
 
   return {
@@ -351,6 +334,8 @@ export const useTransactions = () => {
     isLoading,
     error,
     lastSync,
+    isInitialized: computed(() => initialized),
+    hasAttemptedLoad: computed(() => hasAttemptedLoad),
 
     // Dependencies (for form dropdowns) - from shared data
     parties: sharedData.parties,

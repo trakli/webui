@@ -5,6 +5,7 @@ import type { Party } from '~/types/party';
 import type { Wallet } from '~/types/wallet';
 import type { Group } from '~/services/api/groupsApi';
 import { checkAuth } from '~/utils/auth';
+import { extractApiErrors } from '~/utils/apiErrors';
 
 /**
  * Shared data composable for centralized state management
@@ -47,16 +48,6 @@ function deduplicateById<T extends { id: number }>(items: T[]): T[] {
     seen.add(item.id);
     return true;
   });
-}
-
-function extractApiErrors(err: unknown): string {
-  if (typeof err === 'string') return err;
-  if (err?.response?._data?.message) return err.response._data.message;
-  if (err?.response?._data?.errors?.length) return err.response._data.errors.join(', ');
-  if (err?.message) return err.message;
-  if (err?._data?.message) return err._data.message;
-  if (err?._data?.errors?.length) return err._data.errors.join(', ');
-  return 'An unknown error occurred';
 }
 
 function isCacheValid(lastSync: string | null): boolean {

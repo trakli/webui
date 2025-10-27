@@ -37,16 +37,11 @@
 import LoadingSkeleton from './LoadingSkeleton.vue';
 import EmptyState from './EmptyState.vue';
 import { AlertTriangle } from 'lucide-vue-next';
+import { extractApiErrors } from '~/utils/apiErrors';
 
 // Extract HTTP status code and message from error
 function formatErrorMessage(error) {
-  if (!error) return 'An unknown error occurred';
-
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  return 'An unexpected error occurred. Please try again.';
+  return extractApiErrors(error);
 }
 
 // Extract HTTP status code from error object
@@ -73,7 +68,7 @@ defineProps({
     default: false
   },
   error: {
-    type: String,
+    type: [String, Object, Error],
     default: null
   },
   hasData: {

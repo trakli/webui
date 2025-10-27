@@ -1,11 +1,12 @@
 export const useAuth = () => {
-  const router = useRouter();
-
+  // Cookie management for persistence
   const userCookie = useCookie('auth.user', {
     default: () => null,
     serialize: JSON.stringify,
-    deserialize: JSON.parse
+    deserialize: JSON.parse,
+    maxAge: 60 * 60 * 24 * 7 // 7 days
   });
+
   const tokenCookie = useCookie('auth.token', {
     default: () => null,
     httpOnly: false,
@@ -13,10 +14,27 @@ export const useAuth = () => {
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7
   });
+
+  // Reactive state using useState (SSR-friendly)
   const user = useState('auth.user', () => userCookie.value);
   const token = useState('auth.token', () => tokenCookie.value);
 
   const isAuthenticated = computed(() => !!user.value && !!token.value);
+
+  // Sync auth state between cookies and reactive state
+  const syncAuthState = () => {
+    if (userCookie.value && !user.value) {
+      user.value = userCookie.value;
+    }
+    if (tokenCookie.value && !token.value) {
+      token.value = tokenCookie.value;
+    }
+  };
+
+  // Auto-sync auth state on client-side
+  if (typeof window !== 'undefined') {
+    syncAuthState();
+  }
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
@@ -27,10 +45,16 @@ export const useAuth = () => {
       });
 
       if (response.data) {
+        // Update reactive state
         user.value = response.data.user;
         token.value = response.data.token;
+
+        // Sync to cookies
         userCookie.value = response.data.user;
         tokenCookie.value = response.data.token;
+
+        const { initializeData } = useDataManager();
+        initializeData();
       }
 
       return response;
@@ -54,10 +78,16 @@ export const useAuth = () => {
       });
 
       if (response.data) {
+        // Update reactive state
         user.value = response.data.user;
         token.value = response.data.token;
+
+        // Sync to cookies
         userCookie.value = response.data.user;
         tokenCookie.value = response.data.token;
+
+        const { initializeData } = useDataManager();
+        initializeData();
       }
 
       return response;
@@ -81,20 +111,10 @@ export const useAuth = () => {
       userCookie.value = null;
       tokenCookie.value = null;
 
-      try {
-        const { clearAllData } = await import('@/composables/useSharedData').then((m) =>
-          m.useSharedData()
-        );
-        const { clearTransactions } = await import('@/composables/useTransactions').then((m) =>
-          m.useTransactions()
-        );
-        clearAllData();
-        clearTransactions();
-      } catch (error) {
-        console.warn('Error clearing data on logout:', error);
-      }
+      const { clearData } = useDataManager();
+      clearData();
 
-      router.push('/login');
+      await navigateTo('/login');
     }
   };
 
@@ -110,22 +130,31 @@ export const useAuth = () => {
 
       if (response?.data) {
         user.value = response.data;
+        // Sync updated user data to cookie
+        userCookie.value = response.data;
       }
     } catch (error) {
       console.error('Failed to fetch user:', error);
+      // Clear invalid auth state
       user.value = null;
       token.value = null;
       userCookie.value = null;
       tokenCookie.value = null;
+
+      // Clear data since auth is invalid
+      const { clearData } = useDataManager();
+      clearData();
     }
   };
 
   return {
     user: readonly(user),
+    token: readonly(token),
     isAuthenticated,
     login,
     register,
     logout,
-    fetchUser
+    fetchUser,
+    syncAuthState
   };
 };
