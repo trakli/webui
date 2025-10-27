@@ -4,6 +4,7 @@ import type { Category } from '~/types/category';
 import type { Party } from '~/types/party';
 import type { Wallet } from '~/types/wallet';
 import type { Group } from '~/services/api/groupsApi';
+import { checkAuth } from '~/utils/auth';
 
 /**
  * Shared data composable for centralized state management
@@ -28,17 +29,13 @@ const partiesError = ref<string | null>(null);
 const walletsError = ref<string | null>(null);
 const groupsError = ref<string | null>(null);
 
-// Last sync timestamps
+// Last sync timestamps for lightweight caching (5 minutes)
 const categoriesLastSync = ref<string | null>(null);
 const partiesLastSync = ref<string | null>(null);
 const walletsLastSync = ref<string | null>(null);
 const groupsLastSync = ref<string | null>(null);
 
-// Initialization flags to prevent duplicate loads
-let categoriesInitialized = false;
-let partiesInitialized = false;
-let walletsInitialized = false;
-let groupsInitialized = false;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Helper function to deduplicate arrays by ID
 function deduplicateById<T extends { id: number }>(items: T[]): T[] {
@@ -52,7 +49,6 @@ function deduplicateById<T extends { id: number }>(items: T[]): T[] {
   });
 }
 
-// Helper function to extract API errors
 function extractApiErrors(err: unknown): string {
   if (typeof err === 'string') return err;
   if (err?.response?._data?.message) return err.response._data.message;
@@ -63,151 +59,100 @@ function extractApiErrors(err: unknown): string {
   return 'An unknown error occurred';
 }
 
-export const useSharedData = () => {
-  // Categories operations
-  const loadCategories = async (forceReload = false) => {
-    if (categoriesInitialized && !forceReload) {
-      return categories.value;
+function isCacheValid(lastSync: string | null): boolean {
+  if (!lastSync) return false;
+  const syncTime = new Date(lastSync).getTime();
+  return Date.now() - syncTime < CACHE_DURATION;
+}
+
+function createDataLoader<T>(
+  name: string,
+  data: Ref<T[]>,
+  loading: Ref<boolean>,
+  error: Ref<string | null>,
+  lastSync: Ref<string | null>,
+  apiCall: () => Promise<any>
+) {
+  return async (forceReload = false) => {
+    if (!forceReload && data.value.length > 0 && isCacheValid(lastSync.value)) {
+      return data.value;
     }
 
-    if (categoriesLoading.value) {
-      // Wait for existing load to complete
-      while (categoriesLoading.value) {
+    if (loading.value) {
+      while (loading.value) {
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
-      return categories.value;
+      return data.value;
     }
 
-    categoriesLoading.value = true;
-    categoriesError.value = null;
+    if (!checkAuth()) {
+      loading.value = false;
+      return data.value;
+    }
+
+    loading.value = true;
+    error.value = null;
 
     try {
-      // Load both income and expense categories in parallel
+      const response = await apiCall();
+      data.value = deduplicateById(response.data || []);
+      lastSync.value = new Date().toISOString();
+      console.log(`✅ Loaded ${data.value.length} ${name}`);
+      return data.value;
+    } catch (err) {
+      const errorMsg = extractApiErrors(err);
+      error.value = errorMsg;
+      console.error(`Error loading ${name}:`, errorMsg);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+}
+
+export const useSharedData = () => {
+  const loadCategories = createDataLoader(
+    'categories',
+    categories,
+    categoriesLoading,
+    categoriesError,
+    categoriesLastSync,
+    async () => {
       const [incomeResponse, expenseResponse] = await Promise.all([
         api.categories.fetchByType('income'),
         api.categories.fetchByType('expense')
       ]);
-
-      // Combine and deduplicate categories
-      const allCategories = [...(incomeResponse.data || []), ...(expenseResponse.data || [])];
-
-      categories.value = deduplicateById(allCategories);
-      categoriesLastSync.value =
-        incomeResponse.last_sync || expenseResponse.last_sync || new Date().toISOString();
-      categoriesInitialized = true;
-
-      console.log(`✅ Loaded ${categories.value.length} categories (deduplicated)`);
-      return categories.value;
-    } catch (err) {
-      const errorMsg = extractApiErrors(err);
-      categoriesError.value = errorMsg;
-      console.error('Error loading categories:', errorMsg);
-      throw err;
-    } finally {
-      categoriesLoading.value = false;
+      return { data: [...(incomeResponse.data || []), ...(expenseResponse.data || [])] };
     }
-  };
+  );
 
-  const loadParties = async (forceReload = false) => {
-    if (partiesInitialized && !forceReload) {
-      return parties.value;
-    }
+  const loadParties = createDataLoader(
+    'parties',
+    parties,
+    partiesLoading,
+    partiesError,
+    partiesLastSync,
+    () => api.parties.fetchAll()
+  );
 
-    if (partiesLoading.value) {
-      while (partiesLoading.value) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-      return parties.value;
-    }
+  const loadWallets = createDataLoader(
+    'wallets',
+    wallets,
+    walletsLoading,
+    walletsError,
+    walletsLastSync,
+    () => api.wallets.fetchAll()
+  );
 
-    partiesLoading.value = true;
-    partiesError.value = null;
+  const loadGroups = createDataLoader(
+    'groups',
+    groups,
+    groupsLoading,
+    groupsError,
+    groupsLastSync,
+    () => api.groups.fetchAll()
+  );
 
-    try {
-      const response = await api.parties.fetchAll();
-      parties.value = deduplicateById(response.data || []);
-      partiesLastSync.value = response.last_sync || new Date().toISOString();
-      partiesInitialized = true;
-
-      console.log(`✅ Loaded ${parties.value.length} parties`);
-      return parties.value;
-    } catch (err) {
-      const errorMsg = extractApiErrors(err);
-      partiesError.value = errorMsg;
-      console.error('Error loading parties:', errorMsg);
-      throw err;
-    } finally {
-      partiesLoading.value = false;
-    }
-  };
-
-  const loadWallets = async (forceReload = false) => {
-    if (walletsInitialized && !forceReload) {
-      return wallets.value;
-    }
-
-    if (walletsLoading.value) {
-      while (walletsLoading.value) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-      return wallets.value;
-    }
-
-    walletsLoading.value = true;
-    walletsError.value = null;
-
-    try {
-      const response = await api.wallets.fetchAll();
-      wallets.value = deduplicateById(response.data || []);
-      walletsLastSync.value = response.last_sync || new Date().toISOString();
-      walletsInitialized = true;
-
-      console.log(`✅ Loaded ${wallets.value.length} wallets`);
-      return wallets.value;
-    } catch (err) {
-      const errorMsg = extractApiErrors(err);
-      walletsError.value = errorMsg;
-      console.error('Error loading wallets:', errorMsg);
-      throw err;
-    } finally {
-      walletsLoading.value = false;
-    }
-  };
-
-  const loadGroups = async (forceReload = false) => {
-    if (groupsInitialized && !forceReload) {
-      return groups.value;
-    }
-
-    if (groupsLoading.value) {
-      while (groupsLoading.value) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-      return groups.value;
-    }
-
-    groupsLoading.value = true;
-    groupsError.value = null;
-
-    try {
-      const response = await api.groups.fetchAll();
-      groups.value = deduplicateById(response.data || []);
-      groupsLastSync.value = response.last_sync || new Date().toISOString();
-      groupsInitialized = true;
-
-      console.log(`✅ Loaded ${groups.value.length} groups`);
-      return groups.value;
-    } catch (err) {
-      const errorMsg = extractApiErrors(err);
-      groupsError.value = errorMsg;
-      console.error('Error loading groups:', errorMsg);
-      throw err;
-    } finally {
-      groupsLoading.value = false;
-    }
-  };
-
-  // Load all data in parallel
   const loadAllData = async (forceReload = false) => {
     try {
       await Promise.all([
@@ -317,6 +262,30 @@ export const useSharedData = () => {
     groups.value = groups.value.filter((group) => group.id !== id);
   };
 
+  const clearAllData = () => {
+    categories.value = [];
+    parties.value = [];
+    wallets.value = [];
+    groups.value = [];
+
+    categoriesLoading.value = false;
+    partiesLoading.value = false;
+    walletsLoading.value = false;
+    groupsLoading.value = false;
+
+    categoriesError.value = null;
+    partiesError.value = null;
+    walletsError.value = null;
+    groupsError.value = null;
+
+    categoriesLastSync.value = null;
+    partiesLastSync.value = null;
+    walletsLastSync.value = null;
+    groupsLastSync.value = null;
+
+    console.log('✅ All shared data cleared for logout');
+  };
+
   return {
     // Data
     categories: readonly(categories),
@@ -368,6 +337,8 @@ export const useSharedData = () => {
     removeWallet,
     addGroup,
     updateGroup,
-    removeGroup
+    removeGroup,
+
+    clearAllData
   };
 };

@@ -80,6 +80,20 @@ export const useAuth = () => {
       token.value = null;
       userCookie.value = null;
       tokenCookie.value = null;
+
+      try {
+        const { clearAllData } = await import('@/composables/useSharedData').then((m) =>
+          m.useSharedData()
+        );
+        const { clearTransactions } = await import('@/composables/useTransactions').then((m) =>
+          m.useTransactions()
+        );
+        clearAllData();
+        clearTransactions();
+      } catch (error) {
+        console.warn('Error clearing data on logout:', error);
+      }
+
       router.push('/login');
     }
   };

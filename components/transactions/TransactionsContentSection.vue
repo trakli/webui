@@ -2,47 +2,55 @@
   <div class="content-area">
     <TTopCard :page-name="'Transaction'" :page-name-plural="'Transactions'" @add="navigateToNew" />
 
-    <OnboardingEmptyState
-      v-if="paginatedTransactions.length === 0"
-      page-type="transactions"
+    <ComponentLoader
+      :is-loading="isLoading"
+      :error="error"
+      :has-data="!isLoading && transactions.length > 0"
+      :show-empty="true"
+      skeleton-variant="table"
+      :skeleton-count="6"
+      :skeleton-columns="5"
+      empty-state-name="transactions"
       @create="navigateToNew"
-    />
+    >
+      <template #empty>
+        <OnboardingEmptyState page-type="transactions" @create="navigateToNew" />
+      </template>
 
-    <!-- Mobile cards -->
-    <TTransactionsCardList
-      v-if="paginatedTransactions.length > 0"
-      class="only-mobile"
-      :transactions="paginatedTransactions"
-      :search-query="searchQuery"
-      :filter-query="filterQuery"
-      :current-page="currentPage"
-      :items-per-page="itemsPerPage"
-      :total-pages="totalPages"
-      :total-entries="filteredTransactions.length"
-      @update:search-query="searchQuery = $event"
-      @update:filter-query="filterQuery = $event"
-      @page-change="currentPage = $event"
-      @edit="handleEdit"
-      @delete="handleDelete"
-    />
+      <!-- Mobile cards -->
+      <TTransactionsCardList
+        class="only-mobile"
+        :transactions="paginatedTransactions"
+        :search-query="searchQuery"
+        :filter-query="filterQuery"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total-pages="totalPages"
+        :total-entries="filteredTransactions.length"
+        @update:search-query="searchQuery = $event"
+        @update:filter-query="filterQuery = $event"
+        @page-change="currentPage = $event"
+        @edit="handleEdit"
+        @delete="handleDelete"
+      />
 
-    <!-- Desktop table -->
-    <TTableComponent
-      v-if="paginatedTransactions.length > 0"
-      class="only-desktop"
-      :transactions="paginatedTransactions"
-      :search-query="searchQuery"
-      :filter-query="filterQuery"
-      :current-page="currentPage"
-      :items-per-page="itemsPerPage"
-      :total-pages="totalPages"
-      :total-entries="filteredTransactions.length"
-      @update:search-query="searchQuery = $event"
-      @update:filter-query="filterQuery = $event"
-      @page-change="currentPage = $event"
-      @edit="handleEdit"
-      @delete="handleDelete"
-    />
+      <!-- Desktop table -->
+      <TTableComponent
+        class="only-desktop"
+        :transactions="paginatedTransactions"
+        :search-query="searchQuery"
+        :filter-query="filterQuery"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total-pages="totalPages"
+        :total-entries="filteredTransactions.length"
+        @update:search-query="searchQuery = $event"
+        @update:filter-query="filterQuery = $event"
+        @page-change="currentPage = $event"
+        @edit="handleEdit"
+        @delete="handleDelete"
+      />
+    </ComponentLoader>
   </div>
 </template>
 
@@ -53,6 +61,7 @@ import TTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
+import ComponentLoader from '@/components/ComponentLoader.vue';
 
 const {
   paginatedTransactions,
@@ -62,7 +71,10 @@ const {
   currentPage,
   itemsPerPage,
   totalPages,
-  deleteTransaction
+  deleteTransaction,
+  isLoading,
+  error,
+  transactions
 } = useTransactions();
 
 const { confirmDelete, showSuccess, showError } = useNotifications();

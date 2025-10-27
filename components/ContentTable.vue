@@ -1,95 +1,113 @@
 <template>
-  <div class="entity-list">
-    <div class="header-row">
-      <h1>All {{ pageNamePlural }}</h1>
-      <input
-        v-model="searchQuery"
-        type="text"
-        :placeholder="`Search ${pageNamePlural.toLowerCase()}...`"
-        class="search-input"
-      />
-    </div>
-
-    <div class="table-header" :class="{ 'expense-header': headerType === 'expense' }">
-      <div class="col-name">{{ pageName }} Name</div>
-      <div class="col-description">{{ pageName }} Description</div>
-      <div class="col-action">Action</div>
-    </div>
-
-    <TransitionGroup
-      name="list"
-      tag="div"
-      class="entities-container"
-      @after-enter="$emit('item-add-complete')"
-    >
-      <ContentCard
-        v-for="entity in paginatedEntities"
-        :key="entity.id"
-        :name="entity.name"
-        :icon="entity.icon?.path || entity.icon?.content || entity.icon"
-        :description="entity.description"
-        :page-name="pageName"
-        @edit="$emit('edit', entity)"
-        @delete="$emit('delete', entity)"
-      />
-    </TransitionGroup>
-
-    <div class="pagination-row">
-      <div class="pagination-controls">
-        <button
-          :disabled="currentPage === 1"
-          class="pagination-button"
-          :class="{ disabled: currentPage === 1 }"
-          @click="currentPage--"
-        >
-          &lt; Prev
-        </button>
-
-        <button
-          v-for="page in visiblePages"
-          :key="page"
-          class="pagination-button"
-          :class="{
-            active: page === currentPage,
-            ellipsis: page === '...'
-          }"
-          @click="currentPage = typeof page === 'number' ? page : currentPage"
-        >
-          {{ page }}
-        </button>
-
-        <button
-          :disabled="currentPage === totalPages"
-          class="pagination-button"
-          :class="{ disabled: currentPage === totalPages }"
-          @click="currentPage++"
-        >
-          Next &gt;
-        </button>
+  <ComponentLoader
+    :is-loading="isLoading"
+    :error="error"
+    :has-data="entities.length > 0"
+    :show-empty="false"
+    skeleton-variant="table"
+    :skeleton-count="8"
+    :skeleton-columns="3"
+  >
+    <div class="entity-list">
+      <div class="header-row">
+        <h1>All {{ pageNamePlural }}</h1>
+        <input
+          v-model="searchQuery"
+          type="text"
+          :placeholder="`Search ${pageNamePlural.toLowerCase()}...`"
+          class="search-input"
+        />
       </div>
 
-      <div class="page-info">
-        <span>Show</span>
-        <select v-model="perPage" class="per-page-select">
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-        </select>
-        <span>per page</span>
+      <div class="table-header" :class="{ 'expense-header': headerType === 'expense' }">
+        <div class="col-name">{{ pageName }} Name</div>
+        <div class="col-description">{{ pageName }} Description</div>
+        <div class="col-action">Action</div>
+      </div>
+
+      <TransitionGroup
+        name="list"
+        tag="div"
+        class="entities-container"
+        @after-enter="$emit('item-add-complete')"
+      >
+        <ContentCard
+          v-for="entity in paginatedEntities"
+          :key="entity.id"
+          :name="entity.name"
+          :icon="entity.icon?.path || entity.icon?.content || entity.icon"
+          :description="entity.description"
+          :page-name="pageName"
+          @edit="$emit('edit', entity)"
+          @delete="$emit('delete', entity)"
+        />
+      </TransitionGroup>
+
+      <div class="pagination-row">
+        <div class="pagination-controls">
+          <button
+            :disabled="currentPage === 1"
+            class="pagination-button"
+            :class="{ disabled: currentPage === 1 }"
+            @click="currentPage--"
+          >
+            &lt; Prev
+          </button>
+
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            class="pagination-button"
+            :class="{
+              active: page === currentPage,
+              ellipsis: page === '...'
+            }"
+            @click="currentPage = typeof page === 'number' ? page : currentPage"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            :disabled="currentPage === totalPages"
+            class="pagination-button"
+            :class="{ disabled: currentPage === totalPages }"
+            @click="currentPage++"
+          >
+            Next &gt;
+          </button>
+        </div>
+
+        <div class="page-info">
+          <span>Show</span>
+          <select v-model="perPage" class="per-page-select">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <span>per page</span>
+        </div>
       </div>
     </div>
-  </div>
+  </ComponentLoader>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import ContentCard from './ContentCard.vue';
+import ComponentLoader from './ComponentLoader.vue';
 
 const props = defineProps({
   entities: {
     type: Array,
-    required: true,
     default: () => []
+  },
+  isLoading: {
+    type: Boolean,
+    default: false
+  },
+  error: {
+    type: String,
+    default: null
   },
   pageName: {
     type: String,
@@ -259,7 +277,7 @@ const visiblePages = computed(() => {
   align-items: center;
 
   &.expense-header {
-    background: #dc2626;
+    background: $primary;
   }
 
   @media (max-width: $breakpoint-md) {
@@ -416,9 +434,9 @@ const visiblePages = computed(() => {
 
   .expense-header ~ .entities-container ~ .pagination-row & {
     &.active {
-      background: #dc2626;
-      border-color: #dc2626;
-      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+      background: $primary;
+      border-color: $primary;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
     }
   }
 
@@ -492,8 +510,8 @@ const visiblePages = computed(() => {
 
   .expense-header ~ .entities-container ~ .pagination-row & {
     &:focus {
-      border-color: #dc2626;
-      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
     }
   }
 

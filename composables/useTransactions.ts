@@ -3,6 +3,7 @@ import { api } from '~/services/api';
 import { transactionMapper } from '~/utils/transactionMapper';
 import type { FrontendTransaction } from '~/types/transaction';
 import { useSharedData } from '~/composables/useSharedData';
+import { checkAuth } from '~/utils/auth';
 
 // Use FrontendTransaction as the main interface
 type Transaction = FrontendTransaction;
@@ -11,7 +12,7 @@ type Transaction = FrontendTransaction;
 
 // Module-scoped shared state
 const transactions = ref<Transaction[]>([]);
-const isLoading = ref(false);
+const isLoading = ref(typeof window !== 'undefined' && checkAuth());
 const error = ref<string | null>(null);
 const lastSync = ref<string | null>(null);
 
@@ -37,27 +38,10 @@ async function loadDependencies() {
   if (typeof window === 'undefined') return;
 
   try {
-    isLoading.value = true;
-    console.log('[loadDependencies] Starting with shared data...');
-
-    // Load all data through centralized composable
     await sharedData.loadAllData();
-
-    console.log(
-      'All dependencies loaded - Categories:',
-      sharedData.categories.value.length,
-      'Parties:',
-      sharedData.parties.value.length,
-      'Wallets:',
-      sharedData.wallets.value.length,
-      'Groups:',
-      sharedData.groups.value.length
-    );
   } catch (err) {
     console.error('Error loading dependencies:', err);
     error.value = extractApiErrors(err);
-  } finally {
-    isLoading.value = false;
   }
 }
 
@@ -66,31 +50,26 @@ async function fetchTransactionsFromApi() {
   if (typeof window === 'undefined') return;
 
   try {
-    console.log('[API MODE] Fetching transactions from API...');
+    if (!checkAuth()) {
+      isLoading.value = false;
+      return;
+    }
+
     isLoading.value = true;
     error.value = null;
 
-    // Ensure dependencies are loaded
     if (
       sharedData.parties.value.length === 0 ||
       sharedData.categories.value.length === 0 ||
       sharedData.wallets.value.length === 0 ||
       sharedData.groups.value.length === 0
     ) {
-      console.log('Loading dependencies (parties, categories, wallets)...');
       await loadDependencies();
-      console.log(
-        `Dependencies loaded: ${sharedData.parties.value.length} parties, ${sharedData.categories.value.length} categories, ${sharedData.wallets.value.length} wallets, ${sharedData.groups.value.length} groups`
-      );
     }
 
-    // Fetch transactions
     const response = await api.transactions.fetchAll();
-    console.log(`Received ${response.data.length} transactions from API`);
     lastSync.value = response.last_sync;
-    console.log('Last sync:', lastSync.value);
 
-    // Transform to frontend format
     const transformed = transactionMapper.toFrontendBatch(
       response.data,
       sharedData.parties.value,
@@ -98,7 +77,6 @@ async function fetchTransactionsFromApi() {
       sharedData.wallets.value,
       sharedData.groups.value
     );
-    console.log('Transformed', transformed.length, 'transactions for display');
 
     transactions.value = transformed;
   } catch (err) {
@@ -114,8 +92,11 @@ function ensureInit() {
   if (typeof window === 'undefined') return;
   initialized = true;
 
-  // Fetch transactions from API on init
-  console.log('initialized, fetching transactions...');
+  if (!checkAuth()) {
+    return;
+  }
+
+  isLoading.value = true;
   fetchTransactionsFromApi();
 }
 
@@ -170,11 +151,7 @@ export const useTransactions = () => {
         sharedData.wallets.value.length === 0 ||
         sharedData.groups.value.length === 0
       ) {
-        console.log('Dependencies not ready. Loading...');
         await loadDependencies();
-        console.log(
-          `Deps ready -> parties=${sharedData.parties.value.length}, categories=${sharedData.categories.value.length}, wallets=${sharedData.wallets.value.length}, groups=${sharedData.groups.value.length}`
-        );
       }
 
       // Transform to API format (pass parties, wallets, and default group for ID lookup)
@@ -259,11 +236,7 @@ export const useTransactions = () => {
         sharedData.wallets.value.length === 0 ||
         sharedData.groups.value.length === 0
       ) {
-        console.log('Dependencies not ready. Loading...');
         await loadDependencies();
-        console.log(
-          `Deps ready -> parties=${sharedData.parties.value.length}, categories=${sharedData.categories.value.length}, wallets=${sharedData.wallets.value.length}, groups=${sharedData.groups.value.length}`
-        );
       }
 
       const numericId = parseInt(id);
@@ -340,18 +313,15 @@ export const useTransactions = () => {
 
   const getTransactionForEdit = async (id: string) => {
     try {
-      // Ensure dependencies are loaded
       if (sharedData.parties.value.length === 0 || sharedData.wallets.value.length === 0) {
         await loadDependencies();
       }
 
-      // Fetch from API
       const apiTransaction = await api.transactions.fetchById(parseInt(id));
       if (!apiTransaction) {
         throw new Error('Transaction not found');
       }
 
-      // Transform for edit form (no display defaults)
       return transactionMapper.toEditForm(
         apiTransaction,
         sharedData.parties.value,
@@ -361,6 +331,14 @@ export const useTransactions = () => {
       console.error('Error fetching transaction for edit:', err);
       throw err;
     }
+  };
+
+  const clearTransactions = () => {
+    transactions.value = [];
+    isLoading.value = false;
+    error.value = null;
+    lastSync.value = null;
+    initialized = false;
   };
 
   return {
@@ -390,6 +368,7 @@ export const useTransactions = () => {
     deleteTransaction,
     refreshTransactions,
     getTransactionById,
-    getTransactionForEdit
+    getTransactionForEdit,
+    clearTransactions
   };
 };
