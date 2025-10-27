@@ -1,73 +1,71 @@
 <template>
   <div class="wallet-card-wrapper">
-    <div class="card-container">
-      <div class="background-ellipse" />
-      <div class="card-content">
-        <div class="card-header-content">
-          <div class="card-header">
-            <span class="total-balance-text">
-              {{ selectedWalletName }}
+    <ComponentLoader
+      :is-loading="isLoading"
+      :has-data="!!statistics"
+      :show-empty="false"
+      skeleton-variant="card"
+      :on-retry="loadStatistics"
+    >
+      <div class="card-container">
+        <div class="background-ellipse" />
+        <div class="card-content">
+          <div class="card-header-content">
+            <div class="card-header">
+              <span class="total-balance-text">
+                {{ selectedWalletName }}
+              </span>
+              <ChevronDownIcon
+                class="chevron-icon"
+                :class="{ rotated: showWalletDropdown }"
+                @click="toggleWalletDropdown"
+              />
+            </div>
+            <span class="balance-amount-text">
+              {{ formatCurrency(statistics?.total_balance || 0, primaryCurrency) }}
             </span>
-            <ChevronDownIcon
-              class="chevron-icon"
-              :class="{ rotated: showWalletDropdown }"
-              @click="toggleWalletDropdown"
-            />
           </div>
-          <span class="balance-amount-text">
-            {{
-              isLoading
-                ? 'Loading...'
-                : formatCurrency(statistics?.total_balance || 0, primaryCurrency)
-            }}
-          </span>
+          <button class="three-dots-button">
+            <EllipsisHorizontalIcon class="three-dots" />
+          </button>
         </div>
-        <button class="three-dots-button">
-          <EllipsisHorizontalIcon class="three-dots" />
-        </button>
+        <div class="card-footer">
+          <button class="income-button">
+            <div class="income-button-content">
+              <ArrowDownLeftIcon class="income-arrow-icon" />
+              <span class="income-button-text">Income</span>
+            </div>
+            <span class="income-card-amount-text">
+              {{ formatCompactCurrency(statistics?.total_income || 0, primaryCurrency) }}
+            </span>
+          </button>
+          <button class="expense-button">
+            <div class="expense-button-content">
+              <ArrowUpLeftIcon class="expense-arrow-icon" />
+              <span class="expense-button-text">Expense</span>
+            </div>
+            <span class="expense-card-amount-text">
+              {{ formatCompactCurrency(statistics?.total_expenses || 0, primaryCurrency) }}
+            </span>
+          </button>
+        </div>
       </div>
-      <div class="card-footer">
-        <button class="income-button">
-          <div class="income-button-content">
-            <ArrowDownLeftIcon class="income-arrow-icon" />
-            <span class="income-button-text">Income</span>
-          </div>
-          <span class="income-card-amount-text">
-            {{
-              isLoading
-                ? 'Loading...'
-                : formatCompactCurrency(statistics?.total_income || 0, primaryCurrency)
-            }}
-          </span>
-        </button>
-        <button class="expense-button">
-          <div class="expense-button-content">
-            <ArrowUpLeftIcon class="expense-arrow-icon" />
-            <span class="expense-button-text">Expense</span>
-          </div>
-          <span class="expense-card-amount-text">
-            {{
-              isLoading
-                ? 'Loading...'
-                : formatCompactCurrency(statistics?.total_expenses || 0, primaryCurrency)
-            }}
-          </span>
-        </button>
-      </div>
-    </div>
 
-    <div v-if="showWalletDropdown" class="wallet-dropdown">
-      <div
-        v-for="wallet in availableWallets"
-        :key="wallet.id || 'all'"
-        class="wallet-option"
-        :class="{ selected: selectedWalletId === wallet.id }"
-        @click="selectWallet(wallet.id)"
-      >
-        <span class="wallet-option__name">{{ wallet.name }}</span>
-        <span v-if="wallet.id !== null" class="wallet-option__currency">{{ wallet.currency }}</span>
+      <div v-if="showWalletDropdown" class="wallet-dropdown">
+        <div
+          v-for="wallet in availableWallets"
+          :key="wallet.id || 'all'"
+          class="wallet-option"
+          :class="{ selected: selectedWalletId === wallet.id }"
+          @click="selectWallet(wallet.id)"
+        >
+          <span class="wallet-option__name">{{ wallet.name }}</span>
+          <span v-if="wallet.id !== null" class="wallet-option__currency">{{
+            wallet.currency
+          }}</span>
+        </div>
       </div>
-    </div>
+    </ComponentLoader>
   </div>
 </template>
 
@@ -76,6 +74,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { EllipsisHorizontalIcon } from '@heroicons/vue/16/solid';
 import { ArrowDownLeftIcon, ArrowUpLeftIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 import { useStatistics } from '@/composables/useStatistics';
+import ComponentLoader from '@/components/ComponentLoader.vue';
 
 const {
   currentPeriod,

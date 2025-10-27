@@ -18,20 +18,19 @@
         <TipsSection v-if="!isTabletOrBelow" page-name="Wallet" />
       </div>
 
-      <div v-if="isLoading" class="loading-state">Loading wallets...</div>
-      <div v-if="error" class="error-state">Error: {{ error }}</div>
-
       <OnboardingEmptyState
-        v-if="!showForm && !isLoading && wallets.length === 0"
+        v-if="!showForm && !isLoading && !error && wallets.length === 0"
         page-type="wallets"
         @create="handleOpenFormForCreation"
       />
 
       <ContentTable
-        v-if="!showForm && !isLoading && wallets.length > 0"
+        v-if="!showForm && (isLoading || error || wallets.length > 0)"
         page-name="Wallet"
         page-name-plural="Wallets"
         :entities="wallets"
+        :is-loading="isLoading"
+        :error="error"
         @edit="handleEdit"
         @delete="handleDelete"
       />
@@ -156,14 +155,9 @@ definePageMeta({
   max-width: 800px;
 }
 
-.loading-state,
 .error-state {
   text-align: center;
   padding: 2rem;
-  color: $text-secondary;
-}
-
-.error-state {
   color: $error-color;
 }
 </style>

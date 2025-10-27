@@ -4,6 +4,7 @@ import { useWallets } from '~/composables/useWallets';
 import { useSharedData } from '~/composables/useSharedData';
 import type { FrontendTransaction } from '~/types/transaction';
 import { parseAmount, formatAmount, formatShortAmount } from '@/utils/currency';
+import { checkAuth } from '~/utils/auth';
 
 export interface PartyBreakdown {
   party: string;
@@ -136,6 +137,7 @@ export interface StatisticsPeriod {
 // Configuration for statistics source
 const USE_API_STATISTICS = false; // TODO: Set to true when backend endpoint is ready
 
+// TODO: Replace with API call to fetch real-time currency conversion rates
 // Simple currency conversion rates (should come from API in production)
 const CURRENCY_RATES: Record<string, number> = {
   USD: 1.0,
@@ -156,7 +158,7 @@ const AVAILABLE_PERIODS: StatisticsPeriod[] = [
 
 const currentPeriod = ref<string>('all_time');
 const selectedWalletId = ref<number | null>(null); // null = all wallets
-const isLoading = ref(false);
+const isLoading = ref(typeof window !== 'undefined' && checkAuth());
 const error = ref<string | null>(null);
 
 export const useStatistics = () => {
@@ -622,7 +624,6 @@ export const useStatistics = () => {
     return stats;
   };
 
-  // Future API-based statistics (ready for backend integration)
   const fetchStatisticsFromAPI = async (
     walletId: number | null,
     period: string
@@ -631,7 +632,6 @@ export const useStatistics = () => {
       isLoading.value = true;
       error.value = null;
 
-      // TODO: Implement when backend statistics endpoint is available
       const response = await api.statistics.fetch({
         wallet_id: walletId,
         period: period,
@@ -639,12 +639,10 @@ export const useStatistics = () => {
         include_breakdowns: true
       });
       return response.data;
-
-      return await calculateStatistics(walletId, period);
     } catch (err) {
       console.error('Error fetching statistics from API:', err);
-      error.value = 'Failed to fetch statistics';
-      return await calculateStatistics(walletId, period);
+      error.value = 'Failed to fetch statistics from API';
+      throw err;
     } finally {
       isLoading.value = false;
     }
@@ -655,7 +653,12 @@ export const useStatistics = () => {
     period: string = 'all_time'
   ): Promise<WalletStatistics> => {
     if (USE_API_STATISTICS) {
-      return await fetchStatisticsFromAPI(walletId, period);
+      try {
+        return await fetchStatisticsFromAPI(walletId, period);
+      } catch (err) {
+        console.warn('API statistics failed, falling back to client-side calculation:', err);
+        return await calculateStatistics(walletId, period);
+      }
     } else {
       return await calculateStatistics(walletId, period);
     }
