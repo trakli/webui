@@ -9,7 +9,7 @@ export const useAuth = () => {
 
   const tokenCookie = useCookie('auth.token', {
     default: () => null,
-    httpOnly: false,
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7
