@@ -114,10 +114,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import IconPicker from './IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
 import { ImagePlus } from 'lucide-vue-next';
+import { useSharedData } from '@/composables/useSharedData';
 
 const props = defineProps({
   editingItem: {
@@ -127,6 +128,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['created', 'updated', 'close']);
+
+const sharedData = useSharedData();
+const defaultCurrency = computed(() => sharedData.getDefaultCurrency?.value || 'USD');
 
 const form = ref({
   name: '',
@@ -152,6 +156,12 @@ const selectedIconComponent = computed(() => {
 });
 
 const isEditing = computed(() => !!props.editingItem);
+
+onMounted(() => {
+  if (!isEditing.value && (!form.value.currency || form.value.currency.trim() === '')) {
+    form.value.currency = defaultCurrency.value;
+  }
+});
 
 // Populate form when editing
 watch(
@@ -189,7 +199,14 @@ watch(
 );
 
 function resetForm() {
-  form.value = { name: '', icon: '', type: '', currency: '', balance: 0, description: '' };
+  form.value = {
+    name: '',
+    icon: '',
+    type: '',
+    currency: defaultCurrency.value,
+    balance: 0,
+    description: ''
+  };
   nameError.value = false;
   typeError.value = false;
   currencyError.value = false;
@@ -234,6 +251,10 @@ function validateForm() {
 }
 
 async function handleSubmit() {
+  if (!form.value.currency || form.value.currency.trim() === '') {
+    form.value.currency = defaultCurrency.value;
+  }
+
   // Validate all fields
   if (!validateForm()) {
     return;

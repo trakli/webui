@@ -226,12 +226,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'nuxt/app';
-import { CreditCardIcon, ArrowsRightLeftIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
+import { CreditCardIcon, ArrowsRightLeftIcon, CheckCircleIcon, TagIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { useNotifications } from '@/composables/useNotifications';
+import { useWallets } from '@/composables/useWallets';
+import configurationsApi from '@/services/api/configurationsApi';
+import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 
 definePageMeta({
   layout: 'onboarding',
@@ -241,6 +244,7 @@ definePageMeta({
 const router = useRouter();
 const sharedData = useSharedData();
 const { showSuccess } = useNotifications();
+const { createWallet, updateWallet } = useWallets();
 
 const currentStep = ref(1);
 const totalSteps = 3;
@@ -250,7 +254,7 @@ const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100
 // Data from shared state
 const incomeCategories = computed(() => sharedData.getIncomeCategories?.value || []);
 const expenseCategories = computed(() => sharedData.getExpenseCategories?.value || []);
-const wallets = computed(() => sharedData.getWallets?.value || []);
+const wallets = computed(() => sharedData.wallets?.value || []);
 const walletCount = computed(() => wallets.value.length);
 const categoryCount = computed(
   () => incomeCategories.value.length + expenseCategories.value.length
@@ -316,18 +320,17 @@ const skipStep = () => {
 const handleLanguageSelection = () => {
   if (!selectedLanguage.value) return;
 
-  showSuccess(
-    'Language Set!',
-    `Language changed to ${availableLanguages.find((l) => l.code === selectedLanguage.value)?.name}.`
-  );
+  // Just store locally - will be saved when onboarding completes
+  const langName = availableLanguages.find((l) => l.code === selectedLanguage.value)?.name;
+  showSuccess('Language Set!', `Language changed to ${langName}.`);
   nextStep();
 };
 
 const handleWalletCurrencySetup = () => {
   if (!isWalletCurrencySetupValid.value) return;
 
+  // Just store locally - will be saved when onboarding completes
   let message = 'Settings saved successfully!';
-
   if (walletChoice.value === 'rename-default') {
     message = `Default wallet renamed to "${newWalletName.value}" and currency set to ${selectedCurrency.value}.`;
   } else if (walletChoice.value === 'create-new') {
@@ -340,17 +343,150 @@ const handleWalletCurrencySetup = () => {
   nextStep();
 };
 
-const completOnboarding = () => {
+const completOnboarding = async () => {
+  // Save all user selections at the end of onboarding
+  const configurationsToSave = [];
+
+  // Save language if selected
+  if (selectedLanguage.value) {
+    configurationsToSave.push({
+      key: CONFIGURATION_KEYS.LANGUAGE,
+      value: selectedLanguage.value,
+      type: 'string'
+    });
+  }
+
+  // Save currency if selected
+  if (selectedCurrency.value) {
+    configurationsToSave.push({
+      key: CONFIGURATION_KEYS.CURRENCY,
+      value: selectedCurrency.value,
+      type: 'string'
+    });
+  }
+
+  
+
+  // Ensure a wallet exists and persist default-wallet
+  try {
+    let targetWalletId: string | null = null;
+
+    if (walletChoice.value === 'use-default' || walletChoice.value === 'rename-default') {
+      let existing = wallets.value.find((w: any) => w.name.toLowerCase().includes('default'));
+
+      if (!existing) {
+        const name =
+          walletChoice.value === 'rename-default' && newWalletName.value.trim().length > 0
+            ? newWalletName.value.trim()
+            : 'Default Wallet';
+
+        const createdRes = await createWallet({
+          name,
+          type: 'cash',
+          description: 'Created during onboarding',
+          currency: selectedCurrency.value
+        });
+        const created = createdRes?.data as any;
+        if (created) {
+          existing = created;
+        } else {
+          
+        }
+      } else if (
+        walletChoice.value === 'rename-default' &&
+        newWalletName.value.trim().length > 0 &&
+        existing.name !== newWalletName.value.trim()
+      ) {
+        await updateWallet(existing.id, { name: newWalletName.value.trim() });
+      }
+
+      if (existing) {
+        targetWalletId = String(existing.id);
+      }
+    } else if (walletChoice.value === 'create-new') {
+      const name = newWalletName.value.trim();
+      
+      if (name && newWalletCurrency.value) {
+        const createdRes = await createWallet({
+          name,
+          type: 'cash',
+          description: 'Created during onboarding',
+          currency: newWalletCurrency.value
+        });
+        const created = createdRes?.data as any;
+        if (created) {
+          targetWalletId = String(created.id);
+        } else {
+          
+        }
+      } else {
+        
+      }
+    }
+
+    if (targetWalletId) {
+      configurationsToSave.push({
+        key: CONFIGURATION_KEYS.WALLET,
+        value: targetWalletId,
+        type: 'string'
+      });
+    } else {
+      
+    }
+  } catch (error) {
+    // Best-effort: continue onboarding even if wallet ops fail
+    
+  }
+
+  try {
+    // Save all configurations
+    for (const config of configurationsToSave) {
+      try {
+        const createRes = await configurationsApi.create(config);
+      } catch (e) {
+        // If create fails (e.g., already exists), fallback to update
+        try {
+          const updateRes = await configurationsApi.update(config.key, config);
+        } catch (updateError) {
+          
+        }
+      }
+    }
+
+    // Mark onboarding as complete
+    try {
+      const completeRes = await configurationsApi.create({
+        key: CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
+        value: { completedAt: new Date().toISOString() }
+      });
+    } catch (e) {
+      const updateRes = await configurationsApi.update(
+        CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
+        { value: { completedAt: new Date().toISOString() } }
+      );
+    }
+
+    showSuccess('Welcome to Trakli!', "You're ready to take control of your finances!");
+  } catch (error) {
+    // Silently handle error - still proceed with navigation
+    
+  }
+
+  // Always proceed with navigation
   localStorage.setItem('onboarding-completed', 'true');
   localStorage.removeItem('onboarding-step');
-  showSuccess('Welcome to Trakli!', "You're ready to take control of your finances!");
+  // Refresh caches so default wallet/currency reflect immediately after onboarding
+  try {
+    await sharedData.loadConfigurations(true);
+    await sharedData.loadWallets(true);
+  } catch {}
   router.push('/dashboard');
 };
 
 onMounted(() => {
   const savedStep = localStorage.getItem('onboarding-step');
   if (savedStep) {
-    currentStep.value = parseInt(savedStep) + 1;
+    currentStep.value = Number.parseInt(savedStep) + 1;
     localStorage.removeItem('onboarding-step');
   }
 

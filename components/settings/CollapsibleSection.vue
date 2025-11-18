@@ -30,7 +30,7 @@ import { ChevronDown, ChevronUp, Edit, X } from 'lucide-vue-next';
 
 const props = defineProps({
   title: { type: String, required: true },
-  icon: { type: [Object, String], required: true },
+  icon: { type: [Object, String, Function], required: true },
   defaultOpen: { type: Boolean, default: true }
 });
 

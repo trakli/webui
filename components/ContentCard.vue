@@ -1,8 +1,11 @@
 <template>
-  <div class="entity-card">
+  <div class="entity-card" :class="{ 'is-default': isDefault }">
     <div class="entity-icon-name" :class="{ 'no-icon': !icon }">
       <component :is="resolvedIcon" v-if="icon" class="entity-icon" />
       <span class="name">{{ name }}</span>
+      <span v-if="isDefault" class="default-badge" title="This is the default wallet">
+        Default
+      </span>
     </div>
     <div class="entity-description">
       {{ description }}
@@ -45,6 +48,10 @@ const props = defineProps({
   type: {
     type: String,
     default: null
+  },
+  isDefault: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -86,10 +93,20 @@ const resolvedIcon = computed(() => {
     min-height: 50px;
   }
 
+  &.is-default {
+    background: rgba($primary, 0.05);
+    border-left: 4px solid $primary;
+    padding-left: calc($spacing-4 - 4px);
+  }
+
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     background: #fff;
+
+    &.is-default {
+      background: rgba($primary, 0.1);
+    }
 
     .entity-icon {
       transform: scale(1.1);
@@ -138,6 +155,22 @@ const resolvedIcon = computed(() => {
       font-size: 0.875rem;
       line-height: 1.2;
     }
+  }
+
+  .default-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: $primary;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
 
   &.no-icon {

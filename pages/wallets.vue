@@ -31,6 +31,7 @@
         :entities="wallets"
         :is-loading="isLoading"
         :error="error"
+        :default-item-id="defaultWalletId"
         @edit="handleEdit"
         @delete="handleDelete"
       />
@@ -39,8 +40,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useWallets } from '@/composables/useWallets';
+import { useSharedData } from '@/composables/useSharedData';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import ContentTopCard from '@/components/TTopCard.vue';
@@ -52,16 +54,23 @@ import TipsSection from '@/components/TipsSection.vue';
 const showForm = ref(false);
 const editingItem = ref(null);
 const { isTabletOrBelow } = useSidebar();
+const sharedData = useSharedData();
 
 const { wallets, isLoading, error, fetchWallets, createWallet, updateWallet, deleteWallet } =
   useWallets();
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
 
+const defaultWalletId = computed(() => {
+  const defaultWallet = sharedData.getDefaultWallet?.value;
+  return defaultWallet?.id ? String(defaultWallet.id) : null;
+});
+
 async function loadWallets() {
   try {
-    // Load wallets (no required parameters like categories)
+    // Load wallets and configurations
     await fetchWallets();
+    await sharedData.loadConfigurations();
   } catch (err) {
     console.error('Failed to load wallets:', err);
     // Don't throw the error to prevent page from breaking

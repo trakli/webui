@@ -3,22 +3,22 @@
     <div class="section-grid">
       <div class="form-group">
         <label class="form-label">Default Language</label>
-        <select v-if="isEditMode" v-model="language" class="form-select">
-          <option value="English">English</option>
-          <option value="Spanish">Spanish</option>
-          <option value="French">French</option>
+        <select v-if="isEditMode" v-model="languageCode" class="form-select">
+          <option v-for="lang in languages" :key="lang.code" :value="lang.code">
+            {{ lang.code.toUpperCase() }} - {{ lang.label }}
+          </option>
         </select>
-        <p v-else class="text-display">{{ language }}</p>
+        <p v-else class="text-display">{{ languageLabel }}</p>
       </div>
 
       <div class="form-group">
         <label class="form-label">Current Currency</label>
-        <select v-if="isEditMode" v-model="currency" class="form-select">
-          <option value="USD">USD ($) - US Dollar</option>
-          <option value="EUR">EUR (€) - Euro</option>
-          <option value="JPY">JPY (¥) - Japanese Yen</option>
+        <select v-if="isEditMode" v-model="currencyCode" class="form-select">
+          <option v-for="c in currencies" :key="c.code" :value="c.code">
+            {{ c.code }} - {{ c.label }}
+          </option>
         </select>
-        <p v-else class="text-display">{{ currency }}</p>
+        <p v-else class="text-display">{{ currencyLabel }}</p>
       </div>
     </div>
 
@@ -33,16 +33,46 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { Save } from 'lucide-vue-next';
+import configurationsApi from '@/services/api/configurationsApi';
+import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 
 const props = defineProps({
   isEditMode: { type: Boolean, default: false }
 });
 
-const language = ref('English');
-const currency = ref('USD');
+const languages = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'pt', label: 'Português' },
+  { code: 'it', label: 'Italiano' }
+];
+
+const currencies = [
+  { code: 'USD', label: 'US Dollar' },
+  { code: 'EUR', label: 'Euro' },
+  { code: 'JPY', label: 'Japanese Yen' },
+  { code: 'GBP', label: 'British Pound' },
+  { code: 'CAD', label: 'Canadian Dollar' },
+  { code: 'AUD', label: 'Australian Dollar' }
+];
+
+const languageCode = ref('en');
+const currencyCode = ref('USD');
 const message = ref('');
+
+const languageLabel = computed(() => {
+  const found = languages.find((l) => l.code === languageCode.value);
+  return found ? found.label : languageCode.value;
+});
+
+const currencyLabel = computed(() => {
+  const found = currencies.find((c) => c.code === currencyCode.value);
+  return found ? found.label : currencyCode.value;
+});
 
 watch(
   () => props.isEditMode,
@@ -51,11 +81,48 @@ watch(
   }
 );
 
-const handleSave = () => {
-  message.value = 'General settings updated successfully!';
-  setTimeout(() => {
-    message.value = '';
-  }, 2000);
+onMounted(async () => {
+  try {
+    const res = await configurationsApi.fetchAll();
+    const items = res?.data || [];
+
+    const langItem = items.find((i) => i.key === CONFIGURATION_KEYS.LANGUAGE);
+    const curItem = items.find((i) => i.key === CONFIGURATION_KEYS.CURRENCY);
+
+    const extractCode = (val) => {
+      if (typeof val === 'string') return val;
+      if (val && typeof val === 'object' && 'code' in val) return val.code;
+      return null;
+    };
+
+    const langCode = extractCode(langItem?.value);
+    const curCode = extractCode(curItem?.value);
+
+    if (langCode) languageCode.value = langCode;
+    if (curCode) currencyCode.value = curCode;
+  } catch (e) {
+    console.error('Failed to load configurations', e);
+  }
+});
+
+const handleSave = async () => {
+  try {
+    await configurationsApi.update(CONFIGURATION_KEYS.LANGUAGE, {
+      value: languageCode.value,
+      type: 'string'
+    });
+    await configurationsApi.update(CONFIGURATION_KEYS.CURRENCY, {
+      value: currencyCode.value,
+      type: 'string'
+    });
+    message.value = 'General settings updated successfully!';
+  } catch (e) {
+    console.error('Failed to update general settings', e);
+  } finally {
+    setTimeout(() => {
+      message.value = '';
+    }, 2000);
+  }
 };
 </script>
 
