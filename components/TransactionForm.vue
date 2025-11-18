@@ -63,7 +63,11 @@
             :error="walletError ? 'Wallet is required.' : ''"
             @select="handleWalletSelect"
           />
-          <span v-if="isWalletDefault" class="wallet-default-indicator" title="This is your default wallet">
+          <span
+            v-if="isWalletDefault"
+            class="wallet-default-indicator"
+            title="This is your default wallet"
+          >
             Default
           </span>
         </div>

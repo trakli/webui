@@ -68,7 +68,9 @@ watch(
 const walletLabel = computed(() => {
   if (!walletId.value) return '';
   const w = wallets.value.find(
-    (x) => String(x.id) === walletId.value || String(x.sync_state?.client_generated_id || '') === walletId.value
+    (x) =>
+      String(x.id) === walletId.value ||
+      String(x.sync_state?.client_generated_id || '') === walletId.value
   );
   return w ? w.name : walletId.value;
 });
