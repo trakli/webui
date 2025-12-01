@@ -37,6 +37,7 @@ import { ref, watch, onMounted, computed } from 'vue';
 import { Save } from 'lucide-vue-next';
 import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
+import { CURRENCIES } from '@/utils/currencies';
 
 const props = defineProps({
   isEditMode: { type: Boolean, default: false }
@@ -51,14 +52,7 @@ const languages = [
   { code: 'it', label: 'Italiano' }
 ];
 
-const currencies = [
-  { code: 'USD', label: 'US Dollar' },
-  { code: 'EUR', label: 'Euro' },
-  { code: 'JPY', label: 'Japanese Yen' },
-  { code: 'GBP', label: 'British Pound' },
-  { code: 'CAD', label: 'Canadian Dollar' },
-  { code: 'AUD', label: 'Australian Dollar' }
-];
+const currencies = CURRENCIES.map((c) => ({ code: c.code, label: c.name }));
 
 const languageCode = ref('en');
 const currencyCode = ref('USD');

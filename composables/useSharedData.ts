@@ -38,7 +38,7 @@ const categoriesLastFetched = ref<string | null>(null);
 const partiesLastFetched = ref<string | null>(null);
 const walletsLastFetched = ref<string | null>(null);
 const groupsLastFetched = ref<string | null>(null);
-const configurationsLastSync = ref<string | null>(null);
+const configurationsLastFetched = ref<string | null>(null);
 const configurationsMap = ref<Record<string, any> | null>(null);
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -123,7 +123,7 @@ export const useSharedData = () => {
   );
 
   const loadConfigurations = async (forceReload = false) => {
-    if (!forceReload && configurationsMap.value && isCacheValid(configurationsLastSync.value)) {
+    if (!forceReload && configurationsMap.value && isCacheValid(configurationsLastFetched.value)) {
       return configurationsMap.value;
     }
 
@@ -150,7 +150,7 @@ export const useSharedData = () => {
         map[item.key] = item.value;
       }
       configurationsMap.value = map;
-      configurationsLastSync.value = new Date().toISOString();
+      configurationsLastFetched.value = new Date().toISOString();
       return map;
     } catch (err) {
       const errorMsg = extractApiErrors(err);
@@ -267,11 +267,7 @@ export const useSharedData = () => {
       if (byId) return byId;
     }
 
-    // Fallback heuristic
-    return (
-      wallets.value.find((wallet) => wallet.name.toLowerCase().includes('default')) ||
-      (wallets.value.length > 0 ? wallets.value[0] : null)
-    );
+    return null;
   });
 
   // Default currency prefers configuration; fallback to default wallet currency or 'USD'
@@ -375,7 +371,7 @@ export const useSharedData = () => {
     partiesLastFetched.value = null;
     walletsLastFetched.value = null;
     groupsLastFetched.value = null;
-    configurationsLastSync.value = null;
+    configurationsLastFetched.value = null;
 
     console.log('✅ All shared data cleared for logout');
   };
@@ -402,12 +398,12 @@ export const useSharedData = () => {
     groupsError: readonly(groupsError),
     configurationsError: readonly(configurationsError),
 
-    // Last sync timestamps
-    categoriesLastSync: readonly(categoriesLastFetched),
-    partiesLastSync: readonly(partiesLastFetched),
-    walletsLastSync: readonly(walletsLastFetched),
-    groupsLastSync: readonly(groupsLastFetched),
-    configurationsLastSync: readonly(configurationsLastSync),
+    // Last fetch timestamps
+    categoriesLastFetched: readonly(categoriesLastFetched),
+    partiesLastFetched: readonly(partiesLastFetched),
+    walletsLastFetched: readonly(walletsLastFetched),
+    groupsLastFetched: readonly(groupsLastFetched),
+    configurationsLastFetched: readonly(configurationsLastFetched),
 
     // Computed getters
     getIncomeCategories,

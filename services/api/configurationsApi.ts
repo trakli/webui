@@ -31,11 +31,16 @@ const configurationsApi = {
 
   async update(key: string, payload: ConfigurationPayload): Promise<ConfigurationItem | null> {
     const api = useApi();
+    // Build request body without the key (key is in URL) and include type if provided
+    const body: Record<string, any> = { value: payload.value };
+    if (typeof payload.type !== 'undefined') {
+      body.type = payload.type;
+    }
     const response = await api<ApiResponse<ConfigurationItem>>(
       `/configurations/${encodeURIComponent(key)}`,
       {
         method: 'PUT',
-        body: payload
+        body
       }
     );
     return response?.data || null;

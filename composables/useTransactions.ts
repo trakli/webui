@@ -130,13 +130,14 @@ export const useTransactions = () => {
         await loadDependencies();
       }
 
-      // Transform to API format (pass parties, wallets, and default group for ID lookup)
+      // Transform to API format (pass parties, wallets, and defaults for ID lookup)
       const payload = transactionMapper.toApi(
         transaction,
         sharedData.parties.value,
         sharedData.wallets.value,
         undefined,
-        sharedData.getDefaultGroup.value
+        sharedData.getDefaultGroup.value,
+        sharedData.getDefaultWallet.value
       );
 
       console.log('Payload summary', {
@@ -221,7 +222,8 @@ export const useTransactions = () => {
         sharedData.parties.value,
         sharedData.wallets.value,
         undefined,
-        sharedData.getDefaultGroup.value
+        sharedData.getDefaultGroup.value,
+        sharedData.getDefaultWallet.value
       );
       const updated = await api.transactions.update(numericId, payload);
 

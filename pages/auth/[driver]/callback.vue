@@ -30,7 +30,7 @@ const handleCallback = async (code) => {
       userCookie.value = response.data.user;
       tokenCookie.value = response.data.token;
 
-      router.push('/dashboard');
+      router.push('/onboarding');
     }
   } catch (error) {
     console.error(`Failed to handle ${driver} callback:`, error);
