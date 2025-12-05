@@ -1,4 +1,4 @@
-import { useDataManager } from "./useDataManager";
+import { useDataManager } from './useDataManager';
 
 export const useAuth = () => {
   // Cookie management for persistence
@@ -43,7 +43,6 @@ export const useAuth = () => {
       //clear data before new login
       const { clearData } = useDataManager();
       clearData();
-
 
       const api = useApi();
       const response = await api('/login', {
