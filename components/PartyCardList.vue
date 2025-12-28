@@ -145,29 +145,25 @@ const handleMenu = (_party) => {
 }
 
 .page-title {
-  font-size: $font-size-2xl;
-  font-weight: $font-bold;
+  font-size: $font-size-base;
+  font-weight: $font-medium;
   color: $text-primary;
-  margin: 0 0 $spacing-2 0;
+  margin: 0 0 $spacing-1 0;
 
   @media (max-width: $breakpoint-md) {
-    font-size: $font-size-xl;
+    font-size: $font-size-sm;
   }
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-lg;
-  }
-}
-
-.page-subtitle {
-  font-size: $font-size-base;
-  color: $text-muted;
-  margin: 0;
-  line-height: 1.5;
 
   @media (max-width: $breakpoint-sm) {
     font-size: $font-size-sm;
   }
+}
+
+.page-subtitle {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .search-filter-section {
@@ -326,14 +322,6 @@ const handleMenu = (_party) => {
   .cards-grid {
     grid-template-columns: 1fr;
     gap: $spacing-4;
-  }
-
-  .page-title {
-    font-size: $font-size-xl;
-  }
-
-  .page-subtitle {
-    font-size: $font-size-sm;
   }
 }
 

@@ -374,17 +374,17 @@ const pageSubtitle = computed(() => {
 }
 
 .page-title {
-  font-size: 1.5rem;
-  font-weight: $font-bold + 100; // 800
-  color: #1d3229; // Match dashboard green text
+  font-size: $font-size-lg;
+  font-weight: $font-semibold;
+  color: #1d3229;
   margin: 0;
 
   @media (max-width: $breakpoint-md) {
-    font-size: 1.25rem;
+    font-size: $font-size-base;
   }
 
   @media (max-width: $breakpoint-sm) {
-    font-size: 1.125rem;
+    font-size: $font-size-sm;
   }
 }
 

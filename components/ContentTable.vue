@@ -232,16 +232,16 @@ const visiblePages = computed(() => {
 
   h1 {
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: $font-size-base;
+    font-weight: $font-medium;
     color: $text-primary;
 
     @media (max-width: $breakpoint-md) {
-      font-size: 1.25rem;
+      font-size: $font-size-sm;
     }
 
     @media (max-width: $breakpoint-sm) {
-      font-size: 1.125rem;
+      font-size: $font-size-sm;
     }
   }
 }
