@@ -5,7 +5,9 @@
         <div class="title-row">
           <h1 class="title">{{ displayTitle }}</h1>
           <div class="breadcrumb">
-            <span class="breadcrumb-item breadcrumb-clickable" @click="$router.push('/dashboard')">Home</span>
+            <span class="breadcrumb-item breadcrumb-clickable" @click="$router.push('/dashboard')"
+              >Home</span
+            >
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{ pageNamePlural }}</span>
           </div>

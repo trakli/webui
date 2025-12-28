@@ -3,26 +3,12 @@
     <div class="table-heading">
       <h1 class="table-heading-text">All Transactions</h1>
       <div class="input-controls">
-        <div class="search-container">
-          <input
-            type="text"
-            placeholder="Search..."
-            class="search-input"
-            :value="searchQuery"
-            @input="$emit('update:searchQuery', $event.target.value)"
-          />
-          <MagnifyingGlassIcon class="search-icon" />
-        </div>
-        <div class="filter-container">
-          <input
-            type="text"
-            placeholder="Filter..."
-            class="filter-input"
-            :value="filterQuery"
-            @input="$emit('update:filterQuery', $event.target.value)"
-          />
-          <FunnelIcon class="filter-icon" />
-        </div>
+        <SearchInput
+          :model-value="searchQuery"
+          placeholder="Search..."
+          :debounce="0"
+          @update:model-value="$emit('update:searchQuery', $event)"
+        />
       </div>
     </div>
 
@@ -86,7 +72,10 @@
                     <span class="total-label">Expenses</span>
                     <span class="total-value">{{ formatDisplayCurrency(totals.expenses) }}</span>
                   </div>
-                  <div class="total-section net" :class="{ positive: totals.net >= 0, negative: totals.net < 0 }">
+                  <div
+                    class="total-section net"
+                    :class="{ positive: totals.net >= 0, negative: totals.net < 0 }"
+                  >
                     <span class="total-label">Net</span>
                     <span class="total-value">{{ formatDisplayCurrency(totals.net) }}</span>
                   </div>
@@ -138,14 +127,10 @@
 
 <script setup>
 import { computed } from 'vue';
-import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  PencilSquareIcon,
-  TrashIcon
-} from '@heroicons/vue/24/outline';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { parseAmount, getCurrencySymbol } from '@/utils/currency';
+import SearchInput from './SearchInput.vue';
 
 const CURRENCY_RATES = {
   USD: 1.0,
@@ -158,7 +143,6 @@ const CURRENCY_RATES = {
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
   searchQuery: { type: String, default: '' },
-  filterQuery: { type: String, default: '' },
   currentPage: { type: Number, default: 1 },
   itemsPerPage: { type: Number, default: 10 },
   totalPages: { type: Number, default: 1 },
@@ -167,7 +151,7 @@ const props = defineProps({
   allTransactions: { type: Array, default: () => [] }
 });
 
-defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery', 'update:filterQuery']);
+defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery']);
 
 const { getDefaultCurrency } = useSharedData();
 
@@ -307,61 +291,7 @@ const formatTimeAgo = (txn) => {
 
 .input-controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-
-  @media (min-width: 640px) {
-    flex-wrap: nowrap;
-    gap: 1rem;
-  }
   align-items: center;
-}
-
-.search-container,
-.filter-container {
-  position: relative;
-  width: 100%;
-  height: 36px;
-  min-width: 140px;
-
-  @media (min-width: 640px) {
-    width: 160px;
-  }
-
-  .search-input,
-  .filter-input {
-    width: 100%;
-    height: 100%;
-    padding: 8px 36px 8px 16px;
-    border: 1px solid $bg-gray;
-    border-radius: $radius-lg;
-    font-size: $font-size-sm;
-    background-color: #f5f6f7;
-    transition: border-color 0.2s ease;
-    box-sizing: border-box;
-
-    &::placeholder {
-      color: #9ca3af;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-  }
-}
-
-.search-icon,
-.filter-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: #798588;
-  pointer-events: none;
 }
 
 .table-wrapper {
@@ -552,26 +482,42 @@ const formatTimeAgo = (txn) => {
 
     &.income {
       background-color: #d1fae5;
-      .total-label { color: #065f46; }
-      .total-value { color: #059669; }
+      .total-label {
+        color: #065f46;
+      }
+      .total-value {
+        color: #059669;
+      }
     }
 
     &.expense {
       background-color: #fee2e2;
-      .total-label { color: #991b1b; }
-      .total-value { color: #dc2626; }
+      .total-label {
+        color: #991b1b;
+      }
+      .total-value {
+        color: #dc2626;
+      }
     }
 
     &.net {
       &.positive {
         background-color: #dbeafe;
-        .total-label { color: #1e40af; }
-        .total-value { color: #2563eb; }
+        .total-label {
+          color: #1e40af;
+        }
+        .total-value {
+          color: #2563eb;
+        }
       }
       &.negative {
         background-color: #fef3c7;
-        .total-label { color: #92400e; }
-        .total-value { color: #d97706; }
+        .total-label {
+          color: #92400e;
+        }
+        .total-value {
+          color: #d97706;
+        }
       }
     }
   }

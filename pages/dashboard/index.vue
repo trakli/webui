@@ -44,13 +44,11 @@
         class="only-mobile"
         :transactions="paginatedTransactions"
         :search-query="searchQuery"
-        :filter-query="filterQuery"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total-pages="totalPages"
         :total-entries="filteredTransactions.length"
         @update:search-query="searchQuery = $event"
-        @update:filter-query="filterQuery = $event"
         @page-change="currentPage = $event"
         @edit="handleEdit"
         @delete="handleDelete"
@@ -63,13 +61,11 @@
         :transactions="paginatedTransactions"
         :all-transactions="filteredTransactions"
         :search-query="searchQuery"
-        :filter-query="filterQuery"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total-pages="totalPages"
         :total-entries="filteredTransactions.length"
         @update:search-query="searchQuery = $event"
-        @update:filter-query="filterQuery = $event"
         @page-change="currentPage = $event"
         @edit="handleEdit"
         @delete="handleDelete"
@@ -98,7 +94,6 @@ const {
   paginatedTransactions,
   filteredTransactions,
   searchQuery,
-  filterQuery,
   currentPage,
   itemsPerPage,
   totalPages,

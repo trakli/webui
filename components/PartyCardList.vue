@@ -4,16 +4,7 @@
       <div class="header-row">
         <h2 class="page-title">All Parties</h2>
         <div class="search-filter-section">
-          <div class="search-container">
-            <LucideSearch class="search-icon" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="search-input"
-              placeholder="Search..."
-              @input="handleSearch"
-            />
-          </div>
+          <SearchInput v-model="searchQuery" placeholder="Search..." />
           <div class="filter-container">
             <select v-model="selectedFilter" class="filter-dropdown" @change="handleFilter">
               <option value="all">All</option>
@@ -45,8 +36,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { Search as LucideSearch, Filter as LucideFilter } from 'lucide-vue-next';
+import { ref, computed } from 'vue';
+import SearchInput from './SearchInput.vue';
 import PartyCard from './PartyCard.vue';
 
 const props = defineProps({
@@ -61,16 +52,6 @@ defineEmits(['edit', 'delete', 'view', 'menu']);
 // Search and filter state
 const searchQuery = ref('');
 const selectedFilter = ref('all');
-const debouncedSearchQuery = ref('');
-
-// Debounced search for better performance
-let searchTimeout;
-watch(searchQuery, (newQuery) => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    debouncedSearchQuery.value = newQuery;
-  }, 300);
-});
 
 // Computed filtered parties
 const filteredParties = computed(() => {
@@ -82,8 +63,8 @@ const filteredParties = computed(() => {
   }
 
   // Apply search filter
-  if (debouncedSearchQuery.value.trim()) {
-    const query = debouncedSearchQuery.value.toLowerCase().trim();
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim();
     filtered = filtered.filter(
       (party) =>
         party.name.toLowerCase().includes(query) || party.description.toLowerCase().includes(query)
@@ -92,11 +73,6 @@ const filteredParties = computed(() => {
 
   return filtered;
 });
-
-// Search handler
-const handleSearch = () => {
-  // Search is handled reactively through computed property
-};
 
 // Filter handler
 const handleFilter = () => {
@@ -146,50 +122,6 @@ const handleMenu = (_party) => {
   display: flex;
   gap: $spacing-2;
   align-items: center;
-}
-
-.search-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 8px;
-  color: $text-muted;
-  width: 14px;
-  height: 14px;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 160px;
-  padding: 6px 10px 6px 28px;
-  border: 1px solid $border-light;
-  border-radius: $radius-md;
-  font-size: $font-size-xs;
-  background: $bg-white;
-  color: $text-primary;
-  transition: all 0.2s ease;
-
-  &:focus {
-    outline: none;
-    border-color: $primary;
-    width: 200px;
-  }
-
-  &::placeholder {
-    color: $text-muted;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    width: 100%;
-
-    &:focus {
-      width: 100%;
-    }
-  }
 }
 
 .filter-container {

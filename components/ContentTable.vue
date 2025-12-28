@@ -11,11 +11,9 @@
     <div class="entity-list">
       <div class="header-row">
         <h1>All {{ pageNamePlural }}</h1>
-        <input
+        <SearchInput
           v-model="searchQuery"
-          type="text"
           :placeholder="`Search ${pageNamePlural.toLowerCase()}...`"
-          class="search-input"
         />
       </div>
 
@@ -95,6 +93,7 @@
 import { ref, computed, watch } from 'vue';
 import ContentCard from './ContentCard.vue';
 import ComponentLoader from './ComponentLoader.vue';
+import SearchInput from './SearchInput.vue';
 
 const props = defineProps({
   entities: {
@@ -243,23 +242,6 @@ const visiblePages = computed(() => {
     @media (max-width: $breakpoint-sm) {
       font-size: $font-size-sm;
     }
-  }
-}
-
-.search-input {
-  padding: 0.5rem 1rem;
-  border-radius: $radius-lg;
-  border: 1px solid #ccc;
-  width: 250px;
-  transition: border-color 0.2s;
-
-  @media (max-width: $breakpoint-md) {
-    width: 100%;
-  }
-
-  &:focus {
-    border-color: $primary;
-    outline: none;
   }
 }
 
