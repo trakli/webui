@@ -289,11 +289,11 @@ const formatTimeAgo = (txn) => {
 
 .table-wrapper {
   width: 100%;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   overflow-x: auto;
   background-color: #ebedec;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-table {
@@ -344,7 +344,7 @@ const formatTimeAgo = (txn) => {
 
   .type-badge {
     padding: 4px 12px;
-    border-radius: 6px;
+    border-radius: $radius-md;
     font-weight: bold;
     font-size: 12px;
     display: inline-block;
@@ -362,7 +362,7 @@ const formatTimeAgo = (txn) => {
 
   .party {
     padding: 4px 8px;
-    border-radius: 6px;
+    border-radius: $radius-md;
     display: inline-block;
   }
 
@@ -394,7 +394,7 @@ const formatTimeAgo = (txn) => {
     background: transparent;
     border: none;
     padding: 6px;
-    border-radius: 4px;
+    border-radius: $radius-sm;
     cursor: pointer;
     transition: all 0.2s ease;
     width: 28px;
@@ -464,7 +464,7 @@ const formatTimeAgo = (txn) => {
   border: 1px solid #ddd;
   background-color: white;
   color: #374151;
-  border-radius: 6px;
+  border-radius: $radius-md;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;

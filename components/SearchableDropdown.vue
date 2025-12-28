@@ -230,7 +230,7 @@ watch(
     align-items: center;
     min-height: 50px;
     border: 1px solid $border-color;
-    border-radius: 8px;
+    border-radius: $radius-lg;
     background-color: $bg-white;
     padding: 8px 10px;
 
@@ -295,7 +295,7 @@ watch(
   width: 100%;
   background-color: $bg-white;
   border: 1px solid $border-light;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   list-style: none;
   padding: 8px 0;
@@ -361,7 +361,7 @@ watch(
   background: $primary;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;

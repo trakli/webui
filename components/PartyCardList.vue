@@ -215,7 +215,7 @@ const handleMenu = (_party) => {
   width: 100%;
   padding: 12px 16px 12px 44px;
   border: 1.5px solid $border-light;
-  border-radius: 12px;
+  border-radius: $radius-lg;
   font-size: $font-size-sm;
   background: $bg-white;
   color: $text-primary;
@@ -275,7 +275,7 @@ const handleMenu = (_party) => {
   width: 100%;
   padding: 12px 16px 12px 44px;
   border: 1.5px solid $border-light;
-  border-radius: 12px;
+  border-radius: $radius-lg;
   font-size: $font-size-sm;
   background: $bg-white;
   color: $text-secondary;

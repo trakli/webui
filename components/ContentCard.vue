@@ -198,14 +198,14 @@ const resolvedIcon = computed(() => {
   background: transparent;
   border: none;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: $radius-lg;
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
   opacity: 0.7;
   transform: translateX(10px);
-  width: 32px; // Fixed width for consistency
-  height: 32px; // Fixed height for consistency
+  width: 32px;
+  height: 32px;
 
   svg {
     width: 16px;
@@ -241,7 +241,7 @@ const resolvedIcon = computed(() => {
   background: #333;
   color: white;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: $radius-md;
   font-size: 12px;
   white-space: nowrap;
   opacity: 0;

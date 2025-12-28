@@ -228,7 +228,7 @@ const handleButtonNavClick = (path) => {
     align-items: center;
     width: calc(100% - 20px);
     height: 56px;
-    border-radius: 12px;
+    border-radius: $radius-xl;
     padding: 16px 8px;
     gap: 12px;
     background-color: transparent;
@@ -261,7 +261,7 @@ const handleButtonNavClick = (path) => {
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: $radius-lg;
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -315,7 +315,7 @@ const handleButtonNavClick = (path) => {
     align-items: center;
     width: calc(100% - 20px);
     min-height: 56px;
-    border-radius: 12px;
+    border-radius: $radius-xl;
     padding: 12px 16px;
     gap: 12px;
     background-color: transparent;

@@ -256,7 +256,7 @@ const currentStep = computed(() => {
 .onboarding-card {
   background: white;
   border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   padding: 1.5rem;
   transition: all 0.3s ease;
   position: relative;
@@ -358,7 +358,7 @@ const currentStep = computed(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
@@ -419,7 +419,7 @@ const currentStep = computed(() => {
 .quick-tips {
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
   border: 1px solid #f59e0b;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   padding: 1.5rem;
 
   @media (max-width: $breakpoint-sm) {
