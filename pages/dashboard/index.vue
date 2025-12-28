@@ -61,6 +61,7 @@
         v-if="hasTransactions"
         class="only-desktop"
         :transactions="paginatedTransactions"
+        :all-transactions="filteredTransactions"
         :search-query="searchQuery"
         :filter-query="filterQuery"
         :current-page="currentPage"

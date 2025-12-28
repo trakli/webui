@@ -4,6 +4,7 @@ import type { Category } from '~/types/category';
 import type { Party } from '~/types/party';
 import type { Wallet } from '~/types/wallet';
 import type { Group } from '~/services/api/groupsApi';
+import type { Configuration } from '~/services/api/configurationsApi';
 import { checkAuth } from '~/utils/auth';
 import { extractApiErrors } from '~/utils/apiErrors';
 
@@ -17,24 +18,28 @@ const categories = ref<Category[]>([]);
 const parties = ref<Party[]>([]);
 const wallets = ref<Wallet[]>([]);
 const groups = ref<Group[]>([]);
+const configurations = ref<Configuration[]>([]);
 
 // Loading states
 const categoriesLoading = ref(false);
 const partiesLoading = ref(false);
 const walletsLoading = ref(false);
 const groupsLoading = ref(false);
+const configurationsLoading = ref(false);
 
 // Error states
 const categoriesError = ref<string | null>(null);
 const partiesError = ref<string | null>(null);
 const walletsError = ref<string | null>(null);
 const groupsError = ref<string | null>(null);
+const configurationsError = ref<string | null>(null);
 
-// Last sync timestamps for lightweight caching (5 minutes)
-const categoriesLastSync = ref<string | null>(null);
-const partiesLastSync = ref<string | null>(null);
-const walletsLastSync = ref<string | null>(null);
-const groupsLastSync = ref<string | null>(null);
+// Cache timestamps for lightweight caching (5 minutes)
+const categoriesLastFetched = ref<string | null>(null);
+const partiesLastFetched = ref<string | null>(null);
+const walletsLastFetched = ref<string | null>(null);
+const groupsLastFetched = ref<string | null>(null);
+const configurationsLastFetched = ref<string | null>(null);
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
@@ -50,10 +55,10 @@ function deduplicateById<T extends { id: number }>(items: T[]): T[] {
   });
 }
 
-function isCacheValid(lastSync: string | null): boolean {
-  if (!lastSync) return false;
-  const syncTime = new Date(lastSync).getTime();
-  return Date.now() - syncTime < CACHE_DURATION;
+function isCacheValid(lastFetched: string | null): boolean {
+  if (!lastFetched) return false;
+  const fetchTime = new Date(lastFetched).getTime();
+  return Date.now() - fetchTime < CACHE_DURATION;
 }
 
 function createDataLoader<T>(
@@ -61,11 +66,11 @@ function createDataLoader<T>(
   data: Ref<T[]>,
   loading: Ref<boolean>,
   error: Ref<string | null>,
-  lastSync: Ref<string | null>,
+  lastFetched: Ref<string | null>,
   apiCall: () => Promise<any>
 ) {
   return async (forceReload = false) => {
-    if (!forceReload && data.value.length > 0 && isCacheValid(lastSync.value)) {
+    if (!forceReload && data.value.length > 0 && isCacheValid(lastFetched.value)) {
       return data.value;
     }
 
@@ -87,7 +92,7 @@ function createDataLoader<T>(
     try {
       const response = await apiCall();
       data.value = deduplicateById(response.data || []);
-      lastSync.value = new Date().toISOString();
+      lastFetched.value = new Date().toISOString();
       console.log(`✅ Loaded ${data.value.length} ${name}`);
       return data.value;
     } catch (err) {
@@ -107,7 +112,7 @@ export const useSharedData = () => {
     categories,
     categoriesLoading,
     categoriesError,
-    categoriesLastSync,
+    categoriesLastFetched,
     async () => {
       const [incomeResponse, expenseResponse] = await Promise.all([
         api.categories.fetchByType('income'),
@@ -122,7 +127,7 @@ export const useSharedData = () => {
     parties,
     partiesLoading,
     partiesError,
-    partiesLastSync,
+    partiesLastFetched,
     () => api.parties.fetchAll()
   );
 
@@ -131,7 +136,7 @@ export const useSharedData = () => {
     wallets,
     walletsLoading,
     walletsError,
-    walletsLastSync,
+    walletsLastFetched,
     () => api.wallets.fetchAll()
   );
 
@@ -140,8 +145,17 @@ export const useSharedData = () => {
     groups,
     groupsLoading,
     groupsError,
-    groupsLastSync,
+    groupsLastFetched,
     () => api.groups.fetchAll()
+  );
+
+  const loadConfigurations = createDataLoader(
+    'configurations',
+    configurations,
+    configurationsLoading,
+    configurationsError,
+    configurationsLastFetched,
+    () => api.configurations.fetchAll()
   );
 
   const loadAllData = async (forceReload = false) => {
@@ -150,7 +164,8 @@ export const useSharedData = () => {
         loadCategories(forceReload),
         loadParties(forceReload),
         loadWallets(forceReload),
-        loadGroups(forceReload)
+        loadGroups(forceReload),
+        loadConfigurations(forceReload)
       ]);
     } catch (err) {
       console.error('Error loading shared data:', err);
@@ -167,26 +182,27 @@ export const useSharedData = () => {
     categories.value.filter((cat) => cat.type === 'expense')
   );
 
-  // TODO: Replace with backend configuration API call to get default group
-  // For now, find group with "default" in its name
-  const getDefaultGroup = computed(
-    () =>
-      groups.value.find((group) => group.name.toLowerCase().includes('default')) ||
-      (groups.value.length > 0 ? groups.value[0] : null)
-  );
+  const getDefaultGroup = computed(() => {
+    const config = configurations.value.find((c) => c.key === 'default-group');
+    if (config?.value) {
+      const group = groups.value.find((g) => g.id === parseInt(config.value));
+      if (group) return group;
+    }
+    return groups.value.length > 0 ? groups.value[0] : null;
+  });
 
-  // TODO: Replace with backend configuration API call to get default wallet
-  // For now, find wallet with "default" in its name
-  const getDefaultWallet = computed(
-    () =>
-      wallets.value.find((wallet) => wallet.name.toLowerCase().includes('default')) ||
-      (wallets.value.length > 0 ? wallets.value[0] : null)
-  );
+  const getDefaultWallet = computed(() => {
+    const config = configurations.value.find((c) => c.key === 'default-wallet');
+    if (config?.value) {
+      const wallet = wallets.value.find((w) => w.id === parseInt(config.value));
+      if (wallet) return wallet;
+    }
+    return wallets.value.length > 0 ? wallets.value[0] : null;
+  });
 
-  // TODO: Replace with backend user preferences API call to get default currency
-  // For now, use default wallet's currency or fallback to USD
   const getDefaultCurrency = computed(() => {
-    return getDefaultWallet.value?.currency || 'USD';
+    const config = configurations.value.find((c) => c.key === 'default-currency');
+    return config?.value || getDefaultWallet.value?.currency || 'USD';
   });
 
   // Category management functions
@@ -258,21 +274,25 @@ export const useSharedData = () => {
     parties.value = [];
     wallets.value = [];
     groups.value = [];
+    configurations.value = [];
 
     categoriesLoading.value = false;
     partiesLoading.value = false;
     walletsLoading.value = false;
     groupsLoading.value = false;
+    configurationsLoading.value = false;
 
     categoriesError.value = null;
     partiesError.value = null;
     walletsError.value = null;
     groupsError.value = null;
+    configurationsError.value = null;
 
-    categoriesLastSync.value = null;
-    partiesLastSync.value = null;
-    walletsLastSync.value = null;
-    groupsLastSync.value = null;
+    categoriesLastFetched.value = null;
+    partiesLastFetched.value = null;
+    walletsLastFetched.value = null;
+    groupsLastFetched.value = null;
+    configurationsLastFetched.value = null;
 
     console.log('✅ All shared data cleared for logout');
   };
@@ -283,24 +303,21 @@ export const useSharedData = () => {
     parties: readonly(parties),
     wallets: readonly(wallets),
     groups: readonly(groups),
+    configurations: readonly(configurations),
 
     // Loading states
     categoriesLoading: readonly(categoriesLoading),
     partiesLoading: readonly(partiesLoading),
     walletsLoading: readonly(walletsLoading),
     groupsLoading: readonly(groupsLoading),
+    configurationsLoading: readonly(configurationsLoading),
 
     // Error states
     categoriesError: readonly(categoriesError),
     partiesError: readonly(partiesError),
     walletsError: readonly(walletsError),
     groupsError: readonly(groupsError),
-
-    // Last sync timestamps
-    categoriesLastSync: readonly(categoriesLastSync),
-    partiesLastSync: readonly(partiesLastSync),
-    walletsLastSync: readonly(walletsLastSync),
-    groupsLastSync: readonly(groupsLastSync),
+    configurationsError: readonly(configurationsError),
 
     // Computed getters
     getIncomeCategories,
@@ -314,6 +331,7 @@ export const useSharedData = () => {
     loadParties,
     loadWallets,
     loadGroups,
+    loadConfigurations,
     loadAllData,
 
     // Management functions

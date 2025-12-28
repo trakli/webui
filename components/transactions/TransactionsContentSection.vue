@@ -1,6 +1,23 @@
 <template>
   <div class="content-area">
-    <TTopCard :page-name="'Transaction'" :page-name-plural="'Transactions'" @add="navigateToNew" />
+    <TTopCard :page-name="'Transaction'" :page-name-plural="'Transactions'" @add="navigateToNew">
+      <template #summary>
+        <div v-if="hasTotals" class="totals-summary">
+          <span class="total-item">
+            <span class="total-label">Income:</span>
+            <span class="total-value income">{{ formatCurrency(totals.income) }}</span>
+          </span>
+          <span class="total-item">
+            <span class="total-label">Expenses:</span>
+            <span class="total-value expense">{{ formatCurrency(totals.expenses) }}</span>
+          </span>
+          <span class="total-item">
+            <span class="total-label">Net:</span>
+            <span class="total-value" :class="totals.net >= 0 ? 'income' : 'expense'">{{ formatCurrency(totals.net) }}</span>
+          </span>
+        </div>
+      </template>
+    </TTopCard>
 
     <ComponentLoader
       :is-loading="isLoadingOrNotReady"
@@ -38,6 +55,7 @@
       <TTableComponent
         class="only-desktop"
         :transactions="paginatedTransactions"
+        :all-transactions="filteredTransactions"
         :search-query="searchQuery"
         :filter-query="filterQuery"
         :current-page="currentPage"
@@ -74,6 +92,38 @@ const {
   deleteTransaction,
   transactions
 } = useTransactions();
+
+const parseAmount = (amountStr) => {
+  if (!amountStr) return 0;
+  const cleaned = String(amountStr).replace(/[^0-9.-]/g, '');
+  return parseFloat(cleaned) || 0;
+};
+
+const totals = computed(() => {
+  const txns = filteredTransactions.value;
+  let income = 0;
+  let expenses = 0;
+
+  txns.forEach((txn) => {
+    const amount = parseAmount(txn.amount);
+    if (txn.type === 'INCOME') {
+      income += amount;
+    } else {
+      expenses += amount;
+    }
+  });
+
+  return { income, expenses, net: income - expenses };
+});
+
+const hasTotals = computed(() => filteredTransactions.value.length > 0);
+
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+};
 
 // Use centralized data manager states and initialization
 const { isLoading, error, isInitialized } = useDataManagerStates();
@@ -115,5 +165,44 @@ async function handleDelete(txn) {
   gap: 2rem;
   align-items: center;
   width: 100%;
+}
+
+.totals-summary {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 0.5rem;
+  }
+}
+
+.total-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: $font-size-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    font-size: $font-size-xs;
+  }
+
+  .total-label {
+    color: $text-muted;
+    font-weight: $font-medium;
+  }
+
+  .total-value {
+    font-weight: $font-bold;
+
+    &.income {
+      color: #059669;
+    }
+
+    &.expense {
+      color: #dc2626;
+    }
+  }
 }
 </style>
