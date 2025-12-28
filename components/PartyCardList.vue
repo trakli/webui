@@ -1,36 +1,26 @@
 <template>
   <div class="party-card-list">
     <div class="list-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h2 class="page-title">All Parties</h2>
-          <p class="page-subtitle">View transaction history and financial relationships.</p>
-        </div>
-      </div>
-
-      <div class="search-filter-section">
-        <div class="search-container">
-          <div class="search-icon">
-            <LucideSearch />
+      <div class="header-row">
+        <h2 class="page-title">All Parties</h2>
+        <div class="search-filter-section">
+          <div class="search-container">
+            <LucideSearch class="search-icon" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="search-input"
+              placeholder="Search..."
+              @input="handleSearch"
+            />
           </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="search-input"
-            placeholder="Search financial contacts..."
-            @input="handleSearch"
-          />
-        </div>
-
-        <div class="filter-container">
-          <div class="filter-icon">
-            <LucideFilter />
+          <div class="filter-container">
+            <select v-model="selectedFilter" class="filter-dropdown" @change="handleFilter">
+              <option value="all">All</option>
+              <option value="individual">Individual</option>
+              <option value="company">Company</option>
+            </select>
           </div>
-          <select v-model="selectedFilter" class="filter-dropdown" @change="handleFilter">
-            <option value="all">All Types</option>
-            <option value="individual">Individual</option>
-            <option value="company">Company</option>
-          </select>
         </div>
       </div>
     </div>
@@ -128,19 +118,19 @@ const handleMenu = (_party) => {
 }
 
 .list-header {
-  margin-bottom: $spacing-8;
+  margin-bottom: $spacing-3;
 }
 
-.header-content {
-  margin-bottom: $spacing-6;
-}
-
-.header-text {
-  text-align: left;
-  margin-bottom: $spacing-4;
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-3;
 
   @media (max-width: $breakpoint-sm) {
-    margin-bottom: $spacing-3;
+    flex-direction: column;
+    align-items: stretch;
+    gap: $spacing-2;
   }
 }
 
@@ -148,166 +138,90 @@ const handleMenu = (_party) => {
   font-size: $font-size-base;
   font-weight: $font-medium;
   color: $text-primary;
-  margin: 0 0 $spacing-1 0;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: $font-size-sm;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-sm;
-  }
-}
-
-.page-subtitle {
-  font-size: $font-size-xs;
-  color: $text-muted;
   margin: 0;
-  line-height: 1.4;
+  white-space: nowrap;
 }
 
 .search-filter-section {
   display: flex;
-  gap: $spacing-4;
+  gap: $spacing-2;
   align-items: center;
-  width: 100%;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: $spacing-2;
-
-  @media (max-width: $breakpoint-md) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: $spacing-3;
-  }
 }
 
 .search-container {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
-  width: 86%;
-  @media (max-width: $breakpoint-md) {
-    max-width: 100%;
-    width: 100%;
-  }
 }
 
 .search-icon {
   position: absolute;
-  left: $spacing-3;
+  left: 8px;
   color: $text-muted;
-  z-index: 1;
+  width: 14px;
+  height: 14px;
   pointer-events: none;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
 }
 
 .search-input {
-  width: 100%;
-  padding: 12px 16px 12px 44px;
-  border: 1.5px solid $border-light;
-  border-radius: $radius-lg;
-  font-size: $font-size-sm;
+  width: 160px;
+  padding: 6px 10px 6px 28px;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
   background: $bg-white;
   color: $text-primary;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   &:focus {
     outline: none;
     border-color: $primary;
-    box-shadow:
-      0 0 0 3px rgba(34, 197, 94, 0.1),
-      0 2px 8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-  }
-
-  &:hover {
-    border-color: color.adjust($border-light, $lightness: -10%);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    width: 200px;
   }
 
   &::placeholder {
     color: $text-muted;
-    font-weight: 400;
   }
 
   @media (max-width: $breakpoint-sm) {
-    padding: 10px 14px 10px 40px;
-    font-size: $font-size-xs;
+    width: 100%;
+
+    &:focus {
+      width: 100%;
+    }
   }
 }
 
 .filter-container {
-  position: relative;
   display: flex;
   align-items: center;
-  min-width: 160px;
-
-  @media (max-width: $breakpoint-md) {
-    width: 100%;
-  }
-}
-
-.filter-icon {
-  position: absolute;
-  left: $spacing-3;
-  color: $text-muted;
-  z-index: 1;
-  pointer-events: none;
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 }
 
 .filter-dropdown {
-  width: 100%;
-  padding: 12px 16px 12px 44px;
-  border: 1.5px solid $border-light;
-  border-radius: $radius-lg;
-  font-size: $font-size-sm;
+  padding: 6px 24px 6px 10px;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
   background: $bg-white;
   color: $text-secondary;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   appearance: none;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 12px center;
+  background-position: right 6px center;
   background-repeat: no-repeat;
-  background-size: 16px;
+  background-size: 14px;
 
   &:focus {
     outline: none;
     border-color: $primary;
-    box-shadow:
-      0 0 0 3px rgba(34, 197, 94, 0.1),
-      0 2px 8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-  }
-
-  &:hover {
-    border-color: color.adjust($border-light, $lightness: -10%);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    padding: 10px 14px 10px 40px;
-    font-size: $font-size-xs;
   }
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: $spacing-6;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-3;
   width: 100%;
 }
 
@@ -321,13 +235,13 @@ const handleMenu = (_party) => {
 @media (max-width: $breakpoint-md) {
   .cards-grid {
     grid-template-columns: 1fr;
-    gap: $spacing-4;
+    gap: $spacing-2;
   }
 }
 
 @media (min-width: $breakpoint-xl) {
   .cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 </style>
