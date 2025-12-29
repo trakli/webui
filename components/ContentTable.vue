@@ -11,11 +11,9 @@
     <div class="entity-list">
       <div class="header-row">
         <h1>All {{ pageNamePlural }}</h1>
-        <input
+        <SearchInput
           v-model="searchQuery"
-          type="text"
           :placeholder="`Search ${pageNamePlural.toLowerCase()}...`"
-          class="search-input"
         />
       </div>
 
@@ -95,6 +93,7 @@
 import { ref, computed, watch } from 'vue';
 import ContentCard from './ContentCard.vue';
 import ComponentLoader from './ComponentLoader.vue';
+import SearchInput from './SearchInput.vue';
 
 const props = defineProps({
   entities: {
@@ -205,7 +204,7 @@ const visiblePages = computed(() => {
   width: 100%;
   padding: 1rem;
   box-sizing: border-box;
-  border-radius: 8px;
+  border-radius: $radius-xl;
 
   @media (max-width: $breakpoint-md) {
     padding: 0.75rem;
@@ -232,34 +231,17 @@ const visiblePages = computed(() => {
 
   h1 {
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: $font-size-base;
+    font-weight: $font-medium;
     color: $text-primary;
 
     @media (max-width: $breakpoint-md) {
-      font-size: 1.25rem;
+      font-size: $font-size-sm;
     }
 
     @media (max-width: $breakpoint-sm) {
-      font-size: 1.125rem;
+      font-size: $font-size-sm;
     }
-  }
-}
-
-.search-input {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  width: 250px;
-  transition: border-color 0.2s;
-
-  @media (max-width: $breakpoint-md) {
-    width: 100%;
-  }
-
-  &:focus {
-    border-color: $primary;
-    outline: none;
   }
 }
 
@@ -270,7 +252,7 @@ const visiblePages = computed(() => {
   color: white;
   font-weight: bold;
   padding: 0.75rem 1rem;
-  border-radius: 8px 8px 0 0;
+  border-radius: $radius-xl $radius-xl 0 0;
   margin: 0 -1rem;
   width: calc(100% + 2rem);
   gap: 1rem;
@@ -342,7 +324,7 @@ const visiblePages = computed(() => {
 .entities-container {
   margin: 0 -1rem;
   width: calc(100% + 2rem);
-  background: $bg-gray;
+  background: #ebedec;
 }
 
 .pagination-row {
@@ -351,7 +333,7 @@ const visiblePages = computed(() => {
   align-items: center;
   padding: 1rem;
   background-color: $bg-gray;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 $radius-xl $radius-xl;
   border-top: 1px solid #e5e7eb;
   margin: 0 -1rem -1rem -1rem;
   width: calc(100% + 2rem);
@@ -399,7 +381,7 @@ const visiblePages = computed(() => {
   color: #374151;
   background: white;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
@@ -415,7 +397,7 @@ const visiblePages = computed(() => {
     font-size: 0.75rem;
     min-width: 28px;
     height: 28px;
-    border-radius: 4px;
+    border-radius: $radius-md;
   }
 
   &:hover:not(.disabled):not(.ellipsis) {
@@ -480,7 +462,7 @@ const visiblePages = computed(() => {
 .per-page-select {
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
   border: 1.5px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   background: white;
   color: #374151;
   font-size: 0.875rem;
@@ -499,7 +481,7 @@ const visiblePages = computed(() => {
     padding: 0.125rem 1.25rem 0.125rem 0.375rem;
     height: 28px;
     min-width: 45px;
-    border-radius: 4px;
+    border-radius: $radius-md;
   }
 
   &:focus {

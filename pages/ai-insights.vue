@@ -110,17 +110,17 @@ definePageMeta({
   margin-bottom: 1.5rem;
 
   h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: $font-size-lg;
+    font-weight: $font-semibold;
     color: $text-primary;
     margin: 0;
 
     @media (max-width: $breakpoint-md) {
-      font-size: 1.5rem;
+      font-size: $font-size-base;
     }
 
     @media (max-width: $breakpoint-sm) {
-      font-size: 1.25rem;
+      font-size: $font-size-sm;
     }
   }
 
@@ -131,18 +131,13 @@ definePageMeta({
 }
 
 .header-icon {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   color: $primary;
 
   @media (max-width: $breakpoint-sm) {
-    width: 28px;
-    height: 28px;
-  }
-
-  @media (max-width: 480px) {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 }
 

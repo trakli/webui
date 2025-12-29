@@ -3,26 +3,12 @@
     <div class="cards-heading">
       <h1 class="cards-heading__text">All Transactions</h1>
       <div class="input-controls">
-        <div class="txn-search-container">
-          <input
-            type="text"
-            placeholder="Search..."
-            class="search-input"
-            :value="searchQuery"
-            @input="$emit('update:searchQuery', $event.target.value)"
-          />
-          <MagnifyingGlassIcon class="txn-search-icon" />
-        </div>
-        <div class="txn-filter-container">
-          <input
-            type="text"
-            placeholder="Filter..."
-            class="filter-input"
-            :value="filterQuery"
-            @input="$emit('update:filterQuery', $event.target.value)"
-          />
-          <FunnelIcon class="txn-filter-icon" />
-        </div>
+        <SearchInput
+          :model-value="searchQuery"
+          placeholder="Search..."
+          :debounce="0"
+          @update:model-value="$emit('update:searchQuery', $event)"
+        />
       </div>
     </div>
 
@@ -105,8 +91,6 @@
 <script setup>
 import { computed } from 'vue';
 import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
   UserIcon,
   LockClosedIcon,
   CreditCardIcon,
@@ -115,18 +99,18 @@ import {
 } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { formatShortAmount } from '@/utils/currency';
+import SearchInput from '@/components/SearchInput.vue';
 
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
   searchQuery: { type: String, default: '' },
-  filterQuery: { type: String, default: '' },
   currentPage: { type: Number, default: 1 },
   itemsPerPage: { type: Number, default: 10 },
   totalPages: { type: Number, default: 1 },
   totalEntries: { type: Number, default: 0 }
 });
 
-defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery', 'update:filterQuery']);
+defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery']);
 
 const displayedTransactions = computed(() => props.transactions);
 

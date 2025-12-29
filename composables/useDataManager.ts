@@ -24,16 +24,13 @@ export const useDataManager = () => {
 
     try {
       // Clear existing data to ensure loading state shows properly
-      const { clearAllData } = useSharedData();
-      const { clearTransactions } = useTransactions();
+      const { clearAllData, loadAllData } = useSharedData();
+      const { clearTransactions, refreshTransactions } = useTransactions();
       clearAllData();
       clearTransactions();
 
-      // Import composables lazily to avoid circular dependencies
-      const { loadAllData } = useSharedData();
-      const { refreshTransactions } = useTransactions();
-
-      await loadAllData();
+      // Force reload all data (bypass cache)
+      await loadAllData(true);
       await refreshTransactions();
 
       isInitialized.value = true;

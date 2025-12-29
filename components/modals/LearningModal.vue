@@ -277,7 +277,7 @@ const toggleFaq = (question) => {
 
 .modal-content {
   background: white;
-  border-radius: 16px;
+  border-radius: $radius-xl;
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
@@ -314,7 +314,7 @@ const toggleFaq = (question) => {
   border: none;
   cursor: pointer;
   padding: 0.5rem;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   transition: background 0.2s ease;
 
   &:hover {
@@ -405,7 +405,7 @@ const toggleFaq = (question) => {
 .concept-card {
   background: $bg-slate;
   border: 1px solid $border-gray;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   padding: 1.5rem;
   border-left: 4px solid $primary;
 }
@@ -475,7 +475,7 @@ const toggleFaq = (question) => {
 .tip-card {
   background: white;
   border: 1px solid $border-gray;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   padding: 1.5rem;
   text-align: center;
   transition:
@@ -519,7 +519,7 @@ const toggleFaq = (question) => {
   align-items: center;
   padding: 1rem;
   background: $bg-slate;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   border: 1px solid $border-gray;
 }
 
@@ -531,7 +531,7 @@ const toggleFaq = (question) => {
 .key {
   background: white;
   border: 1px solid $border-light;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
@@ -552,7 +552,7 @@ const toggleFaq = (question) => {
 
 .faq-item {
   border: 1px solid $border-gray;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   overflow: hidden;
 }
 

@@ -4,7 +4,7 @@
       <HamburgerMenu v-if="isMobile" :is-open="isSidebarOpen" @toggle="toggleSidebar" />
     </div>
     <div class="navbar-right">
-      <div class="search-container">
+      <div class="navbar-actions">
         <TButton
           class="add-transaction-btn"
           size="small"
@@ -15,12 +15,6 @@
             <PlusIcon />
           </template>
         </TButton>
-        <button class="icon-button">
-          <BellIcon class="icon" />
-        </button>
-        <button class="icon-button">
-          <MagnifyingGlassIcon class="icon" />
-        </button>
         <LanguageSelector />
         <button
           class="icon-button info-btn"
@@ -45,12 +39,7 @@ import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
-import {
-  MagnifyingGlassIcon,
-  BellIcon,
-  PlusIcon,
-  InformationCircleIcon
-} from '@heroicons/vue/24/outline';
+import { PlusIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
 import { useSidebar } from '@/composables/useSidebar';
@@ -126,12 +115,13 @@ const openLearningModal = () => {
     }
   }
 
-  .search-container {
-    width: 396px;
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 
     @media (max-width: $breakpoint-sm) {
-      .add-transaction-btn,
-      .icon-button:last-child {
+      .add-transaction-btn {
         display: none;
       }
     }

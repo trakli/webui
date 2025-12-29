@@ -2,33 +2,17 @@
   <div class="entity-header">
     <div class="header-content">
       <div class="content-main">
-        <h1 class="title">{{ action }} {{ pageName }}</h1>
-        <div class="breadcrumb">
-          <template v-if="breadcrumbItems.length > 0">
-            <template v-for="(item, index) in breadcrumbItems" :key="index">
-              <span
-                :class="{
-                  'breadcrumb-item': !item.current,
-                  'breadcrumb-current': item.current,
-                  'breadcrumb-clickable': item.clickable
-                }"
-                @click="item.clickable ? $emit(item.action || 'back', item) : null"
-              >
-                {{ item.text }}
-              </span>
-              <span v-if="index < breadcrumbItems.length - 1" class="breadcrumb-separator"
-                >&gt;</span
-              >
-            </template>
-          </template>
-          <template v-else>
-            <span class="breadcrumb-item">Home</span>
-            <span class="breadcrumb-separator">&gt;</span>
-            <span class="breadcrumb-item">{{ pageNamePlural }}</span>
-            <span class="breadcrumb-separator">&gt;</span>
-            <span class="breadcrumb-current">{{ action }} {{ pageName }}</span>
-          </template>
+        <div class="title-row">
+          <h1 class="title">{{ displayTitle }}</h1>
+          <div class="breadcrumb">
+            <span class="breadcrumb-item breadcrumb-clickable" @click="$router.push('/dashboard')"
+              >Home</span
+            >
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">{{ pageNamePlural }}</span>
+          </div>
         </div>
+        <slot name="summary"></slot>
       </div>
       <div class="action-buttons">
         <TInfoButton />
@@ -48,18 +32,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import TInfoButton from '@/components/TInfoButton.vue';
 import TButton from '@/components/TButton.vue';
 import { PlusIcon } from '@heroicons/vue/24/outline';
 
-defineProps({
+const props = defineProps({
   pageName: {
     type: String,
     required: true
-  },
-  action: {
-    type: String,
-    default: 'Add'
   },
   pageNamePlural: {
     type: String,
@@ -76,14 +57,12 @@ defineProps({
   buttonAction: {
     type: String,
     default: 'add'
-  },
-  breadcrumbItems: {
-    type: Array,
-    default: () => []
   }
 });
 
-defineEmits(['add', 'back', 'custom']);
+defineEmits(['add']);
+
+const displayTitle = computed(() => props.pageNamePlural);
 </script>
 
 <style lang="scss" scoped>
@@ -111,33 +90,41 @@ defineEmits(['add', 'back', 'custom']);
 .header-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
+  gap: 1rem;
 
   @media (max-width: $breakpoint-sm) {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    align-items: stretch;
+    gap: 0.5rem;
   }
 }
 
 .content-main {
   flex: 1;
+  min-width: 0;
+}
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .title {
   color: #1d3229;
-  font-size: $font-size-lg;
-  font-weight: $font-bold;
-  margin: 0 0 4px 0;
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  margin: 0;
 
   @media (max-width: $breakpoint-md) {
-    font-size: $font-size-base;
+    font-size: $font-size-sm;
   }
 
   @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-sm;
-    margin-bottom: 2px;
+    font-size: $font-size-xs;
   }
 }
 
@@ -146,41 +133,24 @@ defineEmits(['add', 'back', 'custom']);
   flex-direction: row;
   gap: 4px;
   align-items: center;
-  flex-wrap: wrap;
-
-  @media (max-width: $breakpoint-sm) {
-    gap: 2px;
-  }
 }
 
 .breadcrumb-item {
-  color: $primary;
+  color: $text-muted;
   font-weight: $font-normal;
-  font-size: $font-size-sm;
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-xs;
-  }
+  font-size: $font-size-xs;
 }
 
 .breadcrumb-separator {
-  color: $text-secondary;
+  color: $text-muted;
   font-weight: $font-normal;
-  font-size: $font-size-sm;
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-xs;
-  }
+  font-size: $font-size-xs;
 }
 
 .breadcrumb-current {
-  color: $text-primary;
-  font-weight: $font-normal;
-  font-size: $font-size-sm;
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-xs;
-  }
+  color: $text-secondary;
+  font-weight: $font-medium;
+  font-size: $font-size-xs;
 }
 
 .breadcrumb-clickable {
@@ -188,13 +158,13 @@ defineEmits(['add', 'back', 'custom']);
 
   &:hover {
     color: $primary;
-    text-decoration: underline;
   }
 }
 
 .action-buttons {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 
   @media (max-width: $breakpoint-sm) {
     width: 100%;

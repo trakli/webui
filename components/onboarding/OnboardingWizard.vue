@@ -340,7 +340,7 @@ const previousStep = () => {
 
 .step-benefits {
   background: $bg-slate;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   padding: 1rem;
   border-left: 4px solid $primary;
 }
@@ -394,7 +394,7 @@ const previousStep = () => {
   font-size: 1rem;
   font-weight: 600;
   border: none;
-  border-radius: 10px;
+  border-radius: $radius-lg;
   padding: 0.875rem 2rem;
   cursor: pointer;
   transition: all 0.2s ease;

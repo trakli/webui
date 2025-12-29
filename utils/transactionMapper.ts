@@ -31,7 +31,11 @@ export const transactionMapper = {
     _groups: GroupLite[] = []
   ): FrontendTransaction {
     const dt = new Date(api.datetime);
-    const date = dt.toISOString().slice(0, 10);
+    // Use local date to avoid timezone issues with filtering
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const date = `${year}-${month}-${day}`;
     const time = dt.toTimeString().slice(0, 5);
 
     const party =
@@ -67,13 +71,13 @@ export const transactionMapper = {
       time,
       type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
       party: party?.name || '',
-      partyId: api.party_client_generated_id,
+      partyId: party?.id,
       amount: formattedAmount,
       category: categoryNames || 'Uncategorized',
       groupId: api.group_id,
       categoryIds: transactionCategories.map((cat) => cat.id),
       wallet: wallet?.name || '',
-      walletId: api.wallet_client_generated_id,
+      walletId: wallet?.id,
       description: api.description || '',
       isRecurring: api.is_recurring || false,
       files: api.files || []
@@ -93,7 +97,11 @@ export const transactionMapper = {
     wallets: Wallet[] = []
   ): FrontendTransaction {
     const dt = new Date(api.datetime);
-    const date = dt.toISOString().slice(0, 10);
+    // Use local date to avoid timezone issues
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const date = `${year}-${month}-${day}`;
     const time = dt.toTimeString().slice(0, 5);
 
     const party =
@@ -112,13 +120,13 @@ export const transactionMapper = {
       time,
       type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
       party: party?.name || '',
-      partyId: api.party_client_generated_id,
+      partyId: party?.id,
       amount: String(api.amount),
       category: '',
       groupId: api.group_id,
       categoryIds: transactionCategories.map((cat) => cat.id),
       wallet: wallet?.name || '',
-      walletId: api.wallet_client_generated_id,
+      walletId: wallet?.id,
       description: api.description || '',
       isRecurring: api.is_recurring || false,
       files: api.files || []
@@ -135,7 +143,7 @@ export const transactionMapper = {
    */
   toApi(
     frontend: Partial<FrontendTransaction>,
-    parties: Party[] = [],
+    _parties: Party[] = [],
     wallets: Wallet[] = [],
     currentDatetime?: string,
     defaultGroup?: { id: number; name: string }
@@ -153,38 +161,8 @@ export const transactionMapper = {
     const amountStr = frontend.amount || '0';
     const amount = parseAmountUtil(amountStr).value;
 
-    let partyId = null;
-    let walletId = null;
-
-    if (frontend.partyId) {
-      let party = parties.find((p) => p.sync_state?.client_generated_id === frontend.partyId);
-
-      if (!party) {
-        const numericId = parseInt(frontend.partyId);
-        if (!isNaN(numericId)) {
-          party = parties.find((p) => p.id === numericId);
-        }
-      }
-
-      if (party) {
-        partyId = party.id;
-      }
-    }
-
-    if (frontend.walletId) {
-      let wallet = wallets.find((w) => w.sync_state?.client_generated_id === frontend.walletId);
-
-      if (!wallet) {
-        const numericId = parseInt(frontend.walletId);
-        if (!isNaN(numericId)) {
-          wallet = wallets.find((w) => w.id === numericId);
-        }
-      }
-
-      if (wallet) {
-        walletId = wallet.id;
-      }
-    }
+    const partyId: number | null = frontend.partyId || null;
+    let walletId: number | null = frontend.walletId || null;
 
     if (walletId === null && wallets.length > 0) {
       const defaultWallet = wallets.find(
@@ -234,13 +212,16 @@ export const transactionMapper = {
   },
 
   /**
-   * Helper: Split ISO datetime into date and time
+   * Helper: Split ISO datetime into date and time (local timezone)
    */
   splitDatetime(datetime: string): { date: string; time: string } {
     const dt = new Date(datetime);
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
     return {
-      date: dt.toISOString().slice(0, 10), // YYYY-MM-DD
-      time: dt.toTimeString().slice(0, 5) // HH:mm
+      date: `${year}-${month}-${day}`,
+      time: dt.toTimeString().slice(0, 5)
     };
   }
 };

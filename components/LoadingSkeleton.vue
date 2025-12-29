@@ -71,7 +71,7 @@ defineProps({
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: 4px;
+  border-radius: $radius-md;
 }
 
 .skeleton-line {
@@ -123,7 +123,7 @@ defineProps({
 .skeleton-card {
   @extend .skeleton-base;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: $radius-lg;
 
   .skeleton-header {
     @extend .skeleton-base;

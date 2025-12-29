@@ -38,9 +38,17 @@ export interface WalletBreakdown {
   percentage_of_total: number;
 }
 
+export interface BiggestCategory {
+  category: string;
+  amount: number;
+  percentage: number;
+  transaction_count: number;
+}
+
 export interface IncomeInsights {
   total: number;
   biggest_source: PartyBreakdown | null;
+  biggest_category: BiggestCategory | null;
   top_sources: PartyBreakdown[];
   top_categories: CategoryBreakdown[];
   average_transaction: number;
@@ -59,6 +67,7 @@ export interface IncomeInsights {
 export interface ExpenseInsights {
   total: number;
   biggest_expense: PartyBreakdown | null;
+  biggest_category: BiggestCategory | null;
   top_destinations: PartyBreakdown[];
   top_categories: CategoryBreakdown[];
   average_transaction: number;
@@ -135,7 +144,7 @@ export interface StatisticsPeriod {
 }
 
 // Configuration for statistics source
-const USE_API_STATISTICS = false; // TODO: Set to true when backend endpoint is ready
+const USE_API_STATISTICS = true;
 
 // TODO: Replace with API call to fetch real-time currency conversion rates
 // Simple currency conversion rates (should come from API in production)
@@ -161,9 +170,18 @@ const selectedWalletId = ref<number | null>(null); // null = all wallets
 const isLoading = ref(typeof window !== 'undefined' && checkAuth());
 const error = ref<string | null>(null);
 
+export interface CustomFilters {
+  startDate: string;
+  endDate: string;
+  walletIds: number[];
+}
+
+const customFilters = ref<CustomFilters | null>(null);
+
 export const useStatistics = () => {
   const { transactions } = useTransactions();
   const { wallets } = useWallets();
+  const { getDefaultCurrency } = useSharedData();
 
   const getDateRangeForPeriod = (period: string): { start: Date; end: Date } => {
     const now = new Date();
@@ -208,7 +226,6 @@ export const useStatistics = () => {
       return wallet?.currency || 'USD';
     }
 
-    const { getDefaultCurrency } = useSharedData();
     return getDefaultCurrency.value;
   };
 
@@ -310,7 +327,7 @@ export const useStatistics = () => {
     const monthMap = new Map<string, { income: number; expenses: number }>();
 
     filteredTransactions.forEach((t) => {
-      const date = new Date(t.date);
+      const date = new Date(t.date + 'T00:00:00');
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const amount = parseAmount(t.amount);
 
@@ -425,7 +442,8 @@ export const useStatistics = () => {
     const { start, end } = getDateRangeForPeriod(period);
 
     const filteredTransactions = transactions.value.filter((t) => {
-      const txnDate = new Date(t.date);
+      // Parse date as local time by appending T00:00:00 (without Z)
+      const txnDate = new Date(t.date + 'T00:00:00');
       return txnDate >= start && txnDate <= end;
     });
 
@@ -498,7 +516,7 @@ export const useStatistics = () => {
 
     const previousPeriodStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
     const previousPeriodTransactions = transactions.value.filter((t) => {
-      const txnDate = new Date(t.date);
+      const txnDate = new Date(t.date + 'T00:00:00');
       return txnDate >= previousPeriodStart && txnDate < start;
     });
     const previousIncome = previousPeriodTransactions
@@ -530,6 +548,14 @@ export const useStatistics = () => {
       income_insights: {
         total: totalIncome,
         biggest_source: incomeParties[0] || null,
+        biggest_category: incomeCategories[0]
+          ? {
+              category: incomeCategories[0].category,
+              amount: incomeCategories[0].amount,
+              percentage: incomeCategories[0].percentage,
+              transaction_count: incomeCategories[0].transaction_count
+            }
+          : null,
         top_sources: incomeParties.slice(0, 5),
         top_categories: incomeCategories.slice(0, 5),
         average_transaction:
@@ -549,6 +575,14 @@ export const useStatistics = () => {
       expense_insights: {
         total: totalExpenses,
         biggest_expense: expenseParties[0] || null,
+        biggest_category: expenseCategories[0]
+          ? {
+              category: expenseCategories[0].category,
+              amount: expenseCategories[0].amount,
+              percentage: expenseCategories[0].percentage,
+              transaction_count: expenseCategories[0].transaction_count
+            }
+          : null,
         top_destinations: expenseParties.slice(0, 5),
         top_categories: expenseCategories.slice(0, 5),
         average_transaction:
@@ -628,24 +662,208 @@ export const useStatistics = () => {
     walletId: number | null,
     period: string
   ): Promise<WalletStatistics> => {
-    try {
-      isLoading.value = true;
-      error.value = null;
+    const { api } = await import('~/services/api');
 
-      const response = await api.statistics.fetch({
-        wallet_id: walletId,
-        period: period,
-        include_insights: true,
-        include_breakdowns: true
-      });
-      return response.data;
-    } catch (err) {
-      console.error('Error fetching statistics from API:', err);
-      error.value = 'Failed to fetch statistics from API';
-      throw err;
-    } finally {
-      isLoading.value = false;
+    // Map period to preset
+    const presetMap: Record<string, string> = {
+      all_time: 'all_time',
+      current_week: 'current_week',
+      current_month: 'current_month',
+      '90d': 'last_3_months'
+    };
+
+    const params: Record<string, string> = {};
+
+    // Use custom filters if set, otherwise use preset
+    if (period === 'custom' && customFilters.value) {
+      if (customFilters.value.startDate) {
+        params.start_date = customFilters.value.startDate;
+      }
+      if (customFilters.value.endDate) {
+        params.end_date = customFilters.value.endDate;
+      }
+      if (customFilters.value.walletIds.length > 0) {
+        params.wallet_ids = customFilters.value.walletIds.join(',');
+      }
+    } else {
+      if (presetMap[period]) {
+        params.preset = presetMap[period];
+      }
+      if (walletId) {
+        params.wallet_ids = String(walletId);
+      }
     }
+
+    const response = await api.stats.fetch(params);
+    const data = response.data;
+
+    // Transform API response to WalletStatistics format
+    return {
+      total_balance: data.overview.net_cash_flow,
+      total_income: data.overview.total_income,
+      total_expenses: data.overview.total_expenses,
+      transaction_count: 0,
+      unique_parties: 0,
+      period,
+      wallet_id: walletId,
+      wallet_name: walletId ? wallets.value.find((w) => w.id === walletId)?.name : 'All Wallets',
+      last_updated: new Date().toISOString(),
+
+      income_insights: {
+        total: data.overview.total_income,
+        biggest_source: data.charts?.party_income?.[0]
+          ? {
+              party: data.charts.party_income[0].name,
+              amount: data.charts.party_income[0].amount,
+              percentage: data.charts.party_income[0].percentage,
+              transaction_count: data.charts.party_income[0].transaction_count || 0
+            }
+          : null,
+        biggest_category: data.top_categories?.income?.[0]
+          ? {
+              category: data.top_categories.income[0].name,
+              amount: data.top_categories.income[0].amount,
+              percentage: data.top_categories.income[0].percentage,
+              transaction_count: 0
+            }
+          : null,
+        top_sources: (data.charts?.party_income || []).slice(0, 5).map((p: any) => ({
+          party: p.name,
+          amount: p.amount,
+          percentage: p.percentage,
+          transaction_count: p.transaction_count || 0
+        })),
+        top_categories: (data.top_categories?.income || []).map((c: any) => ({
+          category: c.name,
+          amount: c.amount,
+          percentage: c.percentage,
+          transaction_count: 0,
+          type: 'INCOME' as const
+        })),
+        average_transaction: 0,
+        frequency_analysis: {
+          daily_average: 0,
+          weekly_average: 0,
+          monthly_average: data.overview.avg_monthly_income
+        },
+        growth_trends: {
+          current_vs_previous: data.comparisons?.previous_period?.income_change_percent || 0,
+          trend_direction:
+            (data.comparisons?.previous_period?.income_change_percent || 0) > 5
+              ? 'up'
+              : (data.comparisons?.previous_period?.income_change_percent || 0) < -5
+                ? 'down'
+                : 'stable',
+          momentum: 'steady'
+        }
+      },
+
+      expense_insights: {
+        total: data.overview.total_expenses,
+        biggest_expense: data.charts?.party_spending?.[0]
+          ? {
+              party: data.charts.party_spending[0].name,
+              amount: data.charts.party_spending[0].amount,
+              percentage: data.charts.party_spending[0].percentage,
+              transaction_count: data.charts.party_spending[0].transaction_count || 0
+            }
+          : null,
+        biggest_category: data.top_categories?.expenses?.[0]
+          ? {
+              category: data.top_categories.expenses[0].name,
+              amount: data.top_categories.expenses[0].amount,
+              percentage: data.top_categories.expenses[0].percentage,
+              transaction_count: 0
+            }
+          : null,
+        top_destinations: (data.charts?.party_spending || []).slice(0, 5).map((p: any) => ({
+          party: p.name,
+          amount: p.amount,
+          percentage: p.percentage,
+          transaction_count: p.transaction_count || 0
+        })),
+        top_categories: (data.top_categories?.expenses || []).map((c: any) => ({
+          category: c.name,
+          amount: c.amount,
+          percentage: c.percentage,
+          transaction_count: 0,
+          type: 'EXPENSE' as const
+        })),
+        average_transaction: 0,
+        spending_patterns: {
+          daily_average: 0,
+          weekly_average: 0,
+          monthly_average: data.overview.avg_monthly_expenses
+        },
+        budget_analysis: {
+          expense_ratio:
+            data.overview.total_income > 0
+              ? data.overview.total_expenses / data.overview.total_income
+              : 0,
+          savings_rate: data.overview.savings_rate / 100,
+          risk_level:
+            data.overview.savings_rate < 10
+              ? 'high'
+              : data.overview.savings_rate < 30
+                ? 'medium'
+                : 'low'
+        }
+      },
+
+      category_breakdown: {
+        income_categories: (data.charts?.income_sources || []).map((c: any) => ({
+          category: c.name,
+          amount: c.amount,
+          percentage: c.percentage,
+          transaction_count: c.transaction_count || 0,
+          type: 'INCOME' as const
+        })),
+        expense_categories: (data.charts?.category_spending || []).map((c: any) => ({
+          category: c.name,
+          amount: c.amount,
+          percentage: c.percentage,
+          transaction_count: c.transaction_count || 0,
+          type: 'EXPENSE' as const
+        })),
+        most_used_category: null
+      },
+
+      party_breakdown: {
+        income_sources: (data.charts?.party_income || []).map((p: any) => ({
+          party: p.name,
+          amount: p.amount,
+          percentage: p.percentage,
+          transaction_count: p.transaction_count || 0
+        })),
+        expense_destinations: (data.charts?.party_spending || []).map((p: any) => ({
+          party: p.name,
+          amount: p.amount,
+          percentage: p.percentage,
+          transaction_count: p.transaction_count || 0
+        })),
+        most_frequent_party: null
+      },
+
+      time_analysis: {
+        monthly_trends: (data.charts?.monthly_cash_flow || []).map((m: any) => ({
+          month: m.period,
+          income: m.income,
+          expenses: m.expense,
+          net: m.net
+        })),
+        busiest_day: 'Monday',
+        transaction_frequency: { per_day: 0, per_week: 0, per_month: 0 }
+      },
+
+      performance: {
+        growth_percentage: data.comparisons?.previous_period?.income_change_percent || 0,
+        velocity: 0,
+        efficiency: data.overview.savings_rate / 100,
+        consistency: 0
+      },
+
+      insights: { key_observations: [], recommendations: [], alerts: [], opportunities: [] }
+    };
   };
 
   const getStatistics = async (
@@ -680,10 +898,15 @@ export const useStatistics = () => {
     }
   };
 
-  // Watch for changes in selected wallet, period, AND when the underlying data becomes available
-  watch([selectedWalletId, currentPeriod, transactions, wallets], updateCurrentStatistics, {
-    immediate: true
-  });
+  // Watch for changes in selected wallet, period, custom filters, AND when the underlying data becomes available
+  watch(
+    [selectedWalletId, currentPeriod, customFilters, transactions, wallets],
+    updateCurrentStatistics,
+    {
+      immediate: true,
+      deep: true
+    }
+  );
 
   const formatCurrency = (amount: number, currency: string = 'USD'): string => {
     const rounded = Math.round(amount * 100) / 100;
@@ -708,8 +931,18 @@ export const useStatistics = () => {
     currentPeriod.value = period;
   };
 
+  const setCustomFilters = (filters: CustomFilters) => {
+    console.log('[Statistics] Setting custom filters:', filters);
+    customFilters.value = filters;
+    currentPeriod.value = 'custom';
+  };
+
+  const clearCustomFilters = () => {
+    customFilters.value = null;
+    currentPeriod.value = 'all_time';
+  };
+
   const availableWallets = computed(() => {
-    const { getDefaultCurrency } = useSharedData();
     return [
       { id: null, name: 'All Wallets', currency: getDefaultCurrency.value },
       ...wallets.value.map((w) => ({ id: w.id, name: w.name, currency: w.currency }))
@@ -719,6 +952,7 @@ export const useStatistics = () => {
   return {
     currentPeriod,
     selectedWalletId,
+    customFilters,
     isLoading,
     error,
 
@@ -729,6 +963,8 @@ export const useStatistics = () => {
     getStatistics,
     setSelectedWallet,
     setPeriod,
+    setCustomFilters,
+    clearCustomFilters,
     formatCurrency,
     formatCompactCurrency,
 

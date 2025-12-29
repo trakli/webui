@@ -95,7 +95,7 @@ const handleCancel = () => {
 
 .modal-content {
   background: white;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   max-width: 400px;
   width: 100%;
   box-shadow:
@@ -135,7 +135,7 @@ const handleCancel = () => {
   color: $text-secondary;
   cursor: pointer;
   padding: 0.25rem;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   transition: all 0.2s ease;
 
   &:hover {
@@ -201,7 +201,7 @@ const handleCancel = () => {
 .cancel-button,
 .confirm-button {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: $radius-md;
   font-weight: 500;
   cursor: pointer;
   border: 1px solid;

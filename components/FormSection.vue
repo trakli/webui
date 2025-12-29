@@ -99,7 +99,7 @@ watch(
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-radius: 8px 8px 0 0;
+  border-radius: $radius-lg $radius-lg 0 0;
 
   @media (max-width: $breakpoint-md) {
     padding: 0.625rem 1.25rem;

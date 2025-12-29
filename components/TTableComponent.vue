@@ -3,26 +3,12 @@
     <div class="table-heading">
       <h1 class="table-heading-text">All Transactions</h1>
       <div class="input-controls">
-        <div class="search-container">
-          <input
-            type="text"
-            placeholder="Search..."
-            class="search-input"
-            :value="searchQuery"
-            @input="$emit('update:searchQuery', $event.target.value)"
-          />
-          <MagnifyingGlassIcon class="search-icon" />
-        </div>
-        <div class="filter-container">
-          <input
-            type="text"
-            placeholder="Filter..."
-            class="filter-input"
-            :value="filterQuery"
-            @input="$emit('update:filterQuery', $event.target.value)"
-          />
-          <FunnelIcon class="filter-icon" />
-        </div>
+        <SearchInput
+          :model-value="searchQuery"
+          placeholder="Search..."
+          :debounce="0"
+          @update:model-value="$emit('update:searchQuery', $event)"
+        />
       </div>
     </div>
 
@@ -70,6 +56,32 @@
                 </div>
               </td>
             </tr>
+          </tbody>
+          <tfoot>
+            <tr class="totals-row">
+              <td colspan="6" class="totals-cell">
+                <div class="totals-grid">
+                  <div class="total-section totals-label">
+                    <span class="total-label">Totals</span>
+                  </div>
+                  <div class="total-section income">
+                    <span class="total-label">Income</span>
+                    <span class="total-value">{{ formatDisplayCurrency(totals.income) }}</span>
+                  </div>
+                  <div class="total-section expense">
+                    <span class="total-label">Expenses</span>
+                    <span class="total-value">{{ formatDisplayCurrency(totals.expenses) }}</span>
+                  </div>
+                  <div
+                    class="total-section net"
+                    :class="{ positive: totals.net >= 0, negative: totals.net < 0 }"
+                  >
+                    <span class="total-label">Net</span>
+                    <span class="total-value">{{ formatDisplayCurrency(totals.net) }}</span>
+                  </div>
+                </div>
+              </td>
+            </tr>
             <tr class="pagination-row">
               <td colspan="6">
                 <div class="pagination-container">
@@ -106,7 +118,7 @@
                 </div>
               </td>
             </tr>
-          </tbody>
+          </tfoot>
         </table>
       </div>
     </div>
@@ -115,27 +127,76 @@
 
 <script setup>
 import { computed } from 'vue';
-import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  PencilSquareIcon,
-  TrashIcon
-} from '@heroicons/vue/24/outline';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { useSharedData } from '@/composables/useSharedData';
+import { parseAmount, getCurrencySymbol } from '@/utils/currency';
+import SearchInput from './SearchInput.vue';
+
+const CURRENCY_RATES = {
+  USD: 1.0,
+  EUR: 0.85,
+  XAF: 600.0,
+  GBP: 0.75,
+  CAD: 1.35
+};
 
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
   searchQuery: { type: String, default: '' },
-  filterQuery: { type: String, default: '' },
   currentPage: { type: Number, default: 1 },
   itemsPerPage: { type: Number, default: 10 },
   totalPages: { type: Number, default: 1 },
   totalEntries: { type: Number, default: 0 },
-  headerType: { type: String, default: 'default' } // 'default', 'expense'
+  headerType: { type: String, default: 'default' },
+  allTransactions: { type: Array, default: () => [] }
 });
 
-defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery', 'update:filterQuery']);
+defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery']);
+
+const { getDefaultCurrency } = useSharedData();
 
 const displayedTransactions = computed(() => props.transactions);
+
+const convertCurrency = (amount, fromCurrency, toCurrency) => {
+  if (fromCurrency === toCurrency) return amount;
+  const fromRate = CURRENCY_RATES[fromCurrency] || 1;
+  const toRate = CURRENCY_RATES[toCurrency] || 1;
+  const usdAmount = amount / fromRate;
+  return usdAmount * toRate;
+};
+
+const totals = computed(() => {
+  const txns = props.allTransactions.length > 0 ? props.allTransactions : props.transactions;
+  const targetCurrency = getDefaultCurrency.value;
+  let income = 0;
+  let expenses = 0;
+
+  txns.forEach((txn) => {
+    const { value, currency } = parseAmount(txn.amount);
+    const convertedAmount = convertCurrency(value, currency || targetCurrency, targetCurrency);
+    if (txn.type === 'INCOME') {
+      income += convertedAmount;
+    } else {
+      expenses += convertedAmount;
+    }
+  });
+
+  return {
+    income,
+    expenses,
+    net: income - expenses
+  };
+});
+
+const formatDisplayCurrency = (value) => {
+  const currency = getDefaultCurrency.value;
+  const symbol = getCurrencySymbol(currency);
+  const formatted = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+  return `${formatted} ${symbol}`;
+};
 
 const computedTotalEntries = computed(() => {
   if (props.totalEntries && props.totalEntries > 0) return props.totalEntries;
@@ -221,8 +282,8 @@ const formatTimeAgo = (txn) => {
     }
 
     &-text {
-      font-weight: $font-bold;
-      font-size: $font-size-xl;
+      font-weight: $font-medium;
+      font-size: $font-size-base;
       margin-bottom: 0;
     }
   }
@@ -230,70 +291,16 @@ const formatTimeAgo = (txn) => {
 
 .input-controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-
-  @media (min-width: 640px) {
-    flex-wrap: nowrap;
-    gap: 1rem;
-  }
   align-items: center;
-}
-
-.search-container,
-.filter-container {
-  position: relative;
-  width: 100%;
-  height: 36px;
-  min-width: 140px;
-
-  @media (min-width: 640px) {
-    width: 160px;
-  }
-
-  .search-input,
-  .filter-input {
-    width: 100%;
-    height: 100%;
-    padding: 8px 36px 8px 16px;
-    border: 1px solid $bg-gray;
-    border-radius: $radius-lg;
-    font-size: $font-size-sm;
-    background-color: #f5f6f7;
-    transition: border-color 0.2s ease;
-    box-sizing: border-box;
-
-    &::placeholder {
-      color: #9ca3af;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-  }
-}
-
-.search-icon,
-.filter-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: #798588;
-  pointer-events: none;
 }
 
 .table-wrapper {
   width: 100%;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   overflow-x: auto;
   background-color: #ebedec;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-table {
@@ -315,7 +322,8 @@ const formatTimeAgo = (txn) => {
     background-color: #057a55;
     color: white;
     text-align: left;
-    padding: 12px;
+    padding: 10px;
+    font-size: $font-size-sm;
   }
 
   &.expense-table th {
@@ -323,16 +331,18 @@ const formatTimeAgo = (txn) => {
   }
 
   td {
-    padding: 12px;
+    padding: 10px;
     background-color: #f9f9f9;
     border-bottom: 1px solid #ddd;
     vertical-align: top;
+    font-size: $font-size-sm;
   }
 
   .date {
     &-main {
       color: #1d3229;
-      font-weight: $font-bold;
+      font-weight: $font-medium;
+      font-size: $font-size-sm;
     }
 
     &-sub {
@@ -344,7 +354,7 @@ const formatTimeAgo = (txn) => {
 
   .type-badge {
     padding: 4px 12px;
-    border-radius: 6px;
+    border-radius: $radius-md;
     font-weight: bold;
     font-size: 12px;
     display: inline-block;
@@ -362,7 +372,7 @@ const formatTimeAgo = (txn) => {
 
   .party {
     padding: 4px 8px;
-    border-radius: 6px;
+    border-radius: $radius-md;
     display: inline-block;
   }
 
@@ -394,7 +404,7 @@ const formatTimeAgo = (txn) => {
     background: transparent;
     border: none;
     padding: 6px;
-    border-radius: 4px;
+    border-radius: $radius-sm;
     cursor: pointer;
     transition: all 0.2s ease;
     width: 28px;
@@ -422,6 +432,93 @@ const formatTimeAgo = (txn) => {
 
     &:hover {
       color: #b91c1c;
+    }
+  }
+}
+
+// Totals row styles
+.totals-row {
+  .totals-cell {
+    padding: 0 !important;
+    background-color: transparent !important;
+    border-top: 2px solid #057a55;
+  }
+
+  .totals-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+  }
+
+  .total-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    text-align: center;
+
+    .total-label {
+      font-size: $font-size-xs;
+      font-weight: $font-medium;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .total-value {
+      font-size: $font-size-sm;
+      font-weight: $font-bold;
+    }
+
+    &.totals-label {
+      background-color: #057a55;
+      .total-label {
+        color: white;
+        font-size: $font-size-sm;
+        font-weight: $font-bold;
+      }
+    }
+
+    &.income {
+      background-color: #d1fae5;
+      .total-label {
+        color: #065f46;
+      }
+      .total-value {
+        color: #059669;
+      }
+    }
+
+    &.expense {
+      background-color: #fee2e2;
+      .total-label {
+        color: #991b1b;
+      }
+      .total-value {
+        color: #dc2626;
+      }
+    }
+
+    &.net {
+      &.positive {
+        background-color: #dbeafe;
+        .total-label {
+          color: #1e40af;
+        }
+        .total-value {
+          color: #2563eb;
+        }
+      }
+      &.negative {
+        background-color: #fef3c7;
+        .total-label {
+          color: #92400e;
+        }
+        .total-value {
+          color: #d97706;
+        }
+      }
     }
   }
 }
@@ -464,7 +561,7 @@ const formatTimeAgo = (txn) => {
   border: 1px solid #ddd;
   background-color: white;
   color: #374151;
-  border-radius: 6px;
+  border-radius: $radius-md;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;

@@ -125,7 +125,7 @@ defineEmits(['create']);
   font-size: 1.3rem;
   font-weight: 600;
   border: none;
-  border-radius: 14px;
+  border-radius: $radius-xl;
   padding: 1rem 2.5rem;
   cursor: pointer;
   transition: background 0.2s;
@@ -145,14 +145,14 @@ defineEmits(['create']);
   @media (max-width: $breakpoint-md) {
     font-size: 1.1rem;
     padding: 0.875rem 2rem;
-    border-radius: 12px;
+    border-radius: $radius-lg;
     min-width: 140px;
   }
 
   @media (max-width: $breakpoint-sm) {
     font-size: 1rem;
     padding: 0.75rem 1.5rem;
-    border-radius: 10px;
+    border-radius: $radius-lg;
     min-width: 120px;
   }
 

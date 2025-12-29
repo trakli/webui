@@ -100,11 +100,10 @@ const primaryCurrency = computed(() => {
 
 .stats-section {
   width: 100%;
-  max-width: 655px;
   display: flex;
   flex-direction: column;
-  justify-content: center; // Center content vertically
-  min-height: 158px; // Match wallet card height
+  justify-content: center;
+  min-height: 158px;
 }
 
 .kpis {

@@ -255,7 +255,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 .onboarding-steps {
   background: rgba(248, 250, 252, 0.8);
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   padding: 1.5rem;
   margin: 1rem 0;
   text-align: left;
@@ -333,7 +333,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
   font-size: 1.125rem;
   font-weight: 600;
   border: none;
-  border-radius: 12px;
+  border-radius: $radius-xl;
   padding: 1rem 2rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -366,7 +366,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 .onboarding-tip {
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
   border: 1px solid #f59e0b;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   padding: 1rem 1.25rem;
   display: flex;
   align-items: flex-start;

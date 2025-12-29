@@ -60,7 +60,7 @@ async function fetchTransactionsFromApi() {
       await loadDependencies();
     }
 
-    const response = await api.transactions.fetchAll();
+    const response = await api.transactions.fetchAll({ limit: 100 });
     lastSync.value = response.last_sync;
 
     const transformed = transactionMapper.toFrontendBatch(
@@ -86,25 +86,21 @@ export const useTransactions = () => {
 
   // View-scoped state
   const searchQuery = ref('');
-  const filterQuery = ref('');
   const currentPage = ref(1);
   const itemsPerPage = ref(10);
 
   // Computed values
   const filteredTransactions = computed(() => {
     const q = searchQuery.value.trim().toLowerCase();
-    const f = filterQuery.value.trim().toLowerCase();
+    if (!q) return transactions.value;
     return transactions.value.filter((t) => {
-      const matchesSearch =
-        !q ||
+      return (
         t.party.toLowerCase().includes(q) ||
         t.category.toLowerCase().includes(q) ||
         t.type.toLowerCase().includes(q) ||
         t.amount.toLowerCase().includes(q) ||
-        (t.date || '').toLowerCase().includes(q);
-      const matchesFilter =
-        !f || t.category.toLowerCase().includes(f) || t.type.toLowerCase().includes(f);
-      return matchesSearch && matchesFilter;
+        (t.date || '').toLowerCase().includes(q)
+      );
     });
   });
 
@@ -328,7 +324,6 @@ export const useTransactions = () => {
     // State
     transactions,
     searchQuery,
-    filterQuery,
     currentPage,
     itemsPerPage,
     isLoading,

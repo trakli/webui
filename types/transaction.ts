@@ -42,18 +42,16 @@ export interface FrontendTransaction {
   time: string; // HH:mm
   type: 'INCOME' | 'EXPENSE'; // Uppercase for UI
   party: string; // Display name
-  partyId?: string; // UUID for API calls
+  partyId?: number; // Numeric ID
   amount: string; // Formatted with currency e.g., "5000 XAF"
   category: string; // Display name(s) - single or comma-separated
   categoryIds?: number[]; // IDs for API calls
-  // Selected group for transaction (maps to API group_id)
   groupId?: number;
   wallet?: string; // Display name
-  walletId?: string; // UUID for API calls
+  walletId?: number; // Numeric ID
   description?: string;
   isRecurring?: boolean;
   files?: TransactionFile[];
-  // Base64 files prepared on the client for upload after create/update
   filesToUpload?: string[];
 }
 

@@ -120,7 +120,7 @@ defineEmits(['create']);
   padding: 2rem;
   background: #fef2f2;
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   margin: 1rem 0;
 
   .error-icon {
@@ -150,7 +150,7 @@ defineEmits(['create']);
     background: $primary;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: $radius-md;
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s;

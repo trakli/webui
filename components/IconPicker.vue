@@ -210,7 +210,7 @@ function clearSelection() {
   display: flex;
   align-items: center;
   border: 1.5px solid $border-light;
-  border-radius: 8px;
+  border-radius: $radius-lg;
   padding: 0.5rem;
   background: $bg-white;
   min-height: 44px;
@@ -257,7 +257,7 @@ function clearSelection() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   transition: background-color 0.2s ease;
   flex-shrink: 0;
   width: 24px;
@@ -297,7 +297,7 @@ function clearSelection() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   transition: background-color 0.2s ease;
   flex-shrink: 0;
   width: 24px;
@@ -332,7 +332,7 @@ function clearSelection() {
   gap: 0.3rem;
   background: $bg-white;
   border: 1px solid $border-light;
-  border-radius: 6px;
+  border-radius: $radius-md;
   padding: 0.5rem;
   box-sizing: border-box;
   height: 18vh;
@@ -364,7 +364,7 @@ function clearSelection() {
   width: 2.2rem;
   height: 2.2rem;
   border: 1px solid $border-color;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   background: $bg-white;
   display: flex;
   align-items: center;
@@ -375,7 +375,7 @@ function clearSelection() {
   @media (max-width: $breakpoint-sm) {
     width: 2rem;
     height: 2rem;
-    border-radius: 3px;
+    border-radius: $radius-sm;
   }
 
   @media (max-width: 480px) {

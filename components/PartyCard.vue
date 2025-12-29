@@ -7,7 +7,7 @@
         </div>
         <div class="party-details">
           <h3 class="party-name">{{ party.name }}</h3>
-          <span class="party-type-badge" :class="party.type">
+          <span v-if="isValidPartyType" class="party-type-badge" :class="party.type">
             {{ party.type }}
           </span>
         </div>
@@ -39,27 +39,31 @@
     <div class="financial-insights">
       <h4 class="insights-header">FINANCIAL INSIGHTS</h4>
 
-      <div class="insight-row received">
+      <div v-if="party.receivedAmount > 0" class="insight-row received">
         <div class="insight-icon">
           <LucideArrowUp />
         </div>
         <div class="insight-text">
-          Received <span class="amount">${{ party.receivedAmount || 0 }}</span> from
-          {{ party.name }} in the last 3 months
+          Received <span class="amount">${{ party.receivedAmount }}</span> from {{ party.name }} in
+          the last 3 months
         </div>
       </div>
 
-      <div class="insight-row spent">
+      <div v-if="party.spentAmount > 0" class="insight-row spent">
         <div class="insight-icon">
           <LucideArrowDown />
         </div>
         <div class="insight-text">
-          Spent <span class="amount">${{ party.spentAmount || 0 }}</span> on transactions pertaining
-          to {{ party.name }}
+          Spent <span class="amount">${{ party.spentAmount }}</span> on transactions pertaining to
+          {{ party.name }}
         </div>
       </div>
 
-      <div class="last-updated">
+      <div v-if="!party.receivedAmount && !party.spentAmount" class="insight-row neutral">
+        <div class="insight-text muted">No transactions in the last 3 months</div>
+      </div>
+
+      <div v-if="party.receivedAmount > 0 || party.spentAmount > 0" class="last-updated">
         <div class="insight-icon">
           <LucideClock />
         </div>
@@ -127,6 +131,12 @@ onUnmounted(() => {
 // - $error-color in _variables.scss is #dc2626.
 // - Instead of using blue (#3b82f6) for "spent > received", we will use #dc2626 and treat it as the error color.
 // - For primary, we can still use the fallback hex (#047844) as before, since $primary is also #047844 in _variables.scss.
+
+const validPartyTypes = ['individual', 'business', 'organization', 'vendor', 'client'];
+
+const isValidPartyType = computed(() => {
+  return validPartyTypes.includes(props.party.type?.toLowerCase());
+});
 
 const statusStyle = computed(() => {
   const received = Number(props.party.receivedAmount || 0);
@@ -218,23 +228,22 @@ const formatLastUpdated = (timestamp) => {
 
 .party-card {
   background: $bg-white;
-  border-radius: $radius-xl;
-  padding: $spacing-6;
+  border-radius: $radius-lg;
+  padding: $spacing-3;
   box-shadow: $shadow-sm;
   transition: $transition-base;
-  border-top: 0.25rem solid var(--party-strip-color, $border-medium);
+  border-left: 3px solid var(--party-strip-color, $border-medium);
   cursor: pointer;
 
   &:hover {
-    transform: translateY(-0.125rem);
     box-shadow: $shadow-md;
   }
 }
 
 /* Colors adapt via CSS vars from script */
 .party-icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -244,8 +253,8 @@ const formatLastUpdated = (timestamp) => {
   color: $bg-white;
 
   svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1rem;
+    height: 1rem;
   }
 }
 
@@ -266,7 +275,7 @@ const formatLastUpdated = (timestamp) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: $spacing-4;
+  margin-bottom: $spacing-2;
 }
 
 .party-info {
@@ -386,28 +395,27 @@ const formatLastUpdated = (timestamp) => {
 
 .card-description {
   color: $text-muted;
-  font-size: $font-size-sm;
+  font-size: $font-size-xs;
   line-height: 1.4;
-  margin-bottom: $spacing-5;
-  min-height: 2.5rem;
+  margin-bottom: $spacing-2;
 }
 
 .financial-insights {
   .insights-header {
-    font-size: 0.6875rem;
-    font-weight: $font-semibold;
+    font-size: 0.625rem;
+    font-weight: $font-medium;
     color: #9ca3af;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 0.375rem 0;
   }
 }
 
 .insight-row {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 0.375rem;
+  margin-bottom: 0.25rem;
 
   &.received {
     .insight-icon {
@@ -416,7 +424,7 @@ const formatLastUpdated = (timestamp) => {
 
     .amount {
       color: $primary;
-      font-weight: $font-semibold;
+      font-weight: $font-medium;
     }
   }
 
@@ -427,7 +435,7 @@ const formatLastUpdated = (timestamp) => {
 
     .amount {
       color: $error-color;
-      font-weight: $font-semibold;
+      font-weight: $font-medium;
     }
   }
 }
@@ -443,24 +451,29 @@ const formatLastUpdated = (timestamp) => {
 }
 
 .insight-text {
-  font-size: 0.8125rem;
+  font-size: $font-size-xs;
   color: $text-muted;
   line-height: 1.3;
   flex: 1;
+
+  &.muted {
+    font-style: italic;
+    color: #9ca3af;
+  }
 }
 
 .last-updated {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
 
   .insight-icon {
     color: #9ca3af;
   }
 
   .update-time {
-    font-size: 0.75rem;
+    font-size: 0.625rem;
     color: #9ca3af;
   }
 }
