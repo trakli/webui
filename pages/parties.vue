@@ -36,8 +36,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useParties } from '@/composables/useParties';
+import { useTransactions } from '@/composables/useTransactions';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import ContentTopCard from '@/components/TTopCard.vue';
@@ -45,13 +46,57 @@ import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.v
 import PartiesForm from '@/components/PartiesForm.vue';
 import PartyCardList from '@/components/PartyCardList.vue';
 import TipsSection from '@/components/TipsSection.vue';
+import { parseAmount } from '@/utils/currency';
 
 const showForm = ref(false);
 const editingItem = ref(null);
 const { isTabletOrBelow } = useSidebar();
 
-const { parties, isLoading, error, fetchParties, createParty, updateParty, deleteParty } =
-  useParties();
+const {
+  parties: rawParties,
+  isLoading,
+  error,
+  fetchParties,
+  createParty,
+  updateParty,
+  deleteParty
+} = useParties();
+const { transactions } = useTransactions();
+
+const parties = computed(() => {
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+  return rawParties.value.map((party) => {
+    const partyTransactions = transactions.value.filter((t) => {
+      const txnDate = new Date(t.date || t.datetime);
+      return t.partyId === party.id && txnDate >= threeMonthsAgo;
+    });
+
+    let receivedAmount = 0;
+    let spentAmount = 0;
+
+    partyTransactions.forEach((t) => {
+      const { value } = parseAmount(t.amount);
+      if (t.type === 'INCOME' || t.type === 'income') {
+        receivedAmount += value;
+      } else {
+        spentAmount += value;
+      }
+    });
+
+    const lastTransaction = [...partyTransactions].sort(
+      (a, b) => new Date(b.date || b.datetime).getTime() - new Date(a.date || a.datetime).getTime()
+    )[0];
+
+    return {
+      ...party,
+      receivedAmount: Math.round(receivedAmount * 100) / 100,
+      spentAmount: Math.round(spentAmount * 100) / 100,
+      lastUpdated: lastTransaction?.date || lastTransaction?.datetime || party.updated_at
+    };
+  });
+});
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
 

@@ -15,17 +15,28 @@
           v-for="period in availablePeriods.slice(0, 3)"
           :key="period.value"
           class="chip"
-          :class="{ 'chip--primary': currentPeriod === period.value }"
-          @click="setPeriod(period.value)"
+          :class="{ 'chip--primary': currentPeriod === period.value && !isCustomActive }"
+          @click="handlePresetClick(period.value)"
         >
           {{ period.label }}
         </button>
-        <button class="chip" @click="toggleCustomPeriod">
+        <button
+          class="chip"
+          :class="{ 'chip--primary': isCustomActive }"
+          @click="toggleCustomPeriod"
+        >
           <span>Custom</span>
-          <ChevronDown class="chip-icon" />
+          <ChevronDown class="chip-icon" :class="{ 'chip-icon--rotated': showFilterModal }" />
         </button>
       </div>
     </div>
+
+    <StatsFilterModal
+      v-if="showFilterModal"
+      :initial-filters="currentFilters"
+      @close="showFilterModal = false"
+      @apply="handleFiltersApply"
+    />
   </div>
 </template>
 
@@ -34,6 +45,7 @@ import { ref, computed } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useStatistics } from '@/composables/useStatistics';
+import StatsFilterModal from '@/components/StatsFilterModal.vue';
 
 const _props = defineProps({
   showFilters: {
@@ -43,21 +55,65 @@ const _props = defineProps({
 });
 
 const { user } = useAuth();
-const { currentPeriod, availablePeriods, setPeriod } = useStatistics();
+const {
+  currentPeriod,
+  customFilters,
+  availablePeriods,
+  setPeriod,
+  setCustomFilters,
+  clearCustomFilters
+} = useStatistics();
 
-// Local state
-const showCustomPeriod = ref(false);
+const showFilterModal = ref(false);
 
-// Computed properties
+const isCustomActive = computed(() => {
+  return currentPeriod.value === 'custom' && customFilters.value !== null;
+});
+
+const currentFilters = computed(() => {
+  if (customFilters.value) {
+    return {
+      startDate: customFilters.value.startDate,
+      endDate: customFilters.value.endDate,
+      walletIds: customFilters.value.walletIds
+    };
+  }
+  return {};
+});
+
 const currentPeriodLabel = computed(() => {
+  if (isCustomActive.value && customFilters.value) {
+    const start = customFilters.value.startDate;
+    const end = customFilters.value.endDate;
+    if (start && end) {
+      return `${formatDate(start)} - ${formatDate(end)}`;
+    }
+  }
   const period = availablePeriods.find((p) => p.value === currentPeriod.value);
   return period ? period.label.toLowerCase() : 'this period';
 });
 
-// Methods
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
 const toggleCustomPeriod = () => {
-  showCustomPeriod.value = !showCustomPeriod.value;
-  // TODO: Implement custom date picker
+  showFilterModal.value = !showFilterModal.value;
+};
+
+const handlePresetClick = (periodValue) => {
+  clearCustomFilters();
+  setPeriod(periodValue);
+};
+
+const handleFiltersApply = (filters) => {
+  setCustomFilters({
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+    walletIds: filters.walletIds
+  });
+  showFilterModal.value = false;
 };
 </script>
 
@@ -148,10 +204,15 @@ const toggleCustomPeriod = () => {
   width: 12px;
   height: 12px;
   stroke-width: 2;
+  transition: transform 0.2s ease;
 
   @media (max-width: $breakpoint-sm) {
     width: 10px;
     height: 10px;
+  }
+
+  &--rotated {
+    transform: rotate(180deg);
   }
 }
 </style>

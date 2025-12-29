@@ -1,19 +1,31 @@
 <template>
   <div class="kpi-section">
-    <div class="wallet-selector" @click="toggleDropdown">
-      <span class="wallet-name">{{ selectedWalletName }}</span>
-      <ChevronDown class="chevron" :class="{ rotated: showDropdown }" />
+    <div class="kpi-header">
+      <div class="wallet-selector" @click="toggleDropdown">
+        <span class="wallet-name">{{ selectedWalletName }}</span>
+        <ChevronDown class="chevron" :class="{ rotated: showDropdown }" />
 
-      <div v-if="showDropdown" class="wallet-dropdown">
-        <div
-          v-for="wallet in availableWallets"
-          :key="wallet.id || 'all'"
-          class="wallet-option"
-          :class="{ selected: selectedWalletId === wallet.id }"
-          @click.stop="selectWallet(wallet.id)"
-        >
-          {{ wallet.name }}
+        <div v-if="showDropdown" class="wallet-dropdown">
+          <div
+            v-for="wallet in availableWallets"
+            :key="wallet.id || 'all'"
+            class="wallet-option"
+            :class="{ selected: selectedWalletId === wallet.id }"
+            @click.stop="selectWallet(wallet.id)"
+          >
+            {{ wallet.name }}
+          </div>
         </div>
+      </div>
+
+      <div v-if="isCustomActive && activeFilterChips.length > 0" class="active-filters">
+        <span v-for="chip in activeFilterChips" :key="chip.key" class="filter-chip">
+          <span class="filter-chip__label">{{ chip.label }}</span>
+          <button class="filter-chip__remove" @click="removeFilter(chip.key)">
+            <XIcon class="filter-chip__remove-icon" />
+          </button>
+        </span>
+        <button class="filter-chip filter-chip--clear" @click="clearAllFilters">Clear all</button>
       </div>
     </div>
 
@@ -28,7 +40,9 @@
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Expenses</div>
-        <div class="kpi-value is-negative">{{ formatCurrency(statistics?.total_expenses || 0) }}</div>
+        <div class="kpi-value is-negative">
+          {{ formatCurrency(statistics?.total_expenses || 0) }}
+        </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Net</div>
@@ -40,15 +54,21 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { ChevronDown } from 'lucide-vue-next';
+import { ChevronDown, X as XIcon } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
+import { useWallets } from '@/composables/useWallets';
 
+const { wallets } = useWallets();
 const {
   currentStatistics,
+  currentPeriod,
+  customFilters,
   formatCompactCurrency,
   selectedWalletId,
   availableWallets,
-  setSelectedWallet
+  setSelectedWallet,
+  setCustomFilters,
+  clearCustomFilters
 } = useStatistics();
 
 const statistics = currentStatistics;
@@ -89,6 +109,68 @@ const handleClickOutside = (event) => {
   }
 };
 
+const isCustomActive = computed(() => {
+  return currentPeriod.value === 'custom' && customFilters.value !== null;
+});
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+const activeFilterChips = computed(() => {
+  if (!customFilters.value) return [];
+
+  const chips = [];
+
+  if (customFilters.value.startDate && customFilters.value.endDate) {
+    chips.push({
+      key: 'dateRange',
+      label: `${formatDate(customFilters.value.startDate)} - ${formatDate(customFilters.value.endDate)}`
+    });
+  }
+
+  if (customFilters.value.walletIds.length > 0) {
+    const selectedWalletNames = customFilters.value.walletIds
+      .map((id) => {
+        const wallet = wallets.value.find((w) => w.id === id);
+        return wallet?.name;
+      })
+      .filter(Boolean);
+
+    if (selectedWalletNames.length === 1) {
+      chips.push({ key: 'wallets', label: selectedWalletNames[0] });
+    } else if (selectedWalletNames.length > 1) {
+      chips.push({ key: 'wallets', label: `${selectedWalletNames.length} wallets` });
+    }
+  }
+
+  return chips;
+});
+
+const removeFilter = (key) => {
+  if (!customFilters.value) return;
+
+  const updatedFilters = { ...customFilters.value };
+
+  if (key === 'dateRange') {
+    updatedFilters.startDate = '';
+    updatedFilters.endDate = new Date().toISOString().split('T')[0];
+  } else if (key === 'wallets') {
+    updatedFilters.walletIds = [];
+  }
+
+  if (!updatedFilters.startDate && updatedFilters.walletIds.length === 0) {
+    clearCustomFilters();
+  } else {
+    setCustomFilters(updatedFilters);
+  }
+};
+
+const clearAllFilters = () => {
+  clearCustomFilters();
+};
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
 });
@@ -105,6 +187,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: $spacing-3;
+}
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  flex-wrap: wrap;
 }
 
 .wallet-selector {
@@ -228,5 +317,64 @@ onUnmounted(() => {
   &.is-negative {
     color: $error-color;
   }
+}
+
+.active-filters {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-1;
+  padding: 4px 8px;
+  border-radius: $radius-lg;
+  background: rgba(4, 120, 68, 0.1);
+  border: 1px solid rgba(4, 120, 68, 0.2);
+  font-size: $font-size-xs;
+  color: $primary;
+
+  &--clear {
+    background: transparent;
+    border: 1px solid $border-light;
+    color: $text-muted;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: $bg-gray;
+      color: $text-secondary;
+    }
+  }
+}
+
+.filter-chip__label {
+  font-weight: $font-medium;
+}
+
+.filter-chip__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $primary;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.filter-chip__remove-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.5;
 }
 </style>

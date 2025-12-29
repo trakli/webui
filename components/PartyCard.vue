@@ -7,7 +7,7 @@
         </div>
         <div class="party-details">
           <h3 class="party-name">{{ party.name }}</h3>
-          <span class="party-type-badge" :class="party.type">
+          <span v-if="isValidPartyType" class="party-type-badge" :class="party.type">
             {{ party.type }}
           </span>
         </div>
@@ -39,27 +39,31 @@
     <div class="financial-insights">
       <h4 class="insights-header">FINANCIAL INSIGHTS</h4>
 
-      <div class="insight-row received">
+      <div v-if="party.receivedAmount > 0" class="insight-row received">
         <div class="insight-icon">
           <LucideArrowUp />
         </div>
         <div class="insight-text">
-          Received <span class="amount">${{ party.receivedAmount || 0 }}</span> from
-          {{ party.name }} in the last 3 months
+          Received <span class="amount">${{ party.receivedAmount }}</span> from {{ party.name }} in
+          the last 3 months
         </div>
       </div>
 
-      <div class="insight-row spent">
+      <div v-if="party.spentAmount > 0" class="insight-row spent">
         <div class="insight-icon">
           <LucideArrowDown />
         </div>
         <div class="insight-text">
-          Spent <span class="amount">${{ party.spentAmount || 0 }}</span> on transactions pertaining
-          to {{ party.name }}
+          Spent <span class="amount">${{ party.spentAmount }}</span> on transactions pertaining to
+          {{ party.name }}
         </div>
       </div>
 
-      <div class="last-updated">
+      <div v-if="!party.receivedAmount && !party.spentAmount" class="insight-row neutral">
+        <div class="insight-text muted">No transactions in the last 3 months</div>
+      </div>
+
+      <div v-if="party.receivedAmount > 0 || party.spentAmount > 0" class="last-updated">
         <div class="insight-icon">
           <LucideClock />
         </div>
@@ -127,6 +131,12 @@ onUnmounted(() => {
 // - $error-color in _variables.scss is #dc2626.
 // - Instead of using blue (#3b82f6) for "spent > received", we will use #dc2626 and treat it as the error color.
 // - For primary, we can still use the fallback hex (#047844) as before, since $primary is also #047844 in _variables.scss.
+
+const validPartyTypes = ['individual', 'business', 'organization', 'vendor', 'client'];
+
+const isValidPartyType = computed(() => {
+  return validPartyTypes.includes(props.party.type?.toLowerCase());
+});
 
 const statusStyle = computed(() => {
   const received = Number(props.party.receivedAmount || 0);
@@ -445,6 +455,11 @@ const formatLastUpdated = (timestamp) => {
   color: $text-muted;
   line-height: 1.3;
   flex: 1;
+
+  &.muted {
+    font-style: italic;
+    color: #9ca3af;
+  }
 }
 
 .last-updated {

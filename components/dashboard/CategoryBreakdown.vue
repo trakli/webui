@@ -74,7 +74,15 @@
           <!-- Grid lines -->
           <line x1="30" y1="20" x2="30" y2="130" stroke="#e5e7eb" stroke-width="1" />
           <line x1="30" y1="130" x2="270" y2="130" stroke="#e5e7eb" stroke-width="1" />
-          <line x1="30" y1="75" x2="270" y2="75" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4" />
+          <line
+            x1="30"
+            y1="75"
+            x2="270"
+            y2="75"
+            stroke="#e5e7eb"
+            stroke-width="1"
+            stroke-dasharray="4"
+          />
           <!-- Lines for each category -->
           <path
             v-for="(cat, idx) in topCategories"
@@ -122,7 +130,7 @@ const COLORS = [
   '#8b5cf6', // Purple
   '#ec4899', // Pink
   '#06b6d4', // Cyan
-  '#f97316'  // Orange
+  '#f97316' // Orange
 ];
 
 const statistics = currentStatistics;

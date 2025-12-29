@@ -71,11 +71,31 @@ const { currentStatistics, formatCompactCurrency } = useStatistics();
 const statistics = currentStatistics;
 
 const topIncomeSource = computed(() => {
-  return statistics.value?.income_insights?.biggest_source || null;
+  const source = statistics.value?.income_insights?.biggest_source;
+  const category = statistics.value?.income_insights?.biggest_category;
+  if (!source && !category) return null;
+
+  const displayName =
+    source?.party && category?.category
+      ? `${source.party} | ${category.category}`
+      : source?.party || category?.category;
+  const amount = source?.amount || category?.amount || 0;
+
+  return { party: displayName, amount };
 });
 
 const topExpense = computed(() => {
-  return statistics.value?.expense_insights?.biggest_expense || null;
+  const target = statistics.value?.expense_insights?.biggest_expense;
+  const category = statistics.value?.expense_insights?.biggest_category;
+  if (!target && !category) return null;
+
+  const displayName =
+    target?.party && category?.category
+      ? `${target.party} | ${category.category}`
+      : target?.party || category?.category;
+  const amount = target?.amount || category?.amount || 0;
+
+  return { party: displayName, amount };
 });
 
 const savingsRate = computed(() => {
