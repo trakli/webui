@@ -58,16 +58,15 @@ const resolvedIcon = computed(() => {
 
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
-@use 'sass:color';
 
 .entity-card {
   display: grid;
   grid-template-columns: 1.8fr 2.5fr auto;
   align-items: start;
   padding: $spacing-4;
-  border-bottom: 1px solid $border-light;
+  border-bottom: 1px solid #ddd;
   gap: $spacing-4;
-  background: $bg-gray;
+  background: #f9f9f9;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -90,7 +89,7 @@ const resolvedIcon = computed(() => {
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    background: whitesmoke;
+    background: #fff;
 
     .entity-icon {
       transform: scale(1.1);
@@ -124,13 +123,13 @@ const resolvedIcon = computed(() => {
   min-width: 0;
 
   .name {
-    font-weight: 600;
-    color: $primary;
+    font-weight: $font-medium;
+    color: #1d3229;
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
-    font-size: 0.95rem;
+    font-size: $font-size-sm;
     flex: 1;
     min-width: 0;
     line-height: 1.3;
@@ -151,8 +150,8 @@ const resolvedIcon = computed(() => {
 }
 
 .entity-description {
-  color: $primary;
-  font-size: 0.95rem;
+  color: #374151;
+  font-size: $font-size-sm;
   padding: 0;
   line-height: 1.4;
   word-wrap: break-word;
@@ -197,38 +196,36 @@ const resolvedIcon = computed(() => {
   justify-content: center;
   background: transparent;
   border: none;
-  padding: 8px;
-  border-radius: $radius-lg;
+  padding: 6px;
+  border-radius: $radius-sm;
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
-  opacity: 0.7;
-  transform: translateX(10px);
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
 
   svg {
     width: 16px;
     height: 16px;
+    color: #047857;
+    transition: color 0.2s ease;
   }
 
   &:hover {
-    color: $error-color;
-    background: color.adjust($error-color, $lightness: 45%);
-  }
+    background-color: rgba(0, 0, 0, 0.05);
 
-  &.edit:hover {
-    color: $primary;
+    svg {
+      color: #065f46;
+    }
   }
 
   &.delete {
     svg {
-      color: $error-color;
+      color: #dc2626;
     }
 
-    &:hover {
-      color: $error-color;
-      background: $accent-color;
+    &:hover svg {
+      color: #b91c1c;
     }
   }
 }

@@ -324,7 +324,7 @@ const visiblePages = computed(() => {
 .entities-container {
   margin: 0 -1rem;
   width: calc(100% + 2rem);
-  background: $bg-gray;
+  background: #ebedec;
 }
 
 .pagination-row {
