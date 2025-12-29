@@ -31,7 +31,11 @@ export const transactionMapper = {
     _groups: GroupLite[] = []
   ): FrontendTransaction {
     const dt = new Date(api.datetime);
-    const date = dt.toISOString().slice(0, 10);
+    // Use local date to avoid timezone issues with filtering
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const date = `${year}-${month}-${day}`;
     const time = dt.toTimeString().slice(0, 5);
 
     const party =
@@ -93,7 +97,11 @@ export const transactionMapper = {
     wallets: Wallet[] = []
   ): FrontendTransaction {
     const dt = new Date(api.datetime);
-    const date = dt.toISOString().slice(0, 10);
+    // Use local date to avoid timezone issues
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const date = `${year}-${month}-${day}`;
     const time = dt.toTimeString().slice(0, 5);
 
     const party =
@@ -234,13 +242,16 @@ export const transactionMapper = {
   },
 
   /**
-   * Helper: Split ISO datetime into date and time
+   * Helper: Split ISO datetime into date and time (local timezone)
    */
   splitDatetime(datetime: string): { date: string; time: string } {
     const dt = new Date(datetime);
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
     return {
-      date: dt.toISOString().slice(0, 10), // YYYY-MM-DD
-      time: dt.toTimeString().slice(0, 5) // HH:mm
+      date: `${year}-${month}-${day}`,
+      time: dt.toTimeString().slice(0, 5)
     };
   }
 };

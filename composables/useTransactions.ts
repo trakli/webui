@@ -60,7 +60,7 @@ async function fetchTransactionsFromApi() {
       await loadDependencies();
     }
 
-    const response = await api.transactions.fetchAll();
+    const response = await api.transactions.fetchAll({ limit: 100 });
     lastSync.value = response.last_sync;
 
     const transformed = transactionMapper.toFrontendBatch(

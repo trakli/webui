@@ -34,14 +34,14 @@ const walletsError = ref<string | null>(null);
 const groupsError = ref<string | null>(null);
 const configurationsError = ref<string | null>(null);
 
-// Cache timestamps for lightweight caching (5 minutes)
+// Cache timestamps for lightweight caching (30 seconds for dev, can increase in prod)
 const categoriesLastFetched = ref<string | null>(null);
 const partiesLastFetched = ref<string | null>(null);
 const walletsLastFetched = ref<string | null>(null);
 const groupsLastFetched = ref<string | null>(null);
 const configurationsLastFetched = ref<string | null>(null);
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 30 * 1000; // 30 seconds
 
 // Helper function to deduplicate arrays by ID
 function deduplicateById<T extends { id: number }>(items: T[]): T[] {

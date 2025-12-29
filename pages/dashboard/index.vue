@@ -1,26 +1,6 @@
 <template>
-  <div class="dashboard-index-content">
-    <TDashboardTopCard :show-filters="hasTransactions" />
-
-    <div v-if="hasTransactions || isLoadingOrNotReady" class="balance-card-container">
-      <ComponentLoader
-        :is-loading="isLoadingOrNotReady"
-        :has-data="hasTransactions"
-        :show-empty="false"
-        skeleton-variant="card"
-      >
-        <WalletCard />
-      </ComponentLoader>
-
-      <ComponentLoader
-        :is-loading="isLoadingOrNotReady"
-        :has-data="hasTransactions"
-        :show-empty="false"
-        skeleton-variant="card"
-      >
-        <TTransactionCard />
-      </ComponentLoader>
-    </div>
+  <div class="dashboard">
+    <TDashboardTopCard :show-filters="hasData" />
 
     <OnboardingWizard
       v-if="shouldShowWizard"
@@ -29,48 +9,45 @@
       @complete-onboarding="handleCompleteOnboarding"
     />
 
-    <ComponentLoader
-      :is-loading="isLoadingOrNotReady"
-      :error="error"
-      :has-data="!isLoadingOrNotReady && transactions.length > 0"
-      :show-empty="false"
-      skeleton-variant="table"
-      :skeleton-count="6"
-      :skeleton-columns="5"
-    >
-      <!-- Mobile cards -->
-      <TTransactionsCardList
-        v-if="hasTransactions"
-        class="only-mobile"
-        :transactions="paginatedTransactions"
-        :search-query="searchQuery"
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total-pages="totalPages"
-        :total-entries="filteredTransactions.length"
-        @update:search-query="searchQuery = $event"
-        @page-change="currentPage = $event"
-        @edit="handleEdit"
-        @delete="handleDelete"
-      />
+    <template v-if="!shouldShowWizard">
+      <ComponentLoader
+        :is-loading="isLoadingOrNotReady"
+        :has-data="hasData"
+        :show-empty="false"
+        skeleton-variant="card"
+      >
+        <DashboardKPIs />
+      </ComponentLoader>
 
-      <!-- Desktop table -->
-      <TTableComponent
-        v-if="hasTransactions"
-        class="only-desktop"
-        :transactions="paginatedTransactions"
-        :all-transactions="filteredTransactions"
-        :search-query="searchQuery"
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total-pages="totalPages"
-        :total-entries="filteredTransactions.length"
-        @update:search-query="searchQuery = $event"
-        @page-change="currentPage = $event"
-        @edit="handleEdit"
-        @delete="handleDelete"
-      />
-    </ComponentLoader>
+      <div class="middle-section">
+        <ComponentLoader
+          :is-loading="isLoadingOrNotReady"
+          :has-data="hasData"
+          :show-empty="false"
+          skeleton-variant="card"
+        >
+          <CategoryBreakdown />
+        </ComponentLoader>
+
+        <ComponentLoader
+          :is-loading="isLoadingOrNotReady"
+          :has-data="hasTransactions"
+          :show-empty="false"
+          skeleton-variant="card"
+        >
+          <RecentTransactions />
+        </ComponentLoader>
+      </div>
+
+      <ComponentLoader
+        :is-loading="isLoadingOrNotReady"
+        :has-data="hasData"
+        :show-empty="false"
+        skeleton-variant="card"
+      >
+        <QuickInsights />
+      </ComponentLoader>
+    </template>
   </div>
 </template>
 
@@ -81,35 +58,24 @@ import { useTransactions } from '@/composables/useTransactions';
 import { useNotifications } from '@/composables/useNotifications';
 import { checkAuth } from '~/utils/auth';
 import TDashboardTopCard from '@/components/TDashboardTopCard.vue';
-import WalletCard from '@/components/WalletCard.vue';
-import TTransactionCard from '@/components/TTransactionCard.vue';
-import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
-import TTableComponent from '@/components/TTableComponent.vue';
+import DashboardKPIs from '@/components/dashboard/DashboardKPIs.vue';
+import CategoryBreakdown from '@/components/dashboard/CategoryBreakdown.vue';
+import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';
+import QuickInsights from '@/components/dashboard/QuickInsights.vue';
 import OnboardingWizard from '@/components/onboarding/OnboardingWizard.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
 
 const router = useRouter();
 
-const {
-  paginatedTransactions,
-  filteredTransactions,
-  searchQuery,
-  currentPage,
-  itemsPerPage,
-  totalPages,
-  deleteTransaction,
-  transactions
-} = useTransactions();
+const { transactions } = useTransactions();
 
-// Use centralized data manager states and initialization
 const { isLoading, error, isInitialized } = useDataManagerStates();
 useDataInitialization();
 
 const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
 const hasDataLoaded = computed(() => isInitialized.value && !isLoading.value);
-const hasTransactions = computed(
-  () => hasDataLoaded.value && filteredTransactions.value.length > 0
-);
+const hasTransactions = computed(() => hasDataLoaded.value && transactions.value.length > 0);
+const hasData = computed(() => hasDataLoaded.value);
 
 const shouldShowWizard = computed(() => {
   if (typeof window === 'undefined') return false;
@@ -118,24 +84,7 @@ const shouldShowWizard = computed(() => {
   return isInitialized.value && !isLoading.value && transactions.value.length === 0;
 });
 
-const { confirmDelete, showSuccess, showError } = useNotifications();
-
-const handleEdit = (transaction) => {
-  router.push(`/transactions/edit/${transaction.id}`);
-};
-
-const handleDelete = async (transaction) => {
-  const confirmed = await confirmDelete('transaction');
-  if (!confirmed) return;
-
-  try {
-    await deleteTransaction(transaction.id);
-    showSuccess('Transaction deleted', 'Transaction has been deleted successfully');
-  } catch (err) {
-    showError('Delete failed', 'Failed to delete transaction. Please try again.');
-    console.error('Failed to delete transaction:', err);
-  }
-};
+const { showSuccess } = useNotifications();
 
 const handleWizardAction = (action) => {
   const actionRoutes = {
@@ -163,46 +112,20 @@ definePageMeta({
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
-@use '@/assets/scss/_utilities.scss' as *;
 
-.dashboard-index-content {
+.dashboard {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: $spacing-4;
 }
 
-.balance-card-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
-  margin: 0;
-  padding: 0;
+.middle-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-4;
 
-  @media (min-width: 768px) {
-    flex-direction: row;
-    gap: 1rem;
-    align-items: center;
-  }
-
-  & > :first-child {
-    flex: 0 0 100%;
-
-    @media (min-width: 768px) {
-      flex: 0 0 40%;
-      max-width: 40%;
-    }
-  }
-
-  & > :last-child {
-    flex: 0 0 100%;
-
-    @media (min-width: 768px) {
-      flex: 0 0 58%;
-      max-width: 58%;
-      display: flex;
-      align-items: center;
-    }
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
   }
 }
 </style>
