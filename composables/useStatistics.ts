@@ -898,21 +898,6 @@ export const useStatistics = () => {
     }
   };
 
-  // Initialize selected wallet from configured default when available
-  const { getDefaultWallet } = useSharedData();
-  watch(
-    [wallets, () => getDefaultWallet.value],
-    () => {
-      if (selectedWalletId.value === null) {
-        const dw = getDefaultWallet.value;
-        if (dw && typeof dw.id === 'number') {
-          selectedWalletId.value = dw.id;
-        }
-      }
-    },
-    { immediate: true }
-  );
-
   // Watch for changes in selected wallet, period, custom filters, AND when the underlying data becomes available
   watch(
     [selectedWalletId, currentPeriod, customFilters, transactions, wallets],

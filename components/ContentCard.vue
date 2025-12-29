@@ -94,8 +94,8 @@ const resolvedIcon = computed(() => {
   }
 
   &.is-default {
-    background: rgba($primary, 0.05);
-    border-left: 4px solid $primary;
+    background: rgba($success, 0.08);
+    border-left: 4px solid $success;
     padding-left: calc($spacing-4 - 4px);
   }
 
@@ -105,7 +105,7 @@ const resolvedIcon = computed(() => {
     background: #fff;
 
     &.is-default {
-      background: rgba($primary, 0.1);
+      background: rgba($success, 0.12);
     }
 
     .entity-icon {
