@@ -1,8 +1,13 @@
 <template>
-  <NuxtLayout>
+  <NuxtLayout :key="layoutKey">
     <NuxtPage />
   </NuxtLayout>
 </template>
+
+<script setup>
+const route = useRoute();
+const layoutKey = computed(() => route.meta.layout || 'default');
+</script>
 
 <style lang="scss">
 html,
