@@ -3,7 +3,7 @@ import { aiApi, type FormatType, type AskResponse } from '@/services/api/aiApi';
 
 const mockApi = vi.fn();
 vi.mock('#imports', () => ({
-  useApi: () => mockApi,
+  useApi: () => mockApi
 }));
 
 vi.stubGlobal('useApi', () => mockApi);
@@ -20,8 +20,8 @@ describe('aiApi', () => {
         data: {
           answer: 'You spent $500 on food last month.',
           format_type: 'scalar',
-          results: [{ total: 500 }],
-        },
+          results: [{ total: 500 }]
+        }
       };
       mockApi.mockResolvedValueOnce(mockResponse);
 
@@ -29,7 +29,7 @@ describe('aiApi', () => {
 
       expect(mockApi).toHaveBeenCalledWith('/ai/chat', {
         method: 'POST',
-        body: { message: 'How much did I spend on food?' },
+        body: { message: 'How much did I spend on food?' }
       });
       expect(result).toEqual(mockResponse);
     });
@@ -37,7 +37,7 @@ describe('aiApi', () => {
     it('should handle error responses', async () => {
       const mockResponse: AskResponse = {
         success: false,
-        message: 'AI service unavailable',
+        message: 'AI service unavailable'
       };
       mockApi.mockResolvedValueOnce(mockResponse);
 
@@ -77,7 +77,7 @@ describe('FormatType', () => {
       'list',
       'pair_list',
       'table',
-      'raw',
+      'raw'
     ];
 
     validTypes.forEach((type) => {
@@ -86,8 +86,8 @@ describe('FormatType', () => {
         data: {
           answer: 'test',
           format_type: type,
-          results: [],
-        },
+          results: []
+        }
       };
       expect(response.data?.format_type).toBe(type);
     });
@@ -99,8 +99,8 @@ describe('FormatType', () => {
       data: {
         answer: 'test',
         format_type: null,
-        results: [],
-      },
+        results: []
+      }
     };
     expect(response.data?.format_type).toBeNull();
   });

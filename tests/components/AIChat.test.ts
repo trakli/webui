@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
-import { ref, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import AIChat from '@/components/ai/AIChat.vue';
 
 const mockAsk = vi.fn();
 vi.mock('@/services/api/aiApi', () => ({
   aiApi: {
-    ask: (...args: unknown[]) => mockAsk(...args),
-  },
+    ask: (...args: unknown[]) => mockAsk(...args)
+  }
 }));
 
 describe('AIChat', () => {
@@ -27,8 +27,8 @@ describe('AIChat', () => {
       data: {
         answer: 'Test response',
         format_type: 'scalar',
-        results: [{ total: 100 }],
-      },
+        results: [{ total: 100 }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -60,7 +60,7 @@ describe('AIChat', () => {
 
     resolvePromise!({
       success: true,
-      data: { answer: 'Response', format_type: null, results: [] },
+      data: { answer: 'Response', format_type: null, results: [] }
     });
     await flushPromises();
 
@@ -73,8 +73,8 @@ describe('AIChat', () => {
       data: {
         answer: 'You spent $500 on food last month.',
         format_type: 'scalar',
-        results: [{ total: 500 }],
-      },
+        results: [{ total: 500 }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -91,7 +91,7 @@ describe('AIChat', () => {
   it('displays error message on failed request', async () => {
     mockAsk.mockResolvedValueOnce({
       success: false,
-      message: 'Service unavailable',
+      message: 'Service unavailable'
     });
 
     const wrapper = mount(AIChat);
@@ -140,7 +140,7 @@ describe('AIChat', () => {
 
     resolvePromise!({
       success: true,
-      data: { answer: 'Done', format_type: null, results: [] },
+      data: { answer: 'Done', format_type: null, results: [] }
     });
     await flushPromises();
 
@@ -159,7 +159,7 @@ describe('AIChat', () => {
   it('clears input after sending message', async () => {
     mockAsk.mockResolvedValueOnce({
       success: true,
-      data: { answer: 'Response', format_type: null, results: [] },
+      data: { answer: 'Response', format_type: null, results: [] }
     });
 
     const wrapper = mount(AIChat);
@@ -184,8 +184,8 @@ describe('AIChat format type rendering', () => {
       data: {
         answer: 'Your total spending is:',
         format_type: 'scalar',
-        results: [{ total: 5000 }],
-      },
+        results: [{ total: 5000 }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -203,8 +203,8 @@ describe('AIChat format type rendering', () => {
       data: {
         answer: 'Top category:',
         format_type: 'pair',
-        results: [{ category: 'Food', amount: 1500 }],
-      },
+        results: [{ category: 'Food', amount: 1500 }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -222,8 +222,8 @@ describe('AIChat format type rendering', () => {
       data: {
         answer: 'Transaction details:',
         format_type: 'record',
-        results: [{ id: 1, name: 'Rent', amount: 2000, date: '2025-01-01' }],
-      },
+        results: [{ id: 1, name: 'Rent', amount: 2000, date: '2025-01-01' }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -241,8 +241,8 @@ describe('AIChat format type rendering', () => {
       data: {
         answer: 'Your categories:',
         format_type: 'list',
-        results: [{ name: 'Food' }, { name: 'Transport' }, { name: 'Entertainment' }],
-      },
+        results: [{ name: 'Food' }, { name: 'Transport' }, { name: 'Entertainment' }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -262,9 +262,9 @@ describe('AIChat format type rendering', () => {
         format_type: 'pair_list',
         results: [
           { category: 'Food', total: 500 },
-          { category: 'Transport', total: 200 },
-        ],
-      },
+          { category: 'Transport', total: 200 }
+        ]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -284,9 +284,9 @@ describe('AIChat format type rendering', () => {
         format_type: 'table',
         results: [
           { date: '2025-01-01', description: 'Groceries', amount: 50 },
-          { date: '2025-01-02', description: 'Gas', amount: 30 },
-        ],
-      },
+          { date: '2025-01-02', description: 'Gas', amount: 30 }
+        ]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -305,8 +305,8 @@ describe('AIChat format type rendering', () => {
       data: {
         answer: 'Raw data:',
         format_type: 'raw',
-        results: [{ complex: { nested: 'data' } }],
-      },
+        results: [{ complex: { nested: 'data' } }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -324,8 +324,8 @@ describe('AIChat format type rendering', () => {
       data: {
         answer: 'No data found.',
         format_type: 'table',
-        results: [],
-      },
+        results: []
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -342,8 +342,8 @@ describe('AIChat format type rendering', () => {
       data: {
         answer: 'Just a text response.',
         format_type: null,
-        results: [{ data: 'value' }],
-      },
+        results: [{ data: 'value' }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -366,8 +366,8 @@ describe('AIChat formatValue helper', () => {
       data: {
         answer: 'Amount:',
         format_type: 'scalar',
-        results: [{ amount: 1234.5 }],
-      },
+        results: [{ amount: 1234.5 }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -384,8 +384,8 @@ describe('AIChat formatValue helper', () => {
       data: {
         answer: 'Count:',
         format_type: 'scalar',
-        results: [{ count: 42 }],
-      },
+        results: [{ count: 42 }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -402,8 +402,8 @@ describe('AIChat formatValue helper', () => {
       data: {
         answer: 'Record:',
         format_type: 'record',
-        results: [{ name: 'Test', value: null }],
-      },
+        results: [{ name: 'Test', value: null }]
+      }
     });
 
     const wrapper = mount(AIChat);
@@ -426,8 +426,8 @@ describe('AIChat formatKey helper', () => {
       data: {
         answer: 'Record:',
         format_type: 'record',
-        results: [{ total_amount: 100 }],
-      },
+        results: [{ total_amount: 100 }]
+      }
     });
 
     const wrapper = mount(AIChat);

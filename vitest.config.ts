@@ -11,13 +11,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['components/**/*.vue', 'composables/**/*.ts', 'services/**/*.ts'],
-    },
+      include: ['components/**/*.vue', 'composables/**/*.ts', 'services/**/*.ts']
+    }
   },
   resolve: {
     alias: {
       '@': resolve(__dirname, './'),
-      '~': resolve(__dirname, './'),
-    },
-  },
+      '~': resolve(__dirname, './')
+    }
+  }
 });

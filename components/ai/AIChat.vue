@@ -12,12 +12,16 @@
           <div class="message-text">{{ message.text }}</div>
           <div v-if="message.results?.length && message.formatType" class="results-container">
             <template v-if="message.formatType === 'scalar'">
-              <div class="result-scalar">{{ formatValue(Object.values(message.results[0])[0]) }}</div>
+              <div class="result-scalar">
+                {{ formatValue(Object.values(message.results[0])[0]) }}
+              </div>
             </template>
             <template v-else-if="message.formatType === 'pair'">
               <div class="result-pair">
                 <span class="pair-label">{{ Object.keys(message.results[0])[0] }}:</span>
-                <span class="pair-value">{{ formatValue(Object.values(message.results[0])[1]) }}</span>
+                <span class="pair-value">{{
+                  formatValue(Object.values(message.results[0])[1])
+                }}</span>
               </div>
             </template>
             <template v-else-if="message.formatType === 'record'">
@@ -113,16 +117,18 @@ const scrollToBottom = () => {
 };
 
 const formatKey = (key: string): string => {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
 const formatValue = (value: unknown): string => {
   if (value === null || value === undefined) return '-';
   if (typeof value === 'number') {
-    return Number.isInteger(value) ? value.toString() : value.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    return Number.isInteger(value)
+      ? value.toString()
+      : value.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
   }
   return String(value);
 };
@@ -223,8 +229,13 @@ const handleSendMessage = async () => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 .bubble.user {
   background: $bg-gray;
@@ -340,7 +351,8 @@ const handleSendMessage = async () => {
   border-collapse: collapse;
   font-size: $font-size-sm;
 
-  th, td {
+  th,
+  td {
     padding: $spacing-1 $spacing-2;
     text-align: left;
     border-bottom: 1px solid color.adjust($primary, $lightness: 35%);
