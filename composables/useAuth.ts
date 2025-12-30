@@ -1,3 +1,5 @@
+import { useDataManager } from './useDataManager';
+
 export const useAuth = () => {
   // Cookie management for persistence
   const userCookie = useCookie('auth.user', {
@@ -38,6 +40,10 @@ export const useAuth = () => {
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
+      //clear data before new login
+      const { clearData } = useDataManager();
+      clearData();
+
       const api = useApi();
       const response = await api('/login', {
         method: 'POST',
