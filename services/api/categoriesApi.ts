@@ -105,6 +105,27 @@ const categoriesApi = {
       console.error('Error deleting category:', error);
       throw error;
     }
+  },
+
+  /**
+   * Seed default categories for the user
+   * POST /categories/seed-defaults
+   */
+  async seedDefaults(): Promise<{
+    created: number;
+    skipped: number;
+    categories: Category[];
+  } | null> {
+    const api = useApi();
+    try {
+      const response = await api<
+        ApiResponse<{ created: number; skipped: number; categories: Category[] }>
+      >('/categories/seed-defaults', { method: 'POST' });
+      return response?.data || null;
+    } catch (error) {
+      console.error('Error seeding default categories:', error);
+      throw error;
+    }
   }
 };
 

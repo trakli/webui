@@ -1,6 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from '#imports';
+import { ref, computed, nextTick } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useApi } from '@/composables/useApi';
 import { usePasswordToggle } from '@/composables/usePasswordToggle';
@@ -16,7 +15,6 @@ definePageMeta({
   middleware: 'guest'
 });
 
-const router = useRouter();
 const { register } = useAuth();
 const api = useApi();
 
@@ -122,7 +120,8 @@ const handleSubmit = async () => {
     delete payload.contact;
 
     await register(payload);
-    router.push('/dashboard');
+    await nextTick();
+    await navigateTo('/onboarding');
   } catch (error) {
     if (error.response && error.response._data && Array.isArray(error.response._data.errors)) {
       const flattenedErrors = error.response._data.errors.reduce(

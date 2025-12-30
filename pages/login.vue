@@ -7,6 +7,7 @@ import { Eye, EyeOff } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import AuthDivider from '@/components/auth/AuthDivider.vue';
 import AuthSocialLogin from '@/components/auth/AuthSocialLogin.vue';
+import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 
 definePageMeta({
   layout: 'auth',
@@ -24,6 +25,7 @@ const loginError = ref('');
 const router = useRouter();
 const route = useRoute();
 const { login } = useAuth();
+const sharedData = useSharedData();
 
 watch(
   form,
@@ -38,14 +40,27 @@ watch(
 const handleSubmit = async () => {
   loading.value = true;
   loginError.value = '';
+  // First attempt login
   try {
     await login(form.value);
-    router.push('/dashboard');
   } catch {
+    // Login failed – show error and stop further processing
     loginError.value = 'Invalid credentials. Please try again.';
-  } finally {
     loading.value = false;
+    return;
   }
+
+  // Login succeeded – now check onboarding status (errors here should not affect login error)
+  let isOnboardingComplete = false;
+  try {
+    const configs = await sharedData.loadConfigurations();
+    isOnboardingComplete = !!configs?.[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
+  } catch (e) {
+    console.warn('Failed to load onboarding config', e);
+  }
+
+  router.push(isOnboardingComplete ? '/dashboard' : '/onboarding');
+  loading.value = false;
 };
 
 const { showPassword, togglePassword } = usePasswordToggle();

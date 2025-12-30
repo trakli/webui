@@ -1,127 +1,110 @@
 <template>
-  <div class="settings-layout">
-    <TSidebar />
-    <TNavbar />
-    <div class="settings-content">
-      <div class="settings-content-card">
-        <div class="settings-page">
-          <div class="page-header-wrapper">
-            <div class="page-header">
-              <div class="page-header-left">
-                <h1 class="page-title">Financial Reports</h1>
-                <p class="page-subtitle">
-                  {{ pageSubtitle }}
-                </p>
-              </div>
-              <div class="page-header-right">
-                <button
-                  v-for="period in availablePeriods.slice(0, 3)"
-                  :key="period.value"
-                  class="chip"
-                  :class="{ 'chip--primary': currentPeriod === period.value }"
-                  @click="setPeriod(period.value)"
-                >
-                  {{ period.label }}
-                </button>
-                <button class="chip">
-                  <span>Custom</span>
-                  <ChevronDown class="chip-icon" />
-                </button>
-                <button class="chip chip--report">
-                  <FileText class="chip-icon" />
-                  <span>Report</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="showReportMessage" class="alert alert--success">
-            <p class="alert-title">Report Generated!</p>
-            <p>
-              Your financial report for June 2024 has been successfully generated and is available
-              for download.
-            </p>
-          </div>
-
-          <div class="kpis">
-            <KpiCard
-              label="Total Income"
-              :value="isLoading ? 'Loading...' : formatCompactCurrency(kpis.totalIncome, currency)"
-            />
-            <KpiCard
-              label="Avg. Monthly Income"
-              :value="
-                isLoading
-                  ? 'Loading...'
-                  : formatCompactCurrency(Math.round(kpis.averageMonthlyIncome), currency)
-              "
-            />
-            <KpiCard
-              label="Top Income Source"
-              :value="isLoading ? 'Loading...' : kpis.topIncomeSource"
-            />
-            <KpiCard
-              label="% Growth vs Last Period"
-              :value="isLoading ? 'Loading...' : `${kpis.growthPercentage}%`"
-              :value-class="kpis.growthPercentage >= 0 ? 'is-positive' : 'is-negative'"
-            />
-          </div>
-
-          <div class="content-layout">
-            <div class="charts-column">
-              <DonutChartCard
-                :data="sourceBreakdown"
-                :total="kpis.totalIncome"
-                :currency="currency"
-              >
-                <template #note>
-                  <span class="bold">AI Insight:</span>
-                  {{
-                    statistics?.income_insights?.top_sources?.length > 1
-                      ? `${Math.round(statistics.income_insights.top_sources[0]?.percentage || 0)}% of your income comes from ${statistics.income_insights.top_sources[0]?.party || 'your top source'}.`
-                      : 'Diversify your income sources to reduce risk.'
-                  }}
-                </template>
-              </DonutChartCard>
-              <LineChartCard :data="lineData" />
-            </div>
-
-            <div class="insights-column">
-              <NarrativeInsights class="insights-card">
-                <span v-if="!isLoading && statistics">
-                  Your income
-                  <strong
-                    >{{ kpis.growthPercentage >= 0 ? 'grew' : 'declined' }}
-                    {{ Math.abs(kpis.growthPercentage) }}%</strong
-                  >
-                  this period{{
-                    kpis.topIncomeSource !== 'N/A'
-                      ? `, driven mainly by ${kpis.topIncomeSource}`
-                      : ''
-                  }}.
-                  {{
-                    statistics.income_insights?.top_sources?.length > 0
-                      ? `You have ${statistics.income_insights.top_sources.length} active income sources.`
-                      : 'Consider diversifying your income sources.'
-                  }}
-                  {{
-                    statistics.expense_insights?.budget_analysis?.savings_rate > 0.2
-                      ? ' Your savings rate is healthy.'
-                      : ' Focus on improving your savings rate.'
-                  }}
-                </span>
-                <span v-else> Loading insights... </span>
-              </NarrativeInsights>
-
-              <ForecastsPanel
-                :total-income="kpis.totalIncome"
-                :average-monthly-income="kpis.averageMonthlyIncome"
-                :disable-input="true"
-                class="forecasts-card forecasts-card--narrow"
-              />
-            </div>
-          </div>
+  <div class="reports-page">
+    <div class="page-header-wrapper">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title">Financial Reports</h1>
+          <p class="page-subtitle">
+            {{ pageSubtitle }}
+          </p>
         </div>
+        <div class="page-header-right">
+          <button
+            v-for="period in availablePeriods.slice(0, 3)"
+            :key="period.value"
+            class="chip"
+            :class="{ 'chip--primary': currentPeriod === period.value }"
+            @click="setPeriod(period.value)"
+          >
+            {{ period.label }}
+          </button>
+          <button class="chip">
+            <span>Custom</span>
+            <ChevronDown class="chip-icon" />
+          </button>
+          <button class="chip chip--report">
+            <FileText class="chip-icon" />
+            <span>Report</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showReportMessage" class="alert alert--success">
+      <p class="alert-title">Report Generated!</p>
+      <p>
+        Your financial report for June 2024 has been successfully generated and is available for
+        download.
+      </p>
+    </div>
+
+    <div class="kpis">
+      <KpiCard
+        label="Total Income"
+        :value="isLoading ? 'Loading...' : formatCompactCurrency(kpis.totalIncome, currency)"
+      />
+      <KpiCard
+        label="Avg. Monthly Income"
+        :value="
+          isLoading
+            ? 'Loading...'
+            : formatCompactCurrency(Math.round(kpis.averageMonthlyIncome), currency)
+        "
+      />
+      <KpiCard label="Top Income Source" :value="isLoading ? 'Loading...' : kpis.topIncomeSource" />
+      <KpiCard
+        label="% Growth vs Last Period"
+        :value="isLoading ? 'Loading...' : `${kpis.growthPercentage}%`"
+        :value-class="kpis.growthPercentage >= 0 ? 'is-positive' : 'is-negative'"
+      />
+    </div>
+
+    <div class="content-layout">
+      <div class="charts-column">
+        <DonutChartCard :data="sourceBreakdown" :total="kpis.totalIncome" :currency="currency">
+          <template #note>
+            <span class="bold">AI Insight:</span>
+            {{
+              statistics?.income_insights?.top_sources?.length > 1
+                ? `${Math.round(statistics.income_insights.top_sources[0]?.percentage || 0)}% of your income comes from ${statistics.income_insights.top_sources[0]?.party || 'your top source'}.`
+                : 'Diversify your income sources to reduce risk.'
+            }}
+          </template>
+        </DonutChartCard>
+        <LineChartCard :data="lineData" />
+      </div>
+
+      <div class="insights-column">
+        <NarrativeInsights class="insights-card">
+          <span v-if="!isLoading && statistics">
+            Your income
+            <strong
+              >{{ kpis.growthPercentage >= 0 ? 'grew' : 'declined' }}
+              {{ Math.abs(kpis.growthPercentage) }}%</strong
+            >
+            this period{{
+              kpis.topIncomeSource !== 'N/A' ? `, driven mainly by ${kpis.topIncomeSource}` : ''
+            }}.
+            {{
+              statistics.income_insights?.top_sources?.length > 0
+                ? `You have ${statistics.income_insights.top_sources.length} active income sources.`
+                : 'Consider diversifying your income sources.'
+            }}
+            {{
+              statistics.expense_insights?.budget_analysis?.savings_rate > 0.2
+                ? ' Your savings rate is healthy.'
+                : ' Focus on improving your savings rate.'
+            }}
+          </span>
+          <span v-else> Loading insights... </span>
+        </NarrativeInsights>
+
+        <ForecastsPanel
+          :total-income="kpis.totalIncome"
+          :average-monthly-income="kpis.averageMonthlyIncome"
+          :disable-input="true"
+          class="forecasts-card forecasts-card--narrow"
+        />
       </div>
     </div>
   </div>
@@ -129,71 +112,41 @@
 
 <script setup>
 import { FileText, ChevronDown } from 'lucide-vue-next';
-import TSidebar from '@/components/TSidebar.vue';
-import TNavbar from '@/components/TNavbar.vue';
 import KpiCard from '@/components/reports/KpiCard.vue';
 import NarrativeInsights from '@/components/reports/NarrativeInsights.vue';
 import ForecastsPanel from '@/components/reports/ForecastsPanel.vue';
 import LineChartCard from '@/components/reports/LineChartCard.vue';
 import DonutChartCard from '@/components/reports/DonutChartCard.vue';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useStatistics } from '@/composables/useStatistics';
 import { useAuth } from '@/composables/useAuth';
 import { getChartColors } from '@/utils/colors';
 
 definePageMeta({
-  layout: 'default',
+  layout: 'dashboard',
   middleware: 'auth'
 });
 
 const { user } = useAuth();
 const {
   currentPeriod,
+  currentStatistics,
   selectedWalletId,
   availablePeriods,
   availableWallets,
+  isLoading,
   setPeriod,
-  getStatistics,
   formatCompactCurrency
 } = useStatistics();
 
 const showReportMessage = ref(false);
-const statistics = ref(null);
-const isLoading = ref(false);
-
-// Load statistics data
-const loadStatistics = async () => {
-  try {
-    isLoading.value = true;
-    statistics.value = await getStatistics(selectedWalletId.value, currentPeriod.value);
-  } catch (err) {
-    console.error('Error loading statistics:', err);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Watch for changes
-watch([selectedWalletId, currentPeriod], () => {
-  loadStatistics();
-});
-
-// Load on mount
-onMounted(() => {
-  loadStatistics();
-});
+const statistics = currentStatistics;
 
 const currency = computed(() => {
   const selectedWallet = availableWallets.value.find((w) => w.id === selectedWalletId.value);
-
-  if (selectedWallet) {
-    return selectedWallet.currency;
-  }
-
-  return selectedWalletId.value === null ? 'USD' : 'XAF';
+  return selectedWallet?.currency || 'USD';
 });
 
-// Computed properties for real data
 const kpis = computed(() => {
   if (!statistics.value)
     return {
@@ -235,7 +188,6 @@ const sourceBreakdown = computed(() => {
   );
 });
 
-// Page header computed properties
 const currentPeriodLabel = computed(() => {
   const period = availablePeriods.find((p) => p.value === currentPeriod.value);
   return period ? period.label.toLowerCase() : 'this period';
@@ -251,73 +203,8 @@ const pageSubtitle = computed(() => {
 @use '@/assets/scss/_variables.scss' as *;
 @use '@/assets/scss/_utilities.scss' as *;
 
-.settings-layout {
-  --sidebar-width: min(300px, 30vw);
-  --sidebar-min-width: 200px;
-  background-color: $bg-gray;
-  min-height: 100vh;
-}
-
-.settings-content {
-  margin-left: var(--sidebar-width, 300px);
-  transition: margin-left 0.3s ease;
-  width: calc(100% - var(--sidebar-width, 300px));
-  overflow-x: hidden;
-  padding: 6rem 1rem 1rem;
-
-  @media (max-width: $breakpoint-lg) {
-    padding: 5.5rem 1rem 1rem;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    width: 100%;
-    margin-left: 0;
-    padding: 5rem 0.75rem 1rem;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    padding: 4.5rem 0.5rem 1rem;
-  }
-
-  @media (max-width: 480px) {
-    padding: 4rem 0.25rem 1rem;
-  }
-}
-
-.settings-content-card {
-  min-height: calc(100vh - 120px);
-  background-color: $bg-white;
-  border-radius: 2rem;
-  border: 1px solid $bg-gray;
-  padding: 2rem 1rem;
-  box-sizing: border-box;
-  overflow: hidden;
-
-  @media (max-width: $breakpoint-md) {
-    border-radius: 1.5rem;
-    padding: 1.5rem 0.75rem;
-    min-height: calc(100vh - 100px);
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    border-radius: 1rem;
-    padding: 1rem 0.5rem;
-    min-height: calc(100vh - 80px);
-  }
-
-  @media (max-width: 480px) {
-    border-radius: 0.75rem;
-    padding: 0.75rem 0.25rem;
-  }
-}
-
-.settings-page {
-  width: 95%;
-  margin: auto;
-
-  @media (max-width: $breakpoint-sm) {
-    width: 100%;
-  }
+.reports-page {
+  width: 100%;
 }
 
 .page-header-wrapper {
@@ -328,7 +215,6 @@ const pageSubtitle = computed(() => {
   position: relative;
   overflow: hidden;
 
-  // Add smaller decorative ellipse
   &::before {
     content: '';
     position: absolute;
@@ -423,11 +309,6 @@ const pageSubtitle = computed(() => {
   font-weight: $font-bold;
 }
 
-.section-spacing {
-  margin-bottom: $spacing-4;
-}
-
-// Enhanced narrative insights styling
 :deep(.narrative-insights) {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 249, 0.8) 100%);
   border: 1px solid rgba(4, 120, 68, 0.1);
@@ -439,7 +320,6 @@ const pageSubtitle = computed(() => {
   position: relative;
   overflow: hidden;
 
-  // Add subtle pattern
   &::before {
     content: '';
     position: absolute;
@@ -450,7 +330,6 @@ const pageSubtitle = computed(() => {
     background: linear-gradient(90deg, $primary 0%, rgba(4, 120, 68, 0.5) 50%, $primary 100%);
   }
 
-  // Text styling
   font-size: $font-size-base;
   line-height: 1.6;
   color: $text-primary;
@@ -476,7 +355,6 @@ const pageSubtitle = computed(() => {
   }
 }
 
-// Override KPI card styles for reports page
 :deep(.kpi-card) {
   background: linear-gradient(135deg, $bg-white 0%, #fefefe 100%);
   border: 1px solid rgba(4, 120, 68, 0.1);
@@ -536,8 +414,6 @@ const pageSubtitle = computed(() => {
   display: flex;
   flex-direction: column;
   gap: $spacing-4;
-
-  // Add subtle background pattern for charts area
   position: relative;
   padding: $spacing-4;
   background:
@@ -546,7 +422,6 @@ const pageSubtitle = computed(() => {
   border-radius: $radius-xl;
   border: 1px solid rgba(4, 120, 68, 0.05);
 
-  // Make chart cards blend better
   :deep(.chart-card) {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(8px);
@@ -576,7 +451,6 @@ const pageSubtitle = computed(() => {
 }
 
 .forecasts-card {
-  // Add some styling to match the overall theme
   :deep(.card) {
     border: 1px solid rgba(4, 120, 68, 0.1);
     box-shadow:
@@ -584,14 +458,12 @@ const pageSubtitle = computed(() => {
       0 2px 4px -1px rgba(0, 0, 0, 0.03);
   }
 
-  // Force single column layout for narrow context
   &.forecasts-card--narrow {
     :deep(.panel-grid) {
       grid-template-columns: 1fr !important;
       gap: $spacing-3;
     }
 
-    // Optimize form input for narrow space
     :deep(.whatif-row) {
       flex-direction: column;
       align-items: stretch;
@@ -609,7 +481,6 @@ const pageSubtitle = computed(() => {
       }
     }
 
-    // Adjust spacing for better vertical layout
     :deep(.sub-title) {
       margin-bottom: $spacing-2;
     }

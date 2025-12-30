@@ -36,6 +36,7 @@
           :icon="entity.icon?.path || entity.icon?.content || entity.icon"
           :description="entity.description"
           :page-name="pageName"
+          :is-default="String(entity.id) === defaultItemId"
           @edit="$emit('edit', entity)"
           @delete="$emit('delete', entity)"
         />
@@ -119,6 +120,10 @@ const props = defineProps({
   headerType: {
     type: String,
     default: 'default' // 'default', 'expense'
+  },
+  defaultItemId: {
+    type: String,
+    default: null
   }
 });
 

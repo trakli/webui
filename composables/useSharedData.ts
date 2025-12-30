@@ -4,9 +4,9 @@ import type { Category } from '~/types/category';
 import type { Party } from '~/types/party';
 import type { Wallet } from '~/types/wallet';
 import type { Group } from '~/services/api/groupsApi';
-import type { Configuration } from '~/services/api/configurationsApi';
 import { checkAuth } from '~/utils/auth';
 import { extractApiErrors } from '~/utils/apiErrors';
+import type { ConfigurationItem } from '~/types/configuration';
 
 /**
  * Shared data composable for centralized state management
@@ -18,7 +18,6 @@ const categories = ref<Category[]>([]);
 const parties = ref<Party[]>([]);
 const wallets = ref<Wallet[]>([]);
 const groups = ref<Group[]>([]);
-const configurations = ref<Configuration[]>([]);
 
 // Loading states
 const categoriesLoading = ref(false);
@@ -34,14 +33,15 @@ const walletsError = ref<string | null>(null);
 const groupsError = ref<string | null>(null);
 const configurationsError = ref<string | null>(null);
 
-// Cache timestamps for lightweight caching (30 seconds for dev, can increase in prod)
+// Cache timestamps for lightweight caching
 const categoriesLastFetched = ref<string | null>(null);
 const partiesLastFetched = ref<string | null>(null);
 const walletsLastFetched = ref<string | null>(null);
 const groupsLastFetched = ref<string | null>(null);
 const configurationsLastFetched = ref<string | null>(null);
+const configurationsMap = ref<Record<string, any> | null>(null);
 
-const CACHE_DURATION = 30 * 1000; // 30 seconds
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Helper function to deduplicate arrays by ID
 function deduplicateById<T extends { id: number }>(items: T[]): T[] {
@@ -122,6 +122,46 @@ export const useSharedData = () => {
     }
   );
 
+  const loadConfigurations = async (forceReload = false) => {
+    if (!forceReload && configurationsMap.value && isCacheValid(configurationsLastFetched.value)) {
+      return configurationsMap.value;
+    }
+
+    if (configurationsLoading.value) {
+      while (configurationsLoading.value) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      return configurationsMap.value;
+    }
+
+    if (!checkAuth()) {
+      configurationsLoading.value = false;
+      return configurationsMap.value;
+    }
+
+    configurationsLoading.value = true;
+    configurationsError.value = null;
+
+    try {
+      const response = await api.configurations.fetchAll();
+      const items: ConfigurationItem[] = response?.data || [];
+      const map: Record<string, any> = {};
+      for (const item of items) {
+        map[item.key] = item.value;
+      }
+      configurationsMap.value = map;
+      configurationsLastFetched.value = new Date().toISOString();
+      return map;
+    } catch (err) {
+      const errorMsg = extractApiErrors(err);
+      configurationsError.value = errorMsg;
+      console.error('Error loading configurations:', errorMsg);
+      throw err;
+    } finally {
+      configurationsLoading.value = false;
+    }
+  };
+
   const loadParties = createDataLoader(
     'parties',
     parties,
@@ -149,15 +189,6 @@ export const useSharedData = () => {
     () => api.groups.fetchAll()
   );
 
-  const loadConfigurations = createDataLoader(
-    'configurations',
-    configurations,
-    configurationsLoading,
-    configurationsError,
-    configurationsLastFetched,
-    () => api.configurations.fetchAll()
-  );
-
   const loadAllData = async (forceReload = false) => {
     try {
       await Promise.all([
@@ -183,26 +214,74 @@ export const useSharedData = () => {
   );
 
   const getDefaultGroup = computed(() => {
-    const config = configurations.value.find((c) => c.key === 'default-group');
-    if (config?.value) {
-      const group = groups.value.find((g) => g.id === parseInt(config.value));
+    const map = configurationsMap.value || {};
+    const configured = map['default-group'];
+    if (configured) {
+      const groupId = typeof configured === 'object' ? configured.id : configured;
+      const group = groups.value.find((g) => g.id === parseInt(groupId));
       if (group) return group;
     }
     return groups.value.length > 0 ? groups.value[0] : null;
   });
 
+  // Default wallet from configurations (fallback to heuristic)
   const getDefaultWallet = computed(() => {
-    const config = configurations.value.find((c) => c.key === 'default-wallet');
-    if (config?.value) {
-      const wallet = wallets.value.find((w) => w.id === parseInt(config.value));
-      if (wallet) return wallet;
+    const map = configurationsMap.value || {};
+    const configured = map['default-wallet'];
+
+    // Try to resolve wallet id from config
+    const resolveConfiguredWalletId = (): string | null => {
+      if (!configured) return null;
+      if (typeof configured === 'string' || typeof configured === 'number')
+        return String(configured);
+      if (configured && typeof configured === 'object') {
+        if (
+          'id' in configured &&
+          (typeof configured.id === 'string' || typeof configured.id === 'number')
+        ) {
+          return String(configured.id);
+        }
+        if (
+          'walletId' in configured &&
+          (typeof configured.walletId === 'string' || typeof configured.walletId === 'number')
+        ) {
+          return String(configured.walletId);
+        }
+        if ('name' in configured && configured.name) {
+          const byName = wallets.value.find(
+            (w) => w.name.toLowerCase() === String(configured.name).toLowerCase()
+          );
+          if (byName) return String(byName.id);
+        }
+      }
+      return null;
+    };
+
+    const configuredId = resolveConfiguredWalletId();
+    if (configuredId) {
+      const byId = wallets.value.find(
+        (w) =>
+          String(w.id) === configuredId ||
+          String(w.sync_state?.client_generated_id || '') === configuredId
+      );
+      if (byId) return byId;
     }
-    return wallets.value.length > 0 ? wallets.value[0] : null;
+
+    return null;
   });
 
+  // Default currency prefers configuration; fallback to default wallet currency or 'USD'
   const getDefaultCurrency = computed(() => {
-    const config = configurations.value.find((c) => c.key === 'default-currency');
-    return config?.value || getDefaultWallet.value?.currency || 'USD';
+    const map = configurationsMap.value || {};
+    const configured = map['default-currency'];
+    const extractCode = (val: any): string | null => {
+      if (!val) return null;
+      if (typeof val === 'string') return val;
+      if (typeof val === 'object' && 'code' in val) return String(val.code);
+      return null;
+    };
+    const fromConfig = extractCode(configured);
+    return fromConfig || getDefaultWallet.value?.currency || 'USD';
   });
 
   // Category management functions
@@ -274,7 +353,7 @@ export const useSharedData = () => {
     parties.value = [];
     wallets.value = [];
     groups.value = [];
-    configurations.value = [];
+    configurationsMap.value = null;
 
     categoriesLoading.value = false;
     partiesLoading.value = false;
@@ -303,7 +382,7 @@ export const useSharedData = () => {
     parties: readonly(parties),
     wallets: readonly(wallets),
     groups: readonly(groups),
-    configurations: readonly(configurations),
+    configurationsMap: readonly(configurationsMap),
 
     // Loading states
     categoriesLoading: readonly(categoriesLoading),
@@ -318,6 +397,13 @@ export const useSharedData = () => {
     walletsError: readonly(walletsError),
     groupsError: readonly(groupsError),
     configurationsError: readonly(configurationsError),
+
+    // Last fetch timestamps
+    categoriesLastFetched: readonly(categoriesLastFetched),
+    partiesLastFetched: readonly(partiesLastFetched),
+    walletsLastFetched: readonly(walletsLastFetched),
+    groupsLastFetched: readonly(groupsLastFetched),
+    configurationsLastFetched: readonly(configurationsLastFetched),
 
     // Computed getters
     getIncomeCategories,

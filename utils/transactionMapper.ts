@@ -144,9 +144,10 @@ export const transactionMapper = {
   toApi(
     frontend: Partial<FrontendTransaction>,
     _parties: Party[] = [],
-    wallets: Wallet[] = [],
+    _wallets: Wallet[] = [],
     currentDatetime?: string,
-    defaultGroup?: { id: number; name: string }
+    defaultGroup?: { id: number; name: string },
+    defaultWallet?: Wallet | null
   ): TransactionCreatePayload {
     let datetime: string;
     if (currentDatetime) {
@@ -164,13 +165,8 @@ export const transactionMapper = {
     const partyId: number | null = frontend.partyId || null;
     let walletId: number | null = frontend.walletId || null;
 
-    if (walletId === null && wallets.length > 0) {
-      const defaultWallet = wallets.find(
-        (wallet) => wallet.name.toLowerCase().includes('default') || wallet.is_default === true
-      );
-      if (defaultWallet) {
-        walletId = defaultWallet.id;
-      }
+    if (walletId === null && defaultWallet) {
+      walletId = defaultWallet.id;
     }
 
     const groupId = frontend.groupId || defaultGroup?.id || null;

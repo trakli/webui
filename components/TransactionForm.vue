@@ -54,14 +54,23 @@
           @select="handlePartySelect"
         />
 
-        <SearchableDropdown
-          v-model="walletSearchQuery"
-          :label="isOutcomeSelected ? 'Wallet (sent from)' : 'Wallet (received to)'"
-          placeholder="Search wallet..."
-          :options="wallets"
-          :error="walletError ? 'Wallet is required.' : ''"
-          @select="handleWalletSelect"
-        />
+        <div class="wallet-field-wrapper">
+          <SearchableDropdown
+            v-model="walletSearchQuery"
+            :label="isOutcomeSelected ? 'Wallet (sent from)' : 'Wallet (received to)'"
+            placeholder="Search wallet..."
+            :options="wallets"
+            :error="walletError ? 'Wallet is required.' : ''"
+            @select="handleWalletSelect"
+          />
+          <span
+            v-if="isWalletDefault"
+            class="wallet-default-indicator"
+            title="This is your default wallet"
+          >
+            Default
+          </span>
+        </div>
       </div>
 
       <div class="form-transaction">
@@ -157,7 +166,8 @@ const selectedWalletId = ref('');
 const selectedGroupId = ref(null);
 const selectedAdditionalCategoryIds = ref([]);
 const filesBase64 = ref([]);
-const selectedCurrency = ref('XAF');
+const sharedData = useSharedData();
+const selectedCurrency = ref(sharedData.getDefaultCurrency.value || 'USD');
 
 const dateError = ref(false);
 const timeError = ref(false);
@@ -223,7 +233,7 @@ function onSubmit() {
   emit('submit', payload);
 }
 
-const sharedData = useSharedData();
+// sharedData declared above for default currency
 
 const parties = computed(() => sharedData.parties.value);
 const groups = computed(() => sharedData.groups.value);
@@ -250,6 +260,14 @@ const wallets = computed(() => {
   return sharedData.wallets.value.filter((wallet) => {
     return !wallet.currency || wallet.currency === selectedCurrency.value;
   });
+});
+
+const isWalletDefault = computed(() => {
+  if (!selectedWalletId.value) return false;
+  const defaultWallet = sharedData.getDefaultWallet.value;
+  if (!defaultWallet) return false;
+  const defaultId = String(defaultWallet.sync_state?.client_generated_id || defaultWallet.id);
+  return selectedWalletId.value === defaultId;
 });
 
 function handlePartySelect(party) {

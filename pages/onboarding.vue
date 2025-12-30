@@ -71,56 +71,77 @@
             <CreditCardIcon />
           </div>
           <div class="step-info">
-            <h2 class="step-title">Set up your wallet and currency</h2>
+            <h2 class="step-title">Set up your wallet</h2>
             <p class="step-description">
-              Configure your default wallet and currency. Your wallet currency and default currency
-              should match for accurate tracking.
+              Configure your default wallet and currency for tracking transactions.
             </p>
           </div>
           <div class="step-form">
             <div class="wallet-currency-setup">
-              <div class="setup-warning">
-                <div class="warning-icon">💡</div>
-                <p class="warning-text">
-                  We've created a default wallet for you. You can use it, rename it, or create a new
-                  one.
-                </p>
-              </div>
-
-              <div class="setup-sections">
-                <div class="setup-section">
-                  <h3>Wallet setup</h3>
-                  <div class="wallet-options">
-                    <div class="wallet-option">
+              <div class="wallet-currency-columns">
+                <div class="wallet-column">
+                  <label class="column-label">Default wallet</label>
+                  <div class="wallet-cards">
+                    <div
+                      class="wallet-card"
+                      :class="{ selected: walletChoice === 'use-default' }"
+                      @click="walletChoice = 'use-default'"
+                    >
                       <input
-                        id="use-default"
                         v-model="walletChoice"
                         type="radio"
                         value="use-default"
+                        class="wallet-radio"
+                        @click.stop
                       />
-                      <label for="use-default">Use default wallet</label>
+                      <div class="wallet-card-content">
+                        <span class="wallet-card-title">Use Main Wallet</span>
+                        <span class="wallet-card-desc">Keep the default wallet name</span>
+                      </div>
                     </div>
-                    <div class="wallet-option">
+
+                    <div
+                      class="wallet-card"
+                      :class="{ selected: walletChoice === 'rename-default' }"
+                      @click="walletChoice = 'rename-default'"
+                    >
                       <input
-                        id="rename-default"
                         v-model="walletChoice"
                         type="radio"
                         value="rename-default"
+                        class="wallet-radio"
+                        @click.stop
                       />
-                      <label for="rename-default">Rename default wallet</label>
+                      <div class="wallet-card-content">
+                        <span class="wallet-card-title">Rename wallet</span>
+                        <span class="wallet-card-desc">Give it a custom name</span>
+                      </div>
                     </div>
-                    <div class="wallet-option">
+
+                    <div
+                      class="wallet-card"
+                      :class="{ selected: walletChoice === 'create-new' }"
+                      @click="walletChoice = 'create-new'"
+                    >
                       <input
-                        id="create-new"
                         v-model="walletChoice"
                         type="radio"
                         value="create-new"
+                        class="wallet-radio"
+                        @click.stop
                       />
-                      <label for="create-new">Create new wallet</label>
+                      <div class="wallet-card-content">
+                        <span class="wallet-card-title">Create new wallet</span>
+                        <span class="wallet-card-desc">Start fresh with a new wallet</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div v-if="walletChoice === 'rename-default'" class="wallet-name-input">
+                  <div
+                    v-if="walletChoice === 'rename-default' || walletChoice === 'create-new'"
+                    class="wallet-extra-field"
+                  >
+                    <label class="field-label">Wallet name</label>
                     <input
                       v-model="newWalletName"
                       type="text"
@@ -129,13 +150,8 @@
                     />
                   </div>
 
-                  <div v-if="walletChoice === 'create-new'" class="new-wallet-form">
-                    <input
-                      v-model="newWalletName"
-                      type="text"
-                      placeholder="Wallet name"
-                      class="wallet-input"
-                    />
+                  <div v-if="walletChoice === 'create-new'" class="wallet-extra-field">
+                    <label class="field-label">Wallet currency</label>
                     <select v-model="newWalletCurrency" class="currency-select">
                       <option value="">Select currency</option>
                       <option
@@ -149,8 +165,8 @@
                   </div>
                 </div>
 
-                <div class="setup-section">
-                  <h3>Default currency</h3>
+                <div class="currency-column">
+                  <label class="column-label">Default currency</label>
                   <select v-model="selectedCurrency" class="currency-select">
                     <option
                       v-for="currency in availableCurrencies"
@@ -160,9 +176,7 @@
                       {{ currency.code }} - {{ currency.name }}
                     </option>
                   </select>
-                  <p class="currency-note">
-                    This will be your default currency for all transactions.
-                  </p>
+                  <p class="currency-note">Used for displaying totals and reports.</p>
                 </div>
               </div>
 
@@ -179,8 +193,46 @@
           </div>
         </div>
 
-        <!-- Step 3: All Set -->
-        <div v-if="currentStep === 3" class="step-content completion-step">
+        <!-- Step 3: Categories Setup -->
+        <div v-if="currentStep === 3" class="step-content">
+          <div class="step-icon">
+            <TagIcon />
+          </div>
+          <div class="step-info">
+            <h2 class="step-title">Set up categories</h2>
+            <p class="step-description">Categories help you organize and track your spending.</p>
+          </div>
+          <div class="step-form">
+            <div class="categories-setup">
+              <div
+                class="categories-card"
+                :class="{ selected: wantDefaultCategories }"
+                @click="wantDefaultCategories = !wantDefaultCategories"
+              >
+                <div class="categories-card-header">
+                  <input
+                    v-model="wantDefaultCategories"
+                    type="checkbox"
+                    class="categories-checkbox"
+                    @click.stop
+                  />
+                  <span class="categories-card-title">Add default categories</span>
+                </div>
+                <p class="categories-card-description">
+                  We'll create common categories like Salary, Food & Dining, Transportation,
+                  Entertainment, and more. You can customize them later.
+                </p>
+              </div>
+
+              <div class="step-actions">
+                <button class="primary-btn" @click="handleCategoriesSetup">Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: All Set -->
+        <div v-if="currentStep === 4" class="step-content completion-step">
           <div class="completion-icon">
             <CheckCircleIcon />
           </div>
@@ -214,11 +266,15 @@
       </div>
 
       <div class="onboarding-footer">
-        <button v-if="currentStep > 1 && currentStep < 4" class="nav-btn" @click="previousStep">
+        <button
+          v-if="currentStep > 1 && currentStep < totalSteps"
+          class="nav-btn"
+          @click="previousStep"
+        >
           ← Previous
         </button>
         <div class="spacer" />
-        <button v-if="currentStep < 3" class="nav-btn skip" @click="skipStep">
+        <button v-if="currentStep < totalSteps" class="nav-btn skip" @click="skipStep">
           Skip for now →
         </button>
       </div>
@@ -226,36 +282,46 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'nuxt/app';
-import { CreditCardIcon, ArrowsRightLeftIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
+import { onBeforeRouteLeave } from 'vue-router';
+import {
+  CreditCardIcon,
+  ArrowsRightLeftIcon,
+  CheckCircleIcon,
+  TagIcon
+} from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { useNotifications } from '@/composables/useNotifications';
+import { useWallets } from '@/composables/useWallets';
+import configurationsApi from '@/services/api/configurationsApi';
+import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
+import { CURRENCIES } from '@/utils/currencies';
+import { categoriesApi } from '@/services/api/categoriesApi';
 
 definePageMeta({
   layout: 'onboarding',
   middleware: 'auth'
 });
 
-const router = useRouter();
 const sharedData = useSharedData();
 const { showSuccess } = useNotifications();
+const { createWallet, updateWallet } = useWallets();
 
 const currentStep = ref(1);
-const totalSteps = 3;
+const totalSteps = 4;
 
 const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100);
 
 // Data from shared state
 const incomeCategories = computed(() => sharedData.getIncomeCategories?.value || []);
 const expenseCategories = computed(() => sharedData.getExpenseCategories?.value || []);
-const wallets = computed(() => sharedData.getWallets?.value || []);
+const wallets = computed(() => sharedData.wallets?.value || []);
 const walletCount = computed(() => wallets.value.length);
 const categoryCount = computed(
   () => incomeCategories.value.length + expenseCategories.value.length
 );
-const transactionCount = computed(() => sharedData.getTransactions?.value?.length || 0);
+const transactionCount = computed(() => 0);
 
 // Language setup
 const selectedLanguage = ref('en');
@@ -273,15 +339,9 @@ const walletChoice = ref('use-default');
 const newWalletName = ref('');
 const newWalletCurrency = ref('');
 const selectedCurrency = ref('USD');
+const wantDefaultCategories = ref(true);
 
-const availableCurrencies = [
-  { code: 'USD', name: 'US Dollar' },
-  { code: 'EUR', name: 'Euro' },
-  { code: 'GBP', name: 'British Pound' },
-  { code: 'JPY', name: 'Japanese Yen' },
-  { code: 'CAD', name: 'Canadian Dollar' },
-  { code: 'AUD', name: 'Australian Dollar' }
-];
+const availableCurrencies = CURRENCIES;
 
 const isWalletCurrencySetupValid = computed(() => {
   if (!selectedCurrency.value) return false;
@@ -309,53 +369,204 @@ const previousStep = () => {
   }
 };
 
-const skipStep = () => {
-  nextStep();
+const ensureOnboardingComplete = async () => {
+  const completeRes = await configurationsApi
+    .create({
+      key: CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
+      value: { completedAt: new Date().toISOString() },
+      type: 'json'
+    })
+    .catch(() => null);
+  if (!completeRes) {
+    await configurationsApi
+      .update(CONFIGURATION_KEYS.ONBOARDING_COMPLETE, {
+        value: { completedAt: new Date().toISOString() },
+        type: 'json'
+      })
+      .catch(() => null);
+  }
+  if (typeof globalThis !== 'undefined') {
+    globalThis.localStorage.setItem('onboarding-completed', 'true');
+  }
+
+  // Refresh configurations cache to ensure middleware sees the update
+  await sharedData.loadConfigurations(true).catch(() => null);
+};
+
+const skipStep = async () => {
+  try {
+    await ensureOnboardingComplete();
+    await navigateTo('/dashboard', { replace: true });
+  } catch (e) {
+    console.error('Error in skipStep:', e);
+  }
 };
 
 const handleLanguageSelection = () => {
   if (!selectedLanguage.value) return;
-
-  showSuccess(
-    'Language Set!',
-    `Language changed to ${availableLanguages.find((l) => l.code === selectedLanguage.value)?.name}.`
-  );
   nextStep();
 };
 
 const handleWalletCurrencySetup = () => {
   if (!isWalletCurrencySetupValid.value) return;
-
-  let message = 'Settings saved successfully!';
-
-  if (walletChoice.value === 'rename-default') {
-    message = `Default wallet renamed to "${newWalletName.value}" and currency set to ${selectedCurrency.value}.`;
-  } else if (walletChoice.value === 'create-new') {
-    message = `New wallet "${newWalletName.value}" created with ${newWalletCurrency.value} currency.`;
-  } else {
-    message = `Default wallet configured with ${selectedCurrency.value} currency.`;
-  }
-
-  showSuccess('Setup Complete!', message);
   nextStep();
 };
 
-const completOnboarding = () => {
+const handleCategoriesSetup = () => {
+  nextStep();
+};
+
+const completOnboarding = async () => {
+  // Save all user selections at the end of onboarding
+  const configurationsToSave = [];
+
+  // Save language if selected
+  if (selectedLanguage.value) {
+    configurationsToSave.push({
+      key: CONFIGURATION_KEYS.LANGUAGE,
+      value: selectedLanguage.value,
+      type: 'string'
+    });
+  }
+
+  // Save currency if selected
+  if (selectedCurrency.value) {
+    configurationsToSave.push({
+      key: CONFIGURATION_KEYS.CURRENCY,
+      value: selectedCurrency.value,
+      type: 'string'
+    });
+  }
+
+  // Ensure a wallet exists and persist default-wallet
+  let targetWalletId: string | null = null;
+
+  if (walletChoice.value === 'use-default' || walletChoice.value === 'rename-default') {
+    let existing = sharedData.getDefaultWallet.value || wallets.value[0];
+
+    if (!existing) {
+      const name =
+        walletChoice.value === 'rename-default' && newWalletName.value.trim().length > 0
+          ? newWalletName.value.trim()
+          : 'Main Wallet';
+
+      const createdRes = await createWallet({
+        name,
+        type: 'cash',
+        description: 'Created during onboarding',
+        currency: selectedCurrency.value
+      }).catch(() => ({
+        data: null
+      }));
+      const created = createdRes?.data as any;
+      if (created) {
+        existing = created;
+      }
+    } else if (
+      walletChoice.value === 'rename-default' &&
+      newWalletName.value.trim().length > 0 &&
+      existing.name !== newWalletName.value.trim()
+    ) {
+      await updateWallet(existing.id, { name: newWalletName.value.trim() }).catch(() => null);
+    }
+
+    if (existing) {
+      targetWalletId = String(existing.id);
+    }
+  } else if (walletChoice.value === 'create-new') {
+    const name = newWalletName.value.trim();
+
+    if (name && newWalletCurrency.value) {
+      const createdRes = await createWallet({
+        name,
+        type: 'cash',
+        description: 'Created during onboarding',
+        currency: newWalletCurrency.value
+      }).catch(() => ({
+        data: null
+      }));
+      const created = createdRes?.data as any;
+      if (created) {
+        targetWalletId = String(created.id);
+      }
+    }
+  }
+
+  if (targetWalletId) {
+    configurationsToSave.push({
+      key: CONFIGURATION_KEYS.WALLET,
+      value: targetWalletId,
+      type: 'string'
+    });
+  }
+
+  // Save all configurations
+  for (const config of configurationsToSave) {
+    const createRes = await configurationsApi.create(config).catch(() => null);
+    if (!createRes) {
+      await configurationsApi.update(config.key, config).catch(() => null);
+    }
+  }
+
+  // Create default categories if user opted in
+  if (wantDefaultCategories.value) {
+    await categoriesApi.seedDefaults().catch((e) => {
+      console.error('Failed to seed default categories:', e);
+    });
+  }
+
+  // Mark onboarding as complete
+  const completeRes = await configurationsApi
+    .create({
+      key: CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
+      value: { completedAt: new Date().toISOString() },
+      type: 'json'
+    })
+    .catch(() => null);
+
+  if (!completeRes) {
+    await configurationsApi
+      .update(CONFIGURATION_KEYS.ONBOARDING_COMPLETE, {
+        value: { completedAt: new Date().toISOString() },
+        type: 'json'
+      })
+      .catch(() => null);
+  }
+
+  showSuccess('Welcome to Trakli!', "You're ready to take control of your finances!");
+
+  // Always proceed with navigation
   localStorage.setItem('onboarding-completed', 'true');
   localStorage.removeItem('onboarding-step');
-  showSuccess('Welcome to Trakli!', "You're ready to take control of your finances!");
-  router.push('/dashboard');
+  // Refresh caches so default wallet/currency reflect immediately after onboarding
+  await Promise.all([
+    sharedData.loadConfigurations(true).catch(() => {}),
+    sharedData.loadWallets(true).catch(() => {})
+  ]);
+  await navigateTo('/dashboard', { replace: true });
 };
 
 onMounted(() => {
   const savedStep = localStorage.getItem('onboarding-step');
   if (savedStep) {
-    currentStep.value = parseInt(savedStep) + 1;
+    currentStep.value = Number.parseInt(savedStep) + 1;
     localStorage.removeItem('onboarding-step');
   }
 
   sharedData.loadCategories();
   sharedData.loadWallets();
+});
+
+onBeforeRouteLeave(() => {
+  // Mark onboarding complete synchronously to avoid layout transition issues
+  if (typeof globalThis !== 'undefined') {
+    const completed = globalThis.localStorage.getItem('onboarding-completed') === 'true';
+    if (!completed) {
+      globalThis.localStorage.setItem('onboarding-completed', 'true');
+      // Fire and forget - don't await to avoid blocking navigation
+      ensureOnboardingComplete().catch(() => {});
+    }
+  }
 });
 </script>
 

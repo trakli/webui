@@ -483,3 +483,29 @@
     }
   }
 }
+
+.wallet-field-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .wallet-default-indicator {
+    position: absolute;
+    top: 34px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: $primary;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+}
