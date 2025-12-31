@@ -10,17 +10,17 @@
   >
     <div class="entity-list">
       <div class="header-row">
-        <h1>All {{ pageNamePlural }}</h1>
+        <h1>{{ t('All {items}', { items: t(pageNamePlural) }) }}</h1>
         <SearchInput
           v-model="searchQuery"
-          :placeholder="`Search ${pageNamePlural.toLowerCase()}...`"
+          :placeholder="t('Search {items}...', { items: t(pageNamePlural).toLowerCase() })"
         />
       </div>
 
       <div class="table-header" :class="{ 'expense-header': headerType === 'expense' }">
-        <div class="col-name">{{ pageName }} Name</div>
-        <div class="col-description">{{ pageName }} Description</div>
-        <div class="col-action">Action</div>
+        <div class="col-name">{{ t('{item} Name', { item: t(pageName) }) }}</div>
+        <div class="col-description">{{ t('{item} Description', { item: t(pageName) }) }}</div>
+        <div class="col-action">{{ t('Action') }}</div>
       </div>
 
       <TransitionGroup
@@ -50,7 +50,7 @@
             :class="{ disabled: currentPage === 1 }"
             @click="currentPage--"
           >
-            &lt; Prev
+            &lt; {{ t('Prev') }}
           </button>
 
           <button
@@ -72,18 +72,18 @@
             :class="{ disabled: currentPage === totalPages }"
             @click="currentPage++"
           >
-            Next &gt;
+            {{ t('Next') }} &gt;
           </button>
         </div>
 
         <div class="page-info">
-          <span>Show</span>
+          <span>{{ t('Show') }}</span>
           <select v-model="perPage" class="per-page-select">
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
           </select>
-          <span>per page</span>
+          <span>{{ t('per page') }}</span>
         </div>
       </div>
     </div>
@@ -95,6 +95,8 @@ import { ref, computed, watch } from 'vue';
 import ContentCard from './ContentCard.vue';
 import ComponentLoader from './ComponentLoader.vue';
 import SearchInput from './SearchInput.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
   entities: {

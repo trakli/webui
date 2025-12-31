@@ -3,15 +3,17 @@
     <div class="onboarding-container">
       <div class="onboarding-header">
         <div class="welcome-section">
-          <h1 class="main-title">Welcome to Trakli!</h1>
-          <p class="subtitle">Let's set up your account in just a few steps</p>
+          <h1 class="main-title">{{ $t('Welcome to Trakli!') }}</h1>
+          <p class="subtitle">{{ $t("Let's set up your account in just a few steps") }}</p>
         </div>
 
         <div class="progress-section">
           <div class="progress-bar">
             <div class="progress-fill" :style="{ width: `${progressPercentage}%` }" />
           </div>
-          <span class="progress-text">Step {{ currentStep }} of {{ totalSteps }}</span>
+          <span class="progress-text">{{
+            $t('Step {current} of {total}', { current: currentStep, total: totalSteps })
+          }}</span>
         </div>
       </div>
 
@@ -32,9 +34,13 @@
             </svg>
           </div>
           <div class="step-info">
-            <h2 class="step-title">Choose your language</h2>
+            <h2 class="step-title">{{ $t('Choose your language') }}</h2>
             <p class="step-description">
-              Select your preferred language for Trakli. You can change this later in settings.
+              {{
+                $t(
+                  'Select your preferred language for Trakli. You can change this later in settings.'
+                )
+              }}
             </p>
           </div>
           <div class="step-form">
@@ -45,7 +51,7 @@
                   :key="language.code"
                   class="language-option"
                   :class="{ selected: selectedLanguage === language.code }"
-                  @click="selectedLanguage = language.code"
+                  @click="selectLanguage(language.code)"
                 >
                   <span class="language-flag">{{ language.flag }}</span>
                   <span class="language-name">{{ language.name }}</span>
@@ -58,7 +64,7 @@
                   :disabled="!selectedLanguage"
                   @click="handleLanguageSelection"
                 >
-                  Continue
+                  {{ $t('Continue') }}
                 </button>
               </div>
             </div>
@@ -71,16 +77,16 @@
             <CreditCardIcon />
           </div>
           <div class="step-info">
-            <h2 class="step-title">Set up your wallet</h2>
+            <h2 class="step-title">{{ $t('Set up your wallet') }}</h2>
             <p class="step-description">
-              Configure your default wallet and currency for tracking transactions.
+              {{ $t('Configure your default wallet and currency for tracking transactions.') }}
             </p>
           </div>
           <div class="step-form">
             <div class="wallet-currency-setup">
               <div class="wallet-currency-columns">
                 <div class="wallet-column">
-                  <label class="column-label">Default wallet</label>
+                  <label class="column-label">{{ $t('Default wallet') }}</label>
                   <div class="wallet-cards">
                     <div
                       class="wallet-card"
@@ -95,8 +101,10 @@
                         @click.stop
                       />
                       <div class="wallet-card-content">
-                        <span class="wallet-card-title">Use Main Wallet</span>
-                        <span class="wallet-card-desc">Keep the default wallet name</span>
+                        <span class="wallet-card-title">{{ $t('Use Main Wallet') }}</span>
+                        <span class="wallet-card-desc">{{
+                          $t('Keep the default wallet name')
+                        }}</span>
                       </div>
                     </div>
 
@@ -113,8 +121,8 @@
                         @click.stop
                       />
                       <div class="wallet-card-content">
-                        <span class="wallet-card-title">Rename wallet</span>
-                        <span class="wallet-card-desc">Give it a custom name</span>
+                        <span class="wallet-card-title">{{ $t('Rename wallet') }}</span>
+                        <span class="wallet-card-desc">{{ $t('Give it a custom name') }}</span>
                       </div>
                     </div>
 
@@ -131,8 +139,10 @@
                         @click.stop
                       />
                       <div class="wallet-card-content">
-                        <span class="wallet-card-title">Create new wallet</span>
-                        <span class="wallet-card-desc">Start fresh with a new wallet</span>
+                        <span class="wallet-card-title">{{ $t('Create new wallet') }}</span>
+                        <span class="wallet-card-desc">{{
+                          $t('Start fresh with a new wallet')
+                        }}</span>
                       </div>
                     </div>
                   </div>
@@ -141,19 +151,19 @@
                     v-if="walletChoice === 'rename-default' || walletChoice === 'create-new'"
                     class="wallet-extra-field"
                   >
-                    <label class="field-label">Wallet name</label>
+                    <label class="field-label">{{ $t('Wallet name') }}</label>
                     <input
                       v-model="newWalletName"
                       type="text"
-                      placeholder="Enter wallet name"
+                      :placeholder="$t('Enter wallet name')"
                       class="wallet-input"
                     />
                   </div>
 
                   <div v-if="walletChoice === 'create-new'" class="wallet-extra-field">
-                    <label class="field-label">Wallet currency</label>
+                    <label class="field-label">{{ $t('Wallet currency') }}</label>
                     <select v-model="newWalletCurrency" class="currency-select">
-                      <option value="">Select currency</option>
+                      <option value="">{{ $t('Select currency') }}</option>
                       <option
                         v-for="currency in availableCurrencies"
                         :key="currency.code"
@@ -166,7 +176,7 @@
                 </div>
 
                 <div class="currency-column">
-                  <label class="column-label">Default currency</label>
+                  <label class="column-label">{{ $t('Default currency') }}</label>
                   <select v-model="selectedCurrency" class="currency-select">
                     <option
                       v-for="currency in availableCurrencies"
@@ -176,7 +186,7 @@
                       {{ currency.code }} - {{ currency.name }}
                     </option>
                   </select>
-                  <p class="currency-note">Used for displaying totals and reports.</p>
+                  <p class="currency-note">{{ $t('Used for displaying totals and reports.') }}</p>
                 </div>
               </div>
 
@@ -186,7 +196,7 @@
                   :disabled="!isWalletCurrencySetupValid"
                   @click="handleWalletCurrencySetup"
                 >
-                  Continue
+                  {{ $t('Continue') }}
                 </button>
               </div>
             </div>
@@ -199,8 +209,10 @@
             <TagIcon />
           </div>
           <div class="step-info">
-            <h2 class="step-title">Set up categories</h2>
-            <p class="step-description">Categories help you organize and track your spending.</p>
+            <h2 class="step-title">{{ $t('Set up categories') }}</h2>
+            <p class="step-description">
+              {{ $t('Categories help you organize and track your spending.') }}
+            </p>
           </div>
           <div class="step-form">
             <div class="categories-setup">
@@ -216,16 +228,21 @@
                     class="categories-checkbox"
                     @click.stop
                   />
-                  <span class="categories-card-title">Add default categories</span>
+                  <span class="categories-card-title">{{ $t('Add default categories') }}</span>
                 </div>
                 <p class="categories-card-description">
-                  We'll create common categories like Salary, Food & Dining, Transportation,
-                  Entertainment, and more. You can customize them later.
+                  {{
+                    $t(
+                      "We'll create common categories like Salary, Food & Dining, Transportation, Entertainment, and more. You can customize them later."
+                    )
+                  }}
                 </p>
               </div>
 
               <div class="step-actions">
-                <button class="primary-btn" @click="handleCategoriesSetup">Continue</button>
+                <button class="primary-btn" @click="handleCategoriesSetup">
+                  {{ $t('Continue') }}
+                </button>
               </div>
             </div>
           </div>
@@ -237,30 +254,35 @@
             <CheckCircleIcon />
           </div>
           <div class="completion-info">
-            <h2 class="completion-title">🎉 You're all set!</h2>
+            <h2 class="completion-title">{{ $t("You're all set!") }}</h2>
             <p class="completion-description">
-              Great job! You've successfully set up your Trakli account. You're ready to start
-              tracking your finances.
+              {{
+                $t(
+                  "Great job! You've successfully set up your Trakli account. You're ready to start tracking your finances."
+                )
+              }}
             </p>
             <div class="completion-stats">
               <div class="stat-item">
                 <CreditCardIcon class="stat-icon" />
-                <span>{{ walletCount }} wallet{{ walletCount !== 1 ? 's' : '' }}</span>
+                <span>{{ $t('{count} wallet', { count: walletCount }, walletCount) }}</span>
               </div>
               <div class="stat-item">
                 <TagIcon class="stat-icon" />
-                <span>{{ categoryCount }} categories</span>
+                <span>{{ $t('{count} categories', { count: categoryCount }) }}</span>
               </div>
               <div class="stat-item">
                 <ArrowsRightLeftIcon class="stat-icon" />
-                <span
-                  >{{ transactionCount }} transaction{{ transactionCount !== 1 ? 's' : '' }}</span
-                >
+                <span>{{
+                  $t('{count} transaction', { count: transactionCount }, transactionCount)
+                }}</span>
               </div>
             </div>
           </div>
           <div class="completion-actions">
-            <button class="primary-btn large" @click="completOnboarding">Go to dashboard</button>
+            <button class="primary-btn large" @click="completOnboarding">
+              {{ $t('Go to dashboard') }}
+            </button>
           </div>
         </div>
       </div>
@@ -271,11 +293,11 @@
           class="nav-btn"
           @click="previousStep"
         >
-          ← Previous
+          ← {{ $t('Previous') }}
         </button>
         <div class="spacer" />
         <button v-if="currentStep < totalSteps" class="nav-btn skip" @click="skipStep">
-          Skip for now →
+          {{ $t('Skip for now') }} →
         </button>
       </div>
     </div>
@@ -298,6 +320,8 @@ import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 import { CURRENCIES } from '@/utils/currencies';
 import { categoriesApi } from '@/services/api/categoriesApi';
+
+const { setLocale } = useI18n();
 
 definePageMeta({
   layout: 'onboarding',
@@ -400,6 +424,11 @@ const skipStep = async () => {
   } catch (e) {
     console.error('Error in skipStep:', e);
   }
+};
+
+const selectLanguage = (code: string) => {
+  selectedLanguage.value = code;
+  setLocale(code);
 };
 
 const handleLanguageSelection = () => {

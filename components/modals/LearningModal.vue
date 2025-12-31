@@ -8,8 +8,8 @@
       @click.stop
     >
       <div class="modal-header">
-        <h2 id="modal-title" class="modal-title">💡 Learn Trakli</h2>
-        <button class="close-btn" aria-label="Close modal" @click="closeModal">
+        <h2 id="modal-title" class="modal-title">💡 {{ t('Learn Trakli') }}</h2>
+        <button class="close-btn" :aria-label="t('Close modal')" @click="closeModal">
           <XMarkIcon class="close-icon" />
         </button>
       </div>
@@ -30,7 +30,7 @@
 
         <div class="tab-content">
           <div v-if="activeTab === 'concepts'" class="concepts-section">
-            <h3 class="section-title">Core Concepts</h3>
+            <h3 class="section-title">{{ t('Core Concepts') }}</h3>
             <div class="concept-cards">
               <div v-for="concept in concepts" :key="concept.title" class="concept-card">
                 <div class="concept-header">
@@ -39,7 +39,7 @@
                 </div>
                 <p class="concept-description">{{ concept.description }}</p>
                 <div class="concept-tips">
-                  <span class="tips-label">💡 Tips:</span>
+                  <span class="tips-label">💡 {{ t('Tips') }}:</span>
                   <ul class="tips-list">
                     <li v-for="tip in concept.tips" :key="tip">{{ tip }}</li>
                   </ul>
@@ -49,7 +49,7 @@
           </div>
 
           <div v-if="activeTab === 'tips'" class="tips-section">
-            <h3 class="section-title">Quick Tips</h3>
+            <h3 class="section-title">{{ t('Quick Tips') }}</h3>
             <div class="tips-grid">
               <div v-for="tip in quickTips" :key="tip.title" class="tip-card">
                 <div class="tip-emoji">{{ tip.emoji }}</div>
@@ -60,7 +60,7 @@
           </div>
 
           <div v-if="activeTab === 'shortcuts'" class="shortcuts-section">
-            <h3 class="section-title">Keyboard Shortcuts</h3>
+            <h3 class="section-title">{{ t('Keyboard Shortcuts') }}</h3>
             <div class="shortcuts-list">
               <div v-for="shortcut in shortcuts" :key="shortcut.action" class="shortcut-item">
                 <div class="shortcut-keys">
@@ -72,18 +72,18 @@
           </div>
 
           <div v-if="activeTab === 'faq'" class="faq-section">
-            <h3 class="section-title">Frequently Asked Questions</h3>
+            <h3 class="section-title">{{ t('Frequently Asked Questions') }}</h3>
             <div class="faq-list">
-              <div v-for="faq in faqs" :key="faq.question" class="faq-item">
+              <div v-for="(faq, index) in faqs" :key="index" class="faq-item">
                 <button
                   class="faq-question"
-                  :class="{ open: openFaq === faq.question }"
-                  @click="toggleFaq(faq.question)"
+                  :class="{ open: openFaq === index }"
+                  @click="toggleFaq(index)"
                 >
                   {{ faq.question }}
                   <ChevronDownIcon class="faq-chevron" />
                 </button>
-                <div v-if="openFaq === faq.question" class="faq-answer">
+                <div v-if="openFaq === index" class="faq-answer">
                   {{ faq.answer }}
                 </div>
               </div>
@@ -96,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import {
   XMarkIcon,
   ChevronDownIcon,
@@ -110,6 +110,8 @@ import {
   QuestionMarkCircleIcon
 } from '@heroicons/vue/24/outline';
 
+const { t } = useI18n();
+
 const _props = defineProps({
   isOpen: {
     type: Boolean,
@@ -122,139 +124,114 @@ const emit = defineEmits(['close']);
 const activeTab = ref('concepts');
 const openFaq = ref(null);
 
-const tabs = [
-  { id: 'concepts', label: 'Concepts', icon: AcademicCapIcon },
-  { id: 'tips', label: 'Tips', icon: LightBulbIcon },
-  { id: 'shortcuts', label: 'Shortcuts', icon: CommandLineIcon },
-  { id: 'faq', label: 'FAQ', icon: QuestionMarkCircleIcon }
-];
+const tabs = computed(() => [
+  { id: 'concepts', label: t('Concepts'), icon: AcademicCapIcon },
+  { id: 'tips', label: t('Tips'), icon: LightBulbIcon },
+  { id: 'shortcuts', label: t('Shortcuts'), icon: CommandLineIcon },
+  { id: 'faq', label: t('FAQ'), icon: QuestionMarkCircleIcon }
+]);
 
-const concepts = [
+const concepts = computed(() => [
   {
-    title: 'Transactions',
+    title: t('Transactions'),
     icon: ArrowsRightLeftIcon,
-    description:
-      'The foundation of expense tracking. Every transaction tells the story of money moving in or out.',
-    tips: [
-      'Add transactions regularly for accurate tracking',
-      'Use clear descriptions to remember what each transaction was for',
-      'Income transactions increase your balance, expenses decrease it'
-    ]
+    description: t('learn.transactions.description'),
+    tips: [t('learn.transactions.tip1'), t('learn.transactions.tip2'), t('learn.transactions.tip3')]
   },
   {
-    title: 'Wallets',
+    title: t('Wallets'),
     icon: CreditCardIcon,
-    description:
-      'Represent your money sources - bank accounts, cash, credit cards, or any place you store money.',
-    tips: [
-      'Start with your main bank account',
-      'Add all your payment methods for complete tracking',
-      'Update balances regularly to stay accurate'
-    ]
+    description: t('learn.wallets.description'),
+    tips: [t('learn.wallets.tip1'), t('learn.wallets.tip2'), t('learn.wallets.tip3')]
   },
   {
-    title: 'Categories',
+    title: t('Categories'),
     icon: TagIcon,
-    description: 'Group similar transactions to understand spending patterns and financial habits.',
-    tips: [
-      'Use specific categories like "Coffee" instead of generic "Food"',
-      'Create both income and expense categories',
-      "Don't create too many - keep it manageable"
-    ]
+    description: t('learn.categories.description'),
+    tips: [t('learn.categories.tip1'), t('learn.categories.tip2'), t('learn.categories.tip3')]
   },
   {
-    title: 'Parties',
+    title: t('Parties'),
     icon: UsersIcon,
-    description:
-      'People or businesses you exchange money with. Helps track relationships and spending patterns.',
-    tips: [
-      'Add your employer for salary tracking',
-      'Include frequent merchants like grocery stores',
-      'Use parties to identify spending habits with specific vendors'
-    ]
+    description: t('learn.parties.description'),
+    tips: [t('learn.parties.tip1'), t('learn.parties.tip2'), t('learn.parties.tip3')]
   }
-];
+]);
 
-const quickTips = [
+const quickTips = computed(() => [
   {
     emoji: '⚡',
-    title: 'Quick Entry',
-    text: 'Use the "Add Transaction" button in the navbar for fastest entry from anywhere in the app.'
+    title: t('Quick Entry'),
+    text: t('learn.quicktips.quickentry')
   },
   {
     emoji: '📊',
-    title: 'Dashboard Overview',
-    text: 'Your dashboard shows the big picture - total income, expenses, and net balance at a glance.'
+    title: t('Dashboard Overview'),
+    text: t('learn.quicktips.dashboard')
   },
   {
     emoji: '🔍',
-    title: 'Search & Filter',
-    text: 'Use search and filters to find specific transactions or analyze spending patterns.'
+    title: t('Search & Filter'),
+    text: t('learn.quicktips.search')
   },
   {
     emoji: '📱',
-    title: 'Mobile Friendly',
-    text: 'Trakli works great on mobile - add transactions on the go whenever you spend money.'
+    title: t('Mobile Friendly'),
+    text: t('learn.quicktips.mobile')
   },
   {
     emoji: '🎯',
-    title: 'Be Consistent',
-    text: 'Regular tracking leads to better insights. Try to add transactions daily or weekly.'
+    title: t('Be Consistent'),
+    text: t('learn.quicktips.consistent')
   },
   {
     emoji: '💡',
-    title: 'Start Simple',
-    text: 'Begin with basic categories and wallets. You can always add more detail as you get comfortable.'
+    title: t('Start Simple'),
+    text: t('learn.quicktips.simple')
   }
-];
+]);
 
-const shortcuts = [
-  { keys: ['Ctrl', '+'], action: 'Add new transaction' },
-  { keys: ['Ctrl', '/'], action: 'Open search' },
-  { keys: ['Ctrl', 'D'], action: 'Go to dashboard' },
-  { keys: ['Esc'], action: 'Close modals/dropdowns' },
-  { keys: ['?'], action: 'Open this help modal' }
-];
+const shortcuts = computed(() => [
+  { keys: ['Ctrl', '+'], action: t('Add new transaction') },
+  { keys: ['Ctrl', '/'], action: t('Open search') },
+  { keys: ['Ctrl', 'D'], action: t('Go to dashboard') },
+  { keys: ['Esc'], action: t('Close modals/dropdowns') },
+  { keys: ['?'], action: t('Open this help modal') }
+]);
 
-const faqs = [
+const faqs = computed(() => [
   {
-    question: 'How often should I add transactions?',
-    answer:
-      'For best results, add transactions daily or weekly. The more frequently you track, the more accurate your financial picture becomes.'
+    question: t('learn.faq.q1'),
+    answer: t('learn.faq.a1')
   },
   {
-    question: "What's the difference between wallets and categories?",
-    answer:
-      'Wallets represent WHERE your money is (bank account, cash, credit card). Categories represent WHAT you spent money on (food, transport, salary).'
+    question: t('learn.faq.q2'),
+    answer: t('learn.faq.a2')
   },
   {
-    question: 'Do I need to add every small transaction?',
-    answer:
-      'It depends on your goals. For complete tracking, yes. But if you prefer, you can set a minimum amount (like $5) and only track larger expenses.'
+    question: t('learn.faq.q3'),
+    answer: t('learn.faq.a3')
   },
   {
-    question: 'How do I handle transfers between accounts?',
-    answer:
-      'Create two transactions: one expense from the source account and one income to the destination account, using the same amount.'
+    question: t('learn.faq.q4'),
+    answer: t('learn.faq.a4')
   },
   {
-    question: 'Can I edit or delete transactions?',
-    answer:
-      'Yes! Click on any transaction to edit its details, or use the delete option if you added something by mistake.'
+    question: t('learn.faq.q5'),
+    answer: t('learn.faq.a5')
   },
   {
-    question: 'What if I forget to add transactions?',
-    answer:
-      'No problem! You can add past transactions by changing the date. Try to catch up weekly to stay current.'
+    question: t('learn.faq.q6'),
+    answer: t('learn.faq.a6')
   }
-];
+]);
 
 const closeModal = () => {
   emit('close');
 };
 
-const toggleFaq = (question) => {
-  openFaq.value = openFaq.value === question ? null : question;
+const toggleFaq = (index) => {
+  openFaq.value = openFaq.value === index ? null : index;
 };
 </script>
 

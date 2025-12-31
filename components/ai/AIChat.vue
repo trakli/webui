@@ -1,6 +1,6 @@
 <template>
   <div class="ai-chat card">
-    <h2 class="title">AI Insights Chat</h2>
+    <h2 class="title">{{ t('AI Insights Chat') }}</h2>
     <div ref="chatWindow" class="chat-window">
       <div
         v-for="(message, index) in chatHistory"
@@ -72,7 +72,7 @@
         </div>
       </div>
       <div v-if="isLoading" class="chat-row ai">
-        <div class="bubble ai loading">Thinking...</div>
+        <div class="bubble ai loading">{{ t('Thinking...') }}</div>
       </div>
     </div>
     <form class="composer" @submit.prevent="handleSendMessage">
@@ -80,19 +80,21 @@
         v-model="input"
         type="text"
         class="chat-input"
-        placeholder="Ask me anything about your finances..."
+        :placeholder="t('Ask me anything about your finances...')"
         :disabled="isLoading"
       />
       <button type="submit" class="send-btn" :disabled="isLoading || !input.trim()">
-        {{ isLoading ? '...' : 'Send' }}
+        {{ isLoading ? '...' : t('Send') }}
       </button>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, computed } from 'vue';
 import { aiApi, type FormatType } from '@/services/api/aiApi';
+
+const { t } = useI18n();
 
 interface ChatMessage {
   type: 'user' | 'ai';
@@ -101,9 +103,11 @@ interface ChatMessage {
   formatType?: FormatType | null;
 }
 
-const chatHistory = ref<ChatMessage[]>([
-  { type: 'ai', text: 'Hello! I am your personal financial assistant. How can I help you today?' }
-]);
+const initialMessage = computed(() =>
+  t('Hello! I am your personal financial assistant. How can I help you today?')
+);
+
+const chatHistory = ref<ChatMessage[]>([{ type: 'ai', text: initialMessage.value }]);
 const input = ref('');
 const isLoading = ref(false);
 const chatWindow = ref<HTMLElement | null>(null);
@@ -156,13 +160,13 @@ const handleSendMessage = async () => {
     } else {
       chatHistory.value.push({
         type: 'ai',
-        text: response.message || 'Sorry, I could not process your request. Please try again.'
+        text: response.message || t('Sorry, I could not process your request. Please try again.')
       });
     }
   } catch {
     chatHistory.value.push({
       type: 'ai',
-      text: 'Sorry, the AI service is currently unavailable. Please try again later.'
+      text: t('Sorry, the AI service is currently unavailable. Please try again later.')
     });
   } finally {
     isLoading.value = false;

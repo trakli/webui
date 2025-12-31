@@ -2,7 +2,7 @@
   <div>
     <div class="section-grid">
       <div class="form-group">
-        <label class="form-label">Default Language</label>
+        <label class="form-label">{{ t('Default Language') }}</label>
         <select v-if="isEditMode" v-model="languageCode" class="form-select">
           <option v-for="lang in languages" :key="lang.code" :value="lang.code">
             {{ lang.code.toUpperCase() }} - {{ lang.label }}
@@ -12,7 +12,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Current Currency</label>
+        <label class="form-label">{{ t('Current Currency') }}</label>
         <select v-if="isEditMode" v-model="currencyCode" class="form-select">
           <option v-for="c in currencies" :key="c.code" :value="c.code">
             {{ c.code }} - {{ c.label }}
@@ -25,7 +25,7 @@
     <div v-if="isEditMode" class="actions">
       <button type="button" class="submit-btn" @click="handleSave">
         <Save class="inline-icon" />
-        <span>Update General Settings</span>
+        <span>{{ t('Update General Settings') }}</span>
       </button>
       <p v-if="message" class="success-text">{{ message }}</p>
     </div>
@@ -38,6 +38,8 @@ import { Save } from 'lucide-vue-next';
 import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 import { CURRENCIES } from '@/utils/currencies';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isEditMode: { type: Boolean, default: false }
@@ -109,7 +111,7 @@ const handleSave = async () => {
       value: currencyCode.value,
       type: 'string'
     });
-    message.value = 'General settings updated successfully!';
+    message.value = t('General settings updated successfully!');
   } catch (e) {
     console.error('Failed to update general settings', e);
   } finally {

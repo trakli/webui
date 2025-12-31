@@ -1,11 +1,13 @@
 export const useApi = () => {
   const config = useRuntimeConfig();
   const tokenCookie = useCookie('auth.token');
+  const localeCookie = useCookie('i18n_redirected');
 
   return $fetch.create({
     baseURL: config.public.apiBase as string,
     headers: {
-      ...(tokenCookie.value ? { Authorization: `Bearer ${tokenCookie.value}` } : {})
+      ...(tokenCookie.value ? { Authorization: `Bearer ${tokenCookie.value}` } : {}),
+      'Accept-Language': localeCookie.value || 'en'
     },
 
     onResponseError({ response }) {

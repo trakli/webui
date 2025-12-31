@@ -1,6 +1,6 @@
 <template>
   <div class="card">
-    <h2 class="title">Income Trend Line (Last 6 Months)</h2>
+    <h2 class="title">{{ t('Income Trend Line (Last 6 Months)') }}</h2>
     <div ref="containerRef" class="chart-container">
       <svg
         ref="svgRef"
@@ -91,6 +91,8 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
   data: { type: Array, required: true } // [{ name: 'Jan', value: 6000, insight?: '...' }]

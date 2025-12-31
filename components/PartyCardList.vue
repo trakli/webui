@@ -2,14 +2,14 @@
   <div class="party-card-list">
     <div class="list-header">
       <div class="header-row">
-        <h2 class="page-title">All Parties</h2>
+        <h2 class="page-title">{{ $t('All Parties') }}</h2>
         <div class="search-filter-section">
-          <SearchInput v-model="searchQuery" placeholder="Search..." />
+          <SearchInput v-model="searchQuery" :placeholder="$t('Search...')" />
           <div class="filter-container">
             <select v-model="selectedFilter" class="filter-dropdown" @change="handleFilter">
-              <option value="all">All</option>
-              <option value="individual">Individual</option>
-              <option value="company">Company</option>
+              <option value="all">{{ $t('All') }}</option>
+              <option value="individual">{{ $t('Individual') }}</option>
+              <option value="company">{{ $t('Company') }}</option>
             </select>
           </div>
         </div>
@@ -29,8 +29,12 @@
     </div>
 
     <div v-if="filteredParties.length === 0" class="empty-state">
-      <p v-if="parties.length === 0">No parties found. Create your first party to get started.</p>
-      <p v-else>No parties match your search criteria. Try adjusting your search or filters.</p>
+      <p v-if="parties.length === 0">
+        {{ $t('No parties found. Create your first party to get started.') }}
+      </p>
+      <p v-else>
+        {{ $t('No parties match your search criteria. Try adjusting your search or filters.') }}
+      </p>
     </div>
   </div>
 </template>

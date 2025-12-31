@@ -3,13 +3,15 @@
     <div class="header-content">
       <div class="content-main">
         <div class="title-row">
-          <h1 class="title">{{ displayTitle }}</h1>
+          <h1 class="title">{{ t(displayTitle) }}</h1>
           <div class="breadcrumb">
-            <span class="breadcrumb-item breadcrumb-clickable" @click="$router.push('/dashboard')"
-              >Home</span
+            <span
+              class="breadcrumb-item breadcrumb-clickable"
+              @click="$router.push('/dashboard')"
+              >{{ t('Home') }}</span
             >
             <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-current">{{ pageNamePlural }}</span>
+            <span class="breadcrumb-current">{{ t(pageNamePlural) }}</span>
           </div>
         </div>
         <slot name="summary"></slot>
@@ -18,7 +20,7 @@
         <TInfoButton />
         <TButton
           v-if="showAddButton"
-          :text="buttonText || `Add ${pageName.toLowerCase()}`"
+          :text="buttonText || t('Add {item}', { item: t(pageName).toLowerCase() })"
           class="add-entity-button"
           @click="$emit(buttonAction)"
         >
@@ -36,6 +38,8 @@ import { computed } from 'vue';
 import TInfoButton from '@/components/TInfoButton.vue';
 import TButton from '@/components/TButton.vue';
 import { PlusIcon } from '@heroicons/vue/24/outline';
+
+const { t } = useI18n();
 
 const props = defineProps({
   pageName: {

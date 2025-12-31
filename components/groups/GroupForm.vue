@@ -1,7 +1,7 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
     <div class="form-group">
-      <label for="group-name" class="form-label">Group Name</label>
+      <label for="group-name" class="form-label">{{ t('Group Name') }}</label>
       <div class="name-icon-row">
         <div class="name-col">
           <input
@@ -10,10 +10,10 @@
             type="text"
             class="form-input"
             :class="{ error: nameError || apiError }"
-            placeholder="Enter group name"
+            :placeholder="t('Enter group name')"
             required
           />
-          <div v-if="nameError" class="error-text">Group name is required.</div>
+          <div v-if="nameError" class="error-text">{{ t('Group name is required.') }}</div>
           <div v-if="apiError" class="error-text">{{ apiError }}</div>
         </div>
         <div class="icon-col">
@@ -21,7 +21,7 @@
             type="button"
             class="icon-trigger"
             :aria-expanded="showIconPicker"
-            aria-label="Choose icon"
+            :aria-label="t('Choose icon')"
             @click="showIconPicker = !showIconPicker"
           >
             <component
@@ -40,22 +40,24 @@
     </div>
 
     <div class="form-group">
-      <label for="group-description" class="form-label">Group Description</label>
+      <label for="group-description" class="form-label">{{ t('Group Description') }}</label>
       <textarea
         id="group-description"
         v-model="form.description"
         class="form-textarea"
         :class="{ error: descriptionError }"
-        placeholder="Type group description here..."
+        :placeholder="t('Type group description here...')"
         rows="5"
         required
       />
-      <div v-if="descriptionError" class="error-text">Group description is required.</div>
+      <div v-if="descriptionError" class="error-text">
+        {{ t('Group description is required.') }}
+      </div>
     </div>
 
     <button type="submit" class="submit-btn" :disabled="isLoading">
-      <span v-if="isLoading">{{ isEditing ? 'Updating...' : 'Creating...' }}</span>
-      <span v-else>{{ isEditing ? 'Update group' : 'Create group' }}</span>
+      <span v-if="isLoading">{{ isEditing ? t('Updating...') : t('Creating...') }}</span>
+      <span v-else>{{ isEditing ? t('Update group') : t('Create group') }}</span>
     </button>
   </form>
 </template>
@@ -65,6 +67,8 @@ import { ref, computed, watch } from 'vue';
 import IconPicker from '../IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
 import { ImagePlus } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
   editingItem: {

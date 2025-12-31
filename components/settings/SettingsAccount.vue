@@ -1,40 +1,40 @@
 <template>
   <div>
     <div class="form-group form-group--full">
-      <label class="form-label">Profile Picture</label>
+      <label class="form-label">{{ t('Profile Picture') }}</label>
       <div class="avatar-container">
         <img v-if="user" :src="getAvatarUrl(user)" alt="User Avatar" class="avatar-image" />
       </div>
     </div>
     <div class="section-grid">
       <div class="form-group">
-        <label class="form-label">First Name</label>
+        <label class="form-label">{{ t('First Name') }}</label>
         <input v-if="isEditMode" v-model="firstName" type="text" class="form-input" />
         <p v-else class="text-display">{{ firstName }}</p>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Last Name</label>
+        <label class="form-label">{{ t('Last Name') }}</label>
         <input v-if="isEditMode" v-model="lastName" type="text" class="form-input" />
         <p v-else class="text-display">{{ lastName }}</p>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Username</label>
+        <label class="form-label">{{ t('Username') }}</label>
         <input v-if="isEditMode" v-model="username" type="text" class="form-input" />
         <p v-else class="text-display">{{ username }}</p>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Email Address</label>
+        <label class="form-label">{{ t('Email Address') }}</label>
         <input v-if="isEditMode" v-model="email" type="email" class="form-input" />
         <p v-else class="text-display">{{ email }}</p>
       </div>
 
       <div class="form-group form-group--full">
-        <label class="form-label">Password</label>
+        <label class="form-label">{{ t('Password') }}</label>
         <button type="button" class="dashed-button" @click="$emit('open-password-modal')">
-          <span>Change Password</span>
+          <span>{{ t('Change Password') }}</span>
           <Lock class="inline-icon" />
         </button>
       </div>
@@ -43,7 +43,7 @@
     <div v-if="isEditMode" class="actions">
       <button type="button" class="submit-btn" @click="handleSave">
         <Save class="inline-icon" />
-        <span>Update Account</span>
+        <span>{{ t('Update Account') }}</span>
       </button>
       <p
         v-if="message"
@@ -61,6 +61,8 @@ import { ref, watch } from 'vue';
 import { Lock, Save } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
+
+const { t } = useI18n();
 
 defineEmits(['open-password-modal']);
 
@@ -99,10 +101,10 @@ watch(
 
 const handleSave = () => {
   if (email.value !== 'user@example.com') {
-    message.value = 'A confirmation email has been sent to your new address.';
+    message.value = t('A confirmation email has been sent to your new address.');
     isSuccess.value = false;
   } else {
-    message.value = 'Account information updated successfully!';
+    message.value = t('Account information updated successfully!');
     isSuccess.value = true;
   }
   setTimeout(() => {

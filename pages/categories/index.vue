@@ -38,7 +38,7 @@
             @click="activeTab = 'income'"
           >
             <span class="tab-icon">💰</span>
-            Income Categories
+            {{ $t('Income Categories') }}
             <span class="tab-count">({{ incomeCategories.length }})</span>
           </button>
           <button
@@ -47,7 +47,7 @@
             @click="activeTab = 'expense'"
           >
             <span class="tab-icon">💸</span>
-            Expense Categories
+            {{ $t('Expense Categories') }}
             <span class="tab-count">({{ expenseCategories.length }})</span>
           </button>
         </div>

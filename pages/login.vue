@@ -9,6 +9,8 @@ import AuthDivider from '@/components/auth/AuthDivider.vue';
 import AuthSocialLogin from '@/components/auth/AuthSocialLogin.vue';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 
+const { t } = useI18n();
+
 definePageMeta({
   layout: 'auth',
   middleware: 'guest'
@@ -44,8 +46,7 @@ const handleSubmit = async () => {
   try {
     await login(form.value);
   } catch {
-    // Login failed – show error and stop further processing
-    loginError.value = 'Invalid credentials. Please try again.';
+    loginError.value = t('Invalid credentials. Please try again.');
     loading.value = false;
     return;
   }
@@ -67,7 +68,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
 
 onMounted(() => {
   if (route.query.error) {
-    loginError.value = 'The social login failed. Please try again.';
+    loginError.value = t('The social login failed. Please try again.');
   }
 });
 </script>
@@ -77,23 +78,23 @@ onMounted(() => {
     <div class="logo-wrapper">
       <Logo size="medium" />
     </div>
-    <h1>Login</h1>
+    <h1>{{ t('Login') }}</h1>
     <form class="login-form" @submit.prevent="handleSubmit">
       <div v-if="loginError" class="error-feedback">
         {{ loginError }}
       </div>
       <div class="form-group">
-        <label>Email</label>
-        <input v-model="form.email" type="email" placeholder="Enter your email" required />
+        <label>{{ t('Email') }}</label>
+        <input v-model="form.email" type="email" :placeholder="t('Enter your email')" required />
       </div>
 
       <div class="form-group">
-        <label>Password</label>
+        <label>{{ t('Password') }}</label>
         <div class="password-input">
           <input
             v-model="form.password"
             :type="showPassword ? 'text' : 'password'"
-            placeholder="Enter your password"
+            :placeholder="t('Enter your password')"
             required
           />
           <button type="button" class="password-toggle" @click="togglePassword">
@@ -106,20 +107,20 @@ onMounted(() => {
       <div class="form-actions">
         <label class="remember-me">
           <input v-model="form.remember" type="checkbox" />
-          Remember me
+          {{ t('Remember me') }}
         </label>
-        <a href="#" class="forgot-password">Forgot Password?</a>
+        <a href="#" class="forgot-password">{{ t('Forgot Password?') }}</a>
       </div>
 
-      <TButton type="submit" :loading="loading" text="Login" class="w-full" />
+      <TButton type="submit" :loading="loading" :text="t('Login')" class="w-full" />
 
       <AuthDivider />
       <AuthSocialLogin mode="login" />
     </form>
 
     <p class="signup-link">
-      Don't have an account?
-      <nuxt-link to="/register">Sign Up</nuxt-link>
+      {{ t("Don't have an account?") }}
+      <nuxt-link to="/register">{{ t('Sign up') }}</nuxt-link>
     </p>
   </div>
 </template>

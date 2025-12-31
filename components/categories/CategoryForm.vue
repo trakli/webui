@@ -1,7 +1,7 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
     <div class="form-group">
-      <label for="category-name" class="form-label">Category Name </label>
+      <label for="category-name" class="form-label">{{ t('Category Name') }}</label>
       <div class="name-icon-row">
         <div class="name-col">
           <input
@@ -10,17 +10,17 @@
             type="text"
             class="form-input"
             :class="{ error: nameError }"
-            placeholder="Enter category name"
+            :placeholder="t('Enter category name')"
             required
           />
-          <div v-if="nameError" class="error-text">Category name is required.</div>
+          <div v-if="nameError" class="error-text">{{ t('Category name is required.') }}</div>
         </div>
         <div class="icon-col">
           <button
             type="button"
             class="icon-trigger"
             :aria-expanded="showIconPicker"
-            aria-label="Choose icon"
+            :aria-label="t('Choose icon')"
             @click="showIconPicker = !showIconPicker"
           >
             <component
@@ -38,9 +38,8 @@
       </div>
     </div>
 
-    <!-- Category Type -->
     <div class="form-group">
-      <label for="category-type" class="form-label">Category Type</label>
+      <label for="category-type" class="form-label">{{ t('Category Type') }}</label>
       <select
         id="category-type"
         v-model="form.type"
@@ -48,30 +47,31 @@
         :class="{ error: typeError }"
         required
       >
-        <option value="">Select type</option>
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
+        <option value="">{{ t('Select type') }}</option>
+        <option value="income">{{ t('Income') }}</option>
+        <option value="expense">{{ t('Expense') }}</option>
       </select>
-      <div v-if="typeError" class="error-text">Please select a category type.</div>
+      <div v-if="typeError" class="error-text">{{ t('Please select a category type.') }}</div>
     </div>
 
-    <!-- Category Description -->
     <div class="form-group">
-      <label for="category-description" class="form-label">Category Description </label>
+      <label for="category-description" class="form-label">{{ t('Category Description') }}</label>
       <textarea
         id="category-description"
         v-model="form.description"
         class="form-textarea"
         :class="{ error: descriptionError }"
-        placeholder="Type category description here..."
+        :placeholder="t('Type category description here...')"
         rows="5"
         required
       />
-      <div v-if="descriptionError" class="error-text">Category description is required.</div>
+      <div v-if="descriptionError" class="error-text">
+        {{ t('Category description is required.') }}
+      </div>
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Save category' : 'Create category' }}
+      {{ isEditing ? t('Save category') : t('Create category') }}
     </button>
   </form>
 </template>
@@ -81,6 +81,8 @@ import { ref, nextTick, computed, watch } from 'vue';
 import IconPicker from '@/components/IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
 import { ImagePlus } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
   pageName: {

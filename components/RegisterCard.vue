@@ -3,6 +3,7 @@ import TButton from '@/components/TButton.vue';
 import AuthFooterLink from '@/components/AuthFooterLink.vue';
 import Logo from '@/components/Logo.vue';
 
+const { t } = useI18n();
 const requiredFields = ['firstName', 'email', 'username', 'password'];
 </script>
 
@@ -10,60 +11,60 @@ const requiredFields = ['firstName', 'email', 'username', 'password'];
   <div class="register-card">
     <div class="register-header">
       <Logo size="medium" />
-      <h1 class="title">Create an account</h1>
+      <h1 class="title">{{ t('Create an account') }}</h1>
     </div>
 
     <form class="form">
       <div class="form-row">
         <div class="form-group">
           <label
-            >First Name
+            >{{ t('First Name') }}
             <span v-if="requiredFields.includes('firstName')" class="required">*</span></label
           >
-          <input type="text" placeholder="Enter first name" />
+          <input type="text" :placeholder="t('Enter first name')" />
         </div>
         <div class="form-group">
           <label
-            >Last Name<span v-if="requiredFields.includes('firstName')" class="required"
-              >*</span
-            ></label
+            >{{ t('Last Name')
+            }}<span v-if="requiredFields.includes('firstName')" class="required">*</span></label
           >
-          <input type="text" placeholder="Enter last name" />
+          <input type="text" :placeholder="t('Enter last name')" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label
-            >Email <span v-if="requiredFields.includes('email')" class="required">*</span></label
+            >{{ t('Email') }}
+            <span v-if="requiredFields.includes('email')" class="required">*</span></label
           >
-          <input type="email" placeholder="Enter email" />
+          <input type="email" :placeholder="t('Enter email')" />
         </div>
         <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" placeholder="Enter phone number" />
+          <label>{{ t('Phone Number') }}</label>
+          <input type="tel" :placeholder="t('Enter phone number')" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label>Username </label>
-          <input type="text" placeholder="Choose username" />
+          <label>{{ t('Username') }} </label>
+          <input type="text" :placeholder="t('Choose username')" />
         </div>
         <div class="form-group">
           <label
-            >Password
+            >{{ t('Password') }}
             <span v-if="requiredFields.includes('password')" class="required">*</span></label
           >
-          <input type="password" placeholder="Create password" />
+          <input type="password" :placeholder="t('Create password')" />
         </div>
       </div>
 
       <div class="button-container">
-        <TButton size="large" class="register-button">Register</TButton>
+        <TButton size="large" class="register-button">{{ t('Register') }}</TButton>
       </div>
 
-      <AuthFooterLink text="Already have an account?" link-text="Login" to="/login" />
+      <AuthFooterLink :text="t('Already have an account?')" :link-text="t('Login')" to="/login" />
     </form>
   </div>
 </template>

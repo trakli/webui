@@ -2,7 +2,7 @@
   <div>
     <div class="section-grid">
       <div class="form-group">
-        <label class="form-label">Default Wallet</label>
+        <label class="form-label">{{ t('Default Wallet') }}</label>
         <select v-if="isEditMode" v-model="walletId" class="form-select">
           <option
             v-for="w in wallets"
@@ -15,25 +15,25 @@
         </select>
         <div v-else class="wallet-display">
           <p class="text-display">{{ walletLabel || '—' }}</p>
-          <span v-if="walletLabel" class="wallet-badge">Currently Selected</span>
+          <span v-if="walletLabel" class="wallet-badge">{{ t('Currently Selected') }}</span>
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Default Group</label>
+        <label class="form-label">{{ t('Default Group') }}</label>
         <select v-if="isEditMode" v-model="group" class="form-select">
-          <option value="Personal">Personal</option>
-          <option value="Family">Family</option>
-          <option value="Work">Work</option>
+          <option value="Personal">{{ t('Personal') }}</option>
+          <option value="Family">{{ t('Family') }}</option>
+          <option value="Work">{{ t('Work') }}</option>
         </select>
-        <p v-else class="text-display">{{ group }}</p>
+        <p v-else class="text-display">{{ t(group) }}</p>
       </div>
     </div>
 
     <div v-if="isEditMode" class="actions">
       <button type="button" class="submit-btn" @click="handleSave">
         <Save class="inline-icon" />
-        <span>Update Wallets & Groups</span>
+        <span>{{ t('Update Wallets & Groups') }}</span>
       </button>
       <p v-if="message" class="success-text">{{ message }}</p>
     </div>
@@ -46,6 +46,8 @@ import { Save } from 'lucide-vue-next';
 import { useSharedData } from '@/composables/useSharedData';
 import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isEditMode: { type: Boolean, default: false }
@@ -95,10 +97,9 @@ const handleSave = async () => {
         value: walletId.value,
         type: 'string'
       });
-      // Refresh shared configurations so other parts of the app reflect the change immediately
       await sharedData.loadConfigurations(true);
     }
-    message.value = 'Wallet and group settings updated successfully!';
+    message.value = t('Wallet and group settings updated successfully!');
   } catch (e) {
     console.error('Failed to update wallet configuration', e);
   } finally {

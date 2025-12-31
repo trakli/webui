@@ -1,12 +1,12 @@
 <template>
   <div class="recent-transactions">
     <div class="header">
-      <h3 class="title">Recent Transactions</h3>
-      <NuxtLink to="/transactions" class="view-all">View All</NuxtLink>
+      <h3 class="title">{{ t('Recent Transactions') }}</h3>
+      <NuxtLink to="/transactions" class="view-all">{{ t('View All') }}</NuxtLink>
     </div>
 
     <div v-if="recentTransactions.length === 0" class="empty-state">
-      <p>No transactions yet</p>
+      <p>{{ t('No transactions yet') }}</p>
     </div>
 
     <div v-else class="transaction-list">
@@ -41,6 +41,7 @@ import { useRouter } from 'vue-router';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-vue-next';
 import { useTransactions } from '@/composables/useTransactions';
 
+const { t } = useI18n();
 const router = useRouter();
 const { transactions } = useTransactions();
 
@@ -62,8 +63,8 @@ const formatRelativeTime = (dateStr) => {
   const diffMs = now - date;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
+  if (diffDays === 0) return t('Today');
+  if (diffDays === 1) return t('Yesterday');
   if (diffDays < 7) return `${diffDays}d ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
   return `${Math.floor(diffDays / 30)}mo ago`;
