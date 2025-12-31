@@ -2,12 +2,17 @@ import { readonly } from 'vue';
 import { extractApiErrors } from '~/utils/apiErrors';
 import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
 
+const SUPPORTED_LOCALES = ['en', 'fr', 'es', 'de', 'pt', 'it'];
+
 export const useDataManager = () => {
   // Centralized state using useState with unique keys
   const isInitialized = useState('data.initialized', () => false);
   const isLoading = useState('data.loading', () => false);
   const error = useState<string | null>('data.error', () => null);
   const lastInitTime = useState('data.lastInitTime', () => 0);
+
+  // Get locale cookie at top level to avoid context issues
+  const localeCookie = useCookie('i18n_redirected');
 
   const initializeData = async () => {
     // Prevent duplicate initialization
@@ -34,14 +39,12 @@ export const useDataManager = () => {
       await loadAllData(true);
       await refreshTransactions();
 
-      // Apply saved language preference
+      // Apply saved language preference via cookie (avoids useI18n context issues)
       const { configurationsMap } = useSharedData();
       const savedLang = configurationsMap.value?.[CONFIGURATION_KEYS.LANGUAGE];
-      if (savedLang) {
-        const { setLocale, locales } = useI18n();
-        const availableLocales = (locales.value as Array<{ code: string }>).map((l) => l.code);
-        if (availableLocales.includes(savedLang)) {
-          setLocale(savedLang);
+      if (savedLang && SUPPORTED_LOCALES.includes(savedLang)) {
+        if (localeCookie.value !== savedLang) {
+          localeCookie.value = savedLang;
         }
       }
 

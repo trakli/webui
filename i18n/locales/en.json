@@ -401,5 +401,11 @@
   "Income Category": "Income Category",
   "Expense Category": "Expense Category",
   "Income Categories": "Income Categories",
-  "Expense Categories": "Expense Categories"
+  "Expense Categories": "Expense Categories",
+  "carousel.simple.title": "Simple",
+  "carousel.simple.text": "Trakli focuses on the basics and gives just what you need to see where your money is coming from or going to.",
+  "carousel.automated.title": "Automated",
+  "carousel.automated.text": "Get your income and expense report completed automatically using your emails and SMS or other custom workflows you setup.",
+  "carousel.opensource.title": "Open Source",
+  "carousel.opensource.text": "Trakli is open source! You can use all Trakli features at no cost on your self-hosted instance."
 }

@@ -400,5 +400,11 @@
   "Income Category": "Categoria de Receita",
   "Expense Category": "Categoria de Despesa",
   "Income Categories": "Categorias de Receita",
-  "Expense Categories": "Categorias de Despesa"
+  "Expense Categories": "Categorias de Despesa",
+  "carousel.simple.title": "Simples",
+  "carousel.simple.text": "Trakli foca no básico e te dá exatamente o que você precisa para ver de onde vem e para onde vai seu dinheiro.",
+  "carousel.automated.title": "Automatizado",
+  "carousel.automated.text": "Tenha seus relatórios de receitas e despesas gerados automaticamente usando seus emails, SMS ou outros fluxos de trabalho personalizados que você configurar.",
+  "carousel.opensource.title": "Código Aberto",
+  "carousel.opensource.text": "Trakli é código aberto! Você pode usar todos os recursos do Trakli gratuitamente na sua instância auto-hospedada."
 }
