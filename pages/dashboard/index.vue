@@ -76,16 +76,21 @@ const { isLoading, error, isInitialized } = useDataManagerStates();
 useDataInitialization();
 
 // Check onboarding status after data loads
-watch(isInitialized, (initialized) => {
-  if (initialized && configurationsMap.value) {
-    const isOnboardingComplete = !!configurationsMap.value[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
-    if (isOnboardingComplete) {
-      setOnboardingComplete();
-    } else {
-      router.push('/onboarding');
+watch(
+  isInitialized,
+  (initialized) => {
+    if (initialized && configurationsMap.value) {
+      const isOnboardingComplete =
+        !!configurationsMap.value[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
+      if (isOnboardingComplete) {
+        setOnboardingComplete();
+      } else {
+        router.push('/onboarding');
+      }
     }
-  }
-}, { immediate: true });
+  },
+  { immediate: true }
+);
 
 const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
 const hasDataLoaded = computed(() => isInitialized.value && !isLoading.value);
