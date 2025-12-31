@@ -156,11 +156,11 @@ const CURRENCY_RATES: Record<string, number> = {
   CAD: 1.35
 };
 
-// Available time periods
+// Available time periods - labels are translation keys
 const AVAILABLE_PERIODS: StatisticsPeriod[] = [
   { label: 'All time', value: 'all_time', days: 0 },
-  { label: 'This week', value: 'current_week', days: 0 },
-  { label: 'This month', value: 'current_month', days: 0 },
+  { label: 'This Week', value: 'current_week', days: 0 },
+  { label: 'This Month', value: 'current_month', days: 0 },
   { label: 'Last 3 months', value: '90d', days: 90 },
   { label: 'Custom', value: 'custom', days: 0 }
 ];

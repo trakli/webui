@@ -3,7 +3,7 @@
     <div class="toggle-row">
       <div class="toggle-label">
         <component :is="darkMode ? Sun : Moon" class="inline-icon" />
-        <span>{{ darkMode ? 'Light' : 'Dark' }} Mode</span>
+        <span>{{ darkMode ? t('Light') : t('Dark') }} {{ t('Mode') }}</span>
       </div>
       <button
         type="button"
@@ -18,7 +18,7 @@
     <div v-if="isEditMode" class="actions">
       <button type="button" class="submit-btn" @click="handleSave">
         <Save class="inline-icon" />
-        <span>Update Display Settings</span>
+        <span>{{ t('Update Display Settings') }}</span>
       </button>
       <p v-if="message" class="success-text">{{ message }}</p>
     </div>
@@ -28,6 +28,8 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Save, Sun, Moon } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isEditMode: { type: Boolean, default: false }
@@ -44,7 +46,7 @@ watch(
 );
 
 const handleSave = () => {
-  message.value = 'Display settings updated successfully!';
+  message.value = t('Display settings updated successfully!');
   setTimeout(() => {
     message.value = '';
   }, 2000);

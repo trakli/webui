@@ -1,12 +1,17 @@
 <template>
   <div class="language-selector">
     <button class="selector-button" @click="toggleDropdown">
-      <img :src="selectedLanguage.flagUrl" :alt="selectedLanguage.name" class="flag-icon" />
+      <img :src="currentLanguage.flagUrl" :alt="currentLanguage.name" class="flag-icon" />
       <ChevronDownIcon class="dropdown-arrow" />
     </button>
     <div v-if="isOpen" class="dropdown-menu">
       <ul>
-        <li v-for="lang in languages" :key="lang.code" @click="selectLanguage(lang)">
+        <li
+          v-for="lang in languages"
+          :key="lang.code"
+          :class="{ selected: locale === lang.code }"
+          @click="selectLanguage(lang.code)"
+        >
           <img :src="lang.flagUrl" :alt="lang.name" class="flag-icon" />
           <span>{{ lang.name }}</span>
         </li>
@@ -16,30 +21,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ChevronDownIcon } from '@heroicons/vue/24/outline';
 
+const { locale, setLocale } = useI18n();
+
 const isOpen = ref(false);
-// To add more languages:
-// 1. Find the 2-letter country code (e.g., 'US' for United States).
-// 2. Add a new object to this 'languages' array below.
-// 3. Copy the corresponding SVG file from 'node_modules/country-flag-icons/3x2/'
-//    to the 'public/flags/' directory.
-//    Example command: cp node_modules/country-flag-icons/3x2/US.svg public/flags/us.svg
-const languages = ref([
-  { code: 'GB', name: 'English', flagUrl: '/flags/gb.svg' },
-  { code: 'FR', name: 'French', flagUrl: '/flags/fr.svg' },
-  { code: 'DE', name: 'German', flagUrl: '/flags/de.svg' },
-  { code: 'ES', name: 'Spanish', flagUrl: '/flags/es.svg' }
-]);
-const selectedLanguage = ref(languages.value[0]);
+
+const languages = [
+  { code: 'en', name: 'English', flagUrl: '/flags/gb.svg' },
+  { code: 'fr', name: 'Français', flagUrl: '/flags/fr.svg' },
+  { code: 'de', name: 'Deutsch', flagUrl: '/flags/de.svg' },
+  { code: 'es', name: 'Español', flagUrl: '/flags/es.svg' },
+  { code: 'pt', name: 'Português', flagUrl: '/flags/pt.svg' },
+  { code: 'it', name: 'Italiano', flagUrl: '/flags/it.svg' }
+];
+
+const currentLanguage = computed(() => {
+  return languages.find((lang) => lang.code === locale.value) || languages[0];
+});
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const selectLanguage = (lang) => {
-  selectedLanguage.value = lang;
+const selectLanguage = (code) => {
+  setLocale(code);
   isOpen.value = false;
 };
 
@@ -122,6 +129,12 @@ onUnmounted(() => {
 
       &:hover {
         background-color: $bg-light;
+      }
+
+      &.selected {
+        background-color: rgba($primary, 0.1);
+        color: $primary;
+        font-weight: 500;
       }
     }
   }

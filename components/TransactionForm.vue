@@ -2,12 +2,12 @@
   <div class="transaction-form">
     <div class="form">
       <div class="transaction-date">
-        <span>Amount</span>
+        <span>{{ t('Amount') }}</span>
         <div class="transaction-amount">
           <input
             v-model="formAmount"
             type="number"
-            placeholder="Ex: 250 000"
+            :placeholder="t('Ex: 250 000')"
             min="1"
             step="any"
             required
@@ -22,34 +22,36 @@
             </option>
           </select>
         </div>
-        <div v-if="amountError" class="error-text">Enter a valid amount greater than 0.</div>
+        <div v-if="amountError" class="error-text">
+          {{ t('Enter a valid amount greater than 0.') }}
+        </div>
       </div>
 
       <div class="transaction-description">
-        <span>Description</span>
-        <textarea v-model="formDescription" placeholder="Type here ..." required />
-        <div v-if="descriptionError" class="error-text">Description is required.</div>
+        <span>{{ t('Description') }}</span>
+        <textarea v-model="formDescription" :placeholder="t('Type here...')" required />
+        <div v-if="descriptionError" class="error-text">{{ t('Description is required.') }}</div>
       </div>
 
       <div class="form-transaction">
         <div class="transaction-date">
-          <span>Transaction date</span>
+          <span>{{ t('Transaction date') }}</span>
           <input v-model="formDate" type="date" required />
-          <div v-if="dateError" class="error-text">Date is required.</div>
+          <div v-if="dateError" class="error-text">{{ t('Date is required.') }}</div>
         </div>
 
         <div class="transaction-date">
-          <span>Transaction time</span>
+          <span>{{ t('Transaction time') }}</span>
           <input v-model="formTime" type="time" required />
-          <div v-if="timeError" class="error-text">Time is required.</div>
+          <div v-if="timeError" class="error-text">{{ t('Time is required.') }}</div>
         </div>
       </div>
 
       <div class="form-transaction">
         <SearchableDropdown
           v-model="searchQuery"
-          :label="isOutcomeSelected ? 'Party (sent to)' : 'Party (received from)'"
-          placeholder="Search party..."
+          :label="isOutcomeSelected ? t('Party (sent to)') : t('Party (received from)')"
+          :placeholder="t('Search party...')"
           :options="parties"
           @select="handlePartySelect"
         />
@@ -57,18 +59,18 @@
         <div class="wallet-field-wrapper">
           <SearchableDropdown
             v-model="walletSearchQuery"
-            :label="isOutcomeSelected ? 'Wallet (sent from)' : 'Wallet (received to)'"
-            placeholder="Search wallet..."
+            :label="isOutcomeSelected ? t('Wallet (sent from)') : t('Wallet (received to)')"
+            :placeholder="t('Search wallet...')"
             :options="wallets"
-            :error="walletError ? 'Wallet is required.' : ''"
+            :error="walletError ? t('Wallet is required.') : ''"
             @select="handleWalletSelect"
           />
           <span
             v-if="isWalletDefault"
             class="wallet-default-indicator"
-            title="This is your default wallet"
+            :title="t('This is your default wallet')"
           >
-            Default
+            {{ t('Default') }}
           </span>
         </div>
       </div>
@@ -76,17 +78,17 @@
       <div class="form-transaction">
         <SearchableDropdown
           v-model="groupSearchQuery"
-          label="Group"
-          placeholder="Search group..."
+          :label="t('Group')"
+          :placeholder="t('Search group...')"
           :options="groups"
-          :error="categoryError ? 'Group is required.' : ''"
+          :error="categoryError ? t('Group is required.') : ''"
           @select="handleGroupSelect"
         />
 
         <SearchableDropdown
           v-model="categorySearchQuery"
-          label="Categories"
-          placeholder="Search categories..."
+          :label="t('Categories')"
+          :placeholder="t('Search categories...')"
           :options="categories"
           :multiple="true"
           :disabled="isSameAsGroup"
@@ -95,11 +97,11 @@
       </div>
 
       <div class="transaction-files">
-        <span>Attachments</span>
+        <span>{{ t('Attachments') }}</span>
         <div class="upload-box">
           <input id="file-input" type="file" multiple @change="onFilesSelected" />
-          <label for="file-input" class="upload-button">Browse files</label>
-          <span class="hint">Images, PDFs or docs. Max 5 files.</span>
+          <label for="file-input" class="upload-button">{{ t('Browse files') }}</label>
+          <span class="hint">{{ t('Images, PDFs or docs. Max 5 files.') }}</span>
         </div>
         <div v-if="selectedFileNames.length" class="file-list">
           <span v-for="(f, i) in selectedFileNames" :key="f.name + i" class="chip">
@@ -113,11 +115,11 @@
       :text="
         props.editingItem
           ? isOutcomeSelected
-            ? 'Update expense'
-            : 'Update income'
+            ? t('Update expense')
+            : t('Update income')
           : isOutcomeSelected
-            ? 'Record expense'
-            : 'Record income'
+            ? t('Record expense')
+            : t('Record income')
       "
       class="submit-button"
       :class="{ 'submit-button--expense': isOutcomeSelected }"
@@ -137,6 +139,8 @@ import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '~/composables/useSharedData';
+
+const { t } = useI18n();
 
 const emit = defineEmits(['submit', 'error']);
 

@@ -2,10 +2,10 @@
   <div class="settings-page">
     <div class="page-header">
       <Settings class="header-icon" />
-      <h1>App Settings</h1>
+      <h1>{{ t('App Settings') }}</h1>
     </div>
 
-    <CollapsibleSection title="Account Information" :icon="User" :default-open="true">
+    <CollapsibleSection :title="t('Account Information')" :icon="User" :default-open="true">
       <template #default="{ isEditMode }">
         <SettingsAccount
           :is-edit-mode="isEditMode"
@@ -14,19 +14,19 @@
       </template>
     </CollapsibleSection>
 
-    <CollapsibleSection title="General Settings" :icon="Globe">
+    <CollapsibleSection :title="t('General Settings')" :icon="Globe">
       <template #default="{ isEditMode }">
         <SettingsGeneral :is-edit-mode="isEditMode" />
       </template>
     </CollapsibleSection>
 
-    <CollapsibleSection title="Account & Wallets" :icon="Wallet">
+    <CollapsibleSection :title="t('Accounts & Wallets')" :icon="Wallet">
       <template #default="{ isEditMode }">
         <SettingsWallets :is-edit-mode="isEditMode" />
       </template>
     </CollapsibleSection>
 
-    <CollapsibleSection title="Display Settings" :icon="Sun" :default-open="false">
+    <CollapsibleSection :title="t('Display Settings')" :icon="Sun" :default-open="false">
       <template #default="{ isEditMode }">
         <SettingsDisplay :is-edit-mode="isEditMode" />
       </template>
@@ -45,6 +45,8 @@ import SettingsGeneral from '@/components/settings/SettingsGeneral.vue';
 import SettingsWallets from '@/components/settings/SettingsWallets.vue';
 import SettingsDisplay from '@/components/settings/SettingsDisplay.vue';
 import PasswordModal from '@/components/settings/PasswordModal.vue';
+
+const { t } = useI18n();
 
 definePageMeta({
   layout: 'dashboard',

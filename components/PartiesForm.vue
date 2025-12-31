@@ -1,7 +1,7 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
     <div class="form-group">
-      <label for="party-name" class="form-label">Party Name </label>
+      <label for="party-name" class="form-label">{{ t('Party Name') }}</label>
       <div class="name-icon-row">
         <div class="name-col">
           <input
@@ -10,16 +10,16 @@
             type="text"
             class="form-input"
             :class="{ error: nameError }"
-            placeholder="Enter Party Name"
+            :placeholder="t('Enter party name')"
           />
-          <div v-if="nameError" class="error-text">Party Name is required.</div>
+          <div v-if="nameError" class="error-text">{{ t('Party name is required.') }}</div>
         </div>
         <div class="icon-col">
           <button
             type="button"
             class="icon-trigger"
             :aria-expanded="showIconPicker"
-            aria-label="Choose icon"
+            :aria-label="t('Choose icon')"
             @click="showIconPicker = !showIconPicker"
           >
             <component
@@ -38,7 +38,7 @@
     </div>
 
     <div class="form-group">
-      <label for="party-type" class="form-label">Party Type</label>
+      <label for="party-type" class="form-label">{{ t('Party Type') }}</label>
       <select
         id="party-type"
         v-model="form.type"
@@ -46,35 +46,37 @@
         :class="{ error: partyTypeError }"
         required
       >
-        <option value="">Select Party Type</option>
-        <option value="individual">Individual</option>
-        <option value="organization">Organization</option>
-        <option value="business">Business</option>
-        <option value="partnership">Partnership</option>
-        <option value="non_profit">Non-Profit</option>
-        <option value="government_agency">Government Agency</option>
-        <option value="educational_institution">Educational Institution</option>
-        <option value="healthcare_provider">Healthcare Provider</option>
+        <option value="">{{ t('Select party type') }}</option>
+        <option value="individual">{{ t('Individual') }}</option>
+        <option value="organization">{{ t('Organization') }}</option>
+        <option value="business">{{ t('Business') }}</option>
+        <option value="partnership">{{ t('Partnership') }}</option>
+        <option value="non_profit">{{ t('Non-Profit') }}</option>
+        <option value="government_agency">{{ t('Government Agency') }}</option>
+        <option value="educational_institution">{{ t('Educational Institution') }}</option>
+        <option value="healthcare_provider">{{ t('Healthcare Provider') }}</option>
       </select>
-      <div v-if="partyTypeError" class="error-text">Please select a party type.</div>
+      <div v-if="partyTypeError" class="error-text">{{ t('Please select a party type.') }}</div>
     </div>
 
     <div class="form-group">
-      <label for="party-description" class="form-label">Party Description </label>
+      <label for="party-description" class="form-label">{{ t('Party Description') }}</label>
       <textarea
         id="party-description"
         v-model="form.description"
         class="form-textarea"
         :class="{ error: descriptionError }"
-        placeholder="Type party description here..."
+        :placeholder="t('Type party description here...')"
         rows="5"
         required
       />
-      <div v-if="descriptionError" class="error-text">Party description is required.</div>
+      <div v-if="descriptionError" class="error-text">
+        {{ t('Party description is required.') }}
+      </div>
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Save party' : 'Create party' }}
+      {{ isEditing ? t('Save party') : t('Create party') }}
     </button>
   </form>
 </template>
@@ -84,6 +86,8 @@ import { ref, nextTick, computed, watch } from 'vue';
 import IconPicker from './IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
 import { ImagePlus } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
   editingItem: {

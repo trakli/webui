@@ -5,6 +5,7 @@ import AuthFooterLink from './AuthFooterLink.vue';
 import Logo from './Logo.vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
+const { t } = useI18n();
 const showPassword = ref(false);
 </script>
 
@@ -14,29 +15,29 @@ const showPassword = ref(false);
       <div class="login-content">
         <div class="login-header">
           <Logo size="medium" />
-          <h1 class="title">Login</h1>
+          <h1 class="title">{{ t('Login') }}</h1>
         </div>
 
         <div class="login-form-container">
           <form class="login-form">
             <div class="form-group">
-              <label for="username" class="form-label">Username</label>
+              <label for="username" class="form-label">{{ t('Username') }}</label>
               <input
                 id="username"
                 type="text"
-                placeholder="Enter your username"
+                :placeholder="t('Enter your username')"
                 class="form-input"
                 required
               />
             </div>
 
             <div class="form-group">
-              <label for="password" class="form-label">Password</label>
+              <label for="password" class="form-label">{{ t('Password') }}</label>
               <div class="password-container">
                 <input
                   id="password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="Enter your password"
+                  :placeholder="t('Enter your password')"
                   class="form-input"
                   required
                 />
@@ -48,10 +49,14 @@ const showPassword = ref(false);
             </div>
 
             <div class="button-container">
-              <TButton text="Login" width="100%" :height="53" />
+              <TButton :text="t('Login')" width="100%" :height="53" />
             </div>
 
-            <AuthFooterLink text="Don't have an account?" link-text="Sign up" to="/register" />
+            <AuthFooterLink
+              :text="t('Don\'t have an account?')"
+              :link-text="t('Sign up')"
+              to="/register"
+            />
           </form>
         </div>
       </div>

@@ -8,7 +8,7 @@
         <TButton
           class="add-transaction-btn"
           size="small"
-          text="Add transaction"
+          :text="t('Add transaction')"
           to="/transactions/new"
         >
           <template #left-icon>
@@ -18,8 +18,8 @@
         <LanguageSelector />
         <button
           class="icon-button info-btn"
-          aria-label="Open learning modal"
-          title="Learn how to use Trakli"
+          :aria-label="t('Open learning modal')"
+          :title="t('Learn how to use Trakli')"
           @click="openLearningModal"
           @keydown.enter="openLearningModal"
           @keydown.space.prevent="openLearningModal"
@@ -45,6 +45,8 @@ import { useAvatar } from '@/composables/useAvatar';
 import { useSidebar } from '@/composables/useSidebar';
 
 import { inject } from 'vue';
+
+const { t } = useI18n();
 
 const { user } = useAuth();
 const { getAvatarUrl } = useAvatar();

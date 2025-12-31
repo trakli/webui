@@ -2,11 +2,17 @@
   <div class="tips-container">
     <div class="tips-content">
       <div class="tips-header">
-        <h2 class="tips-title">Tips for adding {{ pageName.toLowerCase() }}</h2>
+        <h2 class="tips-title">
+          {{ t('Tips for adding {item}', { item: t(pageName).toLowerCase() }) }}
+        </h2>
       </div>
       <div class="tips-text-content">
         <p class="tips-text">
-          Always check everything before submitting a new {{ pageName.toLowerCase() }}.
+          {{
+            t('Always check everything before submitting a new {item}.', {
+              item: t(pageName).toLowerCase()
+            })
+          }}
         </p>
       </div>
     </div>
@@ -17,6 +23,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 defineProps({
   pageName: {
     type: String,

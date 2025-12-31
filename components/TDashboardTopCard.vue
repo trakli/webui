@@ -3,11 +3,11 @@
     <div class="page-header">
       <div class="page-header-left">
         <h1 v-if="user" class="card-title">
-          Welcome,
+          {{ t('Welcome,') }}
           <span class="card-title-username">{{ user.first_name }} {{ user.last_name }}</span>
         </h1>
         <span class="card-subtitle">
-          Here's your financial overview for {{ currentPeriodLabel }}.
+          {{ t("Here's your financial overview for {period}.", { period: currentPeriodLabel }) }}
         </span>
       </div>
       <div v-if="showFilters" class="page-header-right">
@@ -18,14 +18,14 @@
           :class="{ 'chip--primary': currentPeriod === period.value && !isCustomActive }"
           @click="handlePresetClick(period.value)"
         >
-          {{ period.label }}
+          {{ t(period.label) }}
         </button>
         <button
           class="chip"
           :class="{ 'chip--primary': isCustomActive }"
           @click="toggleCustomPeriod"
         >
-          <span>Custom</span>
+          <span>{{ t('Custom') }}</span>
           <ChevronDown class="chip-icon" :class="{ 'chip-icon--rotated': showFilterModal }" />
         </button>
       </div>
@@ -46,6 +46,8 @@ import { ChevronDown } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useStatistics } from '@/composables/useStatistics';
 import StatsFilterModal from '@/components/StatsFilterModal.vue';
+
+const { t } = useI18n();
 
 const _props = defineProps({
   showFilters: {
@@ -90,7 +92,7 @@ const currentPeriodLabel = computed(() => {
     }
   }
   const period = availablePeriods.find((p) => p.value === currentPeriod.value);
-  return period ? period.label.toLowerCase() : 'this period';
+  return period ? t(period.label).toLowerCase() : t('this period');
 });
 
 const formatDate = (dateStr) => {

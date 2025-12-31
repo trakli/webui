@@ -3,7 +3,7 @@
     <button class="card-header" type="button" @click="isOpen = !isOpen">
       <div class="title-row">
         <TrendingUp class="title-icon" />
-        <h2 class="title">Forecasts</h2>
+        <h2 class="title">{{ t('Forecasts') }}</h2>
       </div>
       <component :is="isOpen ? ChevronUp : ChevronDown" class="chevron" />
     </button>
@@ -13,10 +13,10 @@
         <div class="panel-col">
           <h3 class="sub-title">
             <Brain class="inline-icon" />
-            <span>Predictive Forecast</span>
+            <span>{{ t('Predictive Forecast') }}</span>
           </h3>
           <p class="muted">
-            Based on your historical data, here's your projected income for next month.
+            {{ t("Based on your historical data, here's your projected income for next month.") }}
           </p>
           <div class="forecast-row">
             <p class="forecast-value">${{ projectedIncome }}</p>
@@ -26,9 +26,11 @@
         <div class="panel-col">
           <h3 class="sub-title">
             <Lightbulb class="inline-icon" />
-            <span>What-if Scenarios</span>
+            <span>{{ t('What-if Scenarios') }}</span>
           </h3>
-          <p class="muted">Type a scenario below to see how it affects your projections.</p>
+          <p class="muted">
+            {{ t('Type a scenario below to see how it affects your projections.') }}
+          </p>
           <div class="whatif-row">
             <input
               v-model="scenarioText"
@@ -36,12 +38,12 @@
               class="form-input flex-1"
               :class="{ disabled: disableInput }"
               :disabled="disableInput"
-              placeholder="e.g., Increase freelance hours by 20%"
+              :placeholder="t('e.g., Increase freelance hours by 20%')"
             />
-            <button type="button" class="submit-btn" @click="simulate">Simulate</button>
+            <button type="button" class="submit-btn" @click="simulate">{{ t('Simulate') }}</button>
           </div>
           <p v-if="simulatedIncrease > 0" class="result">
-            <span class="bold">Result:</span> {{ resultText }}
+            <span class="bold">{{ t('Result') }}:</span> {{ resultText }}
           </p>
         </div>
       </div>
@@ -52,6 +54,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Brain, Lightbulb, TrendingUp, ChevronDown, ChevronUp } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
   totalIncome: { type: Number, required: true },
@@ -72,14 +76,18 @@ const projectedIncome = computed(() => {
 
 const simulate = () => {
   const matches = scenarioText.value.match(/(\d+)%/);
-  const percent = matches ? Number(matches[1]) / 100 : 0.2; // default 20%
+  const percent = matches ? Number(matches[1]) / 100 : 0.2;
   simulatedIncrease.value = Math.round(props.averageMonthlyIncome * percent);
 };
 
-const resultText = computed(
-  () =>
-    `Increasing your side hustle by ${((simulatedIncrease.value / props.averageMonthlyIncome) * 100).toFixed(0)}% is projected to increase your total income by an additional $${simulatedIncrease.value}.`
-);
+const resultText = computed(() => {
+  const percent = ((simulatedIncrease.value / props.averageMonthlyIncome) * 100).toFixed(0);
+  const amount = simulatedIncrease.value;
+  return t(
+    'Increasing your side hustle by {percent}% is projected to increase your total income by an additional ${amount}.',
+    { percent, amount }
+  );
+});
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div class="category-breakdown">
     <div class="header">
-      <h3 class="title">Spending Overview</h3>
+      <h3 class="title">{{ t('Spending Overview') }}</h3>
       <div class="chart-tabs">
         <button
           v-for="tab in chartTabs"
@@ -16,7 +16,7 @@
     </div>
 
     <div v-if="!hasData" class="empty-state">
-      <p>No expense data available</p>
+      <p>{{ t('No expense data available') }}</p>
     </div>
 
     <div v-else class="chart-section">
@@ -25,7 +25,7 @@
         <div class="donut-wrapper">
           <div class="donut" :style="{ background: gradient }" />
           <div class="donut-center">
-            <span class="center-label">Total</span>
+            <span class="center-label">{{ t('Total') }}</span>
             <span class="center-value">{{ formatTotal }}</span>
           </div>
         </div>
@@ -120,6 +120,7 @@ import { computed, ref, markRaw } from 'vue';
 import { PieChart, BarChart3, TrendingUp } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
 
+const { t } = useI18n();
 const { currentStatistics, formatCompactCurrency } = useStatistics();
 
 const COLORS = [

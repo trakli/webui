@@ -3,22 +3,22 @@
     <div class="modal">
       <h3 class="modal-title">
         <Lock class="inline-icon" />
-        <span>Change Password</span>
+        <span>{{ t('Change Password') }}</span>
       </h3>
       <p class="modal-subtitle">
-        For security, please enter your old password to confirm the change.
+        {{ t('For security, please enter your old password to confirm the change.') }}
       </p>
 
       <div class="form-group">
-        <label class="form-label">Old Password</label>
+        <label class="form-label">{{ t('Old Password') }}</label>
         <input v-model="oldPassword" type="password" class="form-input" />
       </div>
       <div class="form-group">
-        <label class="form-label">New Password</label>
+        <label class="form-label">{{ t('New Password') }}</label>
         <input v-model="newPassword" type="password" class="form-input" />
       </div>
       <div class="form-group">
-        <label class="form-label">Confirm New Password</label>
+        <label class="form-label">{{ t('Confirm New Password') }}</label>
         <input v-model="confirmNewPassword" type="password" class="form-input" />
       </div>
 
@@ -31,8 +31,10 @@
       </p>
 
       <div class="modal-actions">
-        <button type="button" class="cancel-btn" @click="$emit('close')">Cancel</button>
-        <button type="button" class="submit-btn" @click="handleUpdate">Update Password</button>
+        <button type="button" class="cancel-btn" @click="$emit('close')">{{ t('Cancel') }}</button>
+        <button type="button" class="submit-btn" @click="handleUpdate">
+          {{ t('Update Password') }}
+        </button>
       </div>
     </div>
   </div>
@@ -41,6 +43,8 @@
 <script setup>
 import { ref } from 'vue';
 import { Lock } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 defineEmits(['close']);
 
@@ -55,22 +59,22 @@ const handleUpdate = () => {
   isError.value = false;
 
   if (oldPassword.value !== 'current123') {
-    message.value = 'Incorrect old password.';
+    message.value = t('Incorrect old password.');
     isError.value = true;
     return;
   }
   if (newPassword.value.length < 6) {
-    message.value = 'New password must be at least 6 characters long.';
+    message.value = t('New password must be at least 6 characters long.');
     isError.value = true;
     return;
   }
   if (newPassword.value !== confirmNewPassword.value) {
-    message.value = 'New passwords do not match.';
+    message.value = t('New passwords do not match.');
     isError.value = true;
     return;
   }
 
-  message.value = 'Password updated successfully!';
+  message.value = t('Password updated successfully!');
   isError.value = false;
   setTimeout(() => {
     oldPassword.value = '';

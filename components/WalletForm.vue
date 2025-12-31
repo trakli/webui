@@ -1,7 +1,7 @@
 <template>
   <form class="entity-form" @submit.prevent="handleSubmit">
     <div class="form-group">
-      <label for="wallet-name" class="form-label">Wallet Name</label>
+      <label for="wallet-name" class="form-label">{{ t('Wallet Name') }}</label>
       <div class="name-icon-row">
         <div class="name-col">
           <input
@@ -10,17 +10,17 @@
             type="text"
             class="form-input"
             :class="{ error: nameError }"
-            placeholder="Enter wallet name"
+            :placeholder="t('Enter wallet name')"
             required
           />
-          <div v-if="nameError" class="error-text">Wallet name is required.</div>
+          <div v-if="nameError" class="error-text">{{ t('Wallet name is required.') }}</div>
         </div>
         <div class="icon-col">
           <button
             type="button"
             class="icon-trigger"
             :aria-expanded="showIconPicker"
-            aria-label="Choose icon"
+            :aria-label="t('Choose icon')"
             @click="showIconPicker = !showIconPicker"
           >
             <component
@@ -40,7 +40,7 @@
 
     <div class="two-col-row">
       <div class="form-group">
-        <label for="wallet-type" class="form-label">Wallet Type</label>
+        <label for="wallet-type" class="form-label">{{ t('Wallet Type') }}</label>
         <select
           id="wallet-type"
           v-model="form.type"
@@ -48,17 +48,17 @@
           :class="{ error: typeError }"
           required
         >
-          <option value="">Select wallet type</option>
-          <option value="bank">Bank Account</option>
-          <option value="cash">Cash</option>
-          <option value="credit_card">Credit Card</option>
-          <option value="mobile">Mobile Money</option>
+          <option value="">{{ t('Select wallet type') }}</option>
+          <option value="bank">{{ t('Bank Account') }}</option>
+          <option value="cash">{{ t('Cash') }}</option>
+          <option value="credit_card">{{ t('Credit Card') }}</option>
+          <option value="mobile">{{ t('Mobile Money') }}</option>
         </select>
-        <div v-if="typeError" class="error-text">Please select a wallet type.</div>
+        <div v-if="typeError" class="error-text">{{ t('Please select a wallet type.') }}</div>
       </div>
 
       <div class="form-group">
-        <label for="wallet-currency" class="form-label">Currency</label>
+        <label for="wallet-currency" class="form-label">{{ t('Currency') }}</label>
         <select
           id="wallet-currency"
           v-model="form.currency"
@@ -66,23 +66,23 @@
           :class="{ error: currencyError }"
           required
         >
-          <option value="">Select currency</option>
-          <option value="XAF">XAF - Central African Franc</option>
-          <option value="USD">USD - US Dollar</option>
-          <option value="EUR">EUR - Euro</option>
-          <option value="GBP">GBP - British Pound</option>
-          <option value="JPY">JPY - Japanese Yen</option>
-          <option value="CAD">CAD - Canadian Dollar</option>
-          <option value="AUD">AUD - Australian Dollar</option>
-          <option value="CHF">CHF - Swiss Franc</option>
-          <option value="CNY">CNY - Chinese Yuan</option>
+          <option value="">{{ t('Select currency') }}</option>
+          <option value="XAF">XAF - {{ t('Central African Franc') }}</option>
+          <option value="USD">USD - {{ t('US Dollar') }}</option>
+          <option value="EUR">EUR - {{ t('Euro') }}</option>
+          <option value="GBP">GBP - {{ t('British Pound') }}</option>
+          <option value="JPY">JPY - {{ t('Japanese Yen') }}</option>
+          <option value="CAD">CAD - {{ t('Canadian Dollar') }}</option>
+          <option value="AUD">AUD - {{ t('Australian Dollar') }}</option>
+          <option value="CHF">CHF - {{ t('Swiss Franc') }}</option>
+          <option value="CNY">CNY - {{ t('Chinese Yuan') }}</option>
         </select>
-        <div v-if="currencyError" class="error-text">Please select a currency.</div>
+        <div v-if="currencyError" class="error-text">{{ t('Please select a currency.') }}</div>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="wallet-balance" class="form-label">Initial Balance</label>
+      <label for="wallet-balance" class="form-label">{{ t('Initial Balance') }}</label>
       <input
         id="wallet-balance"
         v-model.number="form.balance"
@@ -94,21 +94,23 @@
     </div>
 
     <div class="form-group">
-      <label for="wallet-description" class="form-label">Wallet Description</label>
+      <label for="wallet-description" class="form-label">{{ t('Wallet Description') }}</label>
       <textarea
         id="wallet-description"
         v-model="form.description"
         class="form-textarea"
         :class="{ error: descriptionError }"
-        placeholder="Type wallet description here..."
+        :placeholder="t('Type wallet description here...')"
         rows="5"
         required
       />
-      <div v-if="descriptionError" class="error-text">Wallet description is required.</div>
+      <div v-if="descriptionError" class="error-text">
+        {{ t('Wallet description is required.') }}
+      </div>
     </div>
 
     <button type="submit" class="submit-btn">
-      {{ isEditing ? 'Update wallet' : 'Create wallet' }}
+      {{ isEditing ? t('Update wallet') : t('Create wallet') }}
     </button>
   </form>
 </template>
@@ -119,6 +121,8 @@ import IconPicker from './IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
 import { ImagePlus } from 'lucide-vue-next';
 import { useSharedData } from '@/composables/useSharedData';
+
+const { t } = useI18n();
 
 const props = defineProps({
   editingItem: {

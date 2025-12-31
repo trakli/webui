@@ -1,5 +1,6 @@
 import { readonly } from 'vue';
 import { extractApiErrors } from '~/utils/apiErrors';
+import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
 
 export const useDataManager = () => {
   // Centralized state using useState with unique keys
@@ -32,6 +33,17 @@ export const useDataManager = () => {
       // Force reload all data (bypass cache)
       await loadAllData(true);
       await refreshTransactions();
+
+      // Apply saved language preference
+      const { configurationsMap } = useSharedData();
+      const savedLang = configurationsMap.value?.[CONFIGURATION_KEYS.LANGUAGE];
+      if (savedLang) {
+        const { setLocale, locales } = useI18n();
+        const availableLocales = (locales.value as Array<{ code: string }>).map((l) => l.code);
+        if (availableLocales.includes(savedLang)) {
+          setLocale(savedLang);
+        }
+      }
 
       isInitialized.value = true;
       lastInitTime.value = Date.now();

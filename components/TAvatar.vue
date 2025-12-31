@@ -16,8 +16,8 @@
         <p class="user-email">{{ user.email }}</p>
       </div>
       <hr class="divider" />
-      <TDropdownItem @click="() => $router.push('/settings')"> Settings </TDropdownItem>
-      <TDropdownItem @click="logout"> Logout </TDropdownItem>
+      <TDropdownItem @click="() => $router.push('/settings')"> {{ t('Settings') }} </TDropdownItem>
+      <TDropdownItem @click="logout"> {{ t('Logout') }} </TDropdownItem>
     </div>
   </TDropdown>
 </template>
@@ -27,6 +27,8 @@ import { ChevronDownIcon } from '@heroicons/vue/24/outline';
 import TDropdown from './TDropdown.vue';
 import TDropdownItem from './TDropdownItem.vue';
 import { useAuth } from '@/composables/useAuth';
+
+const { t } = useI18n();
 
 const { user, logout } = useAuth();
 

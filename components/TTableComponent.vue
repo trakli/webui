@@ -1,11 +1,11 @@
 <template>
   <div class="table-container">
     <div class="table-heading">
-      <h1 class="table-heading-text">All Transactions</h1>
+      <h1 class="table-heading-text">{{ t('All Transactions') }}</h1>
       <div class="input-controls">
         <SearchInput
           :model-value="searchQuery"
-          placeholder="Search..."
+          :placeholder="t('Search...')"
           :debounce="0"
           @update:model-value="$emit('update:searchQuery', $event)"
         />
@@ -17,12 +17,12 @@
         <table class="custom-table" :class="{ 'expense-table': headerType === 'expense' }">
           <thead>
             <tr>
-              <th>Date Time</th>
-              <th>Type</th>
-              <th>Party</th>
-              <th>Amount</th>
-              <th>Category</th>
-              <th>Action</th>
+              <th>{{ t('Date Time') }}</th>
+              <th>{{ t('Type') }}</th>
+              <th>{{ t('Party') }}</th>
+              <th>{{ t('Amount') }}</th>
+              <th>{{ t('Category') }}</th>
+              <th>{{ t('Action') }}</th>
             </tr>
           </thead>
           <tbody class="table-body">
@@ -62,21 +62,21 @@
               <td colspan="6" class="totals-cell">
                 <div class="totals-grid">
                   <div class="total-section totals-label">
-                    <span class="total-label">Totals</span>
+                    <span class="total-label">{{ t('Totals') }}</span>
                   </div>
                   <div class="total-section income">
-                    <span class="total-label">Income</span>
+                    <span class="total-label">{{ t('Income') }}</span>
                     <span class="total-value">{{ formatDisplayCurrency(totals.income) }}</span>
                   </div>
                   <div class="total-section expense">
-                    <span class="total-label">Expenses</span>
+                    <span class="total-label">{{ t('Expenses') }}</span>
                     <span class="total-value">{{ formatDisplayCurrency(totals.expenses) }}</span>
                   </div>
                   <div
                     class="total-section net"
                     :class="{ positive: totals.net >= 0, negative: totals.net < 0 }"
                   >
-                    <span class="total-label">Net</span>
+                    <span class="total-label">{{ t('Net') }}</span>
                     <span class="total-value">{{ formatDisplayCurrency(totals.net) }}</span>
                   </div>
                 </div>
@@ -91,7 +91,7 @@
                       :disabled="currentPage === 1"
                       @click="$emit('page-change', currentPage - 1)"
                     >
-                      Previous
+                      {{ t('Previous') }}
                     </button>
                     <button
                       v-for="page in visiblePages"
@@ -107,12 +107,18 @@
                       :disabled="currentPage === pagesTotal"
                       @click="$emit('page-change', currentPage + 1)"
                     >
-                      Next
+                      {{ t('Next') }}
                     </button>
                   </div>
                   <div class="pagination-info">
                     <span class="entries-text">
-                      Showing {{ startEntry }}-{{ endEntry }} of {{ totalEntries }} entries
+                      {{
+                        t('Showing {start}-{end} of {total} entries', {
+                          start: startEntry,
+                          end: endEntry,
+                          total: totalEntries
+                        })
+                      }}
                     </span>
                   </div>
                 </div>
@@ -131,6 +137,8 @@ import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { parseAmount, getCurrencySymbol } from '@/utils/currency';
 import SearchInput from './SearchInput.vue';
+
+const { t } = useI18n();
 
 const CURRENCY_RATES = {
   USD: 1.0,
@@ -249,12 +257,12 @@ const formatTimeAgo = (txn) => {
   if (isNaN(dateObj.getTime())) return '';
   const diffMs = Date.now() - dateObj.getTime();
   const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 1) return t('just now');
+  if (minutes < 60) return t('{n} min ago', { n: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`;
+  if (hours < 24) return t('{n} hr ago', { n: hours }, hours);
   const days = Math.floor(hours / 24);
-  return `${days} day${days > 1 ? 's' : ''} ago`;
+  return t('{n} day ago', { n: days }, days);
 };
 </script>
 

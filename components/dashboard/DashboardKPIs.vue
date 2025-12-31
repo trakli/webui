@@ -25,27 +25,29 @@
             <XIcon class="filter-chip__remove-icon" />
           </button>
         </span>
-        <button class="filter-chip filter-chip--clear" @click="clearAllFilters">Clear all</button>
+        <button class="filter-chip filter-chip--clear" @click="clearAllFilters">
+          {{ t('Clear all') }}
+        </button>
       </div>
     </div>
 
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-label">Balance</div>
+        <div class="kpi-label">{{ t('Balance') }}</div>
         <div class="kpi-value">{{ formatCurrency(statistics?.total_balance || 0) }}</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Income</div>
+        <div class="kpi-label">{{ t('Income') }}</div>
         <div class="kpi-value is-positive">{{ formatCurrency(statistics?.total_income || 0) }}</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Expenses</div>
+        <div class="kpi-label">{{ t('Expenses') }}</div>
         <div class="kpi-value is-negative">
           {{ formatCurrency(statistics?.total_expenses || 0) }}
         </div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Net</div>
+        <div class="kpi-label">{{ t('Net') }}</div>
         <div class="kpi-value" :class="netClass">{{ formatCurrency(netValue) }}</div>
       </div>
     </div>
@@ -57,6 +59,8 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { ChevronDown, X as XIcon } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
 import { useWallets } from '@/composables/useWallets';
+
+const { t } = useI18n();
 
 const { wallets } = useWallets();
 const {
@@ -75,9 +79,9 @@ const statistics = currentStatistics;
 const showDropdown = ref(false);
 
 const selectedWalletName = computed(() => {
-  if (selectedWalletId.value === null) return 'All Wallets';
+  if (selectedWalletId.value === null) return t('All Wallets');
   const wallet = availableWallets.value.find((w) => w.id === selectedWalletId.value);
-  return wallet ? wallet.name : 'All Wallets';
+  return wallet ? wallet.name : t('All Wallets');
 });
 
 const netValue = computed(() => {

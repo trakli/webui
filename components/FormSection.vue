@@ -3,11 +3,11 @@
     <div class="tab-buttons">
       <button class="tab-button" :class="{ active: isIncomeSelected }" @click="selectIncome">
         <ArrowDownTrayIcon class="tab-icon" />
-        Income Transaction
+        {{ t('Income Transaction') }}
       </button>
       <button class="tab-button" :class="{ active: isExpenseSelected }" @click="selectExpense">
         <ArrowUpTrayIcon class="tab-icon" />
-        Expense Transaction
+        {{ t('Expense Transaction') }}
       </button>
     </div>
 
@@ -25,6 +25,8 @@
 import { ref, watch } from 'vue';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/vue/24/outline';
 import TransactionFormContainer from './TransactionFormContainer.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
   editingItem: { type: Object, default: null }

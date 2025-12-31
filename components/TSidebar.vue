@@ -29,7 +29,7 @@
             @click="handleNavClick"
           >
             <HomeIcon class="icon" />
-            <span class="text">Home</span>
+            <span class="text">{{ t('Home') }}</span>
           </NuxtLink>
         </li>
 
@@ -41,7 +41,7 @@
             @click="handleNavClick"
           >
             <RectangleGroupIcon class="icon" />
-            <span class="text">Transactions</span>
+            <span class="text">{{ t('Transactions') }}</span>
           </NuxtLink>
         </li>
         <li>
@@ -52,13 +52,13 @@
             @click="handleNavClick"
           >
             <BuildingLibraryIcon class="icon" />
-            <span class="text">Categories</span>
+            <span class="text">{{ t('Categories') }}</span>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink to="/groups" class="nav-button" active-class="selected" @click="handleNavClick">
             <UserGroupIcon class="icon" />
-            <span class="text">Groups</span>
+            <span class="text">{{ t('Groups') }}</span>
           </NuxtLink>
         </li>
         <li>
@@ -69,7 +69,7 @@
             @click="handleNavClick"
           >
             <UserGroupIcon class="icon" />
-            <span class="text">Parties</span>
+            <span class="text">{{ t('Parties') }}</span>
           </NuxtLink>
         </li>
         <li>
@@ -80,7 +80,7 @@
             @click="handleNavClick"
           >
             <WalletIcon class="icon" />
-            <span class="text">Wallets</span>
+            <span class="text">{{ t('Wallets') }}</span>
           </NuxtLink>
         </li>
       </ul>
@@ -95,7 +95,7 @@
             @click="handleButtonNavClick('/reports')"
           >
             <Cog8ToothIcon class="icon" />
-            <span class="text">Reports & Stats</span>
+            <span class="text">{{ t('Reports & Stats') }}</span>
           </button>
         </li>
         <li>
@@ -105,7 +105,7 @@
             @click="handleButtonNavClick('/ai-insights')"
           >
             <ChatBubbleLeftRightIcon class="icon" />
-            <span class="text">AI Insights</span>
+            <span class="text">{{ t('AI Insights') }}</span>
           </button>
         </li>
         <li>
@@ -115,7 +115,7 @@
             @click="handleButtonNavClick('/settings')"
           >
             <Cog8ToothIcon class="icon" />
-            <span class="text">Settings</span>
+            <span class="text">{{ t('Settings') }}</span>
           </button>
         </li>
       </ul>
@@ -137,6 +137,8 @@ import {
 import Logo from './Logo.vue';
 import { useSidebar } from '@/composables/useSidebar';
 import { useRouter } from 'vue-router';
+
+const { t } = useI18n();
 
 const { isSidebarOpen, isMobile, closeSidebar } = useSidebar();
 const router = useRouter();

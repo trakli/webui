@@ -1,10 +1,10 @@
 <template>
   <div class="card">
-    <h2 class="title">Income Sources Breakdown</h2>
+    <h2 class="title">{{ t('Income Sources Breakdown') }}</h2>
     <div ref="wrapperRef" class="donut-wrapper" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
       <div class="donut" :style="{ background: gradient }" />
       <div class="donut-center">
-        <p class="center-label">Total Income</p>
+        <p class="center-label">{{ t('Total Income') }}</p>
         <p class="center-value">{{ formatShortAmount(`${total} ${currency}`) }}</p>
       </div>
       <div v-if="hoverIndex >= 0" class="tooltip" :style="tooltipStyle">
@@ -28,6 +28,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { formatShortAmount } from '@/utils/currency';
+
+const { t } = useI18n();
 
 const props = defineProps({
   data: { type: Array, required: true }, // [{ name, value, color }]

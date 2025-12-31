@@ -21,6 +21,7 @@
     "@dicebear/collection": "^9.2.4",
     "@dicebear/core": "^9.2.4",
     "@heroicons/vue": "^2.2.0",
+    "@nuxtjs/i18n": "^10.2.1",
     "apexcharts": "^5.3.3",
     "country-flag-icons": "^1.5.19",
     "libphonenumber-js": "^1.12.9",

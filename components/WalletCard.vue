@@ -33,7 +33,7 @@
           <button class="income-button">
             <div class="income-button-content">
               <ArrowDownLeftIcon class="income-arrow-icon" />
-              <span class="income-button-text">Income</span>
+              <span class="income-button-text">{{ t('Income') }}</span>
             </div>
             <span class="income-card-amount-text">
               {{ formatCompactCurrency(statistics?.total_income || 0, primaryCurrency) }}
@@ -42,7 +42,7 @@
           <button class="expense-button">
             <div class="expense-button-content">
               <ArrowUpLeftIcon class="expense-arrow-icon" />
-              <span class="expense-button-text">Expense</span>
+              <span class="expense-button-text">{{ t('Expense') }}</span>
             </div>
             <span class="expense-card-amount-text">
               {{ formatCompactCurrency(statistics?.total_expenses || 0, primaryCurrency) }}
@@ -76,6 +76,8 @@ import { ArrowDownLeftIcon, ArrowUpLeftIcon, ChevronDownIcon } from '@heroicons/
 import { useStatistics } from '@/composables/useStatistics';
 import ComponentLoader from '@/components/ComponentLoader.vue';
 
+const { t } = useI18n();
+
 const {
   currentPeriod,
   selectedWalletId,
@@ -93,9 +95,9 @@ const statistics = ref(null);
 
 // Computed properties
 const selectedWalletName = computed(() => {
-  if (selectedWalletId.value === null) return 'All Wallets';
+  if (selectedWalletId.value === null) return t('All Wallets');
   const wallet = availableWallets.value.find((w) => w.id === selectedWalletId.value);
-  return wallet ? wallet.name : 'All Wallets';
+  return wallet ? wallet.name : t('All Wallets');
 });
 
 const primaryCurrency = computed(() => {

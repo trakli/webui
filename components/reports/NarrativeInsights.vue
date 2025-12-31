@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <button class="card-header" type="button" @click="isOpen = !isOpen">
-      <h2 class="title">Narrative Insights</h2>
+      <h2 class="title">{{ t('Narrative Insights') }}</h2>
       <component :is="isOpen ? ChevronUp : ChevronDown" class="chevron" />
     </button>
     <transition name="collapse">
@@ -15,6 +15,8 @@
 <script setup>
 import { ref } from 'vue';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const isOpen = ref(true);
 </script>
