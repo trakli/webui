@@ -401,5 +401,11 @@
   "Income Category": "Catégorie de Revenu",
   "Expense Category": "Catégorie de Dépense",
   "Income Categories": "Catégories de Revenu",
-  "Expense Categories": "Catégories de Dépense"
+  "Expense Categories": "Catégories de Dépense",
+  "carousel.simple.title": "Simple",
+  "carousel.simple.text": "Trakli se concentre sur l'essentiel et vous donne exactement ce dont vous avez besoin pour voir d'où vient et où va votre argent.",
+  "carousel.automated.title": "Automatisé",
+  "carousel.automated.text": "Obtenez vos rapports de revenus et de dépenses automatiquement grâce à vos emails, SMS ou d'autres workflows personnalisés que vous configurez.",
+  "carousel.opensource.title": "Open Source",
+  "carousel.opensource.text": "Trakli est open source ! Vous pouvez utiliser toutes les fonctionnalités de Trakli gratuitement sur votre instance auto-hébergée."
 }

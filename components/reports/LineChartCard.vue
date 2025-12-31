@@ -22,17 +22,17 @@
           </filter>
         </defs>
         <g>
-          <template v-for="(t, i) in yTicks" :key="`y-${i}`">
+          <template v-for="(tick, i) in yTicks" :key="`y-${i}`">
             <line
               :x1="paddingLeft"
               :x2="width - paddingRight"
-              :y1="yScale(t)"
-              :y2="yScale(t)"
+              :y1="yScale(tick)"
+              :y2="yScale(tick)"
               stroke="#e5e7eb"
               stroke-dasharray="4 4"
             />
-            <text :x="paddingLeft - 8" :y="yScale(t) + 4" text-anchor="end" class="axis-label">
-              {{ formatCurrency(t) }}
+            <text :x="paddingLeft - 8" :y="yScale(tick) + 4" text-anchor="end" class="axis-label">
+              {{ formatCurrency(tick) }}
             </text>
           </template>
           <template v-for="(p, i) in pointArray" :key="`x-${i}`">

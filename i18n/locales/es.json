@@ -401,5 +401,11 @@
   "Income Category": "Categoría de Ingreso",
   "Expense Category": "Categoría de Gasto",
   "Income Categories": "Categorías de Ingreso",
-  "Expense Categories": "Categorías de Gasto"
+  "Expense Categories": "Categorías de Gasto",
+  "carousel.simple.title": "Simple",
+  "carousel.simple.text": "Trakli se centra en lo básico y te da justo lo que necesitas para ver de dónde viene y a dónde va tu dinero.",
+  "carousel.automated.title": "Automatizado",
+  "carousel.automated.text": "Obtén tus informes de ingresos y gastos automáticamente usando tus correos electrónicos, SMS u otros flujos de trabajo personalizados que configures.",
+  "carousel.opensource.title": "Código Abierto",
+  "carousel.opensource.text": "¡Trakli es de código abierto! Puedes usar todas las funciones de Trakli sin costo en tu instancia auto-alojada."
 }

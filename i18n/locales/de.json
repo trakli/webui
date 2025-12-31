@@ -401,5 +401,11 @@
   "Income Category": "Einkommenskategorie",
   "Expense Category": "Ausgabenkategorie",
   "Income Categories": "Einkommenskategorien",
-  "Expense Categories": "Ausgabenkategorien"
+  "Expense Categories": "Ausgabenkategorien",
+  "carousel.simple.title": "Einfach",
+  "carousel.simple.text": "Trakli konzentriert sich auf das Wesentliche und gibt Ihnen genau das, was Sie brauchen, um zu sehen, woher Ihr Geld kommt und wohin es geht.",
+  "carousel.automated.title": "Automatisiert",
+  "carousel.automated.text": "Lassen Sie Ihre Einnahmen- und Ausgabenberichte automatisch erstellen, indem Sie Ihre E-Mails, SMS oder andere benutzerdefinierte Workflows nutzen.",
+  "carousel.opensource.title": "Open Source",
+  "carousel.opensource.text": "Trakli ist Open Source! Sie können alle Trakli-Funktionen kostenlos auf Ihrer selbst gehosteten Instanz nutzen."
 }

@@ -98,6 +98,8 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
+    const { clear: clearOnboardingStatus } = useOnboardingStatus();
+
     try {
       const api = useApi();
       await api('/logout', {
@@ -110,6 +112,7 @@ export const useAuth = () => {
       token.value = null;
       userCookie.value = null;
       tokenCookie.value = null;
+      clearOnboardingStatus();
 
       const { clearData } = useDataManager();
       clearData();

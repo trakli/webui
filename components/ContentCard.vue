@@ -35,12 +35,18 @@ import { Edit as LucideEdit, Trash as LucideTrash } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
 
 const props = defineProps({
-  name: String,
+  name: {
+    type: String,
+    default: ''
+  },
   icon: {
     type: String,
     default: null
   },
-  description: String,
+  description: {
+    type: String,
+    default: ''
+  },
   pageName: {
     type: String,
     required: true

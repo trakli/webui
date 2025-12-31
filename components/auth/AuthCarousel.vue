@@ -7,7 +7,7 @@
         </div>
         <div class="sidebar-text">
           <transition name="fade" mode="out-in">
-            <div :key="currentSlide" class="text-content">
+            <div v-if="slides[currentSlide]" :key="currentSlide" class="text-content">
               <h2>{{ slides[currentSlide].title }}</h2>
               <p>{{ slides[currentSlide].text }}</p>
             </div>
@@ -27,30 +27,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
+const { t } = useI18n();
 const currentSlide = ref(0);
 
-const slides = [
+const slides = computed(() => [
   {
-    title: 'Simple',
-    text: 'Trakli focuses on the basics and gives just what you need to see where your money is coming from or going to.'
+    title: t('carousel.simple.title'),
+    text: t('carousel.simple.text')
   },
   {
-    title: 'Automated',
-    text: 'Get your income and expense report completed automatically using your emails and SMS or other custom workflows you setup.'
+    title: t('carousel.automated.title'),
+    text: t('carousel.automated.text')
   },
   {
-    title: 'Opensource',
-    text: 'Trakli is open source! You can use all Trakli features at no cost on your self-hosted instance.'
+    title: t('carousel.opensource.title'),
+    text: t('carousel.opensource.text')
   }
-];
+]);
 
 let slideInterval;
 
 const startSlideShow = () => {
   slideInterval = setInterval(() => {
-    currentSlide.value = (currentSlide.value + 1) % slides.length;
+    currentSlide.value = (currentSlide.value + 1) % slides.value.length;
   }, 5000);
 };
 
