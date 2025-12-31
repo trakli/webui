@@ -328,9 +328,12 @@ definePageMeta({
   middleware: 'auth'
 });
 
+const route = useRoute();
 const sharedData = useSharedData();
 const { showSuccess } = useNotifications();
 const { createWallet, updateWallet } = useWallets();
+const { setComplete: setOnboardingComplete } = useOnboardingStatus();
+const returnTo = computed(() => (route.query.returnTo as string) || '/dashboard');
 
 const currentStep = ref(1);
 const totalSteps = 4;
@@ -409,9 +412,8 @@ const ensureOnboardingComplete = async () => {
       })
       .catch(() => null);
   }
-  if (typeof globalThis !== 'undefined') {
-    globalThis.localStorage.setItem('onboarding-completed', 'true');
-  }
+  // Set cookie and state for fast middleware check on refresh
+  setOnboardingComplete();
 
   // Refresh configurations cache to ensure middleware sees the update
   await sharedData.loadConfigurations(true).catch(() => null);
@@ -420,7 +422,7 @@ const ensureOnboardingComplete = async () => {
 const skipStep = async () => {
   try {
     await ensureOnboardingComplete();
-    await navigateTo('/dashboard', { replace: true });
+    await navigateTo(returnTo.value, { replace: true });
   } catch (e) {
     console.error('Error in skipStep:', e);
   }
@@ -572,7 +574,7 @@ const completOnboarding = async () => {
     sharedData.loadConfigurations(true).catch(() => {}),
     sharedData.loadWallets(true).catch(() => {})
   ]);
-  await navigateTo('/dashboard', { replace: true });
+  await navigateTo(returnTo.value, { replace: true });
 };
 
 onMounted(() => {

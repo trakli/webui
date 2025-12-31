@@ -1,44 +1,41 @@
 import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
 
-// Track if we've done the initial config check this session
-let initialCheckDone = false;
-
 export default defineNuxtRouteMiddleware(async (to, _from) => {
   const { isAuthenticated } = useAuth();
-  const sharedData = useSharedData();
 
   if (!isAuthenticated.value) {
-    initialCheckDone = false;
     return navigateTo('/login');
   }
 
-  try {
-    // Only force reload on first navigation after login or if cache is empty
-    const forceReload = !initialCheckDone || !sharedData.configurationsMap.value;
-    const configurations = await sharedData.loadConfigurations(forceReload);
-    initialCheckDone = true;
+  // Only handle redirecting FROM onboarding if already complete
+  // Never redirect TO onboarding from here - let pages handle that after data loads
+  if (to.path === '/onboarding') {
+    const { isComplete, setComplete } = useOnboardingStatus();
 
-    const isOnboardingComplete = !!configurations?.[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
+    // Fast path: cookie says complete
+    if (isComplete.value) {
+      const returnTo = to.query.returnTo as string;
+      return navigateTo(returnTo || '/dashboard');
+    }
 
-    if (!isOnboardingComplete) {
-      if (to.path !== '/onboarding') {
-        return navigateTo('/onboarding');
+    // Check API to confirm
+    try {
+      const sharedData = useSharedData();
+      const configurations = await sharedData.loadConfigurations();
+      const isOnboardingComplete = !!configurations?.[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
+
+      if (isOnboardingComplete) {
+        setComplete();
+        const returnTo = to.query.returnTo as string;
+        return navigateTo(returnTo || '/dashboard');
       }
-      return;
+    } catch (error) {
+      console.error('Failed to check onboarding status:', error);
     }
-
-    if (isOnboardingComplete && to.path === '/onboarding') {
-      return navigateTo('/dashboard');
-    }
-  } catch (error) {
-    console.error('Failed to load configurations in auth middleware:', error);
-    // On error, allow navigation but skip onboarding check
-    // This prevents the app from breaking if the API is temporarily unavailable
-    initialCheckDone = true;
   }
 });
 
-// Export reset function for use during logout
+// Export reset function for use during logout (kept for API compatibility)
 export const resetAuthMiddlewareState = () => {
-  initialCheckDone = false;
+  // No-op - state is now handled by useOnboardingStatus
 };

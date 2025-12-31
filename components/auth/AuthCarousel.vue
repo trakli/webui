@@ -7,7 +7,7 @@
         </div>
         <div class="sidebar-text">
           <transition name="fade" mode="out-in">
-            <div :key="currentSlide" class="text-content">
+            <div v-if="slides[currentSlide]" :key="currentSlide" class="text-content">
               <h2>{{ slides[currentSlide].title }}</h2>
               <p>{{ slides[currentSlide].text }}</p>
             </div>
@@ -51,7 +51,7 @@ let slideInterval;
 
 const startSlideShow = () => {
   slideInterval = setInterval(() => {
-    currentSlide.value = (currentSlide.value + 1) % slides.length;
+    currentSlide.value = (currentSlide.value + 1) % slides.value.length;
   }, 5000);
 };
 

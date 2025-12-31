@@ -52,11 +52,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
 import { useNotifications } from '@/composables/useNotifications';
 import { checkAuth } from '~/utils/auth';
+import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
 import TDashboardTopCard from '@/components/TDashboardTopCard.vue';
 import DashboardKPIs from '@/components/dashboard/DashboardKPIs.vue';
 import CategoryBreakdown from '@/components/dashboard/CategoryBreakdown.vue';
@@ -68,9 +69,23 @@ import ComponentLoader from '@/components/ComponentLoader.vue';
 const router = useRouter();
 
 const { transactions } = useTransactions();
+const { configurationsMap } = useSharedData();
+const { setComplete: setOnboardingComplete } = useOnboardingStatus();
 
 const { isLoading, error, isInitialized } = useDataManagerStates();
 useDataInitialization();
+
+// Check onboarding status after data loads
+watch(isInitialized, (initialized) => {
+  if (initialized && configurationsMap.value) {
+    const isOnboardingComplete = !!configurationsMap.value[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
+    if (isOnboardingComplete) {
+      setOnboardingComplete();
+    } else {
+      router.push('/onboarding');
+    }
+  }
+}, { immediate: true });
 
 const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
 const hasDataLoaded = computed(() => isInitialized.value && !isLoading.value);

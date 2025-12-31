@@ -28,6 +28,7 @@ const router = useRouter();
 const route = useRoute();
 const { login } = useAuth();
 const sharedData = useSharedData();
+const { setComplete: setOnboardingComplete } = useOnboardingStatus();
 
 watch(
   form,
@@ -56,6 +57,9 @@ const handleSubmit = async () => {
   try {
     const configs = await sharedData.loadConfigurations();
     isOnboardingComplete = !!configs?.[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
+    if (isOnboardingComplete) {
+      setOnboardingComplete();
+    }
   } catch (e) {
     console.warn('Failed to load onboarding config', e);
   }
