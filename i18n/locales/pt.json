@@ -536,5 +536,8 @@
   "{count}m ago": "há {count} min",
   "{count}h ago": "há {count} h",
   "{count}d ago": "há {count} d",
-  "{count}w ago": "há {count} sem"
+  "{count}w ago": "há {count} sem",
+  "Confirm Deletion": "Confirmar exclusão",
+  "Are you sure you want to delete this {item}? This action cannot be undone.": "Tem certeza de que deseja excluir este {item}? Esta ação não pode ser desfeita.",
+  "item": "item"
 }

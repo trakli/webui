@@ -30,6 +30,8 @@ const confirmModalData = ref<
 });
 
 export const useNotifications = () => {
+  const { t } = useI18n();
+
   // Add a notification
   const addNotification = (notification: Omit<Notification, 'id'>) => {
     const id = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -109,8 +111,8 @@ export const useNotifications = () => {
     return new Promise((resolve) => {
       confirmModalData.value = {
         ...options,
-        confirmText: options.confirmText || 'Confirm',
-        cancelText: options.cancelText || 'Cancel',
+        confirmText: options.confirmText || t('Confirm'),
+        cancelText: options.cancelText || t('Cancel'),
         type: options.type || 'warning',
         resolve
       };
@@ -127,10 +129,12 @@ export const useNotifications = () => {
   // Quick delete confirmation
   const confirmDelete = (itemName: string = 'item'): Promise<boolean> => {
     return showConfirm({
-      title: 'Confirm Deletion',
-      message: `Are you sure you want to delete this ${itemName}? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
+      title: t('Confirm Deletion'),
+      message: t('Are you sure you want to delete this {item}? This action cannot be undone.', {
+        item: t(itemName)
+      }),
+      confirmText: t('Delete'),
+      cancelText: t('Cancel'),
       type: 'danger'
     });
   };

@@ -536,5 +536,8 @@
   "{count}m ago": "{count} min fa",
   "{count}h ago": "{count} h fa",
   "{count}d ago": "{count} g fa",
-  "{count}w ago": "{count} sett fa"
+  "{count}w ago": "{count} sett fa",
+  "Confirm Deletion": "Conferma eliminazione",
+  "Are you sure you want to delete this {item}? This action cannot be undone.": "Sei sicuro di voler eliminare questo {item}? Questa azione non può essere annullata.",
+  "item": "elemento"
 }

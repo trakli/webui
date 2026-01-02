@@ -537,5 +537,8 @@
   "{count}m ago": "hace {count} min",
   "{count}h ago": "hace {count} h",
   "{count}d ago": "hace {count} d",
-  "{count}w ago": "hace {count} sem"
+  "{count}w ago": "hace {count} sem",
+  "Confirm Deletion": "Confirmar eliminación",
+  "Are you sure you want to delete this {item}? This action cannot be undone.": "¿Seguro que quieres eliminar este {item}? Esta acción no se puede deshacer.",
+  "item": "elemento"
 }

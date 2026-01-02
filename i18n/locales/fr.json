@@ -537,5 +537,8 @@
   "{count}m ago": "il y a {count} min",
   "{count}h ago": "il y a {count} h",
   "{count}d ago": "il y a {count} j",
-  "{count}w ago": "il y a {count} sem."
+  "{count}w ago": "il y a {count} sem.",
+  "Confirm Deletion": "Confirmer la suppression",
+  "Are you sure you want to delete this {item}? This action cannot be undone.": "Voulez-vous vraiment supprimer ce {item} ? Cette action est irréversible.",
+  "item": "élément"
 }
