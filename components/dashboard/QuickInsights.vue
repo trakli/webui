@@ -1,8 +1,8 @@
 <template>
   <div class="quick-insights">
     <div class="insights-header">
-      <h3 class="title">Insights</h3>
-      <span class="period">This Period</span>
+      <h3 class="title">{{ t('Insights') }}</h3>
+      <span class="period">{{ t('This Period') }}</span>
     </div>
 
     <div class="insights-content">
@@ -11,8 +11,8 @@
           <TrendingUp />
         </div>
         <div class="stat-info">
-          <span class="stat-label">Top Income</span>
-          <span class="stat-value">{{ topIncomeSource?.party || 'N/A' }}</span>
+          <span class="stat-label">{{ t('Top Income') }}</span>
+          <span class="stat-value">{{ topIncomeSource?.party || t('N/A') }}</span>
           <span v-if="topIncomeSource" class="stat-amount income">
             {{ formatAmount(topIncomeSource.amount) }}
           </span>
@@ -26,8 +26,8 @@
           <TrendingDown />
         </div>
         <div class="stat-info">
-          <span class="stat-label">Top Expense</span>
-          <span class="stat-value">{{ topExpense?.party || 'N/A' }}</span>
+          <span class="stat-label">{{ t('Top Expense') }}</span>
+          <span class="stat-value">{{ topExpense?.party || t('N/A') }}</span>
           <span v-if="topExpense" class="stat-amount expense">
             {{ formatAmount(topExpense.amount) }}
           </span>
@@ -41,7 +41,7 @@
           <Percent />
         </div>
         <div class="stat-info">
-          <span class="stat-label">Savings Rate</span>
+          <span class="stat-label">{{ t('Savings Rate') }}</span>
           <span class="stat-value large" :class="savingsClass">{{ savingsRate }}%</span>
         </div>
       </div>
@@ -53,8 +53,8 @@
           <Shield />
         </div>
         <div class="stat-info">
-          <span class="stat-label">Risk Level</span>
-          <span class="stat-value" :class="riskClass">{{ riskLevel }}</span>
+          <span class="stat-label">{{ t('Risk Level') }}</span>
+          <span class="stat-value" :class="riskClass">{{ displayRiskLevel }}</span>
         </div>
       </div>
     </div>
@@ -65,6 +65,8 @@
 import { computed } from 'vue';
 import { TrendingUp, TrendingDown, Percent, Shield } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
+
+const { t } = useI18n();
 
 const { currentStatistics, formatCompactCurrency } = useStatistics();
 
@@ -112,6 +114,14 @@ const savingsClass = computed(() => {
 
 const riskLevel = computed(() => {
   return statistics.value?.expense_insights?.budget_analysis?.risk_level || 'Unknown';
+});
+
+const displayRiskLevel = computed(() => {
+  const level = String(riskLevel.value || '').toLowerCase();
+  if (level === 'low') return t('Low');
+  if (level === 'medium') return t('Medium');
+  if (level === 'high') return t('High');
+  return t('Unknown');
 });
 
 const riskClass = computed(() => {

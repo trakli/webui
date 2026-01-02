@@ -176,7 +176,7 @@ async function handleSubmit() {
     // after successful creation/update
   } catch (err) {
     console.error('Error submitting group form:', err);
-    apiError.value = err.message || 'Failed to save group. Please try again.';
+    apiError.value = err.message || t('Failed to save group. Please try again.');
   } finally {
     isLoading.value = false;
   }

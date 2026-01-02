@@ -7,9 +7,11 @@ import { HomeIcon } from '@heroicons/vue/24/outline';
 const props = defineProps({
   error: {
     type: Object,
-    default: () => ({ statusCode: 500, message: 'Something went wrong' })
+    default: () => ({ statusCode: 500, message: '' })
   }
 });
+
+const { t } = useI18n();
 
 const token = useCookie('token');
 
@@ -38,12 +40,12 @@ const handleError = () => {
           <div class="error-content">
             <AlertTriangle class="error-icon" />
             <h1 class="error-title">Error {{ error.statusCode }}</h1>
-            <p class="error-message">{{ error.message || 'Something went wrong' }}</p>
+            <p class="error-message">{{ error.message || t('Something went wrong') }}</p>
             <TButton class="error-button" @click="handleError">
               <template #left-icon>
                 <HomeIcon />
               </template>
-              Go to Homepage
+              {{ t('Go to Homepage') }}
             </TButton>
           </div>
         </TCard>

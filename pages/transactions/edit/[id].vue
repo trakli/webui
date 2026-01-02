@@ -24,7 +24,7 @@
         color: #c00;
       "
     >
-      <strong>Error:</strong> {{ errorMessage }}
+      <strong>{{ t('Error:') }}</strong> {{ errorMessage }}
     </div>
     <div class="edit-form-section">
       <TransactionFormContainer
@@ -44,6 +44,8 @@ import { useTransactions } from '@/composables/useTransactions';
 import TTopCard from '@/components/TTopCard.vue';
 import TransactionFormContainer from '@/components/TransactionFormContainer.vue';
 import TipsSection from '@/components/TipsSection.vue';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const route = useRoute();
@@ -70,7 +72,7 @@ const handleSubmit = async (data) => {
     } else if (error?.message) {
       errorMessage.value = error.message;
     } else {
-      errorMessage.value = 'Failed to update transaction. Please check all fields.';
+      errorMessage.value = t('Failed to update transaction. Please check all fields.');
     }
   }
 };
@@ -86,7 +88,7 @@ const loadTransaction = async () => {
     transactionToEdit.value = await getTransactionForEdit(transactionId);
   } catch (error) {
     console.error('Failed to load transaction:', error);
-    errorMessage.value = 'Failed to load transaction for editing.';
+    errorMessage.value = t('Failed to load transaction for editing.'); // Localize error message
   } finally {
     isLoadingTransaction.value = false;
   }

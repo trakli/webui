@@ -146,9 +146,9 @@ async function handleDelete(txn) {
 
   try {
     await deleteTransaction(txn.id);
-    showSuccess('Transaction deleted', 'Transaction has been deleted successfully');
+    showSuccess(t('Transaction deleted'), t('Transaction has been deleted successfully'));
   } catch (err) {
-    showError('Delete failed', 'Failed to delete transaction. Please try again.');
+    showError(t('Delete failed'), t('Failed to delete transaction. Please try again.'));
     console.error('Failed to delete transaction:', err);
   }
 }

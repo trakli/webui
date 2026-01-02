@@ -3,7 +3,7 @@
     <div class="page-header-wrapper">
       <div class="page-header">
         <div class="page-header-left">
-          <h1 class="page-title">Financial Reports</h1>
+          <h1 class="page-title">{{ t('Financial Reports') }}</h1>
           <p class="page-subtitle">
             {{ pageSubtitle }}
           </p>
@@ -16,45 +16,52 @@
             :class="{ 'chip--primary': currentPeriod === period.value }"
             @click="setPeriod(period.value)"
           >
-            {{ period.label }}
+            {{ t(period.label) }}
           </button>
           <button class="chip">
-            <span>Custom</span>
+            <span>{{ t('Custom') }}</span>
             <ChevronDown class="chip-icon" />
           </button>
           <button class="chip chip--report">
             <FileText class="chip-icon" />
-            <span>Report</span>
+            <span>{{ t('Report') }}</span>
           </button>
         </div>
       </div>
     </div>
 
     <div v-if="showReportMessage" class="alert alert--success">
-      <p class="alert-title">Report Generated!</p>
+      <p class="alert-title">{{ t('Report Generated!') }}</p>
       <p>
-        Your financial report for June 2024 has been successfully generated and is available for
-        download.
+        {{
+          t(
+            'Your financial report for {period} has been successfully generated and is available for download.',
+            { period: currentPeriodLabel }
+          )
+        }}
       </p>
     </div>
 
     <div class="kpis">
       <KpiCard
-        label="Total Income"
-        :value="isLoading ? 'Loading...' : formatCompactCurrency(kpis.totalIncome, currency)"
+        :label="t('Total Income')"
+        :value="isLoading ? t('Loading...') : formatCompactCurrency(kpis.totalIncome, currency)"
       />
       <KpiCard
-        label="Avg. Monthly Income"
+        :label="t('Avg. Monthly Income')"
         :value="
           isLoading
-            ? 'Loading...'
+            ? t('Loading...')
             : formatCompactCurrency(Math.round(kpis.averageMonthlyIncome), currency)
         "
       />
-      <KpiCard label="Top Income Source" :value="isLoading ? 'Loading...' : kpis.topIncomeSource" />
       <KpiCard
-        label="% Growth vs Last Period"
-        :value="isLoading ? 'Loading...' : `${kpis.growthPercentage}%`"
+        :label="t('Top Income Source')"
+        :value="isLoading ? t('Loading...') : kpis.topIncomeSource"
+      />
+      <KpiCard
+        :label="t('% Growth vs Last Period')"
+        :value="isLoading ? t('Loading...') : `${kpis.growthPercentage}%`"
         :value-class="kpis.growthPercentage >= 0 ? 'is-positive' : 'is-negative'"
       />
     </div>
@@ -63,11 +70,14 @@
       <div class="charts-column">
         <DonutChartCard :data="sourceBreakdown" :total="kpis.totalIncome" :currency="currency">
           <template #note>
-            <span class="bold">AI Insight:</span>
+            <span class="bold">{{ t('AI Insight:') }}</span>
             {{
               statistics?.income_insights?.top_sources?.length > 1
-                ? `${Math.round(statistics.income_insights.top_sources[0]?.percentage || 0)}% of your income comes from ${statistics.income_insights.top_sources[0]?.party || 'your top source'}.`
-                : 'Diversify your income sources to reduce risk.'
+                ? t('{percent}% of your income comes from {party}.', {
+                    percent: Math.round(statistics.income_insights.top_sources[0]?.percentage || 0),
+                    party: statistics.income_insights.top_sources[0]?.party || t('your top source')
+                  })
+                : t('Diversify your income sources to reduce risk.')
             }}
           </template>
         </DonutChartCard>
@@ -77,26 +87,31 @@
       <div class="insights-column">
         <NarrativeInsights class="insights-card">
           <span v-if="!isLoading && statistics">
-            Your income
+            {{ t('Your income') }}
             <strong
-              >{{ kpis.growthPercentage >= 0 ? 'grew' : 'declined' }}
+              >{{ kpis.growthPercentage >= 0 ? t('grew') : t('declined') }}
               {{ Math.abs(kpis.growthPercentage) }}%</strong
             >
-            this period{{
-              kpis.topIncomeSource !== 'N/A' ? `, driven mainly by ${kpis.topIncomeSource}` : ''
+            {{ t('this period')
+            }}{{
+              kpis.topIncomeSource !== t('N/A')
+                ? t(', driven mainly by {source}', { source: kpis.topIncomeSource })
+                : ''
             }}.
             {{
               statistics.income_insights?.top_sources?.length > 0
-                ? `You have ${statistics.income_insights.top_sources.length} active income sources.`
-                : 'Consider diversifying your income sources.'
+                ? t('You have {count} active income sources.', {
+                    count: statistics.income_insights.top_sources.length
+                  })
+                : t('Consider diversifying your income sources.')
             }}
             {{
               statistics.expense_insights?.budget_analysis?.savings_rate > 0.2
-                ? ' Your savings rate is healthy.'
-                : ' Focus on improving your savings rate.'
+                ? t('Your savings rate is healthy.')
+                : t('Focus on improving your savings rate.')
             }}
           </span>
-          <span v-else> Loading insights... </span>
+          <span v-else> {{ t('Loading insights...') }} </span>
         </NarrativeInsights>
 
         <ForecastsPanel
@@ -121,6 +136,8 @@ import { ref, computed } from 'vue';
 import { useStatistics } from '@/composables/useStatistics';
 import { useAuth } from '@/composables/useAuth';
 import { getChartColors } from '@/utils/colors';
+
+const { t, locale } = useI18n();
 
 definePageMeta({
   layout: 'dashboard',
@@ -152,7 +169,7 @@ const kpis = computed(() => {
     return {
       totalIncome: 0,
       averageMonthlyIncome: 0,
-      topIncomeSource: 'N/A',
+      topIncomeSource: t('N/A'),
       growthPercentage: 0
     };
 
@@ -160,7 +177,7 @@ const kpis = computed(() => {
   return {
     totalIncome: stats.total_income || 0,
     averageMonthlyIncome: stats.income_insights?.frequency_analysis?.monthly_average || 0,
-    topIncomeSource: stats.income_insights?.biggest_source?.party || 'N/A',
+    topIncomeSource: stats.income_insights?.biggest_source?.party || t('N/A'),
     growthPercentage: stats.performance?.growth_percentage || 0
   };
 });
@@ -169,9 +186,11 @@ const lineData = computed(() => {
   if (!statistics.value?.time_analysis?.monthly_trends) return [];
 
   return statistics.value.time_analysis.monthly_trends.map((trend) => ({
-    name: new Date(trend.month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+    name: new Intl.DateTimeFormat(locale.value, { month: 'short' }).format(
+      new Date(trend.month + '-01')
+    ),
     value: trend.income,
-    insight: trend.net >= 0 ? 'Positive balance' : 'Deficit'
+    insight: trend.net >= 0 ? t('Positive balance') : t('Deficit')
   }));
 });
 
@@ -190,12 +209,15 @@ const sourceBreakdown = computed(() => {
 
 const currentPeriodLabel = computed(() => {
   const period = availablePeriods.find((p) => p.value === currentPeriod.value);
-  return period ? period.label.toLowerCase() : 'this period';
+  return period ? t(period.label).toLowerCase() : t('this period');
 });
 
 const pageSubtitle = computed(() => {
-  const userName = user.value ? `${user.value.first_name}` : 'User';
-  return `Hello, ${userName}. Here's your financial overview for ${currentPeriodLabel.value}.`;
+  const userName = user.value ? `${user.value.first_name}` : t('User');
+  return t("Hello, {name}. Here's your financial overview for {period}.", {
+    name: userName,
+    period: currentPeriodLabel.value
+  });
 });
 </script>
 

@@ -51,6 +51,8 @@ import WalletForm from '@/components/WalletForm.vue';
 import ContentTable from '@/components/ContentTable.vue';
 import TipsSection from '@/components/TipsSection.vue';
 
+const { t } = useI18n();
+
 const showForm = ref(false);
 const editingItem = ref(null);
 const { isTabletOrBelow } = useSidebar();
@@ -118,9 +120,12 @@ async function handleDelete(item) {
 
   try {
     await deleteWallet(item.id);
-    showSuccess('Wallet deleted', `${item.name} has been deleted successfully`);
+    showSuccess(
+      t('Wallet deleted'),
+      t('{name} has been deleted successfully', { name: item.name })
+    );
   } catch (err) {
-    showError('Delete failed', 'Failed to delete wallet. Please try again.');
+    showError(t('Delete failed'), t('Failed to delete wallet. Please try again.'));
     console.error('Failed to delete wallet:', err);
   }
 }

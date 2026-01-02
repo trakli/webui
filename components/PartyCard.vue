@@ -8,24 +8,24 @@
         <div class="party-details">
           <h3 class="party-name">{{ party.name }}</h3>
           <span v-if="isValidPartyType" class="party-type-badge" :class="party.type">
-            {{ party.type }}
+            {{ displayPartyType }}
           </span>
         </div>
       </div>
       <div class="card-actions">
         <div class="action-menu-container" @click.stop>
-          <button class="action-menu" title="More actions" @click="toggleMenu">
+          <button class="action-menu" :title="t('More actions')" @click="toggleMenu">
             <LucideMoreVertical />
           </button>
 
           <div v-if="showMenu" class="action-dropdown">
             <button class="dropdown-item edit" @click="handleEdit">
               <LucideEdit />
-              Edit
+              {{ t('Edit') }}
             </button>
             <button class="dropdown-item delete" @click="handleDelete">
               <LucideTrash />
-              Delete
+              {{ t('Delete') }}
             </button>
           </div>
         </div>
@@ -37,15 +37,21 @@
     </div>
 
     <div class="financial-insights">
-      <h4 class="insights-header">FINANCIAL INSIGHTS</h4>
+      <h4 class="insights-header">{{ t('Financial Insights') }}</h4>
 
       <div v-if="party.receivedAmount > 0" class="insight-row received">
         <div class="insight-icon">
           <LucideArrowUp />
         </div>
         <div class="insight-text">
-          Received <span class="amount">${{ party.receivedAmount }}</span> from {{ party.name }} in
-          the last 3 months
+          <i18n-t
+            keypath="Received {amount} from {name} in the last 3 months"
+            :values="{ name: party.name }"
+          >
+            <template #amount>
+              <span class="amount">{{ receivedDisplay }}</span>
+            </template>
+          </i18n-t>
         </div>
       </div>
 
@@ -54,13 +60,19 @@
           <LucideArrowDown />
         </div>
         <div class="insight-text">
-          Spent <span class="amount">${{ party.spentAmount }}</span> on transactions pertaining to
-          {{ party.name }}
+          <i18n-t
+            keypath="Spent {amount} on transactions pertaining to {name}"
+            :values="{ name: party.name }"
+          >
+            <template #amount>
+              <span class="amount">{{ spentDisplay }}</span>
+            </template>
+          </i18n-t>
         </div>
       </div>
 
       <div v-if="!party.receivedAmount && !party.spentAmount" class="insight-row neutral">
-        <div class="insight-text muted">No transactions in the last 3 months</div>
+        <div class="insight-text muted">{{ t('No transactions in the last 3 months') }}</div>
       </div>
 
       <div v-if="party.receivedAmount > 0 || party.spentAmount > 0" class="last-updated">
@@ -84,6 +96,8 @@ import {
   Trash as LucideTrash
 } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
   party: {
@@ -137,6 +151,23 @@ const validPartyTypes = ['individual', 'business', 'organization', 'vendor', 'cl
 const isValidPartyType = computed(() => {
   return validPartyTypes.includes(props.party.type?.toLowerCase());
 });
+
+const displayPartyType = computed(() => {
+  const type = props.party.type?.toLowerCase();
+  const map = {
+    individual: 'Individual',
+    business: 'Business',
+    organization: 'Organization',
+    vendor: 'Vendor',
+    client: 'Client'
+  };
+
+  const labelKey = map[type];
+  return labelKey ? t(labelKey) : props.party.type;
+});
+
+const receivedDisplay = computed(() => `$${props.party.receivedAmount}`);
+const spentDisplay = computed(() => `$${props.party.spentAmount}`);
 
 const statusStyle = computed(() => {
   const received = Number(props.party.receivedAmount || 0);
@@ -206,7 +237,7 @@ const resolvedIcon = computed(() => {
 });
 
 const formatLastUpdated = (timestamp) => {
-  if (!timestamp) return '1h ago';
+  if (!timestamp) return t('{count}h ago', { count: 1 });
 
   const now = new Date();
   const updated = new Date(timestamp);
@@ -216,10 +247,10 @@ const formatLastUpdated = (timestamp) => {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const diffWeeks = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7));
 
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return `${diffWeeks}w ago`;
+  if (diffMins < 60) return t('{count}m ago', { count: diffMins });
+  if (diffHours < 24) return t('{count}h ago', { count: diffHours });
+  if (diffDays < 7) return t('{count}d ago', { count: diffDays });
+  return t('{count}w ago', { count: diffWeeks });
 };
 </script>
 

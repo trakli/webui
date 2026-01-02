@@ -47,7 +47,7 @@ import { useAuth } from '@/composables/useAuth';
 import { useStatistics } from '@/composables/useStatistics';
 import StatsFilterModal from '@/components/StatsFilterModal.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const _props = defineProps({
   showFilters: {
@@ -97,7 +97,7 @@ const currentPeriodLabel = computed(() => {
 
 const formatDate = (dateStr) => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric' }).format(date);
 };
 
 const toggleCustomPeriod = () => {

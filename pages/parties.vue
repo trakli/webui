@@ -14,8 +14,8 @@
         <TipsSection v-if="!isTabletOrBelow" page-name="Party" />
       </div>
 
-      <div v-if="isLoading" class="loading-state">Loading parties...</div>
-      <div v-if="error" class="error-state">Error: {{ error }}</div>
+      <div v-if="isLoading" class="loading-state">{{ t('Loading parties...') }}</div>
+      <div v-if="error" class="error-state">{{ t('Error:') }} {{ error }}</div>
 
       <OnboardingEmptyState
         v-if="!showForm && !isLoading && parties.length === 0"
@@ -47,6 +47,8 @@ import PartiesForm from '@/components/PartiesForm.vue';
 import PartyCardList from '@/components/PartyCardList.vue';
 import TipsSection from '@/components/TipsSection.vue';
 import { parseAmount } from '@/utils/currency';
+
+const { t } = useI18n();
 
 const showForm = ref(false);
 const editingItem = ref(null);
@@ -151,9 +153,9 @@ async function handleDelete(item) {
 
   try {
     await deleteParty(item.id);
-    showSuccess('Party deleted', `${item.name} has been deleted successfully`);
+    showSuccess(t('Party deleted'), t('{name} has been deleted successfully', { name: item.name }));
   } catch (err) {
-    showError('Delete failed', 'Failed to delete party. Please try again.');
+    showError(t('Delete failed'), t('Failed to delete party. Please try again.'));
     console.error('Failed to delete party:', err);
   }
 }

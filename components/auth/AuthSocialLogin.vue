@@ -11,13 +11,10 @@ const props = defineProps({
   }
 });
 
-const buttonText = {
-  login: 'Sign in with Google',
-  signup: 'Sign up with Google'
-};
-
 const api = useApi();
 const state = useCookie('state');
+
+const { t } = useI18n();
 
 const handleGoogleLogin = async () => {
   try {
@@ -42,7 +39,7 @@ const handleGoogleLogin = async () => {
     <template #left-icon>
       <GoogleIcon />
     </template>
-    {{ buttonText[props.mode] }}
+    {{ props.mode === 'login' ? t('Sign in with Google') : t('Sign up with Google') }}
   </TButton>
 </template>
 
