@@ -4,15 +4,15 @@
       <template #summary>
         <div v-if="hasTotals" class="totals-summary">
           <span class="total-item">
-            <span class="total-label">Income:</span>
+            <span class="total-label">{{ t('Income') }}:</span>
             <span class="total-value income">{{ formatCurrency(totals.income) }}</span>
           </span>
           <span class="total-item">
-            <span class="total-label">Expenses:</span>
+            <span class="total-label">{{ t('Expenses') }}:</span>
             <span class="total-value expense">{{ formatCurrency(totals.expenses) }}</span>
           </span>
           <span class="total-item">
-            <span class="total-label">Net:</span>
+            <span class="total-label">{{ t('Net') }}:</span>
             <span class="total-value" :class="totals.net >= 0 ? 'income' : 'expense'">{{
               formatCurrency(totals.net)
             }}</span>
@@ -78,6 +78,8 @@ import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.v
 import TTableComponent from '@/components/TTableComponent.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
+
+const { t } = useI18n();
 
 const {
   paginatedTransactions,
