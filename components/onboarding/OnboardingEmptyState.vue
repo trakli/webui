@@ -6,17 +6,17 @@
       </div>
 
       <div class="onboarding-text">
-        <h2 class="onboarding-title">{{ config.title }}</h2>
-        <p class="onboarding-subtitle">{{ config.subtitle }}</p>
+        <h2 class="onboarding-title">{{ t(config.title) }}</h2>
+        <p class="onboarding-subtitle">{{ t(config.subtitle) }}</p>
 
         <div v-if="config.steps" class="onboarding-steps">
           <div class="steps-header">
-            <span class="steps-label">Quick Start:</span>
+            <span class="steps-label">{{ t('Quick Start:') }}</span>
           </div>
           <ol class="steps-list">
             <li v-for="(step, index) in config.steps" :key="index" class="step-item">
               <span class="step-number">{{ index + 1 }}</span>
-              <span class="step-text">{{ step }}</span>
+              <span class="step-text">{{ t(step) }}</span>
             </li>
           </ol>
         </div>
@@ -25,7 +25,7 @@
       <div class="onboarding-actions">
         <button class="primary-action-btn" @click="$emit('create')">
           <PlusIcon class="button-icon" />
-          {{ config.primaryAction }}
+          {{ t(config.primaryAction) }}
         </button>
       </div>
 
@@ -33,7 +33,7 @@
         <div class="tip-icon">
           <LightBulbIcon />
         </div>
-        <span class="tip-text">{{ config.tip }}</span>
+        <span class="tip-text">{{ t(config.tip) }}</span>
       </div>
     </div>
   </div>
@@ -50,6 +50,8 @@ import {
   UsersIcon,
   FolderIcon
 } from '@heroicons/vue/24/outline';
+
+const { t } = useI18n();
 
 const props = defineProps({
   pageType: {

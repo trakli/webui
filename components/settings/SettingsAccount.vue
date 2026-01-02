@@ -3,7 +3,7 @@
     <div class="form-group form-group--full">
       <label class="form-label">{{ t('Profile Picture') }}</label>
       <div class="avatar-container">
-        <img v-if="user" :src="getAvatarUrl(user)" alt="User Avatar" class="avatar-image" />
+        <img v-if="user" :src="getAvatarUrl(user)" :alt="t('User Avatar')" class="avatar-image" />
       </div>
     </div>
     <div class="section-grid">

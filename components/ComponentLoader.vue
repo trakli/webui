@@ -13,11 +13,13 @@
       </div>
       <div class="error-content">
         <h3 class="error-title">
-          <span v-if="getErrorCode(error)">Error {{ getErrorCode(error) }}</span>
-          <span v-else>Something went wrong</span>
+          <span v-if="getErrorCode(error)">{{ t('Error:') }} {{ getErrorCode(error) }}</span>
+          <span v-else>{{ t('Something went wrong') }}</span>
         </h3>
         <p class="error-message">{{ formatErrorMessage(error) }}</p>
-        <button v-if="onRetry" class="retry-btn" @click="onRetry">Try Again</button>
+        <button v-if="onRetry" class="retry-btn" @click="onRetry">
+          {{ t('Try Again') }}
+        </button>
       </div>
     </div>
 
@@ -38,6 +40,8 @@ import LoadingSkeleton from './LoadingSkeleton.vue';
 import EmptyState from './EmptyState.vue';
 import { AlertTriangle } from 'lucide-vue-next';
 import { extractApiErrors } from '~/utils/apiErrors';
+
+const { t } = useI18n();
 
 // Extract HTTP status code and message from error
 function formatErrorMessage(error) {

@@ -1,20 +1,31 @@
 <template>
   <div class="empty-state">
-    <img class="empty-icon" src="/box.svg" alt="Empty Icon" />
+    <img class="empty-icon" src="/box.svg" :alt="t('Empty Icon')" />
     <h2 class="empty-title">
-      You don't have any {{ pageName }} for the <br />
-      moment!
+      {{
+        t("You don't have any {item} at the moment.", {
+          item: t(pageName).toLowerCase()
+        })
+      }}
     </h2>
-    <p class="empty-subtitle">Please add at least one {{ pageName }} to be able to view it.</p>
+    <p class="empty-subtitle">
+      {{
+        t('Please add at least one {item} to be able to view it.', {
+          item: t(pageName).toLowerCase()
+        })
+      }}
+    </p>
     <button class="add-entity-btn" @click="$emit('create')">
       <PlusIcon class="button-icon" />
-      Add {{ pageName.toLowerCase() }}
+      {{ t('Add {item}', { item: t(pageName).toLowerCase() }) }}
     </button>
   </div>
 </template>
 
 <script setup>
 import { PlusIcon } from '@heroicons/vue/24/outline';
+
+const { t } = useI18n();
 
 defineProps({
   pageName: {

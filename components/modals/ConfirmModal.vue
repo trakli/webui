@@ -19,10 +19,10 @@
 
       <div class="modal-actions">
         <button class="cancel-button" @click="handleCancel">
-          {{ cancelText }}
+          {{ cancelText || t('Cancel') }}
         </button>
         <button class="confirm-button" :class="`type-${type}`" @click="handleConfirm">
-          {{ confirmText }}
+          {{ confirmText || t('Confirm') }}
         </button>
       </div>
     </div>
@@ -36,6 +36,8 @@ import {
   Trash as TrashIcon,
   Info as InfoIcon
 } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 defineProps({
   isOpen: {
@@ -52,11 +54,11 @@ defineProps({
   },
   confirmText: {
     type: String,
-    default: 'Confirm'
+    default: ''
   },
   cancelText: {
     type: String,
-    default: 'Cancel'
+    default: ''
   },
   type: {
     type: String,

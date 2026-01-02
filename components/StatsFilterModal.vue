@@ -2,7 +2,7 @@
   <div class="filter-modal-overlay" @click.self="$emit('close')">
     <div class="filter-modal">
       <div class="filter-modal__header">
-        <h3 class="filter-modal__title">Filter Statistics</h3>
+        <h3 class="filter-modal__title">{{ t('Filter Statistics') }}</h3>
         <button class="filter-modal__close" @click="$emit('close')">
           <XIcon class="filter-modal__close-icon" />
         </button>
@@ -10,10 +10,10 @@
 
       <div class="filter-modal__body">
         <div class="filter-modal__section">
-          <h4 class="filter-modal__section-title">Date Range</h4>
+          <h4 class="filter-modal__section-title">{{ t('Date Range') }}</h4>
           <div class="filter-modal__date-inputs">
             <div class="filter-modal__field">
-              <label class="filter-modal__label">Start date</label>
+              <label class="filter-modal__label">{{ t('Start date') }}</label>
               <input
                 v-model="filters.startDate"
                 type="date"
@@ -22,7 +22,7 @@
               />
             </div>
             <div class="filter-modal__field">
-              <label class="filter-modal__label">End date</label>
+              <label class="filter-modal__label">{{ t('End date') }}</label>
               <input
                 v-model="filters.endDate"
                 type="date"
@@ -40,13 +40,13 @@
               :class="{ 'filter-modal__preset-btn--active': isPresetActive(preset.value) }"
               @click="applyPreset(preset.value)"
             >
-              {{ preset.label }}
+              {{ t(preset.label) }}
             </button>
           </div>
         </div>
 
         <div class="filter-modal__section">
-          <h4 class="filter-modal__section-title">Wallets</h4>
+          <h4 class="filter-modal__section-title">{{ t('Wallets') }}</h4>
           <div class="filter-modal__wallets">
             <label
               v-for="wallet in availableWallets"
@@ -71,10 +71,10 @@
 
       <div class="filter-modal__footer">
         <button class="filter-modal__btn filter-modal__btn--secondary" @click="resetFilters">
-          Reset
+          {{ t('Reset') }}
         </button>
         <button class="filter-modal__btn filter-modal__btn--primary" @click="applyFilters">
-          Apply Filters
+          {{ t('Apply Filters') }}
         </button>
       </div>
     </div>
@@ -88,6 +88,8 @@ import { useStatistics } from '@/composables/useStatistics';
 import { useWallets } from '@/composables/useWallets';
 
 const emit = defineEmits(['close', 'apply']);
+
+const { t } = useI18n();
 
 const props = defineProps({
   initialFilters: {
@@ -110,9 +112,9 @@ const filters = reactive({
 const datePresets = [
   { label: 'This Week', value: 'current_week' },
   { label: 'This Month', value: 'current_month' },
-  { label: 'Last 3 Months', value: 'last_3_months' },
+  { label: 'Last 3 months', value: 'last_3_months' },
   { label: 'This Year', value: 'current_year' },
-  { label: 'All Time', value: 'all_time' }
+  { label: 'All time', value: 'all_time' }
 ];
 
 const availableWallets = computed(() => {

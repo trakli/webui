@@ -5,7 +5,7 @@
       v-model="internalValue"
       type="text"
       class="search-input"
-      :placeholder="placeholder"
+      :placeholder="placeholder || t('Search...')"
       @input="handleInput"
     />
   </div>
@@ -15,6 +15,8 @@
 import { ref, watch } from 'vue';
 import { Search as LucideSearch } from 'lucide-vue-next';
 
+const { t } = useI18n();
+
 const props = defineProps({
   modelValue: {
     type: String,
@@ -22,7 +24,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Search...'
+    default: ''
   },
   debounce: {
     type: Number,

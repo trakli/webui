@@ -14,8 +14,8 @@
         <TipsSection v-if="!isTabletOrBelow" page-name="Group" />
       </div>
 
-      <div v-if="isLoading" class="loading-state">Loading groups...</div>
-      <div v-if="error" class="error-state">Error: {{ error }}</div>
+      <div v-if="isLoading" class="loading-state">{{ t('Loading groups...') }}</div>
+      <div v-if="error" class="error-state">{{ t('Error:') }} {{ error }}</div>
 
       <OnboardingEmptyState
         v-if="!showForm && !isLoading && groups.length === 0"
@@ -45,6 +45,8 @@ import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.v
 import GroupForm from '@/components/groups/GroupForm.vue';
 import ContentTable from '@/components/ContentTable.vue';
 import TipsSection from '@/components/TipsSection.vue';
+
+const { t } = useI18n();
 
 const showForm = ref(false);
 const editingItem = ref(null);
@@ -103,9 +105,9 @@ async function handleDelete(item) {
 
   try {
     await deleteGroup(item.id);
-    showSuccess('Group deleted', `${item.name} has been deleted successfully`);
+    showSuccess(t('Group deleted'), t('{name} has been deleted successfully', { name: item.name }));
   } catch (err) {
-    showError('Delete failed', 'Failed to delete group. Please try again.');
+    showError(t('Delete failed'), t('Failed to delete group. Please try again.'));
     console.error('Failed to delete group:', err);
   }
 }

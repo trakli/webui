@@ -10,6 +10,8 @@ import { Eye, EyeOff, CheckCircle } from 'lucide-vue-next';
 import Logo from '@/components/Logo.vue';
 import TButton from '@/components/TButton.vue';
 
+const { t } = useI18n();
+
 definePageMeta({
   layout: 'auth',
   middleware: 'guest'
@@ -44,7 +46,7 @@ const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const handleRequestVerification = async () => {
   serverErrors.value = null;
   if (!form.value.contact || !isEmail(form.value.contact)) {
-    serverErrors.value = { contact: ['Please enter a valid email address.'] };
+    serverErrors.value = { contact: [t('Please enter a valid email address.')] };
     return;
   }
 
@@ -65,7 +67,7 @@ const handleRequestVerification = async () => {
     } else {
       serverErrors.value = {
         contact: [
-          error.response?._data?.message || 'Failed to send verification code. Please try again.'
+          error.response?._data?.message || t('Failed to send verification code. Please try again.')
         ]
       };
     }
@@ -95,7 +97,7 @@ const handleVerifyCode = async () => {
     if (error.response && error.response._data && error.response._data.message) {
       serverErrors.value = { code: [error.response._data.message] };
     } else {
-      serverErrors.value = { code: ['Invalid verification code. Please try again.'] };
+      serverErrors.value = { code: [t('Invalid verification code. Please try again.')] };
     }
   } finally {
     codeVerificationLoading.value = false;
@@ -130,7 +132,7 @@ const handleSubmit = async () => {
       );
       serverErrors.value = flattenedErrors;
     } else {
-      serverErrors.value = { general: 'An unexpected error occurred. Please try again.' };
+      serverErrors.value = { general: t('An unexpected error occurred. Please try again.') };
     }
   } finally {
     loading.value = false;
@@ -145,12 +147,12 @@ const { showPassword, togglePassword } = usePasswordToggle();
     <div class="logo-wrapper">
       <Logo size="medium" />
     </div>
-    <h1>Create an account</h1>
+    <h1>{{ t('Create an account') }}</h1>
 
     <form class="register-form" @submit.prevent="handleSubmit">
       <div class="form-group">
         <label for="contact" class="contact-label">
-          Email
+          {{ t('Email') }}
           <CheckCircle v-if="isContactVerified" class="verified-icon w-5 h-5" />
         </label>
         <div class="input-with-button">
@@ -158,7 +160,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
             id="contact"
             v-model="form.contact"
             type="email"
-            placeholder="Enter your email"
+            :placeholder="t('Enter your email')"
             :disabled="isContactInputDisabled"
             required
           />
@@ -167,7 +169,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
             type="button"
             :loading="verificationLoading"
             :disabled="!form.contact || isContactInputDisabled"
-            text="Start Sign Up"
+            :text="t('Start Sign Up')"
             class="verify-button"
             @click="handleRequestVerification"
           />
@@ -178,26 +180,28 @@ const { showPassword, togglePassword } = usePasswordToggle();
       </div>
 
       <div v-if="verificationStep === 'code'" class="form-group">
-        <label for="code">Verification Code</label>
+        <label for="code">{{ t('Verification Code') }}</label>
         <div class="input-with-button">
           <input
             id="code"
             v-model="verificationCode"
             type="text"
-            placeholder="Enter code"
+            :placeholder="t('Enter code')"
             required
           />
           <TButton
             type="button"
             :loading="codeVerificationLoading"
             :disabled="!verificationCode"
-            text="Submit Code"
+            :text="t('Submit Code')"
             class="verify-button"
             @click="handleVerifyCode"
           />
         </div>
         <div class="form-actions">
-          <button type="button" class="link-button" @click="handleResendCode">Resend Code</button>
+          <button type="button" class="link-button" @click="handleResendCode">
+            {{ t('Resend Code') }}
+          </button>
         </div>
         <small v-if="serverErrors && serverErrors.code" class="error-text">
           {{ serverErrors.code[0] }}
@@ -207,12 +211,14 @@ const { showPassword, togglePassword } = usePasswordToggle();
       <fieldset v-if="isContactVerified" class="details-fieldset">
         <div class="form-row">
           <div class="form-group">
-            <label for="first_name">First Name <span class="required-asterisk">*</span></label>
+            <label for="first_name">
+              {{ t('First Name') }} <span class="required-asterisk">*</span>
+            </label>
             <input
               id="first_name"
               v-model="form.first_name"
               type="text"
-              placeholder="Enter your first name"
+              :placeholder="t('Enter your first name')"
               required
             />
             <small v-if="serverErrors && serverErrors.first_name" class="error-text">
@@ -220,12 +226,12 @@ const { showPassword, togglePassword } = usePasswordToggle();
             </small>
           </div>
           <div class="form-group">
-            <label for="last_name">Last Name</label>
+            <label for="last_name">{{ t('Last Name') }}</label>
             <input
               id="last_name"
               v-model="form.last_name"
               type="text"
-              placeholder="Enter your last name"
+              :placeholder="t('Enter your last name')"
             />
             <small v-if="serverErrors && serverErrors.last_name" class="error-text">
               {{ serverErrors.last_name[0] }}
@@ -234,13 +240,13 @@ const { showPassword, togglePassword } = usePasswordToggle();
         </div>
 
         <div class="form-group">
-          <label for="password">Password <span class="required-asterisk">*</span></label>
+          <label for="password">{{ t('Password') }} <span class="required-asterisk">*</span></label>
           <div class="password-wrapper">
             <input
               id="password"
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
-              placeholder="Enter your password"
+              :placeholder="t('Enter your password')"
               required
             />
             <button type="button" class="password-toggle" @click="togglePassword">
@@ -258,7 +264,7 @@ const { showPassword, togglePassword } = usePasswordToggle();
         v-if="isContactVerified"
         type="submit"
         :loading="loading"
-        text="Sign Up"
+        :text="t('Sign Up')"
         class="w-full"
       />
       <small v-if="serverErrors && serverErrors.general" class="error-text global-error">
@@ -269,7 +275,10 @@ const { showPassword, togglePassword } = usePasswordToggle();
     <AuthDivider />
     <AuthSocialLogin mode="signup" />
 
-    <p class="login-link">Already have an account? <router-link to="/login">Login</router-link></p>
+    <p class="login-link">
+      {{ t('Already have an account?') }}
+      <router-link to="/login">{{ t('Login') }}</router-link>
+    </p>
   </div>
 </template>
 

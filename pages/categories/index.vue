@@ -21,13 +21,13 @@
       <div v-if="isLoading" class="loading-state">
         <div class="loader">
           <div class="spinner" />
-          <p>Loading categories...</p>
+          <p>{{ t('Loading categories...') }}</p>
         </div>
       </div>
 
       <div v-else-if="error" class="error-state">
-        <p>Error: {{ error }}</p>
-        <button class="retry-button" @click="loadCategories">Try Again</button>
+        <p>{{ t('Error:') }} {{ error }}</p>
+        <button class="retry-button" @click="loadCategories">{{ t('Try Again') }}</button>
       </div>
 
       <div v-else-if="!showForm" class="category-tabs">
@@ -85,6 +85,8 @@ import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.v
 import CategoryForm from '@/components/categories/CategoryForm.vue';
 import ContentTable from '@/components/ContentTable.vue';
 import TipsSection from '@/components/TipsSection.vue';
+
+const { t } = useI18n();
 
 const showForm = ref(false);
 const editingItem = ref(null);
@@ -166,9 +168,12 @@ async function handleDelete(item) {
 
   try {
     await deleteCategory(item.id);
-    showSuccess('Category deleted', `${item.name} has been deleted successfully`);
+    showSuccess(
+      t('Category deleted'),
+      t('{name} has been deleted successfully', { name: item.name })
+    );
   } catch (err) {
-    showError('Delete failed', 'Failed to delete category. Please try again.');
+    showError(t('Delete failed'), t('Failed to delete category. Please try again.'));
     console.error('Failed to delete category:', err);
   }
 }

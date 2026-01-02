@@ -23,7 +23,7 @@
         color: #c00;
       "
     >
-      <strong>Error:</strong> {{ errorMessage }}
+      <strong>{{ t('Error:') }}</strong> {{ errorMessage }}
     </div>
     <TransactionFormSection @submit="handleSubmit" />
   </div>
@@ -35,6 +35,8 @@ import { useRouter } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
 import TTopCard from '@/components/TTopCard.vue';
 import TransactionFormSection from '@/components/TransactionFormSection.vue';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const { addTransaction } = useTransactions();
@@ -61,7 +63,7 @@ const handleSubmit = async (data) => {
     } else if (error?.message) {
       errorMessage.value = error.message;
     } else {
-      errorMessage.value = 'Failed to create transaction. Please check all fields.';
+      errorMessage.value = t('Failed to create transaction. Please check all fields.');
     }
   }
 };
