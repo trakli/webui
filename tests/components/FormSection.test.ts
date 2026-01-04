@@ -21,7 +21,8 @@ vi.mock('~/composables/useSharedData', () => ({
 
 const stubs = {
   TransactionFormContainer: {
-    template: '<div class="transaction-form-container" :data-is-expense="isOutcomeSelected">Form</div>',
+    template:
+      '<div class="transaction-form-container" :data-is-expense="isOutcomeSelected">Form</div>',
     props: ['isOutcomeSelected', 'editingItem']
   },
   TipsSection: {
@@ -176,7 +177,8 @@ describe('FormSection', () => {
           stubs: {
             ...stubs,
             TransactionFormContainer: {
-              template: '<div class="mock-form" @click="$emit(\'submit\', { type: \'EXPENSE\' })">Form</div>',
+              template:
+                '<div class="mock-form" @click="$emit(\'submit\', { type: \'EXPENSE\' })">Form</div>',
               props: ['isOutcomeSelected', 'editingItem'],
               emits: ['submit']
             }

@@ -259,11 +259,7 @@ export const useSharedData = () => {
 
     const configuredId = resolveConfiguredWalletId();
     if (configuredId) {
-      const byId = wallets.value.find(
-        (w) =>
-          String(w.id) === configuredId ||
-          String(w.sync_state?.client_generated_id || '') === configuredId
-      );
+      const byId = wallets.value.find((w) => String(w.id) === configuredId);
       if (byId) return byId;
     }
 

@@ -4,11 +4,7 @@
       <div class="form-group">
         <label class="form-label">{{ t('Default Wallet') }}</label>
         <select v-if="isEditMode" v-model="walletId" class="form-select">
-          <option
-            v-for="w in wallets"
-            :key="w.id || w.sync_state?.client_generated_id || w.name"
-            :value="String(w.sync_state?.client_generated_id ?? w.id)"
-          >
+          <option v-for="w in wallets" :key="w.id" :value="w.id">
             {{ w.name }}
             <template v-if="w.currency"> ({{ w.currency }})</template>
           </option>
@@ -56,7 +52,7 @@ const props = defineProps({
 const sharedData = useSharedData();
 const wallets = computed(() => sharedData.wallets.value);
 
-const walletId = ref('');
+const walletId = ref(null);
 const group = ref('Personal');
 const message = ref('');
 
@@ -69,12 +65,8 @@ watch(
 
 const walletLabel = computed(() => {
   if (!walletId.value) return '';
-  const w = wallets.value.find(
-    (x) =>
-      String(x.id) === walletId.value ||
-      String(x.sync_state?.client_generated_id || '') === walletId.value
-  );
-  return w ? w.name : walletId.value;
+  const w = wallets.value.find((x) => x.id === walletId.value);
+  return w ? w.name : '';
 });
 
 onMounted(async () => {
@@ -83,7 +75,7 @@ onMounted(async () => {
     await sharedData.loadConfigurations();
     const def = sharedData.getDefaultWallet.value;
     if (def?.id != null) {
-      walletId.value = String(def.id);
+      walletId.value = def.id;
     }
   } catch (e) {
     console.error('Failed to load wallets/configurations for settings', e);

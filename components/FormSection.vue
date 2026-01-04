@@ -1,11 +1,19 @@
 <template>
   <div class="transaction-tabs">
     <div class="tab-buttons">
-      <button class="tab-button tab-button--expense" :class="{ active: isExpenseSelected }" @click="selectExpense">
+      <button
+        class="tab-button tab-button--expense"
+        :class="{ active: isExpenseSelected }"
+        @click="selectExpense"
+      >
         <ArrowUpTrayIcon class="tab-icon" />
         {{ t('Expense Transaction') }}
       </button>
-      <button class="tab-button tab-button--income" :class="{ active: isIncomeSelected }" @click="selectIncome">
+      <button
+        class="tab-button tab-button--income"
+        :class="{ active: isIncomeSelected }"
+        @click="selectIncome"
+      >
         <ArrowDownTrayIcon class="tab-icon" />
         {{ t('Income Transaction') }}
       </button>
