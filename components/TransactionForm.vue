@@ -165,8 +165,8 @@ const formParty = ref('');
 const formCategory = ref('');
 const formDescription = ref('');
 
-const selectedPartyId = ref('');
-const selectedWalletId = ref('');
+const selectedPartyId = ref<number | null>(null);
+const selectedWalletId = ref<number | null>(null);
 const selectedGroupId = ref(null);
 const selectedAdditionalCategoryIds = ref([]);
 const filesBase64 = ref([]);
@@ -270,20 +270,17 @@ const isWalletDefault = computed(() => {
   if (!selectedWalletId.value) return false;
   const defaultWallet = sharedData.getDefaultWallet.value;
   if (!defaultWallet) return false;
-  const defaultId = String(defaultWallet.sync_state?.client_generated_id || defaultWallet.id);
-  return selectedWalletId.value === defaultId;
+  return selectedWalletId.value === defaultWallet.id;
 });
 
 function handlePartySelect(party) {
   formParty.value = party.name;
-  const partyId = party.sync_state?.client_generated_id || String(party.id);
-  selectedPartyId.value = partyId;
+  selectedPartyId.value = party.id;
   partyError.value = false;
 }
 
 function handleWalletSelect(wallet) {
-  const walletId = wallet.sync_state?.client_generated_id || String(wallet.id);
-  selectedWalletId.value = walletId;
+  selectedWalletId.value = wallet.id;
   walletError.value = false;
 
   if (wallet.currency && wallet.currency !== selectedCurrency.value) {
@@ -293,23 +290,20 @@ function handleWalletSelect(wallet) {
 
 function handleCurrencyChange() {
   if (selectedWalletId.value) {
-    const currentWallet = sharedData.wallets.value.find(
-      (w) => (w.sync_state?.client_generated_id || String(w.id)) === selectedWalletId.value
-    );
+    const currentWallet = sharedData.wallets.value.find((w) => w.id === selectedWalletId.value);
 
     if (
       currentWallet &&
       currentWallet.currency &&
       currentWallet.currency !== selectedCurrency.value
     ) {
-      selectedWalletId.value = '';
+      selectedWalletId.value = null;
       walletSearchQuery.value = '';
 
       const defaultWallet = sharedData.getDefaultWallet.value;
       if (defaultWallet) {
-        const walletId = defaultWallet.sync_state?.client_generated_id || String(defaultWallet.id);
-        selectedWalletId.value = walletId;
-        walletSearchQuery.value = defaultWallet.name; // Show in dropdown input
+        selectedWalletId.value = defaultWallet.id;
+        walletSearchQuery.value = defaultWallet.name;
       }
     }
   }
@@ -344,9 +338,8 @@ onMounted(async () => {
 
       const defaultWallet = sharedData.getDefaultWallet.value;
       if (defaultWallet && !selectedWalletId.value) {
-        selectedWalletId.value =
-          defaultWallet.sync_state?.client_generated_id || String(defaultWallet.id);
-        walletSearchQuery.value = defaultWallet.name; // Show in dropdown input
+        selectedWalletId.value = defaultWallet.id;
+        walletSearchQuery.value = defaultWallet.name;
         if (defaultWallet.currency) {
           selectedCurrency.value = defaultWallet.currency;
         }
@@ -437,9 +430,7 @@ watch(
 
     if (item.walletId) {
       selectedWalletId.value = item.walletId;
-      const wallet = sharedData.wallets.value.find(
-        (w) => (w.sync_state?.client_generated_id || String(w.id)) === item.walletId
-      );
+      const wallet = sharedData.wallets.value.find((w) => w.id === item.walletId);
       if (wallet) {
         walletSearchQuery.value = wallet.name;
         if (wallet.currency) {

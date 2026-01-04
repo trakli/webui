@@ -152,14 +152,8 @@ const defaultWallet = computed(() => sharedData.getDefaultWallet.value);
 function isDefaultWallet(txn) {
   const dw = defaultWallet.value;
   if (!dw) return false;
-  const txnId = txn.walletId;
-  const dwClientId = dw?.sync_state?.client_generated_id
-    ? String(dw.sync_state.client_generated_id)
-    : undefined;
-  if (txnId && dwClientId && String(txnId) === dwClientId) return true;
-  const dwId = dw?.id != null ? String(dw.id) : undefined;
-  if (txnId && dwId && String(txnId) === dwId) return true;
-  if (txn.wallet && dw?.name && txn.wallet === dw.name) return true;
+  if (txn.walletId && txn.walletId === dw.id) return true;
+  if (txn.wallet && dw.name && txn.wallet === dw.name) return true;
   return false;
 }
 

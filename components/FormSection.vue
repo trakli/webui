@@ -1,13 +1,21 @@
 <template>
   <div class="transaction-tabs">
     <div class="tab-buttons">
-      <button class="tab-button" :class="{ active: isIncomeSelected }" @click="selectIncome">
-        <ArrowDownTrayIcon class="tab-icon" />
-        {{ t('Income Transaction') }}
-      </button>
-      <button class="tab-button" :class="{ active: isExpenseSelected }" @click="selectExpense">
+      <button
+        class="tab-button tab-button--expense"
+        :class="{ active: isExpenseSelected }"
+        @click="selectExpense"
+      >
         <ArrowUpTrayIcon class="tab-icon" />
         {{ t('Expense Transaction') }}
+      </button>
+      <button
+        class="tab-button tab-button--income"
+        :class="{ active: isIncomeSelected }"
+        @click="selectIncome"
+      >
+        <ArrowDownTrayIcon class="tab-icon" />
+        {{ t('Income Transaction') }}
       </button>
     </div>
 
@@ -34,8 +42,8 @@ const props = defineProps({
 
 const emit = defineEmits(['submit']);
 
-const isIncomeSelected = ref(true);
-const isExpenseSelected = ref(false);
+const isIncomeSelected = ref(false);
+const isExpenseSelected = ref(true);
 
 const selectIncome = () => {
   isIncomeSelected.value = true;
@@ -119,19 +127,17 @@ watch(
     color: $primary;
   }
 
-  // Hover state for expense button (second child)
-  &:nth-child(2):hover {
-    color: #dc2626;
-  }
-
   &.active {
     color: $primary;
     background: #f0f9ff;
     border-bottom-color: $primary;
   }
 
-  // Active state for expense button (second child)
-  &:nth-child(2).active {
+  &--expense:hover {
+    color: #dc2626;
+  }
+
+  &--expense.active {
     color: #dc2626;
     background: #fee2e2;
     border-bottom-color: #dc2626;
