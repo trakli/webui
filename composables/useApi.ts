@@ -1,3 +1,5 @@
+let isRedirectingToLogin = false;
+
 export const useApi = () => {
   const config = useRuntimeConfig();
   const tokenCookie = useCookie('auth.token');
@@ -22,8 +24,13 @@ export const useApi = () => {
         userCookie.value = null;
         tokenCookieRef.value = null;
 
-        if (import.meta.client && !window.location.pathname.includes('/login')) {
-          navigateTo('/login');
+        if (
+          import.meta.client &&
+          !isRedirectingToLogin &&
+          !window.location.pathname.includes('/login')
+        ) {
+          isRedirectingToLogin = true;
+          window.location.href = '/login';
         }
       }
 
