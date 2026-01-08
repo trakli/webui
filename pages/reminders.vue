@@ -1,24 +1,21 @@
 <template>
   <div class="reminders-page">
-    <div class="page-header">
-      <div class="header-left">
-        <Bell class="header-icon" />
-        <h1>{{ t('Reminders') }}</h1>
-      </div>
-      <button class="add-btn" @click="handleOpenFormForCreation">
-        <Plus />
-        <span>{{ t('Add Reminder') }}</span>
-      </button>
-    </div>
+    <ContentTopCard
+      page-name="Reminder"
+      page-name-plural="Reminders"
+      @add="handleOpenFormForCreation"
+    />
 
     <div class="content-area">
       <div v-if="showForm" class="form-section">
-        <ReminderForm
-          :editing-item="editingItem"
-          @created="handleCreate"
-          @updated="handleUpdate"
-          @close="handleFormClose"
-        />
+        <div class="form-wrapper">
+          <ReminderForm
+            :editing-item="editingItem"
+            @created="handleCreate"
+            @updated="handleUpdate"
+            @close="handleFormClose"
+          />
+        </div>
       </div>
 
       <div v-if="isLoading" class="loading-state">
@@ -116,7 +113,6 @@
 import { ref, onMounted } from 'vue';
 import {
   Bell,
-  Plus,
   Clock,
   Calendar,
   Repeat,
@@ -129,10 +125,12 @@ import {
   TrendingUp,
   Receipt,
   PiggyBank,
-  Star
+  Star,
+  Plus
 } from 'lucide-vue-next';
 import { useReminders } from '@/composables/useReminders';
 import { useNotifications } from '@/composables/useNotifications';
+import ContentTopCard from '@/components/TTopCard.vue';
 import ReminderForm from '@/components/reminders/ReminderForm.vue';
 
 const { t } = useI18n();
@@ -296,32 +294,24 @@ onMounted(() => {
   width: 100%;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+.content-area {
+  margin-top: 1rem;
 }
 
-.header-left {
+.form-section {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
 
-  h1 {
-    font-size: $font-size-lg;
-    font-weight: $font-semibold;
-    color: $text-primary;
-    margin: 0;
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
   }
 }
 
-.header-icon {
-  width: 24px;
-  height: 24px;
-  color: $primary;
+.form-wrapper {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .add-btn {
@@ -345,15 +335,6 @@ onMounted(() => {
     width: 18px;
     height: 18px;
   }
-}
-
-.content-area {
-  margin-top: 1rem;
-}
-
-.form-section {
-  max-width: 600px;
-  margin: 0 auto 2rem;
 }
 
 .loading-state,
@@ -439,7 +420,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba($primary, 0.1);
+  background: rgba(var(--color-primary-rgb), 0.1);
   border-radius: $radius-lg;
 
   svg {
@@ -506,11 +487,11 @@ onMounted(() => {
     font-weight: $font-medium;
 
     &.active {
-      color: #10b981;
+      color: $success;
     }
 
     &.paused {
-      color: #f59e0b;
+      color: $warning;
     }
 
     &.completed {
@@ -552,10 +533,10 @@ onMounted(() => {
   }
 
   &--danger:hover {
-    background: #fee2e2;
+    background: rgba(var(--color-error-rgb), 0.1);
 
     svg {
-      color: #ef4444;
+      color: $error-color;
     }
   }
 }
