@@ -14,23 +14,29 @@
         <TipsSection v-if="!isTabletOrBelow" page-name="Party" />
       </div>
 
-      <div v-if="isLoading" class="loading-state">{{ t('Loading parties...') }}</div>
-      <div v-if="error" class="error-state">{{ t('Error:') }} {{ error }}</div>
-
       <OnboardingEmptyState
         v-if="!showForm && !isLoading && parties.length === 0"
         page-type="parties"
         @create="handleOpenFormForCreation"
       />
 
-      <PartyCardList
-        v-if="!showForm && !isLoading && parties.length > 0"
-        :parties="parties"
+      <ContentListView
+        v-if="!showForm && (isLoading || error || parties.length > 0)"
+        page-name="Party"
+        page-name-plural="Parties"
+        :entities="parties"
+        :columns="tableColumns"
+        :card-fields="cardFields"
+        :is-loading="isLoading"
+        :error="error"
+        card-layout="grid"
         @edit="handleEdit"
         @delete="handleDelete"
-        @view="handleView"
-        @menu="handleMenu"
-      />
+      >
+        <template #card="{ entity }">
+          <PartyCard :party="entity" @edit="handleEdit" @delete="handleDelete" />
+        </template>
+      </ContentListView>
     </div>
   </div>
 </template>
@@ -41,14 +47,28 @@ import { useParties } from '@/composables/useParties';
 import { useTransactions } from '@/composables/useTransactions';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
+import { parseAmount } from '@/utils/currency';
 import ContentTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import PartiesForm from '@/components/PartiesForm.vue';
-import PartyCardList from '@/components/PartyCardList.vue';
+import ContentListView from '@/components/ContentListView.vue';
+import PartyCard from '@/components/PartyCard.vue';
 import TipsSection from '@/components/TipsSection.vue';
-import { parseAmount } from '@/utils/currency';
 
 const { t } = useI18n();
+
+const formatType = (type) => {
+  if (!type) return '—';
+  return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+};
+
+const tableColumns = [
+  { key: 'name', label: 'Party Name' },
+  { key: 'type', label: 'Type', render: formatType },
+  { key: 'description', label: 'Description' }
+];
+
+const cardFields = [{ key: 'type', label: 'Type', render: formatType }];
 
 const showForm = ref(false);
 const editingItem = ref(null);
@@ -63,6 +83,7 @@ const {
   updateParty,
   deleteParty
 } = useParties();
+
 const { transactions } = useTransactions();
 
 const parties = computed(() => {
@@ -70,17 +91,17 @@ const parties = computed(() => {
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
   return rawParties.value.map((party) => {
-    const partyTransactions = transactions.value.filter((t) => {
-      const txnDate = new Date(t.date || t.datetime);
-      return t.partyId === party.id && txnDate >= threeMonthsAgo;
+    const partyTransactions = transactions.value.filter((txn) => {
+      const txnDate = new Date(txn.date || txn.datetime);
+      return txn.partyId === party.id && txnDate >= threeMonthsAgo;
     });
 
     let receivedAmount = 0;
     let spentAmount = 0;
 
-    partyTransactions.forEach((t) => {
-      const { value } = parseAmount(t.amount);
-      if (t.type === 'INCOME' || t.type === 'income') {
+    partyTransactions.forEach((txn) => {
+      const { value } = parseAmount(txn.amount);
+      if (txn.type === 'INCOME' || txn.type === 'income') {
         receivedAmount += value;
       } else {
         spentAmount += value;
@@ -158,16 +179,6 @@ async function handleDelete(item) {
     showError(t('Delete failed'), t('Failed to delete party. Please try again.'));
     console.error('Failed to delete party:', err);
   }
-}
-
-function handleView(item) {
-  // Handle party view action
-  console.log('View party:', item);
-}
-
-function handleMenu(item) {
-  // Handle party menu action
-  console.log('Menu for party:', item);
 }
 
 onMounted(() => {

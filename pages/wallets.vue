@@ -24,17 +24,29 @@
         @create="handleOpenFormForCreation"
       />
 
-      <ContentTable
+      <ContentListView
         v-if="!showForm && (isLoading || error || wallets.length > 0)"
         page-name="Wallet"
         page-name-plural="Wallets"
         :entities="wallets"
+        :columns="tableColumns"
+        :card-fields="cardFields"
         :is-loading="isLoading"
         :error="error"
         :default-item-id="defaultWalletId"
+        :grid-columns="4"
         @edit="handleEdit"
         @delete="handleDelete"
-      />
+      >
+        <template #card="{ entity, isDefault }">
+          <WalletListCard
+            :wallet="entity"
+            :is-default="isDefault"
+            @edit="handleEdit"
+            @delete="handleDelete"
+          />
+        </template>
+      </ContentListView>
     </div>
   </div>
 </template>
@@ -45,13 +57,37 @@ import { useWallets } from '@/composables/useWallets';
 import { useSharedData } from '@/composables/useSharedData';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
+import { getCurrencySymbol } from '@/utils/currency';
 import ContentTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import WalletForm from '@/components/WalletForm.vue';
-import ContentTable from '@/components/ContentTable.vue';
+import ContentListView from '@/components/ContentListView.vue';
+import WalletListCard from '@/components/WalletListCard.vue';
 import TipsSection from '@/components/TipsSection.vue';
 
 const { t } = useI18n();
+
+const formatBalance = (balance, wallet) => {
+  if (balance == null) return '—';
+  const symbol = getCurrencySymbol(wallet.currency);
+  const formatted = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(balance);
+  return `${formatted} ${symbol}`;
+};
+
+const tableColumns = [
+  { key: 'name', label: 'Wallet Name' },
+  { key: 'balance', label: 'Balance', align: 'right', render: formatBalance },
+  { key: 'currency', label: 'Currency' },
+  { key: 'description', label: 'Description' }
+];
+
+const cardFields = [
+  { key: 'balance', label: 'Balance', render: formatBalance },
+  { key: 'currency', label: 'Currency' }
+];
 
 const showForm = ref(false);
 const editingItem = ref(null);
