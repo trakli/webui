@@ -227,9 +227,11 @@
   box-shadow: $shadow-md;
   padding: 1.5rem;
   width: min(750px, 100%);
+  min-width: 600px;
 
   @media (max-width: $breakpoint-md) {
     padding: 1.25rem;
+    min-width: auto;
   }
 
   @media (max-width: $breakpoint-sm) {
