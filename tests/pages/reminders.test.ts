@@ -47,6 +47,17 @@ const stubs = {
     props: ['editingItem'],
     emits: ['created', 'updated', 'close']
   },
+  ContentTopCard: {
+    template: `
+      <div class="content-top-card-stub">
+        <span>{{ pageNamePlural }}</span>
+        <button class="add-btn" @click="$emit('add')">Add {{ pageName }}</button>
+      </div>
+    `,
+    props: ['pageName', 'pageNamePlural'],
+    emits: ['add']
+  },
+  NuxtLink: { template: '<a><slot /></a>' },
   Bell: { template: '<span class="bell-stub" />' },
   Plus: { template: '<span class="plus-stub" />' },
   Clock: { template: '<span class="clock-stub" />' },
