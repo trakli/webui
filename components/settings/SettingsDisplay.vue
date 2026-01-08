@@ -2,60 +2,26 @@
   <div>
     <div class="toggle-row">
       <div class="toggle-label">
-        <component :is="darkMode ? Sun : Moon" class="inline-icon" />
-        <span>{{ darkMode ? t('Light') : t('Dark') }} {{ t('Mode') }}</span>
+        <component :is="isDark ? Sun : Moon" class="inline-icon" />
+        <span>{{ isDark ? t('Light') : t('Dark') }} {{ t('Mode') }}</span>
       </div>
-      <button
-        type="button"
-        class="toggle"
-        :class="{ 'toggle--on': darkMode }"
-        @click="darkMode = !darkMode"
-      >
+      <button type="button" class="toggle" :class="{ 'toggle--on': isDark }" @click="toggleTheme">
         <span class="toggle-circle" />
       </button>
-    </div>
-
-    <div v-if="isEditMode" class="actions">
-      <button type="button" class="submit-btn" @click="handleSave">
-        <Save class="inline-icon" />
-        <span>{{ t('Update Display Settings') }}</span>
-      </button>
-      <p v-if="message" class="success-text">{{ message }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { Save, Sun, Moon } from 'lucide-vue-next';
+import { Sun, Moon } from 'lucide-vue-next';
+import { useTheme } from '~/composables/useTheme';
 
 const { t } = useI18n();
-
-const props = defineProps({
-  isEditMode: { type: Boolean, default: false }
-});
-
-const darkMode = ref(false);
-const message = ref('');
-
-watch(
-  () => props.isEditMode,
-  () => {
-    message.value = '';
-  }
-);
-
-const handleSave = () => {
-  message.value = t('Display settings updated successfully!');
-  setTimeout(() => {
-    message.value = '';
-  }, 2000);
-};
+const { isDark, toggleTheme } = useTheme();
 </script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
-@use 'sass:color';
 
 .toggle-row {
   display: flex;
@@ -81,7 +47,7 @@ const handleSave = () => {
   height: 24px;
   width: 44px;
   border-radius: 999px;
-  background: color.adjust($primary, $lightness: 25%);
+  background: $primary-toggle;
   transition: $transition-base;
 
   &--on {
