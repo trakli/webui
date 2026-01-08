@@ -11,18 +11,7 @@
       ]"
       @back="$router.push('/transactions')"
     />
-    <div
-      v-if="errorMessage"
-      style="
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 16px;
-        background: #fee;
-        border: 1px solid #fcc;
-        border-radius: 8px;
-        color: #c00;
-      "
-    >
+    <div v-if="errorMessage" class="error-message">
       <strong>{{ t('Error:') }}</strong> {{ errorMessage }}
     </div>
     <TransactionFormSection @submit="handleSubmit" />
@@ -73,3 +62,17 @@ definePageMeta({
   middleware: 'auth'
 });
 </script>
+
+<style lang="scss" scoped>
+@use '@/assets/scss/_variables.scss' as *;
+
+.error-message {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 16px;
+  background: rgba(var(--color-error-rgb), 0.1);
+  border: 1px solid $error-color;
+  border-radius: $radius-lg;
+  color: $error-color;
+}
+</style>

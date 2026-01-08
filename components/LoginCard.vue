@@ -175,7 +175,7 @@ const showPassword = ref(false);
                 transition: $transition-base;
 
                 &:hover {
-                  background-color: rgba($primary, 0.1);
+                  background-color: rgba(var(--color-primary-rgb), 0.1);
                   color: $primary;
                 }
 

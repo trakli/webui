@@ -76,7 +76,7 @@ const openLearningModal = () => {
   height: $navbar-height;
   padding: 0 2rem;
   background-color: $bg-gray;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid $border-color;
   position: fixed;
   top: 0;
   right: 0;

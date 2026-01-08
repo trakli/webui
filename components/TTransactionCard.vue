@@ -177,28 +177,40 @@ const primaryCurrency = computed(() => {
   overflow: hidden;
 
   &.income-insight {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: linear-gradient(
+      135deg,
+      rgba(var(--color-success-rgb), 0.08) 0%,
+      rgba(var(--color-success-rgb), 0.04) 100%
+    );
+    border: 1px solid rgba(var(--color-success-rgb), 0.2);
 
     &:hover {
       background: linear-gradient(
         135deg,
-        rgba(16, 185, 129, 0.15) 0%,
-        rgba(16, 185, 129, 0.08) 100%
+        rgba(var(--color-success-rgb), 0.15) 0%,
+        rgba(var(--color-success-rgb), 0.08) 100%
       );
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      box-shadow: 0 4px 12px rgba(var(--color-success-rgb), 0.2);
     }
   }
 
   &.expense-insight {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.04) 100%);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: linear-gradient(
+      135deg,
+      rgba(var(--color-error-rgb), 0.08) 0%,
+      rgba(var(--color-error-rgb), 0.04) 100%
+    );
+    border: 1px solid rgba(var(--color-error-rgb), 0.2);
 
     &:hover {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.08) 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(var(--color-error-rgb), 0.15) 0%,
+        rgba(var(--color-error-rgb), 0.08) 100%
+      );
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+      box-shadow: 0 4px 12px rgba(var(--color-error-rgb), 0.2);
     }
   }
 }
@@ -218,13 +230,13 @@ const primaryCurrency = computed(() => {
   }
 
   &.income-icon {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
+    background: rgba(var(--color-success-rgb), 0.1);
+    color: $success;
   }
 
   &.expense-icon {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    background: rgba(var(--color-error-rgb), 0.1);
+    color: $error-color;
   }
 }
 
@@ -286,47 +298,47 @@ const primaryCurrency = computed(() => {
   text-overflow: ellipsis;
 
   &.income-chip {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, $success, $primary-dark);
     color: white;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 4px rgba(var(--color-success-rgb), 0.3);
 
     &:hover {
       transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 4px 8px rgba(var(--color-success-rgb), 0.4);
     }
   }
 
   &.expense-chip {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    background: linear-gradient(135deg, $error-color, $error-dark);
     color: white;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 2px 4px rgba(var(--color-error-rgb), 0.3);
 
     &:hover {
       transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 4px 8px rgba(var(--color-error-rgb), 0.4);
     }
   }
 }
 
 .amount-chip {
   &.income-amount-chip {
-    background: rgba(16, 185, 129, 0.15);
-    color: #059669;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(var(--color-success-rgb), 0.15);
+    color: $success;
+    border: 1px solid rgba(var(--color-success-rgb), 0.3);
 
     &:hover {
-      background: rgba(16, 185, 129, 0.25);
+      background: rgba(var(--color-success-rgb), 0.25);
       transform: scale(1.05);
     }
   }
 
   &.expense-amount-chip {
-    background: rgba(239, 68, 68, 0.15);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(var(--color-error-rgb), 0.15);
+    color: $error-color;
+    border: 1px solid rgba(var(--color-error-rgb), 0.3);
 
     &:hover {
-      background: rgba(239, 68, 68, 0.25);
+      background: rgba(var(--color-error-rgb), 0.25);
       transform: scale(1.05);
     }
   }

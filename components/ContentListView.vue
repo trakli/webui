@@ -381,9 +381,9 @@ const visiblePages = computed(() => {
 
 .pagination-button {
   padding: 0.5rem 1rem;
-  color: #374151;
-  background: white;
-  border: 1px solid #d1d5db;
+  color: $text-secondary;
+  background: $bg-white;
+  border: 1px solid $border-light;
   border-radius: $radius-lg;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -404,8 +404,8 @@ const visiblePages = computed(() => {
   }
 
   &:hover:not(.disabled):not(.ellipsis) {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+    background: $bg-light;
+    border-color: $border-medium;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -414,13 +414,13 @@ const visiblePages = computed(() => {
     background: $primary;
     color: white;
     border-color: $primary;
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
   }
 
   &.disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    background: #f9fafb;
+    background: $bg-light;
   }
 
   &.ellipsis {
@@ -437,7 +437,7 @@ const visiblePages = computed(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6b7280;
+  color: $text-muted;
   font-size: 0.875rem;
   white-space: nowrap;
 
@@ -450,10 +450,10 @@ const visiblePages = computed(() => {
 
 .per-page-select {
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-  border: 1.5px solid #d1d5db;
+  border: 1.5px solid $border-light;
   border-radius: $radius-lg;
-  background: white;
-  color: #374151;
+  background: $bg-white;
+  color: $text-secondary;
   font-size: 0.875rem;
   cursor: pointer;
   appearance: none;
@@ -476,11 +476,11 @@ const visiblePages = computed(() => {
   &:focus {
     outline: none;
     border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
   }
 
   &:hover {
-    border-color: #9ca3af;
+    border-color: $border-medium;
   }
 }
 </style>

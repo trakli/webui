@@ -306,8 +306,8 @@ const formatTimeAgo = (txn) => {
   width: 100%;
   border-radius: $radius-lg;
   overflow-x: auto;
-  background-color: #ebedec;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: $bg-gray;
+  box-shadow: $shadow-sm;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -327,28 +327,28 @@ const formatTimeAgo = (txn) => {
   }
 
   th {
-    background-color: #057a55;
-    color: white;
+    background-color: $primary;
+    color: #ffffff;
     text-align: left;
     padding: 10px;
     font-size: $font-size-sm;
   }
 
   &.expense-table th {
-    background-color: #dc2626;
+    background-color: $error-color;
   }
 
   td {
     padding: 10px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #ddd;
+    background-color: $bg-light;
+    border-bottom: 1px solid $border-light;
     vertical-align: top;
     font-size: $font-size-sm;
   }
 
   .date {
     &-main {
-      color: #1d3229;
+      color: $text-primary;
       font-weight: $font-medium;
       font-size: $font-size-sm;
     }
@@ -356,7 +356,7 @@ const formatTimeAgo = (txn) => {
     &-sub {
       font-size: 9px;
       font-weight: $font-normal;
-      color: #646b6b;
+      color: $text-muted;
     }
   }
 
@@ -368,13 +368,13 @@ const formatTimeAgo = (txn) => {
     display: inline-block;
 
     &.income {
-      background-color: #d1fae5;
-      color: #065f46;
+      background-color: rgba(var(--color-success-rgb), 0.15);
+      color: $success;
     }
 
     &.outcome {
-      background-color: #fee2e2;
-      color: #dc2626;
+      background-color: rgba(var(--color-error-rgb), 0.15);
+      color: $error-color;
     }
   }
 
@@ -386,12 +386,12 @@ const formatTimeAgo = (txn) => {
 
   .amount {
     &-income {
-      color: #059669;
+      color: $success;
       font-weight: bold;
     }
 
     &-outcome {
-      color: #dc2626;
+      color: $error-color;
       font-weight: bold;
     }
   }
@@ -401,7 +401,7 @@ const formatTimeAgo = (txn) => {
     align-items: center;
     gap: 8px;
     font-size: 16px;
-    color: #047857;
+    color: $primary;
     cursor: pointer;
   }
 
@@ -419,27 +419,27 @@ const formatTimeAgo = (txn) => {
     height: 28px;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.05);
+      background-color: rgba(var(--color-primary-rgb), 0.1);
     }
   }
 
   .action-icon {
     width: 16px;
     height: 16px;
-    color: #047857;
+    color: $primary;
     transition: color 0.2s ease;
 
     &:hover {
-      color: #065f46;
+      color: $primary-dark;
     }
   }
 
   // Make delete icon red
   .action-btn:nth-child(2) .action-icon {
-    color: #dc2626;
+    color: $error-color;
 
     &:hover {
-      color: #b91c1c;
+      color: $error-dark;
     }
   }
 }
@@ -449,7 +449,7 @@ const formatTimeAgo = (txn) => {
   .totals-cell {
     padding: 0 !important;
     background-color: transparent !important;
-    border-top: 2px solid #057a55;
+    border-top: 2px solid $primary;
   }
 
   .totals-grid {
@@ -480,7 +480,7 @@ const formatTimeAgo = (txn) => {
     }
 
     &.totals-label {
-      background-color: #057a55;
+      background-color: $primary;
       .total-label {
         color: white;
         font-size: $font-size-sm;
@@ -489,42 +489,42 @@ const formatTimeAgo = (txn) => {
     }
 
     &.income {
-      background-color: #d1fae5;
+      background-color: rgba(var(--color-success-rgb), 0.2);
       .total-label {
-        color: #065f46;
+        color: $success;
       }
       .total-value {
-        color: #059669;
+        color: $success;
       }
     }
 
     &.expense {
-      background-color: #fee2e2;
+      background-color: rgba(var(--color-error-rgb), 0.15);
       .total-label {
-        color: #991b1b;
+        color: $error-color;
       }
       .total-value {
-        color: #dc2626;
+        color: $error-color;
       }
     }
 
     &.net {
       &.positive {
-        background-color: #dbeafe;
+        background-color: rgba(var(--color-primary-rgb), 0.15);
         .total-label {
-          color: #1e40af;
+          color: $primary;
         }
         .total-value {
-          color: #2563eb;
+          color: $primary;
         }
       }
       &.negative {
-        background-color: #fef3c7;
+        background-color: $warning-bg;
         .total-label {
-          color: #92400e;
+          color: $warning-text;
         }
         .total-value {
-          color: #d97706;
+          color: $warning-text;
         }
       }
     }
@@ -534,7 +534,7 @@ const formatTimeAgo = (txn) => {
 // Pagination styles
 .pagination-row {
   td {
-    background-color: #f9f9f9 !important;
+    background-color: $bg-light !important;
     border-bottom: none !important;
     padding: 16px 12px !important;
   }
@@ -560,15 +560,15 @@ const formatTimeAgo = (txn) => {
 
 .entries-text {
   font-size: 14px;
-  color: #6b7280;
+  color: $text-muted;
   font-weight: 500;
 }
 
 .pagination-btn {
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  background-color: white;
-  color: #374151;
+  border: 1px solid $border-light;
+  background-color: $bg-white;
+  color: $text-secondary;
   border-radius: $radius-md;
   cursor: pointer;
   font-size: 14px;
@@ -578,33 +578,33 @@ const formatTimeAgo = (txn) => {
   text-align: center;
 
   &:hover:not(:disabled) {
-    background-color: #f3f4f6;
-    border-color: #9ca3af;
+    background-color: $bg-light;
+    border-color: $border-medium;
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background-color: #f9fafb;
+    background-color: $bg-light;
   }
 
   &.active {
-    background-color: #057a55;
+    background-color: $primary;
     color: white;
-    border-color: #057a55;
+    border-color: $primary;
 
     &:hover {
-      background-color: #065f46;
+      background-color: $primary-dark;
     }
   }
 
   .expense-table & {
     &.active {
-      background-color: #dc2626;
-      border-color: #dc2626;
+      background-color: $error-color;
+      border-color: $error-color;
 
       &:hover {
-        background-color: #b91c1c;
+        background-color: $error-dark;
       }
     }
   }

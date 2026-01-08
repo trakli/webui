@@ -77,9 +77,9 @@ const resolvedIcon = computed(() => {
   grid-template-columns: 1.8fr 2.5fr auto;
   align-items: start;
   padding: $spacing-4;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid $border-light;
   gap: $spacing-4;
-  background: #f9f9f9;
+  background: $bg-light;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -100,7 +100,7 @@ const resolvedIcon = computed(() => {
   }
 
   &.is-default {
-    background: rgba($success, 0.08);
+    background: rgba(var(--color-success-rgb), 0.08);
     border-left: 4px solid $success;
     padding-left: calc($spacing-4 - 4px);
   }
@@ -108,10 +108,10 @@ const resolvedIcon = computed(() => {
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    background: #fff;
+    background: $bg-white;
 
     &.is-default {
-      background: rgba($success, 0.12);
+      background: rgba(var(--color-success-rgb), 0.12);
     }
 
     .entity-icon {
@@ -147,7 +147,7 @@ const resolvedIcon = computed(() => {
 
   .name {
     font-weight: $font-medium;
-    color: #1d3229;
+    color: $text-primary;
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -189,7 +189,7 @@ const resolvedIcon = computed(() => {
 }
 
 .entity-description {
-  color: #374151;
+  color: $text-secondary;
   font-size: $font-size-sm;
   padding: 0;
   line-height: 1.4;
@@ -246,25 +246,25 @@ const resolvedIcon = computed(() => {
   svg {
     width: 16px;
     height: 16px;
-    color: #047857;
+    color: $primary;
     transition: color 0.2s ease;
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(var(--color-primary-rgb), 0.1);
 
     svg {
-      color: #065f46;
+      color: $primary-dark;
     }
   }
 
   &.delete {
     svg {
-      color: #dc2626;
+      color: $error-color;
     }
 
     &:hover svg {
-      color: #b91c1c;
+      color: $error-dark;
     }
   }
 }
@@ -274,8 +274,8 @@ const resolvedIcon = computed(() => {
   top: -30px;
   left: 50%;
   transform: translateX(-50%) translateY(0);
-  background: #333;
-  color: white;
+  background: $text-primary;
+  color: $bg-white;
   padding: 4px 8px;
   border-radius: $radius-md;
   font-size: 12px;
@@ -292,7 +292,7 @@ const resolvedIcon = computed(() => {
     transform: translateX(-50%);
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-top: 4px solid #333;
+    border-top: 4px solid $text-primary;
   }
 }
 </style>

@@ -125,7 +125,7 @@ const handleFiltersApply = (filters) => {
 
 .card-container {
   width: 100%;
-  background-color: #e6f2ec;
+  background-color: $primary-light;
   border-radius: $radius-xl;
   padding: 1rem 1.25rem;
   margin: 0;
@@ -151,7 +151,7 @@ const handleFiltersApply = (filters) => {
 }
 
 .card-title {
-  color: #1d3229;
+  color: $text-primary;
   font-size: $font-size-lg;
   font-weight: $font-bold;
   margin: 0;

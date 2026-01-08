@@ -230,7 +230,7 @@ const pageSubtitle = computed(() => {
 }
 
 .page-header-wrapper {
-  background: linear-gradient(135deg, #e6f2ec 0%, #f0f8f2 100%);
+  background: $primary-light;
   border-radius: $radius-lg;
   padding: $spacing-3 $spacing-4;
   margin-bottom: $spacing-3;
@@ -242,7 +242,7 @@ const pageSubtitle = computed(() => {
     position: absolute;
     width: 120px;
     height: 120px;
-    background: rgba(4, 120, 68, 0.06);
+    background: rgba(var(--color-primary-rgb), 0.06);
     border-radius: 50%;
     top: -60px;
     right: -30px;
@@ -254,7 +254,7 @@ const pageSubtitle = computed(() => {
     position: absolute;
     width: 80px;
     height: 80px;
-    background: rgba(4, 120, 68, 0.04);
+    background: rgba(var(--color-primary-rgb), 0.04);
     border-radius: 50%;
     bottom: -40px;
     left: -20px;
@@ -284,7 +284,7 @@ const pageSubtitle = computed(() => {
 .page-title {
   font-size: $font-size-lg;
   font-weight: $font-semibold;
-  color: #1d3229;
+  color: $text-primary;
   margin: 0;
 
   @media (max-width: $breakpoint-md) {
@@ -332,13 +332,11 @@ const pageSubtitle = computed(() => {
 }
 
 :deep(.narrative-insights) {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 249, 0.8) 100%);
-  border: 1px solid rgba(4, 120, 68, 0.1);
+  background: $bg-white;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.1);
   border-radius: $radius-xl;
   padding: $spacing-6;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: $shadow-md;
   position: relative;
   overflow: hidden;
 
@@ -349,7 +347,12 @@ const pageSubtitle = computed(() => {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, $primary 0%, rgba(4, 120, 68, 0.5) 50%, $primary 100%);
+    background: linear-gradient(
+      90deg,
+      $primary 0%,
+      rgba(var(--color-primary-rgb), 0.5) 50%,
+      $primary 100%
+    );
   }
 
   font-size: $font-size-base;
@@ -378,19 +381,15 @@ const pageSubtitle = computed(() => {
 }
 
 :deep(.kpi-card) {
-  background: linear-gradient(135deg, $bg-white 0%, #fefefe 100%);
-  border: 1px solid rgba(4, 120, 68, 0.1);
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  background: $bg-white;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.1);
+  box-shadow: $shadow-sm;
   transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow:
-      0 8px 25px -5px rgba(4, 120, 68, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border-color: rgba(4, 120, 68, 0.2);
+    box-shadow: $shadow-md;
+    border-color: rgba(var(--color-primary-rgb), 0.2);
   }
 }
 
@@ -438,26 +437,19 @@ const pageSubtitle = computed(() => {
   gap: $spacing-4;
   position: relative;
   padding: $spacing-4;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(4, 120, 68, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(4, 120, 68, 0.02) 0%, transparent 50%), $bg-light;
+  background: $bg-light;
   border-radius: $radius-xl;
-  border: 1px solid rgba(4, 120, 68, 0.05);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.05);
 
   :deep(.chart-card) {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.06),
-      0 1px 1px rgba(0, 0, 0, 0.05);
+    background: $bg-white;
+    border: 1px solid $border-color;
+    box-shadow: $shadow-sm;
     transition: all 0.3s ease;
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow:
-        0 16px 64px rgba(0, 0, 0, 0.1),
-        0 1px 1px rgba(0, 0, 0, 0.05);
+      box-shadow: $shadow-lg;
     }
   }
 }
@@ -474,10 +466,8 @@ const pageSubtitle = computed(() => {
 
 .forecasts-card {
   :deep(.card) {
-    border: 1px solid rgba(4, 120, 68, 0.1);
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.05),
-      0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.1);
+    box-shadow: $shadow-sm;
   }
 
   &.forecasts-card--narrow {

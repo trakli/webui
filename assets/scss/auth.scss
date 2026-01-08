@@ -1,4 +1,3 @@
-@use 'sass:color';
 @use '@/assets/scss/_variables.scss' as *;
 
 // This file contains shared styles for authentication pages (Login, Register, etc.)
@@ -75,7 +74,7 @@ h1 {
       border-color: $error-color;
 
       &:focus {
-        box-shadow: 0 0 0 3px rgba($error-color, 0.2);
+        box-shadow: 0 0 0 3px rgba(var(--color-error-rgb), 0.2);
       }
     }
   }

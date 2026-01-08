@@ -16,7 +16,7 @@ import { InformationCircleIcon } from '@heroicons/vue/24/outline';
   height: 34px;
   top: 48px;
   border-radius: $radius-lg;
-  background-color: #dfe1e4;
+  background-color: $bg-light;
   padding: 8px 13px 8px 13px;
   gap: 8px;
 }
