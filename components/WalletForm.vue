@@ -1,5 +1,12 @@
 <template>
-  <form class="entity-form" @submit.prevent="handleSubmit">
+  <form class="card-form" @submit.prevent="handleSubmit">
+    <div class="form-header">
+      <h2>{{ isEditing ? t('Edit Wallet') : t('Create Wallet') }}</h2>
+      <button type="button" class="close-btn" @click="handleFormClose">
+        <X />
+      </button>
+    </div>
+
     <div class="form-group">
       <label for="wallet-name" class="form-label">{{ t('Wallet Name') }}</label>
       <div class="name-icon-row">
@@ -109,9 +116,14 @@
       </div>
     </div>
 
-    <button type="submit" class="submit-btn">
-      {{ isEditing ? t('Update wallet') : t('Create wallet') }}
-    </button>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" @click="handleFormClose">
+        {{ t('Cancel') }}
+      </button>
+      <button type="submit" class="btn btn-primary">
+        {{ isEditing ? t('Update Wallet') : t('Create Wallet') }}
+      </button>
+    </div>
   </form>
 </template>
 
@@ -119,7 +131,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import IconPicker from './IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
-import { ImagePlus } from 'lucide-vue-next';
+import { ImagePlus, X } from 'lucide-vue-next';
 import { useSharedData } from '@/composables/useSharedData';
 
 const { t } = useI18n();
