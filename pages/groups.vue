@@ -126,28 +126,21 @@ definePageMeta({
 @use '@/assets/scss/_variables' as *;
 
 .content-area {
-  margin-top: 2rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  align-items: center;
+  gap: 1rem;
   width: 100%;
 }
 
 .form-section {
   display: flex;
-  justify-content: space-between;
-  gap: 3rem;
+  justify-content: flex-start;
+  gap: 2rem;
   width: 100%;
-  max-width: 1400px;
-  align-self: center;
-  margin: 0 auto;
-  padding: 0 1rem;
 }
 
 .form-wrapper {
-  flex: 1;
   min-width: 0;
-  max-width: 800px;
 }
 </style>
