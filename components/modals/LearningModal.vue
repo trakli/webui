@@ -253,13 +253,13 @@ const toggleFaq = (index) => {
 }
 
 .modal-content {
-  background: white;
+  background: $bg-white;
   border-radius: $radius-xl;
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: $shadow-xl;
 }
 
 .modal-header {
@@ -295,7 +295,7 @@ const toggleFaq = (index) => {
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.15);
   }
 }
 
@@ -343,13 +343,13 @@ const toggleFaq = (index) => {
 
   &:hover {
     color: $primary;
-    background: rgba(4, 120, 68, 0.05);
+    background: rgba(var(--color-primary-rgb), 0.05);
   }
 
   &.active {
     color: $primary;
     border-bottom-color: $primary;
-    background: white;
+    background: $bg-white;
   }
 
   @media (max-width: $breakpoint-sm) {
@@ -450,7 +450,7 @@ const toggleFaq = (index) => {
 }
 
 .tip-card {
-  background: white;
+  background: $bg-white;
   border: 1px solid $border-gray;
   border-radius: $radius-xl;
   padding: 1.5rem;
@@ -461,7 +461,7 @@ const toggleFaq = (index) => {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-md;
   }
 }
 
@@ -506,14 +506,14 @@ const toggleFaq = (index) => {
 }
 
 .key {
-  background: white;
+  background: $bg-white;
   border: 1px solid $border-light;
   border-radius: $radius-sm;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
   color: $text-primary;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: $shadow-sm;
 }
 
 .shortcut-action {
@@ -552,7 +552,7 @@ const toggleFaq = (index) => {
   }
 
   &.open {
-    background: white;
+    background: $bg-white;
   }
 }
 
@@ -569,7 +569,7 @@ const toggleFaq = (index) => {
 
 .faq-answer {
   padding: 1rem;
-  background: white;
+  background: $bg-white;
   color: $text-secondary;
   line-height: 1.6;
   border-top: 1px solid $border-gray;

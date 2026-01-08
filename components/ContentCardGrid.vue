@@ -154,7 +154,7 @@ onUnmounted(() => {
 
   &.is-default {
     border-left-color: $primary;
-    background: rgba($success, 0.04);
+    background: rgba(var(--color-success-rgb), 0.04);
   }
 }
 
@@ -181,7 +181,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba($primary, 0.1);
+  background: rgba(var(--color-primary-rgb), 0.1);
   color: $primary;
 
   svg {

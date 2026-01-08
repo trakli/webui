@@ -31,7 +31,7 @@
 
 .t-card-header {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid $border-color;
   font-size: 1.25rem;
   font-weight: 600;
 }
@@ -43,7 +43,7 @@
 
 .t-card-footer {
   padding: 1rem 1.5rem;
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  background-color: $bg-light;
+  border-top: 1px solid $border-color;
 }
 </style>

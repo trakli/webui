@@ -321,7 +321,7 @@ const formatLastUpdated = (timestamp) => {
     color: $error-color;
 
     &:hover {
-      background: rgba($error-color, 0.1);
+      background: rgba(var(--color-error-rgb), 0.1);
     }
   }
 
@@ -400,7 +400,7 @@ const formatLastUpdated = (timestamp) => {
   text-align: left;
 
   &.received {
-    background: rgba($success, 0.08);
+    background: rgba(var(--color-success-rgb), 0.08);
 
     .stat-icon {
       color: $success;
@@ -412,7 +412,7 @@ const formatLastUpdated = (timestamp) => {
   }
 
   &.spent {
-    background: rgba($error-color, 0.08);
+    background: rgba(var(--color-error-rgb), 0.08);
 
     .stat-icon {
       color: $error-color;

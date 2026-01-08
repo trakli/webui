@@ -38,7 +38,11 @@
       width: 76px;
       height: 76px;
       border-top-right-radius: $radius-xl;
-      background: radial-gradient(80px 80px at 90% 20%, rgba($primary, 0.08), transparent 70%);
+      background: radial-gradient(
+        80px 80px at 90% 20%,
+        rgba(var(--color-primary-rgb), 0.08),
+        transparent 70%
+      );
       pointer-events: none;
     }
 
@@ -57,7 +61,7 @@
 
     &--expense {
       .card__badge {
-        background: rgba($error-color, 0.12);
+        background: rgba(var(--color-error-rgb), 0.12);
         color: $error-color;
       }
       .card__amount {
@@ -66,7 +70,7 @@
       &::after {
         background: radial-gradient(
           80px 80px at 90% 20%,
-          rgba($error-color, 0.08),
+          rgba(var(--color-error-rgb), 0.08),
           transparent 70%
         );
       }
@@ -223,15 +227,15 @@
     background: $bg-light;
 
     &.tile--income {
-      background: rgba($primary, 0.08);
-      border-color: rgba($primary, 0.15);
+      background: rgba(var(--color-primary-rgb), 0.08);
+      border-color: rgba(var(--color-primary-rgb), 0.15);
       .tile-icon {
         color: $primary;
       }
     }
     &.tile--expense {
-      background: rgba($error-color, 0.08);
-      border-color: rgba($error-color, 0.15);
+      background: rgba(var(--color-error-rgb), 0.08);
+      border-color: rgba(var(--color-error-rgb), 0.15);
       .tile-icon {
         color: $error-color;
       }
@@ -286,7 +290,7 @@
     &--default {
       background: $primary-light;
       color: $primary;
-      border-color: rgba($primary, 0.25);
+      border-color: rgba(var(--color-primary-rgb), 0.25);
     }
     &--wallet {
       background: $bg-light;

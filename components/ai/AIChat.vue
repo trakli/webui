@@ -177,7 +177,6 @@ const handleSendMessage = async () => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
-@use 'sass:color';
 
 .card {
   background: $bg-white;
@@ -192,6 +191,7 @@ const handleSendMessage = async () => {
   font-size: $font-size-xl;
   font-weight: $font-bold;
   margin-bottom: $spacing-3;
+  color: $text-primary;
 }
 .chat-window {
   flex: 1;
@@ -224,7 +224,7 @@ const handleSendMessage = async () => {
 .bubble.ai {
   background: $primary-light;
   color: $primary;
-  border: 1px solid color.adjust($primary, $lightness: 35%);
+  border: 1px solid $primary-muted;
 
   &.loading {
     opacity: 0.7;
@@ -259,11 +259,16 @@ const handleSendMessage = async () => {
   outline: none;
   font-size: $font-size-base;
   background: $bg-white;
+  color: $text-primary;
   transition: $transition-base;
+
+  &::placeholder {
+    color: $text-muted;
+  }
 
   &:focus {
     border-color: $primary;
-    box-shadow: 0 0 0 2px rgba(4, 120, 68, 0.15);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.15);
   }
 }
 .send-btn {
@@ -286,7 +291,7 @@ const handleSendMessage = async () => {
 .results-container {
   margin-top: $spacing-2;
   padding-top: $spacing-2;
-  border-top: 1px solid color.adjust($primary, $lightness: 30%);
+  border-top: 1px solid $primary-border;
 }
 
 .result-scalar {
@@ -316,7 +321,7 @@ const handleSendMessage = async () => {
     display: flex;
     gap: $spacing-2;
     padding: $spacing-1 0;
-    border-bottom: 1px solid color.adjust($primary, $lightness: 35%);
+    border-bottom: 1px solid $primary-muted;
 
     &:last-child {
       border-bottom: none;
@@ -359,12 +364,12 @@ const handleSendMessage = async () => {
   td {
     padding: $spacing-1 $spacing-2;
     text-align: left;
-    border-bottom: 1px solid color.adjust($primary, $lightness: 35%);
+    border-bottom: 1px solid $primary-muted;
   }
 
   th {
     font-weight: $font-semibold;
-    background: color.adjust($primary-light, $lightness: 5%);
+    background: $primary-light;
   }
 
   tr:last-child td {

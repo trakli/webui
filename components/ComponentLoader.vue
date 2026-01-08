@@ -122,8 +122,8 @@ defineEmits(['create']);
   align-items: center;
   text-align: center;
   padding: 2rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: rgba(var(--color-error-rgb), 0.05);
+  border: 1px solid rgba(var(--color-error-rgb), 0.2);
   border-radius: $radius-lg;
   margin: 1rem 0;
 
@@ -139,12 +139,12 @@ defineEmits(['create']);
   .error-title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #dc2626;
+    color: $error-color;
     margin: 0 0 0.5rem 0;
   }
 
   .error-message {
-    color: #7f1d1d;
+    color: $error-dark;
     margin: 0 0 1.5rem 0;
     line-height: 1.5;
   }
@@ -165,7 +165,7 @@ defineEmits(['create']);
 
     &:focus {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+      box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
     }
   }
 }

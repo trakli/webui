@@ -321,7 +321,7 @@ watch(
     }
 
     &:hover {
-      background-color: #f5f5f5;
+      background-color: $bg-light;
     }
 
     &.selected-option {

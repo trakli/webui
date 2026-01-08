@@ -91,7 +91,6 @@ const handleMenu = (_party) => {
 
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
-@use 'sass:color';
 
 .party-card-list {
   width: 100%;

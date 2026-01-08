@@ -7,15 +7,14 @@
   gap: $spacing-1;
   padding: $spacing-1 $spacing-2;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
+  background: $bg-white;
   color: $text-secondary;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid $border-light;
+  box-shadow: $shadow-sm;
   font-size: $font-size-xs;
   font-weight: $font-medium;
   cursor: pointer;
   transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
 
   @media (max-width: $breakpoint-sm) {
     padding: 6px 8px;
@@ -23,22 +22,27 @@
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: $bg-light;
     color: $text-primary;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-md;
   }
 
   // Modifiers
   &--primary {
     background: $primary;
-    color: $bg-white;
+    color: white;
     border-color: $primary;
+
+    &:hover {
+      background: $primary-hover;
+      color: white;
+    }
   }
 
   &--report {
     background: $accent-color;
-    color: $bg-white;
+    color: white;
     border-color: $accent-color;
   }
 }
@@ -132,10 +136,10 @@
   width: 36px;
   height: $navbar-icon-button-height;
   border-radius: $radius-lg;
-  background-color: #dee1e0;
-  border: none;
+  background-color: $bg-light;
+  border: 1px solid $border-light;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 
   @media (max-width: $breakpoint-sm) {
     width: 32px;
@@ -144,12 +148,13 @@
   }
 
   &:hover {
-    background-color: #d0d3d2;
+    background-color: $bg-white;
+    border-color: $border-medium;
   }
 
   .icon {
     width: 20px;
     height: 20px;
-    color: #1d3229;
+    color: $text-primary;
   }
 }

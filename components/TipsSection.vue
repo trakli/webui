@@ -39,7 +39,7 @@ defineProps({
 .tips-container {
   width: 380px;
   min-height: 500px;
-  background-color: #fff4e6;
+  background-color: rgba(var(--color-warning-rgb), 0.15);
   padding: 2rem;
   border-radius: $radius-lg;
   display: flex;
@@ -81,7 +81,7 @@ defineProps({
 }
 
 .tips-title {
-  color: #ff9500;
+  color: $warning;
   font-weight: $font-bold;
   font-size: 1.75rem;
   line-height: 120%;
@@ -102,7 +102,7 @@ defineProps({
 }
 
 .tips-text {
-  color: #4a5253;
+  color: $text-secondary;
   line-height: 1.4;
   font-size: $font-size-lg;
   font-weight: $font-normal;

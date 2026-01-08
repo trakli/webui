@@ -223,27 +223,27 @@ const formatAmount = (value) => {
   }
 
   &.income {
-    background: rgba($primary, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.1);
     color: $primary;
   }
 
   &.expense {
-    background: rgba($error-color, 0.1);
+    background: rgba(var(--color-error-rgb), 0.1);
     color: $error-color;
   }
 
   &.good {
-    background: rgba($primary, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.1);
     color: $primary;
   }
 
   &.moderate {
-    background: rgba(#f59e0b, 0.1);
-    color: #f59e0b;
+    background: $warning-bg;
+    color: $warning;
   }
 
   &.low {
-    background: rgba($error-color, 0.1);
+    background: rgba(var(--color-error-rgb), 0.1);
     color: $error-color;
   }
 }
@@ -279,7 +279,7 @@ const formatAmount = (value) => {
   }
 
   &.moderate {
-    color: #f59e0b;
+    color: $warning;
   }
 
   &.low {

@@ -88,7 +88,7 @@ watch(
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid $border-color;
 
   @media (max-width: $breakpoint-sm) {
     gap: 0.25rem;
@@ -123,24 +123,24 @@ watch(
   }
 
   &:hover {
-    background: #f8fafc;
+    background: $bg-slate;
     color: $primary;
   }
 
   &.active {
     color: $primary;
-    background: #f0f9ff;
+    background: $primary-light;
     border-bottom-color: $primary;
   }
 
   &--expense:hover {
-    color: #dc2626;
+    color: $error-color;
   }
 
   &--expense.active {
-    color: #dc2626;
-    background: #fee2e2;
-    border-bottom-color: #dc2626;
+    color: $error-color;
+    background: rgba(var(--color-error-rgb), 0.1);
+    border-bottom-color: $error-color;
   }
 }
 
