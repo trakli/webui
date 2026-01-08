@@ -83,6 +83,17 @@
             <span class="text">{{ t('Wallets') }}</span>
           </NuxtLink>
         </li>
+        <li>
+          <NuxtLink
+            to="/reminders"
+            class="nav-button"
+            active-class="selected"
+            @click="handleNavClick"
+          >
+            <BellIcon class="icon" />
+            <span class="text">{{ t('Reminders') }}</span>
+          </NuxtLink>
+        </li>
       </ul>
     </nav>
     <hr class="divider" />
@@ -125,6 +136,7 @@
 
 <script setup>
 import {
+  BellIcon,
   BuildingLibraryIcon,
   ChatBubbleLeftRightIcon,
   Cog8ToothIcon,

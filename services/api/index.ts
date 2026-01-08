@@ -5,6 +5,8 @@ import walletsApi from './walletsApi';
 import groupsApi from './groupsApi';
 import configurationsApi from './configurationsApi';
 import statsApi from './statsApi';
+import remindersApi from './remindersApi';
+import notificationsApi from './notificationsApi';
 import transactionApi from '../transactionApi';
 
 // Re-export individual services
@@ -15,6 +17,8 @@ export {
   groupsApi,
   configurationsApi,
   statsApi,
+  remindersApi,
+  notificationsApi,
   transactionApi
 };
 
@@ -29,5 +33,7 @@ export const api = {
   groups: groupsApi,
   configurations: configurationsApi,
   stats: statsApi,
+  reminders: remindersApi,
+  notifications: notificationsApi,
   transactions: transactionApi
 } as const;
