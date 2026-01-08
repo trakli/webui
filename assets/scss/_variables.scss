@@ -1,42 +1,153 @@
-// Colors
-$primary: #047844;
-$primary-hover: #036a3c;
-$primary-light: #e6f2ec;
-$primary-dark: #059669;
-$success: #10b981;
+// CSS Custom Properties for theming
+:root {
+  // Primary colors
+  --color-primary: #047844;
+  --color-primary-rgb: 4, 120, 68;
+  --color-primary-hover: #036a3c;
+  --color-primary-light: #e6f2ec;
+  --color-primary-dark: #035c36;
+  --color-primary-lighter: #7ac4a5;
+  --color-primary-border: #4aad84;
+  --color-primary-muted: #90d4b8;
+  --color-primary-toggle: #5cb88f;
+  --color-success: #10b981;
+  --color-success-rgb: 16, 185, 129;
+  --color-error: #dc2626;
+  --color-error-rgb: 220, 38, 38;
+  --color-error-dark: #b91c1c;
+  --color-info: #3b82f6;
+  --color-info-rgb: 59, 130, 246;
+
+  // Text colors
+  --color-text-primary: #333333;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
+
+  // Background colors
+  --color-bg-light: #f8faf9;
+  --color-bg-gray: #ebedec;
+  --color-bg-white: #ffffff;
+  --color-bg-slate: #f8fafc;
+  --color-bg-card: #f1f5f9;
+
+  // Border colors
+  --color-border-light: #d1d5db;
+  --color-border-medium: #b0b8b4;
+  --color-border-gray: #e2e8f0;
+  --color-border: #e5e7eb;
+
+  // Form colors
+  --color-input-bg: #f9fafb;
+  --color-accent: #ff9f43;
+  --color-warning: #f59e0b;
+  --color-warning-rgb: 245, 158, 11;
+  --color-warning-bg: #fef3cd;
+  --color-warning-text: #92400e;
+
+  // Shadows
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+:root.dark {
+  // Primary colors
+  --color-primary: #10b981;
+  --color-primary-rgb: 16, 185, 129;
+  --color-primary-hover: #059669;
+  --color-primary-light: #064e3b;
+  --color-primary-dark: #0d9668;
+  --color-primary-lighter: #6ee7b7;
+  --color-primary-border: #34d399;
+  --color-primary-muted: #a7f3d0;
+  --color-primary-toggle: #34d399;
+  --color-success: #34d399;
+  --color-success-rgb: 52, 211, 153;
+  --color-error: #ef4444;
+  --color-error-rgb: 239, 68, 68;
+  --color-error-dark: #dc2626;
+  --color-info: #60a5fa;
+  --color-info-rgb: 96, 165, 250;
+
+  // Text colors
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #e5e7eb;
+  --color-text-muted: #9ca3af;
+
+  // Background colors - darker hierarchy for better contrast
+  --color-bg-light: #0f172a;
+  --color-bg-gray: #020617;
+  --color-bg-white: #111827;
+  --color-bg-slate: #0f172a;
+  --color-bg-card: #1e293b;
+
+  // Border colors
+  --color-border-light: #374151;
+  --color-border-medium: #4b5563;
+  --color-border-gray: #374151;
+  --color-border: #374151;
+
+  // Form colors
+  --color-input-bg: #111827;
+  --color-accent: #f59e0b;
+  --color-warning: #fbbf24;
+  --color-warning-rgb: 251, 191, 36;
+  --color-warning-bg: #78350f;
+  --color-warning-text: #fef3c7;
+
+  // Shadows
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+// SCSS Variables using CSS custom properties
+$primary: var(--color-primary);
+$primary-hover: var(--color-primary-hover);
+$primary-light: var(--color-primary-light);
+$primary-dark: var(--color-primary-dark);
+$primary-lighter: var(--color-primary-lighter);
+$primary-border: var(--color-primary-border);
+$primary-muted: var(--color-primary-muted);
+$primary-toggle: var(--color-primary-toggle);
+$success: var(--color-success);
+$error-dark: var(--color-error-dark);
+$info: var(--color-info);
 
 // Text colors
-$text-primary: #333333;
-$text-secondary: #374151;
-$text-muted: #6b7280;
+$text-primary: var(--color-text-primary);
+$text-secondary: var(--color-text-secondary);
+$text-muted: var(--color-text-muted);
 
 // Background colors
-$bg-light: #f8faf9;
-$bg-gray: #ebedec;
-$bg-white: #ffffff;
-$bg-slate: #f8fafc;
-$bg-card: #f1f5f9;
+$bg-light: var(--color-bg-light);
+$bg-gray: var(--color-bg-gray);
+$bg-white: var(--color-bg-white);
+$bg-slate: var(--color-bg-slate);
+$bg-card: var(--color-bg-card);
 
 // Border colors
-$border-light: #d1d5db;
-$border-medium: #b0b8b4;
-$border-gray: #e2e8f0;
+$border-light: var(--color-border-light);
+$border-medium: var(--color-border-medium);
+$border-gray: var(--color-border-gray);
 
 // Form colors
-$input-bg: #f9fafb;
-$accent-color: #ff9f43;
-$error-color: #dc2626;
-$warning: #facc15;
-$warning-bg: #fef3cd;
-$warning-text: #92400e;
-$border-color: #e5e7eb;
+$input-bg: var(--color-input-bg);
+$accent-color: var(--color-accent);
+$error-color: var(--color-error);
+$warning: var(--color-warning);
+$warning-bg: var(--color-warning-bg);
+$warning-text: var(--color-warning-text);
+$border-color: var(--color-border);
 $input-focus: rgba(4, 120, 68, 0.5);
 
 // Shadows
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md:
-  0 4px 6px -1px rgba(0, 0, 0, 0.1),
-  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-sm: var(--shadow-sm);
+$shadow-md: var(--shadow-md);
+$shadow-lg: var(--shadow-lg);
+$shadow-xl: var(--shadow-xl);
 
 // Spacing
 $spacing-1: 0.25rem; // 4px
