@@ -166,9 +166,9 @@ const onMouseLeave = () => {
 
 .note {
   margin-top: $spacing-3;
-  background: #fffbeb;
-  color: #92400e;
-  border-left: 4px solid #f59e0b;
+  background: rgba(var(--color-warning-rgb), 0.1);
+  color: $warning;
+  border-left: 4px solid $warning;
   padding: $spacing-2 $spacing-3;
   border-radius: $radius-lg;
   text-align: center;

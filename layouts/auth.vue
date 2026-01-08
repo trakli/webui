@@ -19,7 +19,6 @@ import AuthCarousel from '@/components/auth/AuthCarousel.vue';
 </template>
 
 <style lang="scss" scoped>
-@use 'sass:color';
 @use '@/assets/scss/_variables.scss' as *;
 
 .page-wrapper {

@@ -180,7 +180,7 @@ const handleButtonNavClick = (path) => {
   width: $sidebar-width;
   height: 100vh;
   background-color: $bg-gray;
-  border-right: 1px solid #e9ecef;
+  border-right: 1px solid $border-color;
   position: fixed;
   left: 0;
   top: 0;
@@ -247,20 +247,20 @@ const handleButtonNavClick = (path) => {
     gap: 12px;
     background-color: transparent;
     border: none;
-    color: #495057;
+    color: $text-secondary;
     text-align: left;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-left: 10px;
 
     &:hover:not(.selected) {
-      background-color: rgba(188, 220, 204, 0.5);
+      background-color: rgba(var(--color-primary-rgb), 0.15);
       margin: 2px 10px;
       height: 52px;
     }
 
     &.selected {
-      background-color: #bcdccc;
+      background-color: $primary-light;
     }
   }
 
@@ -282,12 +282,12 @@ const handleButtonNavClick = (path) => {
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.1);
+      background-color: rgba(var(--color-primary-rgb), 0.15);
     }
 
     &:focus {
       outline: none;
-      background-color: rgba(0, 0, 0, 0.1);
+      background-color: rgba(var(--color-primary-rgb), 0.15);
     }
   }
 
@@ -300,7 +300,7 @@ const handleButtonNavClick = (path) => {
   .divider {
     display: flex;
     justify-items: center;
-    border: 1px solid #b9b1bf;
+    border: 1px solid $border-light;
     width: calc(#{$sidebar-width} - 20px);
     margin-left: 10px;
     margin-top: 20px;
@@ -334,7 +334,7 @@ const handleButtonNavClick = (path) => {
     gap: 12px;
     background-color: transparent;
     border: none;
-    color: #495057;
+    color: $text-secondary;
     text-align: left;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -342,13 +342,13 @@ const handleButtonNavClick = (path) => {
     margin-top: 10px;
 
     &:hover:not(.selected) {
-      background-color: rgba(188, 220, 204, 0.5);
+      background-color: rgba(var(--color-primary-rgb), 0.15);
       margin: 12px 10px 8px;
       min-height: 52px;
     }
 
     &.selected {
-      background-color: #bcdccc;
+      background-color: $primary-light;
     }
   }
 }

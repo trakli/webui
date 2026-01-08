@@ -96,7 +96,7 @@ const handleCancel = () => {
 }
 
 .modal-content {
-  background: white;
+  background: $bg-white;
   border-radius: $radius-xl;
   max-width: 400px;
   width: 100%;
@@ -141,7 +141,7 @@ const handleCancel = () => {
   transition: all 0.2s ease;
 
   &:hover {
-    background: #f3f4f6;
+    background: $bg-light;
     color: $text-primary;
   }
 
@@ -171,18 +171,18 @@ const handleCancel = () => {
   }
 
   &.type-warning {
-    background: #fef3c7;
-    color: #d97706;
+    background: $warning-bg;
+    color: $warning;
   }
 
   &.type-danger {
-    background: #fee2e2;
-    color: #dc2626;
+    background: rgba(var(--color-error-rgb), 0.15);
+    color: $error-color;
   }
 
   &.type-info {
-    background: #dbeafe;
-    color: #2563eb;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    color: $primary;
   }
 }
 
@@ -213,47 +213,48 @@ const handleCancel = () => {
 }
 
 .cancel-button {
-  background: white;
+  background: $bg-white;
   color: $text-secondary;
-  border-color: #d1d5db;
+  border-color: $border-light;
 
   &:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    background: $bg-light;
+    border-color: $border-medium;
   }
 }
 
 .confirm-button {
   &.type-warning {
-    background: #d97706;
-    color: white;
-    border-color: #d97706;
+    background: $warning;
+    color: $text-primary;
+    border-color: $warning;
 
     &:hover {
-      background: #b45309;
-      border-color: #b45309;
+      background: $warning-text;
+      border-color: $warning-text;
+      color: $bg-white;
     }
   }
 
   &.type-danger {
-    background: #dc2626;
+    background: $error-color;
     color: white;
-    border-color: #dc2626;
+    border-color: $error-color;
 
     &:hover {
-      background: #b91c1c;
-      border-color: #b91c1c;
+      background: $error-dark;
+      border-color: $error-dark;
     }
   }
 
   &.type-info {
-    background: #2563eb;
+    background: $primary;
     color: white;
-    border-color: #2563eb;
+    border-color: $primary;
 
     &:hover {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
+      background: $primary-dark;
+      border-color: $primary-dark;
     }
   }
 }

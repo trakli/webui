@@ -163,16 +163,16 @@ onUnmounted(() => {
 .card-container {
   width: 100%;
   min-height: 158px;
-  background-color: #f5f6f5;
-  border: 0.5px solid #c0c6c3;
+  background-color: $bg-light;
+  border: 0.5px solid $border-medium;
   border-radius: $radius-xl;
   position: relative;
   box-sizing: border-box;
-  overflow: hidden; // Clip the ellipse to card boundaries
+  overflow: hidden;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  z-index: 10; // Ensure wallet card is above other elements
+  z-index: 10;
 }
 
 .background-ellipse {
@@ -181,9 +181,9 @@ onUnmounted(() => {
   height: 461px;
   left: -141px;
   top: -130px;
-  background: #e6f2ec;
+  background: $primary-light;
   border-radius: 50%;
-  z-index: -1; // Move behind all content
+  z-index: -1;
 }
 
 .card-content {
@@ -213,7 +213,7 @@ onUnmounted(() => {
 }
 
 .total-balance-text {
-  color: #1d3229;
+  color: $text-primary;
   font-weight: $font-normal;
   font-size: $font-size-xs;
 }
@@ -241,7 +241,7 @@ onUnmounted(() => {
 .three-dots-button {
   width: 36px;
   height: 36px;
-  background-color: #cde4da;
+  background-color: $primary-muted;
   border-radius: $radius-lg;
   border: none;
   cursor: pointer;
@@ -253,7 +253,7 @@ onUnmounted(() => {
 .three-dots {
   width: 20px;
   height: 20px;
-  color: #036a3c;
+  color: $primary-dark;
 }
 
 .card-footer {
@@ -276,7 +276,7 @@ onUnmounted(() => {
   height: 45px;
   border-radius: $radius-lg;
   padding: 3px 6px;
-  background-color: #ccffd7;
+  background-color: rgba(var(--color-success-rgb), 0.2);
   overflow: hidden;
 }
 
@@ -291,13 +291,13 @@ onUnmounted(() => {
 .income-arrow-icon {
   width: 16px;
   height: 16px;
-  color: #00c12a;
+  color: $success;
 }
 
 .income-button-text {
   font-weight: $font-normal;
   font-size: $font-size-xs;
-  color: #00c12a;
+  color: $success;
 }
 
 .income-card-amount-text {
@@ -318,7 +318,7 @@ onUnmounted(() => {
   height: 45px;
   border-radius: $radius-lg;
   padding: 3px 6px;
-  background-color: #ffcccc;
+  background-color: rgba(var(--color-error-rgb), 0.2);
   overflow: hidden;
 }
 
@@ -333,13 +333,13 @@ onUnmounted(() => {
 .expense-arrow-icon {
   width: 16px;
   height: 16px;
-  color: #c10000;
+  color: $error-color;
 }
 
 .expense-button-text {
   font-weight: $font-normal;
   font-size: $font-size-xs;
-  color: #c10000;
+  color: $error-color;
 }
 
 .expense-card-amount-text {
@@ -354,11 +354,11 @@ onUnmounted(() => {
 
 .wallet-dropdown {
   position: absolute;
-  top: 70px; // Position below the card header area
-  left: 16px; // Match card padding
-  right: 16px; // Match card padding
-  background: white;
-  border: 1px solid #e5e7eb;
+  top: 70px;
+  left: 16px;
+  right: 16px;
+  background: $bg-white;
+  border: 1px solid $border-color;
   border-radius: $radius-lg;
   box-shadow:
     0 10px 25px -5px rgba(0, 0, 0, 0.1),
@@ -382,17 +382,17 @@ onUnmounted(() => {
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #f3f4f6;
+    background-color: $bg-light;
   }
 
   &.selected {
-    background-color: #e6f2ec;
+    background-color: $primary-light;
     color: $primary;
     font-weight: $font-bold;
   }
 
   &:not(:last-child) {
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid $border-light;
   }
 }
 

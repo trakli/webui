@@ -213,7 +213,7 @@ onUnmounted(() => {
   transition: background-color 0.2s;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(var(--color-primary-rgb), 0.1);
   }
 }
 
@@ -246,9 +246,10 @@ onUnmounted(() => {
   right: 0;
   width: 360px;
   max-height: 480px;
-  background: white;
+  background: $bg-white;
   border-radius: $radius-xl;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: $shadow-md;
+  border: 1px solid $border-color;
   overflow: hidden;
   z-index: $z-index-dropdown;
 
@@ -320,10 +321,10 @@ onUnmounted(() => {
   }
 
   &.unread {
-    background: rgba($primary, 0.05);
+    background: rgba(var(--color-primary-rgb), 0.05);
 
     &:hover {
-      background: rgba($primary, 0.1);
+      background: rgba(var(--color-primary-rgb), 0.1);
     }
   }
 }

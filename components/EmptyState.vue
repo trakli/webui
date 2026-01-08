@@ -132,7 +132,7 @@ defineEmits(['create']);
 
 .add-entity-btn {
   background: $primary;
-  color: #fff;
+  color: $bg-white;
   font-size: 1.3rem;
   font-weight: 600;
   border: none;

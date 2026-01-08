@@ -134,7 +134,6 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 @use '~/assets/scss/_variables' as *;
-@use 'sass:color';
 
 .wallet-list-card {
   background: $bg-white;
@@ -153,12 +152,12 @@ onUnmounted(() => {
   &:hover {
     box-shadow: $shadow-md;
     transform: translateY(-2px);
-    border-color: color.adjust($primary, $lightness: 20%);
+    border-color: $primary-lighter;
   }
 
   &.is-default {
     border-color: $primary;
-    background: linear-gradient(135deg, rgba($primary, 0.03) 0%, $bg-white 100%);
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.03) 0%, $bg-white 100%);
   }
 }
 
@@ -229,7 +228,7 @@ onUnmounted(() => {
     color: $error-color;
 
     &:hover {
-      background: rgba($error-color, 0.1);
+      background: rgba(var(--color-error-rgb), 0.1);
     }
   }
 }
@@ -333,7 +332,7 @@ onUnmounted(() => {
   text-align: left;
 
   &.income {
-    background: rgba($success, 0.08);
+    background: rgba(var(--color-success-rgb), 0.08);
 
     .stat-icon {
       color: $success;
@@ -345,7 +344,7 @@ onUnmounted(() => {
   }
 
   &.expense {
-    background: rgba($error-color, 0.08);
+    background: rgba(var(--color-error-rgb), 0.08);
 
     .stat-icon {
       color: $error-color;
