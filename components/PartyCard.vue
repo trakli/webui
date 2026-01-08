@@ -1,85 +1,56 @@
 <template>
   <div class="party-card" :style="statusStyle">
-    <div class="card-header">
-      <div class="party-info">
-        <div class="party-icon" :class="party.type">
-          <component :is="resolvedIcon" />
-        </div>
-        <div class="party-details">
-          <h3 class="party-name">{{ party.name }}</h3>
-          <span v-if="isValidPartyType" class="party-type-badge" :class="party.type">
-            {{ displayPartyType }}
-          </span>
+    <div class="card-actions">
+      <div class="action-menu-container" @click.stop>
+        <button class="action-menu" :title="t('More actions')" @click="toggleMenu">
+          <LucideMoreVertical />
+        </button>
+        <div v-if="showMenu" class="action-dropdown">
+          <button class="dropdown-item edit" @click="handleEdit">
+            <LucideEdit />
+            {{ t('Edit') }}
+          </button>
+          <button class="dropdown-item delete" @click="handleDelete">
+            <LucideTrash />
+            {{ t('Delete') }}
+          </button>
         </div>
       </div>
-      <div class="card-actions">
-        <div class="action-menu-container" @click.stop>
-          <button class="action-menu" :title="t('More actions')" @click="toggleMenu">
-            <LucideMoreVertical />
-          </button>
+    </div>
 
-          <div v-if="showMenu" class="action-dropdown">
-            <button class="dropdown-item edit" @click="handleEdit">
-              <LucideEdit />
-              {{ t('Edit') }}
-            </button>
-            <button class="dropdown-item delete" @click="handleDelete">
-              <LucideTrash />
-              {{ t('Delete') }}
-            </button>
+    <div class="party-avatar">
+      <component :is="resolvedIcon" />
+    </div>
+
+    <h3 class="party-name">{{ party.name }}</h3>
+
+    <span v-if="isValidPartyType" class="party-type-badge" :class="party.type">
+      {{ displayPartyType }}
+    </span>
+
+    <p v-if="party.description" class="party-description">{{ party.description }}</p>
+
+    <div class="financial-section">
+      <div class="stat-row">
+        <div class="stat received">
+          <LucideArrowDownLeft class="stat-icon" />
+          <div class="stat-content">
+            <span class="stat-label">{{ t('Received') }}</span>
+            <span class="stat-value">{{ receivedDisplay }}</span>
+          </div>
+        </div>
+        <div class="stat spent">
+          <LucideArrowUpRight class="stat-icon" />
+          <div class="stat-content">
+            <span class="stat-label">{{ t('Spent') }}</span>
+            <span class="stat-value">{{ spentDisplay }}</span>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="card-description">
-      {{ party.description }}
-    </div>
-
-    <div class="financial-insights">
-      <h4 class="insights-header">{{ t('Financial Insights') }}</h4>
-
-      <div v-if="party.receivedAmount > 0" class="insight-row received">
-        <div class="insight-icon">
-          <LucideArrowUp />
-        </div>
-        <div class="insight-text">
-          <i18n-t
-            keypath="Received {amount} from {name} in the last 3 months"
-            :values="{ name: party.name }"
-          >
-            <template #amount>
-              <span class="amount">{{ receivedDisplay }}</span>
-            </template>
-          </i18n-t>
-        </div>
-      </div>
-
-      <div v-if="party.spentAmount > 0" class="insight-row spent">
-        <div class="insight-icon">
-          <LucideArrowDown />
-        </div>
-        <div class="insight-text">
-          <i18n-t
-            keypath="Spent {amount} on transactions pertaining to {name}"
-            :values="{ name: party.name }"
-          >
-            <template #amount>
-              <span class="amount">{{ spentDisplay }}</span>
-            </template>
-          </i18n-t>
-        </div>
-      </div>
-
-      <div v-if="!party.receivedAmount && !party.spentAmount" class="insight-row neutral">
-        <div class="insight-text muted">{{ t('No transactions in the last 3 months') }}</div>
-      </div>
-
-      <div v-if="party.receivedAmount > 0 || party.spentAmount > 0" class="last-updated">
-        <div class="insight-icon">
-          <LucideClock />
-        </div>
-        <span class="update-time">{{ formatLastUpdated(party.lastUpdated) }}</span>
+      <div v-if="party.receivedAmount > 0 || party.spentAmount > 0" class="last-activity">
+        <LucideClock class="clock-icon" />
+        <span>{{ t('Last activity') }}: {{ formatLastUpdated(party.lastUpdated) }}</span>
       </div>
     </div>
   </div>
@@ -89,8 +60,8 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import {
   MoreVertical as LucideMoreVertical,
-  ArrowUp as LucideArrowUp,
-  ArrowDown as LucideArrowDown,
+  ArrowDownLeft as LucideArrowDownLeft,
+  ArrowUpRight as LucideArrowUpRight,
   Clock as LucideClock,
   Edit as LucideEdit,
   Trash as LucideTrash
@@ -259,83 +230,29 @@ const formatLastUpdated = (timestamp) => {
 
 .party-card {
   background: $bg-white;
-  border-radius: $radius-lg;
-  padding: $spacing-3;
+  border-radius: $radius-xl;
+  padding: $spacing-4;
   box-shadow: $shadow-sm;
   transition: $transition-base;
-  border-left: 3px solid var(--party-strip-color, $border-medium);
-  cursor: pointer;
+  border: 1px solid $border-light;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 280px;
 
   &:hover {
     box-shadow: $shadow-md;
+    transform: translateY(-2px);
+    border-color: $border-medium;
   }
-}
-
-/* Colors adapt via CSS vars from script */
-.party-icon {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  background: var(--party-accent-bg, $border-medium);
-  color: $bg-white;
-
-  svg {
-    width: 1rem;
-    height: 1rem;
-  }
-}
-
-.party-type-badge {
-  display: inline-block;
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.75rem;
-  font-size: 0.6875rem;
-  font-weight: $font-medium;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  width: fit-content;
-  background: var(--party-accent-bg, $border-medium);
-  color: $bg-white;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: $spacing-2;
-}
-
-.party-info {
-  display: flex;
-  align-items: center;
-  gap: $spacing-3;
-  flex: 1;
-}
-
-.party-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.party-name {
-  margin: 0;
-  font-size: $font-size-base;
-  font-weight: $font-semibold;
-  color: #1f2937;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .card-actions {
-  flex-shrink: 0;
+  position: absolute;
+  top: $spacing-2;
+  right: $spacing-2;
 }
 
 .action-menu-container {
@@ -368,9 +285,9 @@ const formatLastUpdated = (timestamp) => {
   right: 0;
   background: $bg-white;
   border: 1px solid $border-color;
-  border-radius: $radius-xl;
+  border-radius: $radius-lg;
   box-shadow: $shadow-md;
-  min-width: 8.75rem;
+  min-width: 8rem;
   z-index: $z-index-dropdown;
   overflow: hidden;
 }
@@ -380,7 +297,7 @@ const formatLastUpdated = (timestamp) => {
   align-items: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.625rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -390,16 +307,6 @@ const formatLastUpdated = (timestamp) => {
 
   &:hover {
     background: $bg-gray;
-  }
-
-  &:first-child {
-    border-top-left-radius: $radius-xl;
-    border-top-right-radius: $radius-xl;
-  }
-
-  &:last-child {
-    border-bottom-left-radius: $radius-xl;
-    border-bottom-right-radius: $radius-xl;
   }
 
   &.edit {
@@ -414,66 +321,9 @@ const formatLastUpdated = (timestamp) => {
     color: $error-color;
 
     &:hover {
-      background: $bg-light;
+      background: rgba($error-color, 0.1);
     }
   }
-
-  svg {
-    width: 1rem;
-    height: 1rem;
-  }
-}
-
-.card-description {
-  color: $text-muted;
-  font-size: $font-size-xs;
-  line-height: 1.4;
-  margin-bottom: $spacing-2;
-}
-
-.financial-insights {
-  .insights-header {
-    font-size: 0.625rem;
-    font-weight: $font-medium;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 0.375rem 0;
-  }
-}
-
-.insight-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.375rem;
-  margin-bottom: 0.25rem;
-
-  &.received {
-    .insight-icon {
-      color: $primary;
-    }
-
-    .amount {
-      color: $primary;
-      font-weight: $font-medium;
-    }
-  }
-
-  &.spent {
-    .insight-icon {
-      color: $error-color;
-    }
-
-    .amount {
-      color: $error-color;
-      font-weight: $font-medium;
-    }
-  }
-}
-
-.insight-icon {
-  flex-shrink: 0;
-  margin-top: 0.125rem;
 
   svg {
     width: 0.875rem;
@@ -481,31 +331,134 @@ const formatLastUpdated = (timestamp) => {
   }
 }
 
-.insight-text {
-  font-size: $font-size-xs;
-  color: $text-muted;
-  line-height: 1.3;
-  flex: 1;
+.party-avatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--party-accent-bg, $border-medium);
+  color: $bg-white;
+  margin-bottom: $spacing-3;
 
-  &.muted {
-    font-style: italic;
-    color: #9ca3af;
+  svg {
+    width: 2rem;
+    height: 2rem;
   }
 }
 
-.last-updated {
+.party-name {
+  margin: 0 0 $spacing-1 0;
+  font-size: $font-size-lg;
+  font-weight: $font-semibold;
+  color: $text-primary;
+  line-height: 1.2;
+}
+
+.party-type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: $font-size-xs;
+  font-weight: $font-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--party-accent-bg, $border-medium);
+  color: $bg-white;
+  margin-bottom: $spacing-2;
+}
+
+.party-description {
+  margin: 0 0 $spacing-3 0;
+  color: $text-muted;
+  font-size: $font-size-sm;
+  line-height: 1.4;
+  max-width: 100%;
+}
+
+.financial-section {
+  width: 100%;
+  margin-top: auto;
+  padding-top: $spacing-3;
+  border-top: 1px solid $border-light;
+}
+
+.stat-row {
+  display: flex;
+  gap: $spacing-2;
+  margin-bottom: $spacing-2;
+}
+
+.stat {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  margin-top: 0.375rem;
+  gap: $spacing-2;
+  padding: $spacing-2;
+  border-radius: $radius-md;
+  text-align: left;
 
-  .insight-icon {
-    color: #9ca3af;
+  &.received {
+    background: rgba($success, 0.08);
+
+    .stat-icon {
+      color: $success;
+    }
+
+    .stat-value {
+      color: $success;
+    }
   }
 
-  .update-time {
-    font-size: 0.625rem;
-    color: #9ca3af;
+  &.spent {
+    background: rgba($error-color, 0.08);
+
+    .stat-icon {
+      color: $error-color;
+    }
+
+    .stat-value {
+      color: $error-color;
+    }
+  }
+}
+
+.stat-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 0.625rem;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  font-size: $font-size-sm;
+  font-weight: $font-semibold;
+}
+
+.last-activity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: $font-size-xs;
+  color: $text-muted;
+
+  .clock-icon {
+    width: 0.75rem;
+    height: 0.75rem;
   }
 }
 </style>
