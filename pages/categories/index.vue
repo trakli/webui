@@ -201,15 +201,19 @@ definePageMeta({
 
 .form-section {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 2rem;
   width: 100%;
 }
 
 .form-wrapper {
-  flex: 1;
   min-width: 0;
-  max-width: 800px;
+}
+
+@media (max-width: $breakpoint-md) {
+  .form-section {
+    flex-direction: column;
+  }
 }
 
 .loading-state {

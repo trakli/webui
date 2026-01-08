@@ -28,26 +28,22 @@ const handleSubmit = (data) => {
 
 .form-container {
   width: 100%;
-  min-height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  background-color: $bg-gray;
+  background: $bg-white;
   border-radius: $radius-xl;
-  padding: 24px;
-
-  @media (max-width: $breakpoint-lg) {
-    padding: 20px;
-  }
+  border: 1px solid $border-color;
+  box-shadow: $shadow-md;
+  padding: 1.5rem;
 
   @media (max-width: $breakpoint-md) {
-    padding: 16px;
-    min-height: auto;
+    padding: 1.25rem;
   }
 
   @media (max-width: $breakpoint-sm) {
-    padding: 12px;
+    padding: 1rem;
     border-radius: $radius-lg;
   }
 }
