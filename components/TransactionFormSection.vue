@@ -31,10 +31,7 @@ const handleSubmit = (data) => {
   margin-top: 20px;
   gap: 60px;
   width: 100%;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 20px;
+  padding: 0;
 
   @media (max-width: $breakpoint-lg) {
     gap: 40px;
@@ -43,12 +40,10 @@ const handleSubmit = (data) => {
   @media (max-width: $breakpoint-md) {
     flex-direction: column;
     gap: 30px;
-    padding: 0 15px;
   }
 
   @media (max-width: $breakpoint-sm) {
     gap: 20px;
-    padding: 0 10px;
   }
 }
 </style>
