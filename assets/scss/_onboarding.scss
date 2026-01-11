@@ -5,9 +5,9 @@
 }
 
 .onboarding-container {
-  background: white;
+  background: $bg-white;
   border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: $shadow-lg;
   width: 100%;
   max-width: 800px;
   overflow: hidden;
@@ -98,7 +98,7 @@
 .step-icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, $primary-light 0%, rgba(4, 120, 68, 0.1) 100%);
+  background: $primary-light;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -187,7 +187,7 @@
   border: 1px solid $border-gray;
 
   &:hover {
-    background: white;
+    background: $bg-white;
     color: $primary;
     border-color: $primary;
   }
@@ -283,7 +283,7 @@
 
   &:hover {
     color: $primary;
-    background: rgba(4, 120, 68, 0.05);
+    background: rgba(var(--color-primary-rgb), 0.1);
   }
 
   &.skip {
@@ -346,13 +346,13 @@
   border: 1px solid $border-gray;
   border-radius: 8px;
   font-size: 0.875rem;
-  background: white;
+  background: $input-bg;
   color: $text-primary;
 
   &:focus {
     outline: none;
     border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(4, 120, 68, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
   }
 
   &:disabled {
@@ -392,19 +392,19 @@
   padding: 1rem;
   border: 2px solid $border-gray;
   border-radius: 8px;
-  background: white;
+  background: $bg-white;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
     border-color: $primary;
-    background: rgba(4, 120, 68, 0.02);
+    background: rgba(var(--color-primary-rgb), 0.05);
   }
 
   &.selected {
     border-color: $primary;
-    background: rgba(4, 120, 68, 0.05);
-    box-shadow: 0 0 0 3px rgba(4, 120, 68, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
   }
 }
 
@@ -464,16 +464,16 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
+  background: $bg-white;
 
   &:hover {
     border-color: $primary;
-    background: rgba(4, 120, 68, 0.02);
+    background: rgba(var(--color-primary-rgb), 0.05);
   }
 
   &.selected {
     border-color: $primary;
-    background: rgba(4, 120, 68, 0.05);
+    background: rgba(var(--color-primary-rgb), 0.1);
   }
 }
 
@@ -521,14 +521,18 @@
   border: 1px solid $border-gray;
   border-radius: 8px;
   font-size: 0.875rem;
-  background: white;
+  background: $input-bg;
   color: $text-primary;
   box-sizing: border-box;
+
+  &::placeholder {
+    color: $text-muted;
+  }
 
   &:focus {
     outline: none;
     border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(4, 120, 68, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
   }
 }
 
@@ -554,16 +558,16 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
+  background: $bg-white;
 
   &:hover {
     border-color: $primary;
-    background: rgba(4, 120, 68, 0.02);
+    background: rgba(var(--color-primary-rgb), 0.05);
   }
 
   &.selected {
     border-color: $primary;
-    background: rgba(4, 120, 68, 0.05);
+    background: rgba(var(--color-primary-rgb), 0.1);
   }
 }
 

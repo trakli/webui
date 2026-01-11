@@ -345,7 +345,7 @@ const visiblePages = computed(() => {
 
   thead {
     tr {
-      background: $primary;
+      background: $table-header-bg;
     }
 
     th {
