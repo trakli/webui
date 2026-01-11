@@ -400,15 +400,15 @@ const ensureOnboardingComplete = async () => {
   const completeRes = await configurationsApi
     .create({
       key: CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
-      value: { completedAt: new Date().toISOString() },
-      type: 'json'
+      value: true,
+      type: 'bool'
     })
     .catch(() => null);
   if (!completeRes) {
     await configurationsApi
       .update(CONFIGURATION_KEYS.ONBOARDING_COMPLETE, {
-        value: { completedAt: new Date().toISOString() },
-        type: 'json'
+        value: true,
+        type: 'bool'
       })
       .catch(() => null);
   }
@@ -550,16 +550,16 @@ const completOnboarding = async () => {
   const completeRes = await configurationsApi
     .create({
       key: CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
-      value: { completedAt: new Date().toISOString() },
-      type: 'json'
+      value: true,
+      type: 'bool'
     })
     .catch(() => null);
 
   if (!completeRes) {
     await configurationsApi
       .update(CONFIGURATION_KEYS.ONBOARDING_COMPLETE, {
-        value: { completedAt: new Date().toISOString() },
-        type: 'json'
+        value: true,
+        type: 'bool'
       })
       .catch(() => null);
   }

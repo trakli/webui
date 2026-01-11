@@ -63,6 +63,12 @@ h1 {
     border-radius: $radius-md;
     font-size: $font-size-base;
     transition: $transition-base;
+    background-color: $input-bg;
+    color: $text-primary;
+
+    &::placeholder {
+      color: $text-muted;
+    }
 
     &:focus {
       outline: none;
@@ -138,6 +144,7 @@ h1 {
 .signup-link,
 .login-link {
   margin-top: $spacing-4;
+  color: $text-secondary;
 
   a {
     color: $primary;
