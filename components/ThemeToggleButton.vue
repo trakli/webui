@@ -1,5 +1,10 @@
 <template>
-  <button type="button" class="theme-toggle-btn" :title="isDark ? t('Switch to light mode') : t('Switch to dark mode')" @click="toggleTheme">
+  <button
+    type="button"
+    class="theme-toggle-btn"
+    :title="isDark ? t('Switch to light mode') : t('Switch to dark mode')"
+    @click="toggleTheme"
+  >
     <Sun v-if="isDark" class="theme-icon" />
     <Moon v-else class="theme-icon" />
   </button>
