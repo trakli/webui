@@ -327,7 +327,7 @@ const formatTimeAgo = (txn) => {
   }
 
   th {
-    background-color: $primary;
+    background-color: $table-header-bg;
     color: #ffffff;
     text-align: left;
     padding: 10px;
@@ -480,7 +480,7 @@ const formatTimeAgo = (txn) => {
     }
 
     &.totals-label {
-      background-color: $primary;
+      background-color: $table-header-bg;
       .total-label {
         color: white;
         font-size: $font-size-sm;
