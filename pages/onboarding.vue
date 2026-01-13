@@ -493,12 +493,24 @@ const completOnboarding = async () => {
       if (created) {
         existing = created;
       }
-    } else if (
-      walletChoice.value === 'rename-default' &&
-      newWalletName.value.trim().length > 0 &&
-      existing.name !== newWalletName.value.trim()
-    ) {
-      await updateWallet(existing.id, { name: newWalletName.value.trim() }).catch(() => null);
+    } else if (existing) {
+      const updates: Record<string, string> = {};
+
+      if (
+        walletChoice.value === 'rename-default' &&
+        newWalletName.value.trim().length > 0 &&
+        existing.name !== newWalletName.value.trim()
+      ) {
+        updates.name = newWalletName.value.trim();
+      }
+
+      if (selectedCurrency.value && existing.currency !== selectedCurrency.value) {
+        updates.currency = selectedCurrency.value;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await updateWallet(existing.id, updates).catch(() => null);
+      }
     }
 
     if (existing) {
