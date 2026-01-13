@@ -288,4 +288,110 @@ describe('TransactionForm', () => {
       expect(wrapper.find('textarea').element.value).toBe('Test transaction');
     });
   });
+
+  describe('category selection', () => {
+    it('includes categoryIds in submit payload when categories selected', async () => {
+      let capturedSelectHandler: ((ids: number[]) => void) | null = null;
+
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: true },
+        global: {
+          stubs: {
+            ...stubs,
+            SearchableDropdown: {
+              template: '<div class="searchable-dropdown"><input /></div>',
+              props: [
+                'modelValue',
+                'label',
+                'options',
+                'placeholder',
+                'multiple',
+                'error',
+                'disabled',
+                'selected'
+              ],
+              emits: ['update:modelValue', 'select'],
+              setup(props: any, { emit }: any) {
+                if (props.multiple) {
+                  capturedSelectHandler = (ids: number[]) => emit('select', ids);
+                }
+                return {};
+              }
+            }
+          }
+        }
+      });
+
+      await wrapper.find('input[type="number"]').setValue('100');
+
+      // Simulate category selection
+      if (capturedSelectHandler) {
+        capturedSelectHandler([1, 2]);
+      }
+
+      await wrapper.find('button').trigger('click');
+
+      expect(wrapper.emitted('submit')).toBeTruthy();
+      const payload = wrapper.emitted('submit')?.[0]?.[0];
+      expect(payload.categoryIds).toEqual([1, 2]);
+    });
+
+    it('includes empty categoryIds array when no categories selected', async () => {
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: true },
+        global: { stubs }
+      });
+
+      await wrapper.find('input[type="number"]').setValue('100');
+      await wrapper.find('button').trigger('click');
+
+      expect(wrapper.emitted('submit')).toBeTruthy();
+      const payload = wrapper.emitted('submit')?.[0]?.[0];
+      expect(payload.categoryIds).toEqual([]);
+    });
+
+    it('passes selected prop to category SearchableDropdown when editing', async () => {
+      let receivedSelectedProp: number[] | null = null;
+
+      const wrapper = mount(TransactionForm, {
+        props: {
+          isOutcomeSelected: true,
+          editingItem: {
+            id: 1,
+            amount: '100 USD',
+            categoryIds: [1, 2]
+          }
+        },
+        global: {
+          stubs: {
+            ...stubs,
+            SearchableDropdown: {
+              template: '<div class="searchable-dropdown"><input /></div>',
+              props: [
+                'modelValue',
+                'label',
+                'options',
+                'placeholder',
+                'multiple',
+                'error',
+                'disabled',
+                'selected'
+              ],
+              emits: ['update:modelValue', 'select'],
+              setup(props: any) {
+                if (props.multiple && props.selected) {
+                  receivedSelectedProp = props.selected;
+                }
+                return {};
+              }
+            }
+          }
+        }
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(receivedSelectedProp).toEqual([1, 2]);
+    });
+  });
 });

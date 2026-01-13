@@ -225,9 +225,8 @@ async function handleSubmit() {
     }
 
     if (isEditing.value) {
-      // Include the original ID for updates
       const updatedItem = {
-        ...props.editingItem,
+        id: props.editingItem.id,
         ...formData
       };
       emit('updated', updatedItem);
