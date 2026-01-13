@@ -61,6 +61,7 @@ const props = defineProps({
   options: { type: Array, default: () => [] },
   modelValue: { type: [String, Array], default: '' },
   multiple: { type: Boolean, default: false },
+  selected: { type: Array, default: () => [] },
   error: { type: String, default: '' },
   optionLabel: { type: String, default: 'name' },
   optionKey: { type: String, default: 'id' },
@@ -118,17 +119,15 @@ function selectOption(option) {
       selectedItems.value.splice(index, 1);
     }
 
-    emit(
-      'update:modelValue',
-      selectedItems.value.map((item) => getOptionKey(item))
-    );
+    const selectedIds = selectedItems.value.map((item) => getOptionKey(item));
+    emit('update:modelValue', selectedIds);
+    emit('select', selectedIds);
   } else {
     searchQuery.value = label;
     showDropdown.value = false;
     emit('update:modelValue', label);
+    emit('select', option);
   }
-
-  emit('select', option);
 }
 
 function removeSelectedItem(item) {
@@ -137,11 +136,9 @@ function removeSelectedItem(item) {
   );
   if (index !== -1) {
     selectedItems.value.splice(index, 1);
-    emit(
-      'update:modelValue',
-      selectedItems.value.map((item) => getOptionKey(item))
-    );
-    emit('select', selectedItems.value);
+    const selectedIds = selectedItems.value.map((i) => getOptionKey(i));
+    emit('update:modelValue', selectedIds);
+    emit('select', selectedIds);
   }
 }
 
@@ -199,6 +196,31 @@ watch(
   (newValue) => {
     if (!props.multiple && typeof newValue === 'string') {
       searchQuery.value = newValue;
+    }
+  }
+);
+
+// Watch for external changes to selected (for multi-select initialization)
+watch(
+  () => props.selected,
+  (newSelected) => {
+    if (props.multiple && Array.isArray(newSelected) && props.options.length > 0) {
+      selectedItems.value = props.options.filter((opt) =>
+        newSelected.includes(getOptionKey(opt))
+      );
+    }
+  },
+  { immediate: true }
+);
+
+// Re-initialize when options load (they might load after selected)
+watch(
+  () => props.options,
+  () => {
+    if (props.multiple && props.selected.length > 0 && props.options.length > 0) {
+      selectedItems.value = props.options.filter((opt) =>
+        props.selected.includes(getOptionKey(opt))
+      );
     }
   }
 );
