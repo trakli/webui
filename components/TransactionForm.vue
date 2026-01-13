@@ -91,6 +91,7 @@
           :placeholder="t('Search categories...')"
           :options="categories"
           :multiple="true"
+          :selected="selectedAdditionalCategoryIds"
           :disabled="isSameAsGroup"
           @select="handleCategorySelect"
         />
