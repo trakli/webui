@@ -1,5 +1,10 @@
 <template>
   <div class="onboarding-layout">
+    <div class="theme-toggle-wrapper">
+      <ClientOnly>
+        <ThemeToggleButton />
+      </ClientOnly>
+    </div>
     <div class="onboarding-wrapper">
       <div class="logo-container">
         <Logo size="small" />
@@ -11,6 +16,7 @@
 
 <script setup>
 import Logo from '@/components/Logo.vue';
+import ThemeToggleButton from '@/components/ThemeToggleButton.vue';
 </script>
 
 <style lang="scss" scoped>
@@ -18,12 +24,13 @@ import Logo from '@/components/Logo.vue';
 
 .onboarding-layout {
   min-height: 100vh;
-  background: linear-gradient(135deg, $bg-light 0%, $primary-light 100%);
+  background: $bg-light;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
   box-sizing: border-box;
+  position: relative;
 
   @media (max-width: $breakpoint-md) {
     padding: 1rem;
@@ -31,6 +38,18 @@ import Logo from '@/components/Logo.vue';
 
   @media (max-width: $breakpoint-sm) {
     padding: 0.75rem;
+  }
+}
+
+.theme-toggle-wrapper {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 10;
+
+  @media (max-width: $breakpoint-sm) {
+    top: 1rem;
+    right: 1rem;
   }
 }
 

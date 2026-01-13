@@ -127,8 +127,8 @@ const handleSave = () => {
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 3px solid $bg-white;
+  box-shadow: $shadow-md;
 }
 
 .section-grid {

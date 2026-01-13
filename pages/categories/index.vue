@@ -201,15 +201,19 @@ definePageMeta({
 
 .form-section {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 2rem;
   width: 100%;
 }
 
 .form-wrapper {
-  flex: 1;
   min-width: 0;
-  max-width: 800px;
+}
+
+@media (max-width: $breakpoint-md) {
+  .form-section {
+    flex-direction: column;
+  }
 }
 
 .loading-state {
@@ -236,7 +240,7 @@ definePageMeta({
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f4f6;
+  border: 4px solid $bg-light;
   border-top: 4px solid $primary;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -291,7 +295,7 @@ definePageMeta({
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid $border-color;
 
   @media (max-width: $breakpoint-sm) {
     gap: 0.25rem;
@@ -328,26 +332,26 @@ definePageMeta({
   }
 
   &:hover {
-    background: #f8fafc;
+    background: $bg-slate;
     color: $primary;
   }
 
   // Hover state for expense categories button (second child)
   &:nth-child(2):hover {
-    color: #dc2626;
+    color: $error-color;
   }
 
   &.active {
     color: $primary;
-    background: #f0f9ff;
+    background: $primary-light;
     border-bottom-color: $primary;
   }
 
   // Active state for expense categories button (second child)
   &:nth-child(2).active {
-    color: #dc2626;
-    background: #fee2e2;
-    border-bottom-color: #dc2626;
+    color: $error-color;
+    background: rgba(var(--color-error-rgb), 0.1);
+    border-bottom-color: $error-color;
   }
 }
 
@@ -360,7 +364,7 @@ definePageMeta({
 }
 
 .tab-count {
-  background: #e5e7eb;
+  background: $border-color;
   color: $text-secondary;
   padding: 0.125rem 0.375rem;
   border-radius: 12px;
@@ -379,8 +383,8 @@ definePageMeta({
 
   // Count styling for expense categories tab
   .tab-button:nth-child(2).active & {
-    background: rgba(220, 38, 38, 0.1);
-    color: #dc2626;
+    background: rgba(var(--color-error-rgb), 0.1);
+    color: $error-color;
   }
 }
 

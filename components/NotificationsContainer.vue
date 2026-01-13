@@ -83,11 +83,9 @@ const {
   align-items: flex-start;
   gap: 0.75rem;
   padding: 1rem;
-  background: white;
+  background: $bg-white;
   border-radius: $radius-lg;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: $shadow-lg;
   border-left: 4px solid;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -95,40 +93,38 @@ const {
 
   &:hover {
     transform: translateX(-2px);
-    box-shadow:
-      0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: $shadow-xl;
   }
 
   &--success {
-    border-left-color: #10b981;
+    border-left-color: $success;
 
     .notification-icon {
-      color: #10b981;
+      color: $success;
     }
   }
 
   &--error {
-    border-left-color: #ef4444;
+    border-left-color: $error-color;
 
     .notification-icon {
-      color: #ef4444;
+      color: $error-color;
     }
   }
 
   &--warning {
-    border-left-color: #f59e0b;
+    border-left-color: $warning;
 
     .notification-icon {
-      color: #f59e0b;
+      color: $warning;
     }
   }
 
   &--info {
-    border-left-color: #3b82f6;
+    border-left-color: $info;
 
     .notification-icon {
-      color: #3b82f6;
+      color: $info;
     }
   }
 }
@@ -185,7 +181,7 @@ const {
   transition: all 0.2s ease;
 
   &:hover {
-    background: #f3f4f6;
+    background: $bg-light;
     color: $text-primary;
   }
 

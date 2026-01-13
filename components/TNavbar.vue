@@ -16,6 +16,7 @@
           </template>
         </TButton>
         <LanguageSelector />
+        <NotificationBell />
         <button
           class="icon-button info-btn"
           :aria-label="t('Open learning modal')"
@@ -39,6 +40,7 @@ import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
+import NotificationBell from './NotificationBell.vue';
 import { PlusIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
@@ -74,7 +76,7 @@ const openLearningModal = () => {
   height: $navbar-height;
   padding: 0 2rem;
   background-color: $bg-gray;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid $border-color;
   position: fixed;
   top: 0;
   right: 0;

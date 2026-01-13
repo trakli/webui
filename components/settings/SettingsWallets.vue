@@ -136,7 +136,7 @@ const handleSave = async () => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba($primary, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.1);
     color: $primary;
     font-size: 0.75rem;
     font-weight: 700;

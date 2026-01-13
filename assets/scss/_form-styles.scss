@@ -10,7 +10,7 @@
   overflow-y: auto;
   border-radius: 16px;
   padding: 2rem 2rem 1.5rem 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-sm;
   box-sizing: border-box;
   align-self: flex-start;
 
@@ -46,7 +46,7 @@
 
 .form-label {
   font-weight: 600;
-  color: #222;
+  color: $text-primary;
   margin: 0;
   font-size: 1rem;
 
@@ -65,10 +65,11 @@
   width: 100%;
   box-sizing: border-box;
   padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid $border-light;
   border-radius: 8px;
   font-size: 1rem;
   background: $bg-white;
+  color: $text-primary;
   transition: border-color 0.2s;
 
   @media (max-width: $breakpoint-md) {
@@ -188,7 +189,7 @@
   height: 48px;
   border-radius: 9999px;
   border: 1px solid $border-light;
-  background: rgba($primary, 0.12);
+  background: rgba(var(--color-primary-rgb), 0.12);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -196,8 +197,8 @@
   transition: $transition-base;
 
   &:hover {
-    background: rgba($primary, 0.18);
-    border-color: rgba($primary, 0.25);
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border-color: rgba(var(--color-primary-rgb), 0.25);
   }
   &:focus-visible {
     outline: none;
@@ -218,4 +219,124 @@
   border: 1px solid $border-light;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
+}
+
+.card-form {
+  background: $bg-white;
+  border-radius: $radius-xl;
+  border: 1px solid $border-color;
+  box-shadow: $shadow-md;
+  padding: 1.5rem;
+  width: min(750px, 100%);
+  min-width: 600px;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 1.25rem;
+    min-width: auto;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 1rem;
+  }
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: $font-size-lg;
+    font-weight: $font-semibold;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    margin-bottom: 1rem;
+
+    h2 {
+      font-size: $font-size-base;
+    }
+  }
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: $bg-gray;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: $border-color;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    color: $text-secondary;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid $border-color;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: $radius-lg;
+  font-weight: $font-semibold;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+    padding: 0.625rem 1rem;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: $primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+.btn-secondary {
+  background: $bg-gray;
+  color: $text-primary;
+
+  &:hover:not(:disabled) {
+    background: $border-color;
+  }
 }

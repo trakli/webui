@@ -1,9 +1,15 @@
 <script setup>
 import AuthCarousel from '@/components/auth/AuthCarousel.vue';
+import ThemeToggleButton from '@/components/ThemeToggleButton.vue';
 </script>
 
 <template>
   <div class="page-wrapper">
+    <div class="theme-toggle-wrapper">
+      <ClientOnly>
+        <ThemeToggleButton />
+      </ClientOnly>
+    </div>
     <div class="auth-container">
       <ClientOnly>
         <AuthCarousel class="auth-carousel" />
@@ -19,20 +25,47 @@ import AuthCarousel from '@/components/auth/AuthCarousel.vue';
 </template>
 
 <style lang="scss" scoped>
-@use 'sass:color';
 @use '@/assets/scss/_variables.scss' as *;
 
 .page-wrapper {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: url('/background-floating-docs.svg') no-repeat center;
-  background-size: cover;
-  background-attachment: fixed;
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
   padding: 0;
+  background-color: $bg-light;
+
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/background-floating-docs.svg') no-repeat center;
+    background-size: cover;
+    z-index: 0;
+    pointer-events: none;
+
+    :root.dark & {
+      filter: invert(1) hue-rotate(180deg);
+      opacity: 0.12;
+    }
+  }
+}
+
+.theme-toggle-wrapper {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 10;
+
+  @media (max-width: 639px) {
+    top: 1rem;
+    right: 1rem;
+  }
 }
 
 .auth-carousel {

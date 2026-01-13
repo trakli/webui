@@ -72,14 +72,14 @@
             </linearGradient>
           </defs>
           <!-- Grid lines -->
-          <line x1="30" y1="20" x2="30" y2="130" stroke="#e5e7eb" stroke-width="1" />
-          <line x1="30" y1="130" x2="270" y2="130" stroke="#e5e7eb" stroke-width="1" />
+          <line x1="30" y1="20" x2="30" y2="130" class="grid-line" stroke-width="1" />
+          <line x1="30" y1="130" x2="270" y2="130" class="grid-line" stroke-width="1" />
           <line
             x1="30"
             y1="75"
             x2="270"
             y2="75"
-            stroke="#e5e7eb"
+            class="grid-line"
             stroke-width="1"
             stroke-dasharray="4"
           />
@@ -162,7 +162,7 @@ const topCategories = computed(() => {
 });
 
 const gradient = computed(() => {
-  if (!hasData.value) return '#e5e7eb';
+  if (!hasData.value) return 'var(--color-border)';
 
   const total = totalExpenses.value || 1;
   let current = 0;
@@ -174,7 +174,7 @@ const gradient = computed(() => {
   });
 
   if (current < total) {
-    stops.push(`#e5e7eb ${(current / total) * 360}deg 360deg`);
+    stops.push(`var(--color-border) ${(current / total) * 360}deg 360deg`);
   }
 
   return `conic-gradient(${stops.join(', ')})`;
@@ -496,5 +496,9 @@ const allDataPoints = computed(() => {
   font-size: $font-size-xs;
   font-weight: $font-medium;
   color: $text-primary;
+}
+
+.grid-line {
+  stroke: $border-color;
 }
 </style>

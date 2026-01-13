@@ -5,45 +5,39 @@
       <h1>{{ t('App Settings') }}</h1>
     </div>
 
-    <CollapsibleSection :title="t('Account Information')" :icon="User" :default-open="true">
-      <template #default="{ isEditMode }">
-        <SettingsAccount
-          :is-edit-mode="isEditMode"
-          @open-password-modal="showPasswordModal = true"
-        />
-      </template>
-    </CollapsibleSection>
-
-    <CollapsibleSection :title="t('General Settings')" :icon="Globe">
-      <template #default="{ isEditMode }">
-        <SettingsGeneral :is-edit-mode="isEditMode" />
-      </template>
-    </CollapsibleSection>
-
-    <CollapsibleSection :title="t('Accounts & Wallets')" :icon="Wallet">
-      <template #default="{ isEditMode }">
-        <SettingsWallets :is-edit-mode="isEditMode" />
-      </template>
-    </CollapsibleSection>
-
-    <CollapsibleSection :title="t('Display Settings')" :icon="Sun" :default-open="false">
-      <template #default="{ isEditMode }">
-        <SettingsDisplay :is-edit-mode="isEditMode" />
-      </template>
-    </CollapsibleSection>
+    <div class="settings-card">
+      <TTabs v-model:active-tab="activeTab" :tabs="tabs">
+        <template #account>
+          <SettingsAccount @open-password-modal="showPasswordModal = true" />
+        </template>
+        <template #general>
+          <SettingsGeneral :is-edit-mode="true" />
+        </template>
+        <template #wallets>
+          <SettingsWallets :is-edit-mode="true" />
+        </template>
+        <template #display>
+          <SettingsDisplay :is-edit-mode="true" />
+        </template>
+        <template #notifications>
+          <SettingsNotifications :is-edit-mode="true" />
+        </template>
+      </TTabs>
+    </div>
 
     <PasswordModal v-if="showPasswordModal" @close="showPasswordModal = false" />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { Settings, Globe, Wallet, Sun, User } from 'lucide-vue-next';
-import CollapsibleSection from '@/components/settings/CollapsibleSection.vue';
+import { ref, markRaw } from 'vue';
+import { Settings, Globe, Wallet, Sun, User, Bell } from 'lucide-vue-next';
+import TTabs from '@/components/TTabs.vue';
 import SettingsAccount from '@/components/settings/SettingsAccount.vue';
 import SettingsGeneral from '@/components/settings/SettingsGeneral.vue';
 import SettingsWallets from '@/components/settings/SettingsWallets.vue';
 import SettingsDisplay from '@/components/settings/SettingsDisplay.vue';
+import SettingsNotifications from '@/components/settings/SettingsNotifications.vue';
 import PasswordModal from '@/components/settings/PasswordModal.vue';
 
 const { t } = useI18n();
@@ -54,6 +48,15 @@ definePageMeta({
 });
 
 const showPasswordModal = ref(false);
+const activeTab = ref('account');
+
+const tabs = [
+  { id: 'account', label: t('Account'), icon: markRaw(User) },
+  { id: 'general', label: t('General'), icon: markRaw(Globe) },
+  { id: 'wallets', label: t('Wallets'), icon: markRaw(Wallet) },
+  { id: 'display', label: t('Display'), icon: markRaw(Sun) },
+  { id: 'notifications', label: t('Notifications'), icon: markRaw(Bell) }
+];
 </script>
 
 <style lang="scss" scoped>
@@ -98,6 +101,17 @@ const showPasswordModal = ref(false);
   @media (max-width: $breakpoint-sm) {
     width: 20px;
     height: 20px;
+  }
+}
+
+.settings-card {
+  background: $bg-white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-md;
+  padding: 1.5rem;
+
+  @media (max-width: $breakpoint-md) {
+    padding: 1rem;
   }
 }
 </style>

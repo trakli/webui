@@ -122,6 +122,7 @@ const resultText = computed(() => {
 .title {
   font-size: $font-size-lg;
   font-weight: $font-semibold;
+  color: $text-primary;
 }
 
 .chevron {
@@ -149,6 +150,7 @@ const resultText = computed(() => {
   font-size: $font-size-sm;
   font-weight: $font-semibold;
   margin-bottom: $spacing-1;
+  color: $text-primary;
 }
 
 .inline-icon {

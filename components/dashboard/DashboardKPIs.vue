@@ -261,7 +261,7 @@ onUnmounted(() => {
   }
 
   &.selected {
-    background: rgba($primary, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.1);
     color: $primary;
     font-weight: $font-medium;
   }

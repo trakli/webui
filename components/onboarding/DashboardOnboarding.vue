@@ -189,7 +189,7 @@ const currentStep = computed(() => {
 .hero-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, $primary-light 0%, rgba(4, 120, 68, 0.1) 100%);
+  background: linear-gradient(135deg, $primary-light 0%, rgba(var(--color-primary-rgb), 0.1) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -254,26 +254,26 @@ const currentStep = computed(() => {
 }
 
 .onboarding-card {
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: $bg-white;
+  border: 2px solid $border-color;
   border-radius: $radius-xl;
   padding: 1.5rem;
   transition: all 0.3s ease;
   position: relative;
 
   &.card-completed {
-    background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%);
+    background: rgba(var(--color-success-rgb), 0.1);
     border-color: $primary;
 
     .step-indicator {
       background: $primary;
-      color: white;
+      color: $bg-white;
     }
   }
 
   &.card-current {
     border-color: $primary;
-    box-shadow: 0 4px 12px rgba(4, 120, 68, 0.15);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.15);
     transform: scale(1.02);
   }
 
@@ -297,7 +297,7 @@ const currentStep = computed(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #f3f4f6;
+  background: $bg-light;
   color: $text-secondary;
   display: flex;
   align-items: center;
@@ -381,12 +381,12 @@ const currentStep = computed(() => {
   }
 
   &.btn-secondary {
-    background: #f8fafc;
+    background: $bg-light;
     color: $text-secondary;
-    border: 1px solid #e2e8f0;
+    border: 1px solid $border-light;
 
     &:hover {
-      background: white;
+      background: $bg-white;
       color: $primary;
       border-color: $primary;
     }
@@ -417,8 +417,8 @@ const currentStep = computed(() => {
 }
 
 .quick-tips {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border: 1px solid #f59e0b;
+  background: rgba(var(--color-warning-rgb), 0.15);
+  border: 1px solid $warning;
   border-radius: $radius-xl;
   padding: 1.5rem;
 
@@ -436,12 +436,12 @@ const currentStep = computed(() => {
   .tips-icon {
     width: 1.25rem;
     height: 1.25rem;
-    color: #f59e0b;
+    color: $warning;
   }
 
   .tips-title {
     font-weight: 600;
-    color: #92400e;
+    color: $warning;
     font-size: 0.95rem;
   }
 }
@@ -455,7 +455,7 @@ const currentStep = computed(() => {
   gap: 0.5rem;
 
   li {
-    color: #92400e;
+    color: $warning;
     font-size: 0.875rem;
     line-height: 1.4;
     position: relative;
@@ -465,7 +465,7 @@ const currentStep = computed(() => {
       content: '•';
       position: absolute;
       left: 0;
-      color: #f59e0b;
+      color: $warning;
       font-weight: bold;
     }
 

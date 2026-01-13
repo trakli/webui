@@ -28,7 +28,7 @@
               :x2="width - paddingRight"
               :y1="yScale(tick)"
               :y2="yScale(tick)"
-              stroke="#e5e7eb"
+              class="grid-line"
               stroke-dasharray="4 4"
             />
             <text :x="paddingLeft - 8" :y="yScale(tick) + 4" text-anchor="end" class="axis-label">
@@ -41,7 +41,7 @@
               :x2="p.x"
               :y1="paddingTop"
               :y2="height - paddingBottom"
-              stroke="#e5e7eb"
+              class="grid-line"
               stroke-dasharray="4 4"
             />
             <text :x="p.x" :y="height - paddingBottom + 18" text-anchor="middle" class="axis-label">
@@ -55,17 +55,16 @@
           :x2="pointArray[hoverIndex].x"
           :y1="paddingTop"
           :y2="height - paddingBottom"
-          stroke="#93c5fd"
+          class="hover-line"
           stroke-dasharray="3 3"
         />
-        <path :d="smoothPath" fill="none" stroke="#3b82f6" stroke-width="2.5" />
+        <path :d="smoothPath" fill="none" class="data-line" stroke-width="2.5" />
         <template v-for="(p, idx) in pointArray" :key="`pt-${idx}`">
           <circle
             :cx="p.x"
             :cy="p.y"
             r="4"
-            fill="#3b82f6"
-            stroke="#ffffff"
+            class="data-point"
             stroke-width="2"
             filter="url(#markerShadow)"
           />
@@ -219,8 +218,25 @@ const onMouseLeave = () => {
   height: 100%;
 }
 .axis-label {
-  fill: #6b7280;
+  fill: $text-muted;
   font-size: 12px;
+}
+
+.grid-line {
+  stroke: $border-color;
+}
+
+.hover-line {
+  stroke: $primary-light;
+}
+
+.data-line {
+  stroke: $primary;
+}
+
+.data-point {
+  fill: $primary;
+  stroke: $bg-white;
 }
 
 .tooltip {
@@ -241,7 +257,7 @@ const onMouseLeave = () => {
 }
 .tooltip-value {
   font-weight: $font-bold;
-  color: #2563eb;
+  color: $primary;
   margin-bottom: 2px;
 }
 .tooltip-insight {

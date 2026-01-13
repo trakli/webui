@@ -5,8 +5,17 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
+import { useTheme } from '~/composables/useTheme';
+
 const route = useRoute();
 const layoutKey = computed(() => route.meta.layout || 'default');
+
+const { initTheme } = useTheme();
+
+onMounted(() => {
+  initTheme();
+});
 </script>
 
 <style lang="scss">

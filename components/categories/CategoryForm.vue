@@ -1,5 +1,12 @@
 <template>
-  <form class="entity-form" @submit.prevent="handleSubmit">
+  <form class="card-form" @submit.prevent="handleSubmit">
+    <div class="form-header">
+      <h2>{{ isEditing ? t('Edit Category') : t('Create Category') }}</h2>
+      <button type="button" class="close-btn" @click="handleClose">
+        <X />
+      </button>
+    </div>
+
     <div class="form-group">
       <label for="category-name" class="form-label">{{ t('Category Name') }}</label>
       <div class="name-icon-row">
@@ -70,9 +77,14 @@
       </div>
     </div>
 
-    <button type="submit" class="submit-btn">
-      {{ isEditing ? t('Save category') : t('Create category') }}
-    </button>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" @click="handleClose">
+        {{ t('Cancel') }}
+      </button>
+      <button type="submit" class="btn btn-primary">
+        {{ isEditing ? t('Update Category') : t('Create Category') }}
+      </button>
+    </div>
   </form>
 </template>
 
@@ -80,7 +92,7 @@
 import { ref, nextTick, computed, watch } from 'vue';
 import IconPicker from '@/components/IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
-import { ImagePlus } from 'lucide-vue-next';
+import { ImagePlus, X } from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -229,6 +241,11 @@ async function handleSubmit() {
 
 function onIconSelected() {
   showIconPicker.value = false;
+}
+
+function handleClose() {
+  emit('close');
+  resetForm();
 }
 </script>
 

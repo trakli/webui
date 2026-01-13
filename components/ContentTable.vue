@@ -6,41 +6,82 @@
     :show-empty="false"
     skeleton-variant="table"
     :skeleton-count="8"
-    :skeleton-columns="3"
+    :skeleton-columns="computedColumns.length + 1"
   >
     <div class="entity-list">
-      <div class="header-row">
+      <div v-if="!hideHeader" class="header-row">
         <h1>{{ t('All {items}', { items: t(pageNamePlural) }) }}</h1>
         <SearchInput
-          v-model="searchQuery"
+          v-model="internalSearchQuery"
           :placeholder="t('Search {items}...', { items: t(pageNamePlural).toLowerCase() })"
         />
       </div>
 
-      <div class="table-header" :class="{ 'expense-header': headerType === 'expense' }">
-        <div class="col-name">{{ t('{item} Name', { item: t(pageName) }) }}</div>
-        <div class="col-description">{{ t('{item} Description', { item: t(pageName) }) }}</div>
-        <div class="col-action">{{ t('Action') }}</div>
+      <div class="table-wrapper">
+        <table class="content-table" :class="{ 'expense-table': headerType === 'expense' }">
+          <thead>
+            <tr>
+              <th
+                v-for="col in computedColumns"
+                :key="col.key"
+                :style="col.width ? { width: col.width } : {}"
+                :class="[`col-${col.key}`, col.align ? `text-${col.align}` : '']"
+              >
+                {{ t(col.label) }}
+              </th>
+              <th class="col-action">{{ t('Action') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="entity in paginatedEntities"
+              :key="entity.id"
+              class="entity-row"
+              :class="{ 'is-default': String(entity.id) === defaultItemId }"
+            >
+              <td
+                v-for="col in computedColumns"
+                :key="col.key"
+                :class="[`col-${col.key}`, col.align ? `text-${col.align}` : '']"
+              >
+                <template v-if="col.key === 'name'">
+                  <div class="name-cell">
+                    <component :is="getIcon(entity)" v-if="getIcon(entity)" class="entity-icon" />
+                    <span class="name-text">{{ entity.name }}</span>
+                    <span v-if="String(entity.id) === defaultItemId" class="default-badge">
+                      {{ t('Default') }}
+                    </span>
+                  </div>
+                </template>
+                <template v-else-if="col.render">
+                  {{ col.render(entity[col.key], entity) }}
+                </template>
+                <template v-else>
+                  {{ getCellValue(entity, col.key) }}
+                </template>
+              </td>
+              <td class="col-action">
+                <div class="entity-actions">
+                  <button
+                    class="action-button edit"
+                    :title="t('Edit {item}', { item: t(pageName) })"
+                    @click="$emit('edit', entity)"
+                  >
+                    <LucideEdit />
+                  </button>
+                  <button
+                    class="action-button delete"
+                    :title="t('Delete {item}', { item: t(pageName) })"
+                    @click="$emit('delete', entity)"
+                  >
+                    <LucideTrash />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <TransitionGroup
-        name="list"
-        tag="div"
-        class="entities-container"
-        @after-enter="$emit('item-add-complete')"
-      >
-        <ContentCard
-          v-for="entity in paginatedEntities"
-          :key="entity.id"
-          :name="entity.name"
-          :icon="entity.icon?.path || entity.icon?.content || entity.icon"
-          :description="entity.description"
-          :page-name="pageName"
-          :is-default="String(entity.id) === defaultItemId"
-          @edit="$emit('edit', entity)"
-          @delete="$emit('delete', entity)"
-        />
-      </TransitionGroup>
 
       <div class="pagination-row">
         <div class="pagination-controls">
@@ -92,7 +133,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import ContentCard from './ContentCard.vue';
+import { Edit as LucideEdit, Trash as LucideTrash } from 'lucide-vue-next';
+import * as LucideIcons from 'lucide-vue-next';
 import ComponentLoader from './ComponentLoader.vue';
 import SearchInput from './SearchInput.vue';
 
@@ -102,6 +144,10 @@ const props = defineProps({
   entities: {
     type: Array,
     default: () => []
+  },
+  columns: {
+    type: Array,
+    default: null
   },
   isLoading: {
     type: Boolean,
@@ -121,26 +167,59 @@ const props = defineProps({
   },
   headerType: {
     type: String,
-    default: 'default' // 'default', 'expense'
+    default: 'default'
   },
   defaultItemId: {
     type: String,
     default: null
+  },
+  hideHeader: {
+    type: Boolean,
+    default: false
+  },
+  searchQuery: {
+    type: String,
+    default: ''
   }
 });
 
 defineEmits(['edit', 'delete', 'item-add-complete']);
 
-const searchQuery = ref('');
+const defaultColumns = computed(() => [
+  { key: 'name', label: `${props.pageName} Name` },
+  { key: 'description', label: `${props.pageName} Description` }
+]);
+
+const computedColumns = computed(() => props.columns || defaultColumns.value);
+
+const getIcon = (entity) => {
+  const iconValue = entity.icon?.path || entity.icon?.content || entity.icon;
+  if (!iconValue) return null;
+  return LucideIcons[iconValue] || LucideIcons.Box;
+};
+
+const getCellValue = (entity, key) => {
+  if (key.includes('.')) {
+    return key.split('.').reduce((obj, k) => obj?.[k], entity) ?? '';
+  }
+  return entity[key] ?? '';
+};
+
+const internalSearchQuery = ref('');
 const currentPage = ref(1);
 const perPage = ref(10);
 
+const effectiveSearchQuery = computed(() =>
+  props.hideHeader ? props.searchQuery : internalSearchQuery.value
+);
+
 const filteredEntities = computed(() => {
-  if (!searchQuery.value) return props.entities;
-  const query = searchQuery.value.toLowerCase();
+  if (!effectiveSearchQuery.value) return props.entities;
+  const query = effectiveSearchQuery.value.toLowerCase();
   return props.entities.filter(
     (entity) =>
-      entity.name.toLowerCase().includes(query) || entity.description.toLowerCase().includes(query)
+      entity.name?.toLowerCase().includes(query) ||
+      entity.description?.toLowerCase().includes(query)
   );
 });
 
@@ -154,7 +233,7 @@ const paginatedEntities = computed(() => {
 });
 
 // Reset to first page when search changes
-watch(searchQuery, () => {
+watch(effectiveSearchQuery, () => {
   currentPage.value = 1;
 });
 
@@ -227,7 +306,7 @@ const visiblePages = computed(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  background: white;
+  background: $bg-white;
   gap: 1rem;
 
   @media (max-width: $breakpoint-md) {
@@ -252,86 +331,166 @@ const visiblePages = computed(() => {
   }
 }
 
-.table-header {
-  display: grid;
-  grid-template-columns: 1.8fr 2.5fr auto;
-  background: $primary;
-  color: white;
-  font-weight: bold;
-  padding: 0.75rem 1rem;
-  border-radius: $radius-xl $radius-xl 0 0;
+.table-wrapper {
   margin: 0 -1rem;
   width: calc(100% + 2rem);
-  gap: 1rem;
+  overflow-x: auto;
+  border-radius: $radius-xl $radius-xl 0 0;
+}
+
+.content-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+
+  thead {
+    tr {
+      background: $table-header-bg;
+    }
+
+    th {
+      color: white;
+      font-weight: $font-semibold;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-size: $font-size-sm;
+      white-space: nowrap;
+
+      &.text-right {
+        text-align: right;
+      }
+
+      &.text-center {
+        text-align: center;
+      }
+    }
+  }
+
+  &.expense-table thead tr {
+    background: $error-color;
+  }
+
+  tbody {
+    background: $bg-gray;
+
+    .entity-row {
+      background: $bg-light;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $bg-white;
+        transform: translateY(-1px);
+        box-shadow: $shadow-sm;
+      }
+
+      &.is-default {
+        background: rgba(var(--color-success-rgb), 0.08);
+        border-left: 4px solid $success;
+
+        &:hover {
+          background: rgba(var(--color-success-rgb), 0.12);
+        }
+      }
+
+      td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid $border-light;
+        font-size: $font-size-sm;
+        vertical-align: middle;
+
+        &.text-right {
+          text-align: right;
+        }
+
+        &.text-center {
+          text-align: center;
+        }
+      }
+    }
+  }
+}
+
+.name-cell {
+  display: flex;
   align-items: center;
-
-  &.expense-header {
-    background: $primary;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: 1.6fr 2.2fr auto;
-    padding: 0.5rem 0.75rem;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    grid-template-columns: 1.5fr 2fr auto;
-    padding: 0.5rem;
-    gap: 0.375rem;
-    font-size: 0.8rem;
-    line-height: 1.2;
-  }
+  gap: 0.5rem;
 }
 
-.col-name {
-  padding: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
-
-  @media (max-width: $breakpoint-sm) {
-    white-space: normal;
-    word-wrap: break-word;
-    hyphens: auto;
-  }
+.entity-icon {
+  width: 20px;
+  height: 20px;
+  color: $primary;
+  flex-shrink: 0;
 }
 
-.col-description {
-  padding: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
+.name-text {
+  font-weight: $font-medium;
+  color: $text-primary;
+}
 
-  @media (max-width: $breakpoint-sm) {
-    white-space: normal;
-    word-wrap: break-word;
-    hyphens: auto;
-  }
+.default-badge {
+  display: inline-flex;
+  align-items: center;
+  background: $primary;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
 .col-action {
-  padding: 0;
   text-align: right;
   white-space: nowrap;
   min-width: 80px;
-  justify-self: end;
-
-  @media (max-width: $breakpoint-md) {
-    min-width: 70px;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    min-width: 65px;
-    font-size: 0.75rem;
-  }
 }
 
-.entities-container {
-  margin: 0 -1rem;
-  width: calc(100% + 2rem);
-  background: #ebedec;
+.entity-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 28px;
+  height: 28px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: $primary;
+    transition: color 0.2s ease;
+  }
+
+  &:hover {
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+
+    svg {
+      color: $primary-dark;
+    }
+  }
+
+  &.delete {
+    svg {
+      color: $error-color;
+    }
+
+    &:hover svg {
+      color: $error-dark;
+    }
+  }
 }
 
 .pagination-row {
@@ -341,7 +500,7 @@ const visiblePages = computed(() => {
   padding: 1rem;
   background-color: $bg-gray;
   border-radius: 0 0 $radius-xl $radius-xl;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid $border-color;
   margin: 0 -1rem -1rem -1rem;
   width: calc(100% + 2rem);
   gap: 1rem;
@@ -385,9 +544,9 @@ const visiblePages = computed(() => {
 
 .pagination-button {
   padding: 0.5rem 1rem;
-  color: #374151;
-  background: white;
-  border: 1px solid #d1d5db;
+  color: $text-secondary;
+  background: $bg-white;
+  border: 1px solid $border-light;
   border-radius: $radius-lg;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -408,31 +567,31 @@ const visiblePages = computed(() => {
   }
 
   &:hover:not(.disabled):not(.ellipsis) {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+    background: $bg-light;
+    border-color: $border-medium;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-sm;
   }
 
   &.active {
     background: $primary;
     color: white;
     border-color: $primary;
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
   }
 
   .expense-header ~ .entities-container ~ .pagination-row & {
     &.active {
       background: $primary;
       border-color: $primary;
-      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+      box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
     }
   }
 
   &.disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    background: #f9fafb;
+    background: $bg-light;
   }
 
   &.ellipsis {
@@ -449,7 +608,7 @@ const visiblePages = computed(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6b7280;
+  color: $text-muted;
   font-size: 0.875rem;
   white-space: nowrap;
 
@@ -468,10 +627,10 @@ const visiblePages = computed(() => {
 
 .per-page-select {
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-  border: 1.5px solid #d1d5db;
+  border: 1.5px solid $border-light;
   border-radius: $radius-lg;
-  background: white;
-  color: #374151;
+  background: $bg-white;
+  color: $text-secondary;
   font-size: 0.875rem;
   cursor: pointer;
   appearance: none;
@@ -494,18 +653,18 @@ const visiblePages = computed(() => {
   &:focus {
     outline: none;
     border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
   }
 
   .expense-header ~ .entities-container ~ .pagination-row & {
     &:focus {
       border-color: $primary;
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+      box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
     }
   }
 
   &:hover {
-    border-color: #9ca3af;
+    border-color: $border-medium;
   }
 }
 

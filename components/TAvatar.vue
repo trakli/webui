@@ -101,18 +101,18 @@ defineProps({
 
     .user-name {
       font-weight: 600;
-      color: #1a202c;
+      color: $text-primary;
     }
 
     .user-email {
       font-size: 0.875rem;
-      color: #718096;
+      color: $text-muted;
     }
   }
 
   .divider {
     margin: 0.5rem 0;
-    border-color: #e2e8f0;
+    border-color: $border-light;
   }
 }
 </style>

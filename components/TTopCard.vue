@@ -74,7 +74,7 @@ const displayTitle = computed(() => props.pageNamePlural);
 
 .entity-header {
   width: 100%;
-  background-color: #e6f2ec;
+  background-color: $primary-light;
   border-radius: $radius-xl;
   padding: 0.75rem 1rem;
   margin: 0;
@@ -118,7 +118,7 @@ const displayTitle = computed(() => props.pageNamePlural);
 }
 
 .title {
-  color: #1d3229;
+  color: $text-primary;
   font-size: $font-size-base;
   font-weight: $font-semibold;
   margin: 0;

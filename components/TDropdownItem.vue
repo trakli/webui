@@ -5,6 +5,8 @@
 </template>
 
 <style lang="scss" scoped>
+@use '@/assets/scss/_variables.scss' as *;
+
 .dropdown-item {
   display: block;
   width: 100%;
@@ -14,10 +16,10 @@
   border: none;
   cursor: pointer;
   font-size: 0.875rem;
-  color: #4a5568;
+  color: $text-secondary;
 
   &:hover {
-    background-color: #f7fafc;
+    background-color: $bg-light;
   }
 }
 </style>

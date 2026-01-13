@@ -80,10 +80,16 @@ onUnmounted(() => {
   gap: 0.5rem;
   height: $navbar-icon-button-height;
   padding: 0 0.75rem;
-  background-color: #dee1e0;
-  border: none;
+  background-color: $bg-light;
+  border: 1px solid $border-light;
   border-radius: $radius-lg;
   cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $bg-white;
+    border-color: $border-medium;
+  }
 }
 
 .flag-icon {
@@ -93,14 +99,14 @@ onUnmounted(() => {
 }
 
 .language-name {
-  color: #000000;
+  color: $text-primary;
   font-size: 14px;
 }
 
 .dropdown-arrow {
   width: 16px;
   height: 16px;
-  color: #1d3229;
+  color: $text-primary;
 }
 
 .dropdown-menu {
@@ -132,7 +138,7 @@ onUnmounted(() => {
       }
 
       &.selected {
-        background-color: rgba($primary, 0.1);
+        background-color: rgba(var(--color-primary-rgb), 0.1);
         color: $primary;
         font-weight: 500;
       }

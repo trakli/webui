@@ -68,7 +68,7 @@ defineProps({
 }
 
 .skeleton-base {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, $bg-light 25%, $bg-gray 50%, $bg-light 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
   border-radius: $radius-md;
@@ -99,7 +99,7 @@ defineProps({
     display: flex;
     align-items: center;
     padding: 16px 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid $border-light;
 
     &:last-child {
       border-bottom: none;
@@ -151,7 +151,7 @@ defineProps({
     gap: 16px;
     margin-bottom: 16px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid $border-light;
   }
 
   .skeleton-th {

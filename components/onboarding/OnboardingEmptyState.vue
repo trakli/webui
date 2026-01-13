@@ -173,7 +173,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 .onboarding-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, $primary-light 0%, rgba(4, 120, 68, 0.1) 100%);
+  background: linear-gradient(135deg, $primary-light 0%, rgba(var(--color-primary-rgb), 0.1) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -185,7 +185,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
     content: '';
     position: absolute;
     inset: -6px;
-    background: linear-gradient(135deg, $primary 0%, rgba(4, 120, 68, 0.6) 100%);
+    background: linear-gradient(135deg, $primary 0%, rgba(var(--color-primary-rgb), 0.6) 100%);
     border-radius: 50%;
     opacity: 0.1;
     z-index: -1;
@@ -255,8 +255,8 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 }
 
 .onboarding-steps {
-  background: rgba(248, 250, 252, 0.8);
-  border: 1px solid #e2e8f0;
+  background: $bg-light;
+  border: 1px solid $border-light;
   border-radius: $radius-xl;
   padding: 1.5rem;
   margin: 1rem 0;
@@ -331,7 +331,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 
 .primary-action-btn {
   background: $primary;
-  color: #fff;
+  color: $bg-white;
   font-size: 1.125rem;
   font-weight: 600;
   border: none;
@@ -344,7 +344,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
   justify-content: center;
   gap: 0.5rem;
   min-width: 200px;
-  box-shadow: 0 4px 12px rgba(4, 120, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 
   .button-icon {
     width: 1.25rem;
@@ -355,7 +355,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
   &:hover {
     background: $primary-hover;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(4, 120, 68, 0.4);
+    box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.4);
   }
 
   @media (max-width: $breakpoint-sm) {
@@ -366,8 +366,8 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 }
 
 .onboarding-tip {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border: 1px solid #f59e0b;
+  background: rgba(var(--color-warning-rgb), 0.15);
+  border: 1px solid $warning;
   border-radius: $radius-lg;
   padding: 1rem 1.25rem;
   display: flex;
@@ -386,7 +386,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 }
 
 .tip-icon {
-  color: #f59e0b;
+  color: $warning;
   flex-shrink: 0;
   margin-top: 1px;
 
@@ -397,7 +397,7 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 }
 
 .tip-text {
-  color: #92400e;
+  color: $warning;
   font-size: 0.875rem;
   line-height: 1.4;
   margin: 0;
