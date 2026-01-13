@@ -205,9 +205,7 @@ watch(
   () => props.selected,
   (newSelected) => {
     if (props.multiple && Array.isArray(newSelected) && props.options.length > 0) {
-      selectedItems.value = props.options.filter((opt) =>
-        newSelected.includes(getOptionKey(opt))
-      );
+      selectedItems.value = props.options.filter((opt) => newSelected.includes(getOptionKey(opt)));
     }
   },
   { immediate: true }
