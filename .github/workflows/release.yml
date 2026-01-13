@@ -1,0 +1,27 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      node_version:
+        description: 'Node.js version to use'
+        required: false
+        default: '20'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Release
+        uses: whilesmart/workflows/js/release@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          package: trakli-ui
+          release_type: app
+          node_version: ${{ inputs.node_version }}
