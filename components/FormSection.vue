@@ -7,7 +7,7 @@
         @click="selectExpense"
       >
         <ArrowUpTrayIcon class="tab-icon" />
-        {{ t('Expense Transaction') }}
+        {{ t('Expense') }}
       </button>
       <button
         class="tab-button tab-button--income"
@@ -15,24 +15,35 @@
         @click="selectIncome"
       >
         <ArrowDownTrayIcon class="tab-icon" />
-        {{ t('Income Transaction') }}
+        {{ t('Income') }}
+      </button>
+      <button
+        class="tab-button tab-button--transfer"
+        :class="{ active: isTransferSelected }"
+        @click="selectTransfer"
+      >
+        <ArrowsRightLeftIcon class="tab-icon" />
+        {{ t('Transfer') }}
       </button>
     </div>
 
     <div class="tab-content">
       <TransactionFormContainer
+        v-if="!isTransferSelected"
         :is-outcome-selected="isExpenseSelected"
         :editing-item="props.editingItem"
-        @submit="handleSubmit"
+        @submit="handleTransactionSubmit"
       />
+      <TransferFormContainer v-else @submit="handleTransferSubmit" />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
-import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/vue/24/outline';
+import { ArrowDownTrayIcon, ArrowUpTrayIcon, ArrowsRightLeftIcon } from '@heroicons/vue/24/outline';
 import TransactionFormContainer from './TransactionFormContainer.vue';
+import TransferFormContainer from './TransferFormContainer.vue';
 
 const { t } = useI18n();
 
@@ -40,23 +51,36 @@ const props = defineProps({
   editingItem: { type: Object, default: null }
 });
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits(['submit', 'transfer']);
 
 const isIncomeSelected = ref(false);
 const isExpenseSelected = ref(true);
+const isTransferSelected = ref(false);
 
 const selectIncome = () => {
   isIncomeSelected.value = true;
   isExpenseSelected.value = false;
+  isTransferSelected.value = false;
 };
 
 const selectExpense = () => {
   isExpenseSelected.value = true;
   isIncomeSelected.value = false;
+  isTransferSelected.value = false;
 };
 
-const handleSubmit = (data) => {
+const selectTransfer = () => {
+  isTransferSelected.value = true;
+  isExpenseSelected.value = false;
+  isIncomeSelected.value = false;
+};
+
+const handleTransactionSubmit = (data) => {
   emit('submit', data);
+};
+
+const handleTransferSubmit = (data) => {
+  emit('transfer', data);
 };
 
 // When editing, reflect the transaction type into the toggle
@@ -67,9 +91,11 @@ watch(
     if (item.type === 'EXPENSE') {
       isExpenseSelected.value = true;
       isIncomeSelected.value = false;
+      isTransferSelected.value = false;
     } else {
       isIncomeSelected.value = true;
       isExpenseSelected.value = false;
+      isTransferSelected.value = false;
     }
   },
   { immediate: true }
@@ -141,6 +167,16 @@ watch(
     color: $error-color;
     background: rgba(var(--color-error-rgb), 0.1);
     border-bottom-color: $error-color;
+  }
+
+  &--transfer:hover {
+    color: $info;
+  }
+
+  &--transfer.active {
+    color: $info;
+    background: rgba(var(--color-info-rgb), 0.1);
+    border-bottom-color: $info;
   }
 }
 

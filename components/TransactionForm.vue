@@ -261,9 +261,15 @@ const availableCurrencies = computed(() => {
 });
 
 const wallets = computed(() => {
-  return sharedData.wallets.value.filter((wallet) => {
-    return !wallet.currency || wallet.currency === selectedCurrency.value;
-  });
+  return sharedData.wallets.value
+    .filter((wallet) => {
+      return !wallet.currency || wallet.currency === selectedCurrency.value;
+    })
+    .map((w) => ({
+      ...w,
+      name: sharedData.formatWalletName(w),
+      originalName: w.name
+    }));
 });
 
 const isWalletDefault = computed(() => {

@@ -35,9 +35,12 @@
                 <span :class="['type-badge', txn.type === 'INCOME' ? 'income' : 'outcome']">
                   {{ txn.type }}
                 </span>
+                <span v-if="txn.isTransfer" class="transfer-badge">
+                  {{ t('Transfer') }}
+                </span>
               </td>
               <td>
-                <span class="party">{{ txn.party }}</span>
+                <span class="party">{{ txn.party || '—' }}</span>
               </td>
               <td>
                 <span :class="txn.type === 'INCOME' ? 'amount-income' : 'amount-outcome'">
@@ -376,6 +379,18 @@ const formatTimeAgo = (txn) => {
       background-color: rgba(var(--color-error-rgb), 0.15);
       color: $error-color;
     }
+  }
+
+  .transfer-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: $radius-sm;
+    font-size: 10px;
+    font-weight: bold;
+    background-color: rgba(var(--color-primary-rgb), 0.15);
+    color: $primary;
+    vertical-align: middle;
   }
 
   .party {
