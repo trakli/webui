@@ -28,7 +28,8 @@
           <div class="header-line">
             <span class="prefix">{{ directionLabel(txn.type) }}</span>
             <UserIcon class="user-icon" />
-            <span class="party">{{ txn.party || 'Inconnu' }}</span>
+            <span class="party">{{ txn.party || '—' }}</span>
+            <span v-if="txn.isTransfer" class="transfer-indicator">Transfer</span>
           </div>
           <div class="amount" :class="txn.type === 'INCOME' ? 'amount--income' : 'amount--expense'">
             {{ formatShortAmount(txn.amount) }}
@@ -172,4 +173,16 @@ function formatShortDate(txn) {
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 @use '@/assets/scss/_transactions-cards.scss' as *;
+
+.transfer-indicator {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: $radius-sm;
+  font-size: 10px;
+  font-weight: bold;
+  background-color: rgba(var(--color-primary-rgb), 0.15);
+  color: $primary;
+  vertical-align: middle;
+}
 </style>

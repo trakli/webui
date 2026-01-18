@@ -51,6 +51,8 @@ export interface FrontendTransaction {
   walletId?: number; // Numeric ID
   description?: string;
   isRecurring?: boolean;
+  isTransfer?: boolean; // True if this transaction is part of a transfer
+  transferId?: number; // ID of the associated transfer
   files?: TransactionFile[];
   filesToUpload?: string[];
 }

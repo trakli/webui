@@ -119,8 +119,10 @@
 import { computed, ref, markRaw } from 'vue';
 import { PieChart, BarChart3, TrendingUp } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
+import { useSharedData } from '@/composables/useSharedData';
 
 const { t } = useI18n();
+const { getDefaultCurrency } = useSharedData();
 const { currentStatistics, formatCompactCurrency } = useStatistics();
 
 const COLORS = [
@@ -181,7 +183,7 @@ const gradient = computed(() => {
 });
 
 const formatTotal = computed(() => {
-  return formatCompactCurrency(totalExpenses.value, 'USD');
+  return formatCompactCurrency(totalExpenses.value, getDefaultCurrency.value || 'USD');
 });
 
 const formatPercent = (value) => {

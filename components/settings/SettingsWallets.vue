@@ -17,12 +17,13 @@
 
       <div class="form-group">
         <label class="form-label">{{ t('Default Group') }}</label>
-        <select v-if="isEditMode" v-model="group" class="form-select">
-          <option value="Personal">{{ t('Personal') }}</option>
-          <option value="Family">{{ t('Family') }}</option>
-          <option value="Work">{{ t('Work') }}</option>
+        <select v-if="isEditMode" v-model="groupId" class="form-select">
+          <option :value="null">{{ t('None') }}</option>
+          <option v-for="g in groups" :key="g.id" :value="g.id">
+            {{ g.name }}
+          </option>
         </select>
-        <p v-else class="text-display">{{ t(group) }}</p>
+        <p v-else class="text-display">{{ groupLabel || '—' }}</p>
       </div>
     </div>
 
@@ -36,12 +37,20 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
 import { Save } from 'lucide-vue-next';
 import { useSharedData } from '@/composables/useSharedData';
 import configurationsApi from '@/services/api/configurationsApi';
+import walletsApi from '@/services/api/walletsApi';
+import groupsApi from '@/services/api/groupsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
+
+const SERVER_UUID = '00000000-0000-0000-0000-000000000000';
+
+function generateClientId(): string {
+  return `${SERVER_UUID}:${crypto.randomUUID()}`;
+}
 
 const { t } = useI18n();
 
@@ -51,9 +60,10 @@ const props = defineProps({
 
 const sharedData = useSharedData();
 const wallets = computed(() => sharedData.wallets.value);
+const groups = computed(() => sharedData.groups.value);
 
 const walletId = ref(null);
-const group = ref('Personal');
+const groupId = ref(null);
 const message = ref('');
 
 watch(
@@ -69,31 +79,75 @@ const walletLabel = computed(() => {
   return w ? w.name : '';
 });
 
+const groupLabel = computed(() => {
+  if (!groupId.value) return '';
+  const g = groups.value.find((x) => x.id === groupId.value);
+  return g ? g.name : '';
+});
+
 onMounted(async () => {
   try {
     await sharedData.loadWallets();
+    await sharedData.loadGroups();
     await sharedData.loadConfigurations();
-    const def = sharedData.getDefaultWallet.value;
-    if (def?.id != null) {
-      walletId.value = def.id;
+
+    const defWallet = sharedData.getDefaultWallet.value;
+    if (defWallet?.id != null) {
+      walletId.value = defWallet.id;
+    }
+
+    const defGroup = sharedData.getDefaultGroup.value;
+    if (defGroup?.id != null) {
+      groupId.value = defGroup.id;
     }
   } catch (e) {
-    console.error('Failed to load wallets/configurations for settings', e);
+    console.error('Failed to load wallets/groups/configurations for settings', e);
   }
 });
 
 const handleSave = async () => {
   try {
     if (walletId.value) {
+      const wallet = wallets.value.find((w) => w.id === walletId.value);
+      let walletClientId = wallet?.client_generated_id;
+
+      if (!walletClientId && wallet) {
+        walletClientId = generateClientId();
+        await walletsApi.update(wallet.id, { client_id: walletClientId });
+        await sharedData.loadWallets(true);
+      }
+
       await configurationsApi.update(CONFIGURATION_KEYS.WALLET, {
-        value: walletId.value,
+        value: walletClientId || walletId.value,
         type: 'string'
       });
-      await sharedData.loadConfigurations(true);
     }
+
+    if (groupId.value) {
+      const group = groups.value.find((g) => g.id === groupId.value);
+      let groupClientId = group?.client_generated_id;
+
+      if (!groupClientId && group) {
+        groupClientId = generateClientId();
+        await groupsApi.update(group.id, { client_id: groupClientId });
+        await sharedData.loadGroups(true);
+      }
+
+      await configurationsApi.update(CONFIGURATION_KEYS.GROUP, {
+        value: groupClientId || groupId.value,
+        type: 'string'
+      });
+    } else {
+      await configurationsApi.update(CONFIGURATION_KEYS.GROUP, {
+        value: null,
+        type: 'string'
+      });
+    }
+
+    await sharedData.loadConfigurations(true);
     message.value = t('Wallet and group settings updated successfully!');
   } catch (e) {
-    console.error('Failed to update wallet configuration', e);
+    console.error('Failed to update wallet/group configuration', e);
   } finally {
     setTimeout(() => {
       message.value = '';

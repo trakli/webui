@@ -22,7 +22,7 @@
           @focus="showDropdown = true"
         />
       </div>
-      <ChevronDownIcon class="dropdown-icon" @click="toggleDropdown" />
+      <ChevronDownIcon class="dropdown-icon" @mousedown.prevent="toggleDropdown" />
     </div>
     <ul v-if="showDropdown && filteredOptions.length" class="dropdown-list">
       <li
@@ -68,7 +68,7 @@ const props = defineProps({
   disabled: { type: Function, default: () => false }
 });
 
-const emit = defineEmits(['update:modelValue', 'select']);
+const emit = defineEmits(['update:modelValue', 'select', 'clear']);
 
 const searchQuery = ref('');
 const showDropdown = ref(false);
@@ -103,7 +103,16 @@ function handleInput(event) {
 }
 
 function toggleDropdown() {
-  showDropdown.value = !showDropdown.value;
+  if (showDropdown.value && !searchQuery.value) {
+    // Only close if already open AND no search text (user wants to close)
+    showDropdown.value = false;
+  } else {
+    // Open and show all options (clear any search filter and selection)
+    searchQuery.value = '';
+    emit('update:modelValue', '');
+    emit('clear');
+    showDropdown.value = true;
+  }
 }
 
 function selectOption(option) {

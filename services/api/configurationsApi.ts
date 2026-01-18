@@ -31,19 +31,31 @@ const configurationsApi = {
 
   async update(key: string, payload: ConfigurationPayload): Promise<ConfigurationItem | null> {
     const api = useApi();
-    // Build request body without the key (key is in URL) and include type if provided
     const body: Record<string, any> = { value: payload.value };
     if (typeof payload.type !== 'undefined') {
       body.type = payload.type;
     }
-    const response = await api<ApiResponse<ConfigurationItem>>(
-      `/configurations/${encodeURIComponent(key)}`,
-      {
-        method: 'PUT',
-        body
+
+    try {
+      const response = await api<ApiResponse<ConfigurationItem>>(
+        `/configurations/${encodeURIComponent(key)}`,
+        {
+          method: 'PUT',
+          body
+        }
+      );
+      return response?.data || null;
+    } catch (error: any) {
+      // If config doesn't exist (404), create it instead
+      if (error?.statusCode === 404 || error?.status === 404) {
+        return this.create({
+          key,
+          value: payload.value,
+          type: payload.type || 'string'
+        });
       }
-    );
-    return response?.data || null;
+      throw error;
+    }
   },
 
   async fetchByKey(key: string): Promise<ConfigurationItem | null> {

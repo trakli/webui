@@ -28,9 +28,10 @@
       </div>
 
       <div class="transaction-description">
-        <span>{{ t('Description') }}</span>
-        <textarea v-model="formDescription" :placeholder="t('Type here...')" required />
-        <div v-if="descriptionError" class="error-text">{{ t('Description is required.') }}</div>
+        <span
+          >{{ t('Description') }} <span class="optional-label">({{ t('optional') }})</span></span
+        >
+        <textarea v-model="formDescription" :placeholder="t('Type here...')" />
       </div>
 
       <div class="form-transaction">
@@ -64,6 +65,7 @@
             :options="wallets"
             :error="walletError ? t('Wallet is required.') : ''"
             @select="handleWalletSelect"
+            @clear="selectedWalletId = null"
           />
           <span
             v-if="isWalletDefault"
@@ -76,14 +78,24 @@
       </div>
 
       <div class="form-transaction">
-        <SearchableDropdown
-          v-model="groupSearchQuery"
-          :label="t('Group')"
-          :placeholder="t('Search group...')"
-          :options="groups"
-          :error="categoryError ? t('Group is required.') : ''"
-          @select="handleGroupSelect"
-        />
+        <div class="group-field-wrapper">
+          <SearchableDropdown
+            v-model="groupSearchQuery"
+            :label="t('Group')"
+            :placeholder="t('Search group...')"
+            :options="groups"
+            :error="categoryError ? t('Group is required.') : ''"
+            @select="handleGroupSelect"
+            @clear="selectedGroupId = null"
+          />
+          <span
+            v-if="isGroupDefault"
+            class="group-default-indicator"
+            :title="t('This is your default group')"
+          >
+            {{ t('Default') }}
+          </span>
+        </div>
 
         <SearchableDropdown
           v-model="categorySearchQuery"
@@ -180,7 +192,6 @@ const amountError = ref(false);
 const partyError = ref(false);
 const categoryError = ref(false);
 const walletError = ref(false);
-const descriptionError = ref(false);
 
 function validateRequiredFields() {
   let valid = true;
@@ -196,7 +207,6 @@ function validateRequiredFields() {
   partyError.value = false;
   categoryError.value = false;
   walletError.value = false;
-  descriptionError.value = false;
 
   const partyValue = (formParty.value || searchQuery.value || '').trim();
   if (partyValue) formParty.value = partyValue;
@@ -262,9 +272,15 @@ const availableCurrencies = computed(() => {
 });
 
 const wallets = computed(() => {
-  return sharedData.wallets.value.filter((wallet) => {
-    return !wallet.currency || wallet.currency === selectedCurrency.value;
-  });
+  return sharedData.wallets.value
+    .filter((wallet) => {
+      return !wallet.currency || wallet.currency === selectedCurrency.value;
+    })
+    .map((w) => ({
+      ...w,
+      name: sharedData.formatWalletName(w),
+      originalName: w.name
+    }));
 });
 
 const isWalletDefault = computed(() => {
@@ -272,6 +288,13 @@ const isWalletDefault = computed(() => {
   const defaultWallet = sharedData.getDefaultWallet.value;
   if (!defaultWallet) return false;
   return selectedWalletId.value === defaultWallet.id;
+});
+
+const isGroupDefault = computed(() => {
+  if (!selectedGroupId.value) return false;
+  const defaultGroup = sharedData.getDefaultGroup.value;
+  if (!defaultGroup) return false;
+  return selectedGroupId.value === defaultGroup.id;
 });
 
 function handlePartySelect(party) {
@@ -403,7 +426,6 @@ watch(
     amountError.value = false;
     partyError.value = false;
     categoryError.value = false;
-    descriptionError.value = false;
 
     if (item.date) formDate.value = item.date;
     if (item.time) formTime.value = item.time;

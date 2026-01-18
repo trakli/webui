@@ -5,6 +5,7 @@ export interface Wallet {
   description: string;
   currency: string;
   balance: number;
+  client_generated_id: string | null;
   icon: {
     id: number;
     path: string;
@@ -37,6 +38,7 @@ export interface WalletCreatePayload {
 }
 
 export interface WalletUpdatePayload {
+  client_id?: string;
   name?: string;
   type?: string;
   description?: string;

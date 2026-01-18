@@ -65,9 +65,11 @@
 import { computed } from 'vue';
 import { TrendingUp, TrendingDown, Percent, Shield } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
+import { useSharedData } from '@/composables/useSharedData';
 
 const { t } = useI18n();
 
+const { getDefaultCurrency } = useSharedData();
 const { currentStatistics, formatCompactCurrency } = useStatistics();
 
 const statistics = currentStatistics;
@@ -132,7 +134,7 @@ const riskClass = computed(() => {
 });
 
 const formatAmount = (value) => {
-  return formatCompactCurrency(value || 0, 'USD');
+  return formatCompactCurrency(value || 0, getDefaultCurrency.value || 'USD');
 };
 </script>
 

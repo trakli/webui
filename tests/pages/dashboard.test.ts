@@ -51,7 +51,8 @@ vi.mock('@/composables/useTransactions', () => ({
 
 vi.mock('@/composables/useSharedData', () => ({
   useSharedData: () => ({
-    loadAllData: vi.fn()
+    loadAllData: vi.fn(),
+    getDefaultCurrency: ref('USD')
   })
 }));
 

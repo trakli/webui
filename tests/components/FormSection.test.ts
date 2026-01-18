@@ -39,15 +39,16 @@ describe('FormSection', () => {
   });
 
   describe('tab order', () => {
-    it('renders expense tab first', () => {
+    it('renders all tabs in correct order', () => {
       const wrapper = mount(FormSection, {
         global: { stubs }
       });
 
       const tabs = wrapper.findAll('.tab-button');
-      expect(tabs.length).toBe(2);
-      expect(tabs[0].text()).toContain('Expense Transaction');
-      expect(tabs[1].text()).toContain('Income Transaction');
+      expect(tabs.length).toBe(3);
+      expect(tabs[0].text()).toContain('Expense');
+      expect(tabs[1].text()).toContain('Income');
+      expect(tabs[2].text()).toContain('Transfer');
     });
 
     it('has expense tab with correct class', () => {
