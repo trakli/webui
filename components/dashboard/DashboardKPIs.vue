@@ -59,10 +59,12 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { ChevronDown, X as XIcon } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
 import { useWallets } from '@/composables/useWallets';
+import { useSharedData } from '@/composables/useSharedData';
 
 const { t } = useI18n();
 
 const { wallets } = useWallets();
+const { getDefaultCurrency } = useSharedData();
 const {
   currentStatistics,
   currentPeriod,
@@ -95,7 +97,7 @@ const netClass = computed(() => {
 });
 
 const formatCurrency = (value) => {
-  return formatCompactCurrency(value, 'USD');
+  return formatCompactCurrency(value, getDefaultCurrency.value || 'USD');
 };
 
 const toggleDropdown = () => {
