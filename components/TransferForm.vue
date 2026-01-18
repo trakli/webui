@@ -32,6 +32,7 @@
             :options="fromWalletOptions"
             :error="fromWalletError ? t('Source wallet is required.') : ''"
             @select="handleFromWalletSelect"
+            @clear="fromWalletId = null"
           />
         </div>
 
@@ -43,6 +44,7 @@
             :options="toWalletOptions"
             :error="toWalletError ? t('Destination wallet is required.') : ''"
             @select="handleToWalletSelect"
+            @clear="toWalletId = null"
           />
         </div>
       </div>
