@@ -2,6 +2,7 @@ export interface Group {
   id: number;
   name: string;
   description: string;
+  client_generated_id: string | null;
   icon: {
     id: number;
     content: string;
@@ -12,7 +13,7 @@ export interface Group {
   sync_state: {
     id: number;
     syncable_id: number;
-    client_generated_id: number;
+    client_generated_id: string;
     syncable_type: string;
     source: string;
     last_synced_at: string;

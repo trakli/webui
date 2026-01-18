@@ -28,9 +28,10 @@
       </div>
 
       <div class="transaction-description">
-        <span>{{ t('Description') }}</span>
-        <textarea v-model="formDescription" :placeholder="t('Type here...')" required />
-        <div v-if="descriptionError" class="error-text">{{ t('Description is required.') }}</div>
+        <span
+          >{{ t('Description') }} <span class="optional-label">({{ t('optional') }})</span></span
+        >
+        <textarea v-model="formDescription" :placeholder="t('Type here...')" />
       </div>
 
       <div class="form-transaction">
@@ -180,7 +181,6 @@ const amountError = ref(false);
 const partyError = ref(false);
 const categoryError = ref(false);
 const walletError = ref(false);
-const descriptionError = ref(false);
 
 function validateRequiredFields() {
   let valid = true;
@@ -196,7 +196,6 @@ function validateRequiredFields() {
   partyError.value = false;
   categoryError.value = false;
   walletError.value = false;
-  descriptionError.value = false;
 
   const partyValue = (formParty.value || searchQuery.value || '').trim();
   if (partyValue) formParty.value = partyValue;
@@ -403,7 +402,6 @@ watch(
     amountError.value = false;
     partyError.value = false;
     categoryError.value = false;
-    descriptionError.value = false;
 
     if (item.date) formDate.value = item.date;
     if (item.time) formTime.value = item.time;
