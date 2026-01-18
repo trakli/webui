@@ -489,13 +489,15 @@
   }
 }
 
-.wallet-field-wrapper {
+.wallet-field-wrapper,
+.group-field-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
 
-  .wallet-default-indicator {
+  .wallet-default-indicator,
+  .group-default-indicator {
     position: absolute;
     top: 34px;
     right: 8px;

@@ -77,14 +77,23 @@
       </div>
 
       <div class="form-transaction">
-        <SearchableDropdown
-          v-model="groupSearchQuery"
-          :label="t('Group')"
-          :placeholder="t('Search group...')"
-          :options="groups"
-          :error="categoryError ? t('Group is required.') : ''"
-          @select="handleGroupSelect"
-        />
+        <div class="group-field-wrapper">
+          <SearchableDropdown
+            v-model="groupSearchQuery"
+            :label="t('Group')"
+            :placeholder="t('Search group...')"
+            :options="groups"
+            :error="categoryError ? t('Group is required.') : ''"
+            @select="handleGroupSelect"
+          />
+          <span
+            v-if="isGroupDefault"
+            class="group-default-indicator"
+            :title="t('This is your default group')"
+          >
+            {{ t('Default') }}
+          </span>
+        </div>
 
         <SearchableDropdown
           v-model="categorySearchQuery"
@@ -277,6 +286,13 @@ const isWalletDefault = computed(() => {
   const defaultWallet = sharedData.getDefaultWallet.value;
   if (!defaultWallet) return false;
   return selectedWalletId.value === defaultWallet.id;
+});
+
+const isGroupDefault = computed(() => {
+  if (!selectedGroupId.value) return false;
+  const defaultGroup = sharedData.getDefaultGroup.value;
+  if (!defaultGroup) return false;
+  return selectedGroupId.value === defaultGroup.id;
 });
 
 function handlePartySelect(party) {
