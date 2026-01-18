@@ -27,7 +27,9 @@ const mockSharedData = {
   getDefaultCurrency: ref('USD'),
   getDefaultWallet: ref({ id: 1, name: 'Main Wallet', currency: 'USD' }),
   getDefaultGroup: ref({ id: 1, name: 'Food & Dining' }),
-  loadAllData: vi.fn().mockResolvedValue(undefined)
+  loadAllData: vi.fn().mockResolvedValue(undefined),
+  formatWalletName: (wallet: { name: string; currency?: string }) =>
+    wallet.currency ? `${wallet.name} (${wallet.currency})` : wallet.name
 };
 
 vi.mock('~/composables/useSharedData', () => ({

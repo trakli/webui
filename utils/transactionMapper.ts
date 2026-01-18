@@ -40,14 +40,19 @@ export const transactionMapper = {
 
     const party =
       api.party ||
-      parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id);
+      (api.party_client_generated_id
+        ? parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id)
+        : undefined);
 
     const wallet =
       api.wallet ||
-      wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id);
+      (api.wallet_client_generated_id
+        ? wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id)
+        : undefined);
 
     const transactionCategories = api.categories || [];
     const categoryNames = transactionCategories.map((cat) => cat.name).join(', ');
+    const isTransfer = !!api.transfer_id;
     const currency = wallet?.currency || 'XAF';
 
     if (!wallet) {
@@ -73,13 +78,15 @@ export const transactionMapper = {
       party: party?.name || '',
       partyId: party?.id,
       amount: formattedAmount,
-      category: categoryNames || 'Uncategorized',
+      category: categoryNames || (isTransfer ? 'Transfer' : 'Uncategorized'),
       groupId: api.group_id,
       categoryIds: transactionCategories.map((cat) => cat.id),
       wallet: wallet?.name || '',
       walletId: wallet?.id,
       description: api.description || '',
       isRecurring: api.is_recurring || false,
+      isTransfer,
+      transferId: api.transfer_id || undefined,
       files: api.files || []
     };
   },
@@ -106,11 +113,15 @@ export const transactionMapper = {
 
     const party =
       api.party ||
-      parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id);
+      (api.party_client_generated_id
+        ? parties.find((p) => p.sync_state?.client_generated_id === api.party_client_generated_id)
+        : undefined);
 
     const wallet =
       api.wallet ||
-      wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id);
+      (api.wallet_client_generated_id
+        ? wallets.find((w) => w.sync_state?.client_generated_id === api.wallet_client_generated_id)
+        : undefined);
 
     const transactionCategories = api.categories || [];
 
@@ -129,6 +140,8 @@ export const transactionMapper = {
       walletId: wallet?.id,
       description: api.description || '',
       isRecurring: api.is_recurring || false,
+      isTransfer: !!api.transfer_id,
+      transferId: api.transfer_id || undefined,
       files: api.files || []
     };
   },

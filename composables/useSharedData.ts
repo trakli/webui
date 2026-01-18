@@ -282,6 +282,20 @@ export const useSharedData = () => {
     return fromConfig || getDefaultWallet.value?.currency || 'USD';
   });
 
+  // Format wallet name with currency
+  const formatWalletName = (wallet: Wallet): string => {
+    return wallet.currency ? `${wallet.name} (${wallet.currency})` : wallet.name;
+  };
+
+  // Wallets with formatted names including currency
+  const getWalletsWithCurrency = computed(() => {
+    return wallets.value.map((w) => ({
+      ...w,
+      name: formatWalletName(w),
+      originalName: w.name
+    }));
+  });
+
   // Category management functions
   const addCategory = (category: Category) => {
     categories.value = deduplicateById([category, ...categories.value]);
@@ -409,6 +423,8 @@ export const useSharedData = () => {
     getDefaultGroup,
     getDefaultWallet,
     getDefaultCurrency,
+    getWalletsWithCurrency,
+    formatWalletName,
 
     // Load functions
     loadCategories,

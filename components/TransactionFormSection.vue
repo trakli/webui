@@ -1,6 +1,6 @@
 <template>
   <div class="form-section">
-    <FormSection :editing-item="editingItem" @submit="handleSubmit" />
+    <FormSection :editing-item="editingItem" @submit="handleSubmit" @transfer="handleTransfer" />
     <TipsSection page-name="Transaction" />
   </div>
 </template>
@@ -16,10 +16,14 @@ defineProps({
   }
 });
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits(['submit', 'transfer']);
 
 const handleSubmit = (data) => {
   emit('submit', data);
+};
+
+const handleTransfer = (data) => {
+  emit('transfer', data);
 };
 </script>
 
