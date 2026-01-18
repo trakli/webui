@@ -65,6 +65,7 @@
             :options="wallets"
             :error="walletError ? t('Wallet is required.') : ''"
             @select="handleWalletSelect"
+            @clear="selectedWalletId = null"
           />
           <span
             v-if="isWalletDefault"
@@ -85,6 +86,7 @@
             :options="groups"
             :error="categoryError ? t('Group is required.') : ''"
             @select="handleGroupSelect"
+            @clear="selectedGroupId = null"
           />
           <span
             v-if="isGroupDefault"
