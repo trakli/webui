@@ -217,20 +217,25 @@ export const useSharedData = () => {
     const map = configurationsMap.value || {};
     const configured = map['default-group'];
     if (configured) {
-      const groupId = typeof configured === 'object' ? configured.id : configured;
-      const group = groups.value.find((g) => g.id === parseInt(groupId));
-      if (group) return group;
+      const configValue = typeof configured === 'object' ? configured.id : configured;
+      const configStr = String(configValue);
+
+      const byClientId = groups.value.find((g) => g.client_generated_id === configStr);
+      if (byClientId) return byClientId;
+
+      const byId = groups.value.find((g) => String(g.id) === configStr);
+      if (byId) return byId;
     }
-    return groups.value.length > 0 ? groups.value[0] : null;
+    return null;
   });
 
-  // Default wallet from configurations (fallback to heuristic)
+  // Default wallet from configurations
   const getDefaultWallet = computed(() => {
     const map = configurationsMap.value || {};
     const configured = map['default-wallet'];
 
-    // Try to resolve wallet id from config
-    const resolveConfiguredWalletId = (): string | null => {
+    // Try to resolve wallet identifier from config
+    const resolveConfiguredValue = (): string | null => {
       if (!configured) return null;
       if (typeof configured === 'string' || typeof configured === 'number')
         return String(configured);
@@ -247,19 +252,16 @@ export const useSharedData = () => {
         ) {
           return String(configured.walletId);
         }
-        if ('name' in configured && configured.name) {
-          const byName = wallets.value.find(
-            (w) => w.name.toLowerCase() === String(configured.name).toLowerCase()
-          );
-          if (byName) return String(byName.id);
-        }
       }
       return null;
     };
 
-    const configuredId = resolveConfiguredWalletId();
-    if (configuredId) {
-      const byId = wallets.value.find((w) => String(w.id) === configuredId);
+    const configValue = resolveConfiguredValue();
+    if (configValue) {
+      const byClientId = wallets.value.find((w) => w.client_generated_id === configValue);
+      if (byClientId) return byClientId;
+
+      const byId = wallets.value.find((w) => String(w.id) === configValue);
       if (byId) return byId;
     }
 

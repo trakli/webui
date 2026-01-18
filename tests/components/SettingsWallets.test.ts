@@ -4,14 +4,22 @@ import { ref } from 'vue';
 import SettingsWallets from '@/components/settings/SettingsWallets.vue';
 
 const mockWallets = [
-  { id: 1, name: 'Main Wallet', currency: 'USD' },
-  { id: 2, name: 'Savings', currency: 'EUR' }
+  { id: 1, name: 'Main Wallet', currency: 'USD', client_generated_id: 'test-client-id-1' },
+  { id: 2, name: 'Savings', currency: 'EUR', client_generated_id: 'test-client-id-2' }
+];
+
+const mockGroups = [
+  { id: 1, name: 'Personal', client_generated_id: 'group-client-id-1' },
+  { id: 2, name: 'Work', client_generated_id: 'group-client-id-2' }
 ];
 
 const mockSharedData = {
   wallets: ref(mockWallets),
+  groups: ref(mockGroups),
   getDefaultWallet: ref(mockWallets[0]),
+  getDefaultGroup: ref(null),
   loadWallets: vi.fn().mockResolvedValue(undefined),
+  loadGroups: vi.fn().mockResolvedValue(undefined),
   loadConfigurations: vi.fn().mockResolvedValue(undefined)
 };
 
@@ -25,11 +33,25 @@ vi.mock('@/services/api/configurationsApi', () => ({
   }
 }));
 
+vi.mock('@/services/api/walletsApi', () => ({
+  default: {
+    update: vi.fn().mockResolvedValue({})
+  }
+}));
+
+vi.mock('@/services/api/groupsApi', () => ({
+  default: {
+    update: vi.fn().mockResolvedValue({})
+  }
+}));
+
 describe('SettingsWallets', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSharedData.wallets.value = mockWallets;
+    mockSharedData.groups.value = mockGroups;
     mockSharedData.getDefaultWallet.value = mockWallets[0];
+    mockSharedData.getDefaultGroup.value = null;
   });
 
   describe('wallet selection', () => {

@@ -118,10 +118,7 @@ const groupsApi = {
     try {
       const response = await api<ApiResponse<Group>>(`/groups/${id}`, {
         method: 'PUT',
-        body: JSON.stringify({
-          ...data,
-          client_id: `${crypto.randomUUID()}:${crypto.randomUUID()}`
-        }),
+        body: JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json'
         }
