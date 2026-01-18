@@ -103,6 +103,9 @@ function handleInput(event) {
 }
 
 function toggleDropdown() {
+  if (!showDropdown.value) {
+    searchQuery.value = '';
+  }
   showDropdown.value = !showDropdown.value;
 }
 
