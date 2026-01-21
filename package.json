@@ -28,6 +28,7 @@
     "libphonenumber-js": "^1.12.9",
     "lucide-vue-next": "^0.525.0",
     "nuxt": "^3.12.4",
+    "radix-vue": "^1.9.17",
     "vue": "latest",
     "vue3-apexcharts": "^1.8.0"
   },
