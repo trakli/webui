@@ -246,7 +246,7 @@ export const useStatistics = () => {
     walletId: number | null = null
   ): PartyBreakdown[] => {
     const partyMap = new Map<string, { amount: number; count: number }>();
-    const typeTransactions = filteredTransactions.filter((t) => t.type === type);
+    const typeTransactions = filteredTransactions.filter((t) => t.type === type && !t.isTransfer);
 
     let totalAmount = 0;
 
@@ -288,7 +288,7 @@ export const useStatistics = () => {
     walletId: number | null = null
   ): CategoryBreakdown[] => {
     const categoryMap = new Map<string, { amount: number; count: number }>();
-    const typeTransactions = filteredTransactions.filter((t) => t.type === type);
+    const typeTransactions = filteredTransactions.filter((t) => t.type === type && !t.isTransfer);
 
     let totalAmount = 0;
 
@@ -327,6 +327,7 @@ export const useStatistics = () => {
     const monthMap = new Map<string, { income: number; expenses: number }>();
 
     filteredTransactions.forEach((t) => {
+      if (t.isTransfer) return;
       const date = new Date(t.date + 'T00:00:00');
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const amount = parseAmount(t.amount);
@@ -359,6 +360,7 @@ export const useStatistics = () => {
     const walletMap = new Map<string, { income: number; expenses: number; count: number }>();
 
     filteredTransactions.forEach((t) => {
+      if (t.isTransfer) return;
       const { value, currency } = parseAmount(t.amount);
       // Convert to target currency for aggregated wallet view
       const convertedAmount = convertCurrency(value, currency, targetCurrency);
@@ -456,8 +458,14 @@ export const useStatistics = () => {
 
     const primaryCurrency = getPrimaryCurrency(walletId);
 
-    const incomeTransactions = walletFilteredTransactions.filter((t) => t.type === 'INCOME');
-    const expenseTransactions = walletFilteredTransactions.filter((t) => t.type === 'EXPENSE');
+    const incomeTransactions: FrontendTransaction[] = [];
+    const expenseTransactions: FrontendTransaction[] = [];
+
+    walletFilteredTransactions.forEach((t) => {
+      if (t.isTransfer) return;
+      if (t.type === 'INCOME') incomeTransactions.push(t);
+      else if (t.type === 'EXPENSE') expenseTransactions.push(t);
+    });
 
     const totalIncome = incomeTransactions.reduce((sum, t) => {
       const { value, currency } = parseAmount(t.amount);
@@ -517,7 +525,7 @@ export const useStatistics = () => {
     const previousPeriodStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
     const previousPeriodTransactions = transactions.value.filter((t) => {
       const txnDate = new Date(t.date + 'T00:00:00');
-      return txnDate >= previousPeriodStart && txnDate < start;
+      return txnDate >= previousPeriodStart && txnDate < start && !t.isTransfer;
     });
     const previousIncome = previousPeriodTransactions
       .filter(
@@ -697,13 +705,17 @@ export const useStatistics = () => {
     const response = await api.stats.fetch(params);
     const data = response.data;
 
+    const activity = data.activity || {};
+    const frequency = activity.frequency || {};
+    const incomeGrowth = data.comparisons?.previous_period?.income_change_percent || 0;
+
     // Transform API response to WalletStatistics format
     return {
       total_balance: data.overview.net_cash_flow,
       total_income: data.overview.total_income,
       total_expenses: data.overview.total_expenses,
-      transaction_count: 0,
-      unique_parties: 0,
+      transaction_count: activity.transaction_count || 0,
+      unique_parties: activity.unique_parties || 0,
       period,
       wallet_id: walletId,
       wallet_name: walletId ? wallets.value.find((w) => w.id === walletId)?.name : 'All Wallets',
@@ -724,7 +736,7 @@ export const useStatistics = () => {
               category: data.top_categories.income[0].name,
               amount: data.top_categories.income[0].amount,
               percentage: data.top_categories.income[0].percentage,
-              transaction_count: 0
+              transaction_count: data.top_categories.income[0].transaction_count || 0
             }
           : null,
         top_sources: (data.charts?.party_income || []).slice(0, 5).map((p: any) => ({
@@ -737,23 +749,18 @@ export const useStatistics = () => {
           category: c.name,
           amount: c.amount,
           percentage: c.percentage,
-          transaction_count: 0,
+          transaction_count: c.transaction_count || 0,
           type: 'INCOME' as const
         })),
-        average_transaction: 0,
+        average_transaction: activity.average_income_transaction || 0,
         frequency_analysis: {
-          daily_average: 0,
-          weekly_average: 0,
+          daily_average: frequency.per_day || 0,
+          weekly_average: frequency.per_week || 0,
           monthly_average: data.overview.avg_monthly_income
         },
         growth_trends: {
-          current_vs_previous: data.comparisons?.previous_period?.income_change_percent || 0,
-          trend_direction:
-            (data.comparisons?.previous_period?.income_change_percent || 0) > 5
-              ? 'up'
-              : (data.comparisons?.previous_period?.income_change_percent || 0) < -5
-                ? 'down'
-                : 'stable',
+          current_vs_previous: incomeGrowth,
+          trend_direction: incomeGrowth > 5 ? 'up' : incomeGrowth < -5 ? 'down' : 'stable',
           momentum: 'steady'
         }
       },
@@ -773,7 +780,7 @@ export const useStatistics = () => {
               category: data.top_categories.expenses[0].name,
               amount: data.top_categories.expenses[0].amount,
               percentage: data.top_categories.expenses[0].percentage,
-              transaction_count: 0
+              transaction_count: data.top_categories.expenses[0].transaction_count || 0
             }
           : null,
         top_destinations: (data.charts?.party_spending || []).slice(0, 5).map((p: any) => ({
@@ -786,13 +793,13 @@ export const useStatistics = () => {
           category: c.name,
           amount: c.amount,
           percentage: c.percentage,
-          transaction_count: 0,
+          transaction_count: c.transaction_count || 0,
           type: 'EXPENSE' as const
         })),
-        average_transaction: 0,
+        average_transaction: activity.average_expense_transaction || 0,
         spending_patterns: {
-          daily_average: 0,
-          weekly_average: 0,
+          daily_average: frequency.per_day || 0,
+          weekly_average: frequency.per_week || 0,
           monthly_average: data.overview.avg_monthly_expenses
         },
         budget_analysis: {
@@ -825,7 +832,15 @@ export const useStatistics = () => {
           transaction_count: c.transaction_count || 0,
           type: 'EXPENSE' as const
         })),
-        most_used_category: null
+        most_used_category: activity.most_used_category
+          ? {
+              category: activity.most_used_category.name,
+              amount: 0,
+              percentage: 0,
+              transaction_count: activity.most_used_category.transaction_count,
+              type: 'EXPENSE' as const
+            }
+          : null
       },
 
       party_breakdown: {
@@ -841,7 +856,14 @@ export const useStatistics = () => {
           percentage: p.percentage,
           transaction_count: p.transaction_count || 0
         })),
-        most_frequent_party: null
+        most_frequent_party: activity.most_frequent_party
+          ? {
+              party: activity.most_frequent_party.name,
+              amount: 0,
+              percentage: 0,
+              transaction_count: activity.most_frequent_party.transaction_count
+            }
+          : null
       },
 
       time_analysis: {
@@ -851,12 +873,16 @@ export const useStatistics = () => {
           expenses: m.expense,
           net: m.net
         })),
-        busiest_day: 'Monday',
-        transaction_frequency: { per_day: 0, per_week: 0, per_month: 0 }
+        busiest_day: activity.busiest_day || 'Monday',
+        transaction_frequency: {
+          per_day: frequency.per_day || 0,
+          per_week: frequency.per_week || 0,
+          per_month: frequency.per_month || 0
+        }
       },
 
       performance: {
-        growth_percentage: data.comparisons?.previous_period?.income_change_percent || 0,
+        growth_percentage: incomeGrowth,
         velocity: 0,
         efficiency: data.overview.savings_rate / 100,
         consistency: 0
