@@ -22,6 +22,7 @@
   --color-text-primary: #333333;
   --color-text-secondary: #374151;
   --color-text-muted: #6b7280;
+  --color-text-inverse: #ffffff;
 
   // Background colors
   --color-bg-light: #f8faf9;
@@ -78,6 +79,7 @@
   --color-text-primary: #f9fafb;
   --color-text-secondary: #e5e7eb;
   --color-text-muted: #9ca3af;
+  --color-text-inverse: #ffffff;
 
   // Background colors - darker hierarchy for better contrast
   --color-bg-light: #0f172a;
@@ -124,6 +126,7 @@ $info: var(--color-info);
 $text-primary: var(--color-text-primary);
 $text-secondary: var(--color-text-secondary);
 $text-muted: var(--color-text-muted);
+$text-inverse: var(--color-text-inverse);
 
 // Background colors
 $bg-light: var(--color-bg-light);

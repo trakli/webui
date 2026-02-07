@@ -173,7 +173,7 @@
 
 .primary-btn {
   background: $primary;
-  color: white;
+  color: $text-inverse;
 
   &:hover {
     background: $primary-hover;
@@ -206,7 +206,7 @@
   svg {
     width: 40px;
     height: 40px;
-    color: white;
+    color: $text-inverse;
   }
 }
 
