@@ -53,12 +53,14 @@
           >
             <BuildingLibraryIcon class="icon" />
             <span class="text">{{ t('Categories') }}</span>
+            <div class="nav-tooltip">{{ t('Organize your transactions') }}</div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink to="/groups" class="nav-button" active-class="selected" @click="handleNavClick">
             <UserGroupIcon class="icon" />
             <span class="text">{{ t('Groups') }}</span>
+            <div class="nav-tooltip">{{ t('Group transactions into logical buckets') }}</div>
           </NuxtLink>
         </li>
         <li>
@@ -70,6 +72,9 @@
           >
             <UserGroupIcon class="icon" />
             <span class="text">{{ t('Parties') }}</span>
+            <div class="nav-tooltip">
+              {{ t('People and organizations with whom you transact') }}
+            </div>
           </NuxtLink>
         </li>
         <li>
@@ -81,6 +86,7 @@
           >
             <WalletIcon class="icon" />
             <span class="text">{{ t('Wallets') }}</span>
+            <div class="nav-tooltip">{{ t('Accounts you spend from or receive into') }}</div>
           </NuxtLink>
         </li>
         <li>
@@ -92,6 +98,7 @@
           >
             <BellIcon class="icon" />
             <span class="text">{{ t('Reminders') }}</span>
+            <div class="nav-tooltip">{{ t('Accountability transactions') }}</div>
           </NuxtLink>
         </li>
       </ul>
@@ -252,6 +259,7 @@ const handleButtonNavClick = (path) => {
     cursor: pointer;
     transition: all 0.3s ease;
     margin-left: 10px;
+    position: relative;
 
     &:hover:not(.selected) {
       background-color: rgba(var(--color-primary-rgb), 0.15);
@@ -259,8 +267,59 @@ const handleButtonNavClick = (path) => {
       height: 52px;
     }
 
+    /* Show tooltip on hover */
+    &:hover .nav-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(10px);
+    }
+
     &.selected {
       background-color: $primary-light;
+    }
+  }
+
+  .nav-tooltip {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%) translateX(0);
+    background: $bg-card;
+    color: $text-primary;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: $shadow-md;
+    border: 1px solid $border-color;
+    margin-left: 5px;
+    z-index: 1000;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 6px solid $border-color;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-right: 5px solid $bg-card;
+      z-index: 1;
     }
   }
 

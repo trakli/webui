@@ -183,9 +183,9 @@ const previousStep = () => {
 
 .onboarding-wizard {
   width: 100%;
-  background: white;
+  background: $bg-card;
   border-radius: $radius-xl;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: $shadow-xl;
   overflow: hidden;
 }
 
@@ -245,6 +245,7 @@ const previousStep = () => {
   height: 380px;
   overflow: hidden;
   position: relative;
+  background: $bg-light;
 
   @media (max-width: $breakpoint-sm) {
     height: 420px;
@@ -286,7 +287,7 @@ const previousStep = () => {
 .step-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, $primary-light 0%, rgba(4, 120, 68, 0.1) 100%);
+  background: linear-gradient(135deg, $primary-light 0%, rgba(var(--color-primary-rgb), 0.1) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -390,7 +391,7 @@ const previousStep = () => {
 
 .primary-btn {
   background: $primary;
-  color: white;
+  color: $text-inverse;
   font-size: 1rem;
   font-weight: 600;
   border: none;
@@ -398,12 +399,12 @@ const previousStep = () => {
   padding: 0.875rem 2rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(4, 120, 68, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
 
   &:hover {
     background: $primary-hover;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(4, 120, 68, 0.4);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
   }
 
   @media (max-width: $breakpoint-sm) {
@@ -429,7 +430,7 @@ const previousStep = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: white;
+  background: $bg-white;
   color: $text-secondary;
   font-size: 0.875rem;
   font-weight: 500;
@@ -465,7 +466,7 @@ const previousStep = () => {
   font-size: 0.875rem;
   font-weight: 500;
   color: $text-secondary;
-  background: white;
+  background: $bg-white;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: 1px solid $border-gray;
