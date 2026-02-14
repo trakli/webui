@@ -36,69 +36,85 @@
         <li>
           <NuxtLink
             to="/transactions"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <RectangleGroupIcon class="icon" />
-            <span class="text">{{ t('Transactions') }}</span>
+            <div class="nav-copy">
+              <span class="text">{{ t('Transactions') }}</span>
+              <span class="subtext">{{ t('All money movements in one place') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/categories"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <BuildingLibraryIcon class="icon" />
-            <span class="text">{{ t('Categories') }}</span>
-            <div class="nav-tooltip">{{ t('Organize your transactions') }}</div>
+            <div class="nav-copy">
+              <span class="text">{{ t('Categories') }}</span>
+              <span class="subtext">{{ t('Organize transactions by type') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/groups" class="nav-button" active-class="selected" @click="handleNavClick">
+          <NuxtLink
+            to="/groups"
+            class="nav-button nav-button--with-subtext"
+            active-class="selected"
+            @click="handleNavClick"
+          >
             <UserGroupIcon class="icon" />
-            <span class="text">{{ t('Groups') }}</span>
-            <div class="nav-tooltip">{{ t('Group transactions into logical buckets') }}</div>
+            <div class="nav-copy">
+              <span class="text">{{ t('Groups') }}</span>
+              <span class="subtext">{{ t('Bundle related transactions') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/parties"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <UserGroupIcon class="icon" />
-            <span class="text">{{ t('Parties') }}</span>
-            <div class="nav-tooltip">
-              {{ t('People and organizations with whom you transact') }}
+            <div class="nav-copy">
+              <span class="text">{{ t('Parties') }}</span>
+              <span class="subtext">{{ t('People and organizations you transact with') }}</span>
             </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/wallets"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <WalletIcon class="icon" />
-            <span class="text">{{ t('Wallets') }}</span>
-            <div class="nav-tooltip">{{ t('Accounts you spend from or receive into') }}</div>
+            <div class="nav-copy">
+              <span class="text">{{ t('Wallets') }}</span>
+              <span class="subtext">{{ t('Accounts money moves through') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/reminders"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <BellIcon class="icon" />
-            <span class="text">{{ t('Reminders') }}</span>
-            <div class="nav-tooltip">{{ t('Accountability transactions') }}</div>
+            <div class="nav-copy">
+              <span class="text">{{ t('Reminders') }}</span>
+              <span class="subtext">{{ t('Track upcoming or expected transactions') }}</span>
+            </div>
           </NuxtLink>
         </li>
       </ul>
@@ -248,9 +264,9 @@ const handleButtonNavClick = (path) => {
     display: flex;
     align-items: center;
     width: calc(100% - 20px);
-    height: 56px;
+    min-height: 56px;
     border-radius: $radius-xl;
-    padding: 16px 8px;
+    padding: 12px 10px;
     gap: 12px;
     background-color: transparent;
     border: none;
@@ -263,69 +279,45 @@ const handleButtonNavClick = (path) => {
 
     &:hover:not(.selected) {
       background-color: rgba(var(--color-primary-rgb), 0.15);
-      margin: 2px 10px;
-      height: 52px;
-    }
-
-    /* Show tooltip on hover */
-    &:hover .nav-tooltip {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(-50%) translateX(10px);
     }
 
     &.selected {
       background-color: $primary-light;
+
+      .subtext {
+        color: $text-secondary;
+      }
     }
   }
 
-  .nav-tooltip {
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%) translateX(0);
-    background: $bg-card;
-    color: $text-primary;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: $shadow-md;
-    border: 1px solid $border-color;
-    margin-left: 5px;
-    z-index: 1000;
+  .nav-button--with-subtext {
+    align-items: flex-start;
+  }
 
-    &::after {
-      content: '';
-      position: absolute;
-      left: -6px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-top: 6px solid transparent;
-      border-bottom: 6px solid transparent;
-      border-right: 6px solid $border-color;
-    }
+  .nav-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: -5px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-top: 5px solid transparent;
-      border-bottom: 5px solid transparent;
-      border-right: 5px solid $bg-card;
-      z-index: 1;
-    }
+  .text {
+    font-size: $font-size-sm;
+    line-height: 1.2;
+    color: inherit;
+  }
+
+  .subtext {
+    font-size: $font-size-xs;
+    line-height: 1.35;
+    color: $text-muted;
   }
 
   .icon {
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
   .close-button {
