@@ -7,6 +7,41 @@ import type {
 } from '~/types/wallet';
 import { buildIconPayload, extractResponseData } from './apiHelpers';
 
+function createApiBusinessError(message: string, errors: string[] = []): Error {
+  const err = new Error(message) as Error & { _data?: { message: string; errors: string[] } };
+  err._data = { message, errors };
+  return err;
+}
+
+function extractWalletMutationResult(
+  response: ApiResponse<Wallet> | Wallet | null | undefined,
+  fallbackMessage: string
+): Wallet {
+  if (!response) {
+    throw createApiBusinessError(fallbackMessage);
+  }
+
+  if (
+    typeof response === 'object' &&
+    'id' in response &&
+    typeof (response as Wallet).id === 'number'
+  ) {
+    return response as Wallet;
+  }
+
+  const apiResponse = response as ApiResponse<Wallet>;
+
+  if (apiResponse.success === false) {
+    throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+  }
+
+  if (apiResponse.data) {
+    return apiResponse.data;
+  }
+
+  throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+}
+
 /**
  * Wallets API Service
  * Handles all HTTP requests to the wallets endpoints
@@ -53,7 +88,7 @@ const walletsApi = {
         method: 'POST',
         body: payload
       });
-      return response?.data || null;
+      return extractWalletMutationResult(response, 'Failed to create wallet');
     } catch (error) {
       console.error('Error creating wallet:', error);
       throw error;
@@ -77,7 +112,7 @@ const walletsApi = {
         method: 'PUT',
         body: payload
       });
-      return response?.data || null;
+      return extractWalletMutationResult(response, 'Failed to update wallet');
     } catch (error) {
       console.error('Error updating wallet:', error);
       throw error;

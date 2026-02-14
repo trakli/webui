@@ -136,6 +136,8 @@
       "
       class="submit-button"
       :class="{ 'submit-button--expense': isOutcomeSelected }"
+      :disabled="props.isSubmitting"
+      :loading="props.isSubmitting"
       @click="onSubmit"
     >
       <template #left-icon>
@@ -165,6 +167,10 @@ const props = defineProps({
   editingItem: {
     type: Object,
     default: null
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -215,6 +221,10 @@ function validateRequiredFields() {
 }
 
 function onSubmit() {
+  if (props.isSubmitting) {
+    return;
+  }
+
   const isValid = validateRequiredFields();
   if (!isValid) {
     return;

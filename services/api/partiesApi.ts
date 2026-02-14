@@ -7,6 +7,41 @@ import type {
 } from '~/types/party';
 import { buildIconPayload, extractResponseData } from './apiHelpers';
 
+function createApiBusinessError(message: string, errors: string[] = []): Error {
+  const err = new Error(message) as Error & { _data?: { message: string; errors: string[] } };
+  err._data = { message, errors };
+  return err;
+}
+
+function extractPartyMutationResult(
+  response: ApiResponse<Party> | Party | null | undefined,
+  fallbackMessage: string
+): Party {
+  if (!response) {
+    throw createApiBusinessError(fallbackMessage);
+  }
+
+  if (
+    typeof response === 'object' &&
+    'id' in response &&
+    typeof (response as Party).id === 'number'
+  ) {
+    return response as Party;
+  }
+
+  const apiResponse = response as ApiResponse<Party>;
+
+  if (apiResponse.success === false) {
+    throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+  }
+
+  if (apiResponse.data) {
+    return apiResponse.data;
+  }
+
+  throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+}
+
 /**
  * Parties API Service
  * Handles all HTTP requests to the parties endpoints
@@ -52,7 +87,7 @@ const partiesApi = {
         method: 'POST',
         body: payload
       });
-      return response?.data || null;
+      return extractPartyMutationResult(response, 'Failed to create party');
     } catch (error) {
       console.error('Error creating party:', error);
       throw error;
@@ -76,7 +111,7 @@ const partiesApi = {
         method: 'PUT',
         body: payload
       });
-      return response?.data || null;
+      return extractPartyMutationResult(response, 'Failed to update party');
     } catch (error) {
       console.error('Error updating party:', error);
       throw error;

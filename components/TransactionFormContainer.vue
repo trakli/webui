@@ -3,6 +3,7 @@
     <TransactionForm
       :is-outcome-selected="isOutcomeSelected"
       :editing-item="editingItem"
+      :is-submitting="isSubmitting"
       @submit="handleSubmit"
     />
   </div>
@@ -13,7 +14,8 @@ import TransactionForm from './TransactionForm.vue';
 
 defineProps({
   editingItem: { type: Object, default: null },
-  isOutcomeSelected: { type: Boolean, default: false }
+  isOutcomeSelected: { type: Boolean, default: false },
+  isSubmitting: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['submit']);

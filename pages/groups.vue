@@ -6,6 +6,8 @@
         <div class="form-wrapper">
           <GroupForm
             :editing-item="editingItem"
+            :api-error="submitError"
+            :is-submitting="isSubmitting"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
@@ -40,6 +42,7 @@ import { ref, onMounted } from 'vue';
 import { useGroups } from '@/composables/useGroups';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
+import { extractApiErrors } from '@/utils/apiErrors';
 import ContentTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import GroupForm from '@/components/groups/GroupForm.vue';
@@ -50,6 +53,8 @@ const { t } = useI18n();
 
 const showForm = ref(false);
 const editingItem = ref(null);
+const isSubmitting = ref(false);
+const submitError = ref('');
 const { isTabletOrBelow } = useSidebar();
 
 const { groups, isLoading, error, fetchGroups, createGroup, updateGroup, deleteGroup } =
@@ -57,44 +62,95 @@ const { groups, isLoading, error, fetchGroups, createGroup, updateGroup, deleteG
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
 
+const normalizeGroupName = (value) => `${value || ''}`.trim().toLowerCase();
+
+const isDuplicateGroup = (name, ignoreId = null) => {
+  const normalized = normalizeGroupName(name);
+  if (!normalized) return false;
+
+  return groups.value.some((group) => {
+    if (ignoreId && group.id === ignoreId) return false;
+    return normalizeGroupName(group.name) === normalized;
+  });
+};
+
+const isDuplicateGroupMessage = (message) => {
+  const normalized = `${message || ''}`.toLowerCase();
+  return normalized.includes('already exists') || normalized.includes('existe déjà');
+};
+
 async function loadGroups() {
   await fetchGroups();
 }
 
 function handleOpenFormForCreation() {
   editingItem.value = null;
+  submitError.value = '';
   showForm.value = true;
 }
 
 function handleFormClose() {
+  submitError.value = '';
   showForm.value = false;
   editingItem.value = null;
 }
 
 async function handleCreate(data) {
+  if (isSubmitting.value) return;
+
+  if (isDuplicateGroup(data?.name)) {
+    submitError.value = t('Group already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     await createGroup(data);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicateGroupMessage(message);
+    submitError.value = isDuplicate ? t('Group already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to create group. Please try again.'));
+    }
     console.error('Failed to create group:', err);
-    // Optionally, display a notification to the user
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleUpdate(data) {
-  if (!data.id) return;
+  if (isSubmitting.value || !data.id) return;
+
+  if (isDuplicateGroup(data?.name, data.id)) {
+    submitError.value = t('Group already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     // Extract id and pass the rest as update data
     const { id, ...updateData } = data;
     await updateGroup(id, updateData);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicateGroupMessage(message);
+    submitError.value = isDuplicate ? t('Group already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to update group. Please try again.'));
+    }
     console.error('Failed to update group:', err);
-    // Optionally, display a notification to the user
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleEdit(item) {
+  submitError.value = '';
   editingItem.value = item;
   showForm.value = true;
 }

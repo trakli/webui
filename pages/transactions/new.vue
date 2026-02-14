@@ -14,7 +14,11 @@
     <div v-if="errorMessage" class="error-message">
       <strong>{{ t('Error:') }}</strong> {{ errorMessage }}
     </div>
-    <TransactionFormSection @submit="handleSubmit" @transfer="handleTransfer" />
+    <TransactionFormSection
+      :is-submitting="isSubmitting"
+      @submit="handleSubmit"
+      @transfer="handleTransfer"
+    />
   </div>
 </template>
 
@@ -34,8 +38,12 @@ const { addTransaction, refreshTransactions } = useTransactions();
 const sharedData = useSharedData();
 
 const errorMessage = ref('');
+const isSubmitting = ref(false);
 
 const handleSubmit = async (data) => {
+  if (isSubmitting.value) return;
+
+  isSubmitting.value = true;
   errorMessage.value = '';
   try {
     await addTransaction(data);
@@ -43,10 +51,15 @@ const handleSubmit = async (data) => {
   } catch (error) {
     console.error('Failed to add transaction:', error);
     handleError(error);
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
 const handleTransfer = async (data) => {
+  if (isSubmitting.value) return;
+
+  isSubmitting.value = true;
   errorMessage.value = '';
   try {
     await transfersApi.create(data);
@@ -56,6 +69,8 @@ const handleTransfer = async (data) => {
   } catch (error) {
     console.error('Failed to create transfer:', error);
     handleError(error);
+  } finally {
+    isSubmitting.value = false;
   }
 };
 

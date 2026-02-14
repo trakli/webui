@@ -6,6 +6,8 @@
         <div class="form-wrapper">
           <PartiesForm
             :editing-item="editingItem"
+            :api-error="submitError"
+            :is-submitting="isSubmitting"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
@@ -48,6 +50,7 @@ import { useTransactions } from '@/composables/useTransactions';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import { parseAmount } from '@/utils/currency';
+import { extractApiErrors } from '@/utils/apiErrors';
 import ContentTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import PartiesForm from '@/components/PartiesForm.vue';
@@ -72,6 +75,8 @@ const cardFields = [{ key: 'type', label: 'Type', render: formatType }];
 
 const showForm = ref(false);
 const editingItem = ref(null);
+const isSubmitting = ref(false);
+const submitError = ref('');
 const { isTabletOrBelow } = useSidebar();
 
 const {
@@ -123,6 +128,24 @@ const parties = computed(() => {
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
 
+const normalizePartyName = (value) => `${value || ''}`.trim().toLowerCase();
+
+const isDuplicateParty = (name, type, ignoreId = null) => {
+  const normalized = normalizePartyName(name);
+  if (!normalized || !type) return false;
+
+  return rawParties.value.some((party) => {
+    if (party.type !== type) return false;
+    if (ignoreId && party.id === ignoreId) return false;
+    return normalizePartyName(party.name) === normalized;
+  });
+};
+
+const isDuplicatePartyMessage = (message) => {
+  const normalized = `${message || ''}`.toLowerCase();
+  return normalized.includes('already exists') || normalized.includes('existe déjà');
+};
+
 async function loadParties() {
   try {
     // Load parties (no required parameters like wallets)
@@ -135,35 +158,71 @@ async function loadParties() {
 
 function handleOpenFormForCreation() {
   editingItem.value = null;
+  submitError.value = '';
   showForm.value = true;
 }
 
 function handleFormClose() {
+  submitError.value = '';
   showForm.value = false;
   editingItem.value = null;
 }
 
 async function handleCreate(data) {
+  if (isSubmitting.value) return;
+
+  if (isDuplicateParty(data?.name, data?.type)) {
+    submitError.value = t('Party already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     await createParty(data);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicatePartyMessage(message);
+    submitError.value = isDuplicate ? t('Party already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to create party. Please try again.'));
+    }
     console.error('Failed to create party:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleUpdate(data) {
-  if (!data.id) return;
+  if (isSubmitting.value || !data.id) return;
+
+  if (isDuplicateParty(data?.name, data?.type, data.id)) {
+    submitError.value = t('Party already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     const { id, ...updateData } = data;
     await updateParty(id, updateData);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicatePartyMessage(message);
+    submitError.value = isDuplicate ? t('Party already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to update party. Please try again.'));
+    }
     console.error('Failed to update party:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 function handleEdit(item) {
+  submitError.value = '';
   editingItem.value = item;
   showForm.value = true;
 }

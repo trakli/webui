@@ -30,6 +30,7 @@
       <TransactionFormContainer
         :editing-item="transactionToEdit"
         :is-outcome-selected="transactionToEdit?.type === 'EXPENSE'"
+        :is-submitting="isSubmitting"
         @submit="handleSubmit"
       />
       <TipsSection page-name="Transaction" />
@@ -54,8 +55,12 @@ const { updateTransaction, getTransactionForEdit } = useTransactions();
 const errorMessage = ref('');
 const transactionToEdit = ref(null);
 const isLoadingTransaction = ref(false);
+const isSubmitting = ref(false);
 
 const handleSubmit = async (data) => {
+  if (isSubmitting.value) return;
+
+  isSubmitting.value = true;
   errorMessage.value = '';
   try {
     await updateTransaction(route.params.id, data);
@@ -74,6 +79,8 @@ const handleSubmit = async (data) => {
     } else {
       errorMessage.value = t('Failed to update transaction. Please check all fields.');
     }
+  } finally {
+    isSubmitting.value = false;
   }
 };
 

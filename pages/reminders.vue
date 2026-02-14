@@ -11,6 +11,8 @@
         <div class="form-wrapper">
           <ReminderForm
             :editing-item="editingItem"
+            :api-error="submitError"
+            :is-submitting="isSubmitting"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
@@ -130,6 +132,7 @@ import {
 } from 'lucide-vue-next';
 import { useReminders } from '@/composables/useReminders';
 import { useNotifications } from '@/composables/useNotifications';
+import { extractApiErrors } from '@/utils/apiErrors';
 import ContentTopCard from '@/components/TTopCard.vue';
 import ReminderForm from '@/components/reminders/ReminderForm.vue';
 
@@ -142,6 +145,8 @@ definePageMeta({
 
 const showForm = ref(false);
 const editingItem = ref(null);
+const isSubmitting = ref(false);
+const submitError = ref('');
 
 const {
   reminders,
@@ -159,39 +164,55 @@ const { confirmDelete, showSuccess, showError } = useNotifications();
 
 function handleOpenFormForCreation() {
   editingItem.value = null;
+  submitError.value = '';
   showForm.value = true;
 }
 
 function handleFormClose() {
+  submitError.value = '';
   showForm.value = false;
   editingItem.value = null;
 }
 
 async function handleCreate(data) {
+  if (isSubmitting.value) return;
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     await createReminder(data);
     showSuccess(t('Reminder created'), t('Your reminder has been created successfully'));
     handleFormClose();
   } catch (err) {
+    submitError.value = extractApiErrors(err);
     showError(t('Error'), t('Failed to create reminder'));
     console.error('Failed to create reminder:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleUpdate(data) {
-  if (!data.id) return;
+  if (isSubmitting.value || !data.id) return;
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     const { id, ...updateData } = data;
     await updateReminder(id, updateData);
     showSuccess(t('Reminder updated'), t('Your reminder has been updated successfully'));
     handleFormClose();
   } catch (err) {
+    submitError.value = extractApiErrors(err);
     showError(t('Error'), t('Failed to update reminder'));
     console.error('Failed to update reminder:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 function handleEdit(item) {
+  submitError.value = '';
   editingItem.value = item;
   showForm.value = true;
 }
