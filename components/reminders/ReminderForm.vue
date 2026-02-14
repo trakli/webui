@@ -17,6 +17,7 @@
           :placeholder="t('e.g., Review weekly expenses')"
           required
         />
+        <div v-if="props.apiError" class="error-text">{{ props.apiError }}</div>
       </div>
 
       <div class="form-group">
@@ -87,8 +88,8 @@
         <button type="button" class="btn btn-secondary" @click="$emit('close')">
           {{ t('Cancel') }}
         </button>
-        <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-          <Loader2 v-if="isSubmitting" class="spinner" />
+        <button type="submit" class="btn btn-primary" :disabled="props.isSubmitting">
+          <Loader2 v-if="props.isSubmitting" class="spinner" />
           {{ isEditing ? t('Update Reminder') : t('Create Reminder') }}
         </button>
       </div>
@@ -106,13 +107,20 @@ const props = defineProps({
   editingItem: {
     type: Object,
     default: null
+  },
+  apiError: {
+    type: String,
+    default: ''
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
   }
 });
 
 const emit = defineEmits(['created', 'updated', 'close']);
 
 const isEditing = computed(() => !!props.editingItem);
-const isSubmitting = ref(false);
 const repeatOption = ref('none');
 
 const form = reactive({
@@ -185,28 +193,27 @@ function getDefaultDateTime() {
   return now.toISOString().slice(0, 16);
 }
 
-async function handleSubmit() {
-  isSubmitting.value = true;
-
-  try {
-    const data = {
-      title: form.title,
-      description: form.description || undefined,
-      type: form.type,
-      trigger_at: new Date(form.trigger_at).toISOString(),
-      timezone: form.timezone,
-      priority: form.priority,
-      repeat_rule: form.repeat_rule || undefined
-    };
-
-    if (isEditing.value) {
-      emit('updated', { id: props.editingItem.id, ...data });
-    } else {
-      emit('created', data);
-    }
-  } finally {
-    isSubmitting.value = false;
+function handleSubmit() {
+  if (props.isSubmitting) {
+    return;
   }
+
+  const data = {
+    title: form.title,
+    description: form.description || undefined,
+    type: form.type,
+    trigger_at: new Date(form.trigger_at).toISOString(),
+    timezone: form.timezone,
+    priority: form.priority,
+    repeat_rule: form.repeat_rule || undefined
+  };
+
+  if (isEditing.value) {
+    emit('updated', { id: props.editingItem.id, ...data });
+    return;
+  }
+
+  emit('created', data);
 }
 
 onMounted(() => {

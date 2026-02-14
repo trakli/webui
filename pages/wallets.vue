@@ -10,6 +10,8 @@
         <div class="form-wrapper">
           <WalletForm
             :editing-item="editingItem"
+            :api-error="submitError"
+            :is-submitting="isSubmitting"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
@@ -58,6 +60,7 @@ import { useSharedData } from '@/composables/useSharedData';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import { getCurrencySymbol } from '@/utils/currency';
+import { extractApiErrors } from '@/utils/apiErrors';
 import ContentTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import WalletForm from '@/components/WalletForm.vue';
@@ -91,6 +94,8 @@ const cardFields = [
 
 const showForm = ref(false);
 const editingItem = ref(null);
+const isSubmitting = ref(false);
+const submitError = ref('');
 const { isTabletOrBelow } = useSidebar();
 const sharedData = useSharedData();
 
@@ -98,6 +103,23 @@ const { wallets, isLoading, error, fetchWallets, createWallet, updateWallet, del
   useWallets();
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
+
+const normalizeWalletName = (value) => `${value || ''}`.trim().toLowerCase();
+
+const isDuplicateWallet = (name, ignoreId = null) => {
+  const normalized = normalizeWalletName(name);
+  if (!normalized) return false;
+
+  return wallets.value.some((wallet) => {
+    if (ignoreId && wallet.id === ignoreId) return false;
+    return normalizeWalletName(wallet.name) === normalized;
+  });
+};
+
+const isDuplicateWalletMessage = (message) => {
+  const normalized = `${message || ''}`.toLowerCase();
+  return normalized.includes('already exists') || normalized.includes('existe déjà');
+};
 
 const defaultWalletId = computed(() => {
   const defaultWallet = sharedData.getDefaultWallet?.value;
@@ -117,35 +139,71 @@ async function loadWallets() {
 
 function handleOpenFormForCreation() {
   editingItem.value = null;
+  submitError.value = '';
   showForm.value = true;
 }
 
 function handleFormClose() {
+  submitError.value = '';
   showForm.value = false;
   editingItem.value = null;
 }
 
 async function handleCreate(data) {
+  if (isSubmitting.value) return;
+
+  if (isDuplicateWallet(data?.name)) {
+    submitError.value = t('Wallet already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     await createWallet(data);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicateWalletMessage(message);
+    submitError.value = isDuplicate ? t('Wallet already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to create wallet. Please try again.'));
+    }
     console.error('Failed to create wallet:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleUpdate(data) {
-  if (!data.id) return;
+  if (isSubmitting.value || !data.id) return;
+
+  if (isDuplicateWallet(data?.name, data.id)) {
+    submitError.value = t('Wallet already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     const { id, ...updateData } = data;
     await updateWallet(id, updateData);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicateWalletMessage(message);
+    submitError.value = isDuplicate ? t('Wallet already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to update wallet. Please try again.'));
+    }
     console.error('Failed to update wallet:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleEdit(item) {
+  submitError.value = '';
   editingItem.value = item;
   showForm.value = true;
 }

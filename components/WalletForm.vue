@@ -16,11 +16,12 @@
             v-model="form.name"
             type="text"
             class="form-input"
-            :class="{ error: nameError }"
+            :class="{ error: nameError || props.apiError }"
             :placeholder="t('Enter wallet name')"
             required
           />
           <div v-if="nameError" class="error-text">{{ t('Wallet name is required.') }}</div>
+          <div v-if="props.apiError" class="error-text">{{ props.apiError }}</div>
         </div>
         <div class="icon-col">
           <button
@@ -120,7 +121,7 @@
       <button type="button" class="btn btn-secondary" @click="handleFormClose">
         {{ t('Cancel') }}
       </button>
-      <button type="submit" class="btn btn-primary">
+      <button type="submit" class="btn btn-primary" :disabled="props.isSubmitting">
         {{ isEditing ? t('Update Wallet') : t('Create Wallet') }}
       </button>
     </div>
@@ -140,6 +141,14 @@ const props = defineProps({
   editingItem: {
     type: Object,
     default: null
+  },
+  apiError: {
+    type: String,
+    default: ''
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -266,7 +275,11 @@ function validateForm() {
   return isValid;
 }
 
-async function handleSubmit() {
+function handleSubmit() {
+  if (props.isSubmitting) {
+    return;
+  }
+
   if (!form.value.currency || form.value.currency.trim() === '') {
     form.value.currency = defaultCurrency.value;
   }
@@ -276,33 +289,28 @@ async function handleSubmit() {
     return;
   }
 
-  try {
-    const formData = {
-      name: form.value.name.trim(),
-      description: form.value.description.trim(),
-      type: form.value.type.trim(),
-      currency: form.value.currency,
-      balance: form.value.balance || 0
-    };
-    if (form.value.icon && form.value.icon.trim() !== '') {
-      formData.icon = form.value.icon;
-      formData.icon_type = 'image';
-    }
-
-    if (isEditing.value) {
-      const updatedItem = {
-        id: props.editingItem.id,
-        ...formData
-      };
-      emit('updated', updatedItem);
-    } else {
-      emit('created', formData);
-    }
-
-    handleFormClose();
-  } catch (err) {
-    console.error('Error submitting form:', err);
+  const formData = {
+    name: form.value.name.trim(),
+    description: form.value.description.trim(),
+    type: form.value.type.trim(),
+    currency: form.value.currency,
+    balance: form.value.balance || 0
+  };
+  if (form.value.icon && form.value.icon.trim() !== '') {
+    formData.icon = form.value.icon;
+    formData.icon_type = 'image';
   }
+
+  if (isEditing.value) {
+    const updatedItem = {
+      id: props.editingItem.id,
+      ...formData
+    };
+    emit('updated', updatedItem);
+    return;
+  }
+
+  emit('created', formData);
 }
 
 function handleFormClose() {
