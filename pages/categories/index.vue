@@ -10,6 +10,8 @@
         <div class="form-wrapper">
           <CategoryForm
             :editing-item="editingItem"
+            :api-error="submitError"
+            :is-submitting="isSubmitting"
             @created="handleCreate"
             @updated="handleUpdate"
             @close="handleFormClose"
@@ -80,6 +82,7 @@ import { useCategories } from '@/composables/useCategories';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
 import { useSharedData } from '@/composables/useSharedData';
+import { extractApiErrors } from '@/utils/apiErrors';
 import ContentTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import CategoryForm from '@/components/categories/CategoryForm.vue';
@@ -91,6 +94,8 @@ const { t } = useI18n();
 const showForm = ref(false);
 const editingItem = ref(null);
 const activeTab = ref('income');
+const isSubmitting = ref(false);
+const submitError = ref('');
 const { isTabletOrBelow } = useSidebar();
 
 // Get shared data for filtered categories
@@ -111,6 +116,24 @@ const currentCategoryType = computed(() => (activeTab.value === 'income' ? 'Inco
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
 
+const normalizeCategoryName = (value) => `${value || ''}`.trim().toLowerCase();
+
+const isDuplicateCategory = (name, type, ignoreId = null) => {
+  const normalized = normalizeCategoryName(name);
+  if (!normalized || !type) return false;
+
+  return sharedData.categories.value.some((category) => {
+    if (category.type !== type) return false;
+    if (ignoreId && category.id === ignoreId) return false;
+    return normalizeCategoryName(category.name) === normalized;
+  });
+};
+
+const isDuplicateCategoryMessage = (message) => {
+  const normalized = `${message || ''}`.toLowerCase();
+  return normalized.includes('already exists') || normalized.includes('existe déjà');
+};
+
 async function loadCategories() {
   try {
     // Load all data through shared data composable
@@ -129,35 +152,71 @@ async function loadCategories() {
 
 function handleOpenFormForCreation() {
   editingItem.value = null;
+  submitError.value = '';
   showForm.value = true;
 }
 
 function handleFormClose() {
+  submitError.value = '';
   showForm.value = false;
   editingItem.value = null;
 }
 
 async function handleCreate(data) {
+  if (isSubmitting.value) return;
+
+  if (isDuplicateCategory(data?.name, data?.type)) {
+    submitError.value = t('Category already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     await createCategory(data);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicateCategoryMessage(message);
+    submitError.value = isDuplicate ? t('Category already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to create category. Please try again.'));
+    }
     console.error('Failed to create category:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleUpdate(data) {
-  if (!data.id) return;
+  if (isSubmitting.value || !data.id) return;
+
+  if (isDuplicateCategory(data?.name, data?.type, data.id)) {
+    submitError.value = t('Category already exists');
+    return;
+  }
+
+  isSubmitting.value = true;
+  submitError.value = '';
   try {
     const { id, ...updateData } = data;
     await updateCategory(id, updateData);
     handleFormClose();
   } catch (err) {
+    const message = extractApiErrors(err);
+    const isDuplicate = isDuplicateCategoryMessage(message);
+    submitError.value = isDuplicate ? t('Category already exists') : message;
+    if (!isDuplicate) {
+      showError(t('Error'), submitError.value || t('Failed to update category. Please try again.'));
+    }
     console.error('Failed to update category:', err);
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
 async function handleEdit(item) {
+  submitError.value = '';
   editingItem.value = item;
   showForm.value = true;
 }

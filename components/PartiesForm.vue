@@ -16,10 +16,11 @@
             v-model="form.name"
             type="text"
             class="form-input"
-            :class="{ error: nameError }"
+            :class="{ error: nameError || props.apiError }"
             :placeholder="t('Enter party name')"
           />
           <div v-if="nameError" class="error-text">{{ t('Party name is required.') }}</div>
+          <div v-if="props.apiError" class="error-text">{{ props.apiError }}</div>
         </div>
         <div class="icon-col">
           <button
@@ -86,7 +87,7 @@
       <button type="button" class="btn btn-secondary" @click="handleClose">
         {{ t('Cancel') }}
       </button>
-      <button type="submit" class="btn btn-primary">
+      <button type="submit" class="btn btn-primary" :disabled="props.isSubmitting">
         {{ isEditing ? t('Update Party') : t('Create Party') }}
       </button>
     </div>
@@ -94,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import IconPicker from './IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
 import { ImagePlus, X } from 'lucide-vue-next';
@@ -105,6 +106,14 @@ const props = defineProps({
   editingItem: {
     type: Object,
     default: null
+  },
+  apiError: {
+    type: String,
+    default: ''
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -207,44 +216,36 @@ function validateForm() {
   return isValid;
 }
 
-async function handleSubmit() {
+function handleSubmit() {
+  if (props.isSubmitting) {
+    return;
+  }
+
   // Validate all fields
   if (!validateForm()) {
     return;
   }
 
-  try {
-    const formData = {
-      name: form.value.name.trim(),
-      type: form.value.type,
-      description: form.value.description.trim()
-    };
-    if (form.value.icon && form.value.icon.trim() !== '') {
-      formData.icon = form.value.icon;
-      formData.icon_type = 'image';
-    }
-
-    if (isEditing.value) {
-      const updatedItem = {
-        id: props.editingItem.id,
-        ...formData
-      };
-      emit('updated', updatedItem);
-    } else {
-      emit('created', formData);
-    }
-
-    // give the parent a tick to handle the event (avoid race)
-    await nextTick();
-
-    // now close
-    emit('close');
-  } catch (err) {
-    console.error('Error submitting form:', err);
-  } finally {
-    // reset form and errors
-    resetForm();
+  const formData = {
+    name: form.value.name.trim(),
+    type: form.value.type,
+    description: form.value.description.trim()
+  };
+  if (form.value.icon && form.value.icon.trim() !== '') {
+    formData.icon = form.value.icon;
+    formData.icon_type = 'image';
   }
+
+  if (isEditing.value) {
+    const updatedItem = {
+      id: props.editingItem.id,
+      ...formData
+    };
+    emit('updated', updatedItem);
+    return;
+  }
+
+  emit('created', formData);
 }
 
 function onIconSelected() {

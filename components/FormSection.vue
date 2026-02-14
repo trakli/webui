@@ -4,6 +4,7 @@
       <button
         class="tab-button tab-button--expense"
         :class="{ active: isExpenseSelected }"
+        :disabled="props.isSubmitting"
         @click="selectExpense"
       >
         <ArrowUpTrayIcon class="tab-icon" />
@@ -12,6 +13,7 @@
       <button
         class="tab-button tab-button--income"
         :class="{ active: isIncomeSelected }"
+        :disabled="props.isSubmitting"
         @click="selectIncome"
       >
         <ArrowDownTrayIcon class="tab-icon" />
@@ -20,6 +22,7 @@
       <button
         class="tab-button tab-button--transfer"
         :class="{ active: isTransferSelected }"
+        :disabled="props.isSubmitting"
         @click="selectTransfer"
       >
         <ArrowsRightLeftIcon class="tab-icon" />
@@ -32,9 +35,14 @@
         v-if="!isTransferSelected"
         :is-outcome-selected="isExpenseSelected"
         :editing-item="props.editingItem"
+        :is-submitting="props.isSubmitting"
         @submit="handleTransactionSubmit"
       />
-      <TransferFormContainer v-else @submit="handleTransferSubmit" />
+      <TransferFormContainer
+        v-else
+        :is-submitting="props.isSubmitting"
+        @submit="handleTransferSubmit"
+      />
     </div>
   </div>
 </template>
@@ -48,7 +56,8 @@ import TransferFormContainer from './TransferFormContainer.vue';
 const { t } = useI18n();
 
 const props = defineProps({
-  editingItem: { type: Object, default: null }
+  editingItem: { type: Object, default: null },
+  isSubmitting: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['submit', 'transfer']);
@@ -151,6 +160,12 @@ watch(
   &:hover {
     background: $bg-slate;
     color: $primary;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 
   &.active {

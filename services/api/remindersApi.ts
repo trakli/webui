@@ -8,6 +8,40 @@ import type {
 } from '~/types/reminder';
 import { extractResponseData } from './apiHelpers';
 
+function createApiBusinessError(message: string, errors: string[] = []): Error {
+  const err = new Error(message) as Error & { _data?: { message: string; errors: string[] } };
+  err._data = { message, errors };
+  return err;
+}
+
+function extractReminderMutationResult(
+  response: ApiResponse<Reminder> | Reminder | null | undefined,
+  fallbackMessage: string
+): Reminder {
+  if (!response) {
+    throw createApiBusinessError(fallbackMessage);
+  }
+
+  if (
+    typeof response === 'object' &&
+    'id' in response &&
+    typeof (response as Reminder).id === 'number'
+  ) {
+    return response as Reminder;
+  }
+
+  const apiResponse = response as ApiResponse<Reminder>;
+
+  if (apiResponse.success === false) {
+    throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+  }
+
+  if (apiResponse.data) {
+    return apiResponse.data;
+  }
+
+  throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+}
 const remindersApi = {
   async fetchAll(): Promise<RemindersResponse> {
     const api = useApi();
@@ -23,7 +57,7 @@ const remindersApi = {
     const api = useApi();
     try {
       const response = await api<ApiResponse<Reminder>>(`/reminders/${id}`);
-      return response?.data || null;
+      return extractReminderMutationResult(response, 'Failed to fetch reminder');
     } catch (error) {
       console.error('Error fetching reminder:', error);
       throw error;
@@ -37,7 +71,7 @@ const remindersApi = {
         method: 'POST',
         body: data
       });
-      return response?.data || null;
+      return extractReminderMutationResult(response, 'Failed to create reminder');
     } catch (error) {
       console.error('Error creating reminder:', error);
       throw error;
@@ -51,7 +85,7 @@ const remindersApi = {
         method: 'PUT',
         body: data
       });
-      return response?.data || null;
+      return extractReminderMutationResult(response, 'Failed to update reminder');
     } catch (error) {
       console.error('Error updating reminder:', error);
       throw error;
@@ -78,7 +112,7 @@ const remindersApi = {
         method: 'POST',
         body: { duration } as ReminderSnoozePayload
       });
-      return response?.data || null;
+      return extractReminderMutationResult(response, 'Failed to snooze reminder');
     } catch (error) {
       console.error('Error snoozing reminder:', error);
       throw error;
@@ -91,7 +125,7 @@ const remindersApi = {
       const response = await api<ApiResponse<Reminder>>(`/reminders/${id}/pause`, {
         method: 'POST'
       });
-      return response?.data || null;
+      return extractReminderMutationResult(response, 'Failed to pause reminder');
     } catch (error) {
       console.error('Error pausing reminder:', error);
       throw error;
@@ -104,7 +138,7 @@ const remindersApi = {
       const response = await api<ApiResponse<Reminder>>(`/reminders/${id}/resume`, {
         method: 'POST'
       });
-      return response?.data || null;
+      return extractReminderMutationResult(response, 'Failed to resume reminder');
     } catch (error) {
       console.error('Error resuming reminder:', error);
       throw error;

@@ -36,62 +36,85 @@
         <li>
           <NuxtLink
             to="/transactions"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <RectangleGroupIcon class="icon" />
-            <span class="text">{{ t('Transactions') }}</span>
+            <div class="nav-copy">
+              <span class="text">{{ t('Transactions') }}</span>
+              <span class="subtext">{{ t('All money movements in one place') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/categories"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <BuildingLibraryIcon class="icon" />
-            <span class="text">{{ t('Categories') }}</span>
+            <div class="nav-copy">
+              <span class="text">{{ t('Categories') }}</span>
+              <span class="subtext">{{ t('Organize transactions by type') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink to="/groups" class="nav-button" active-class="selected" @click="handleNavClick">
+          <NuxtLink
+            to="/groups"
+            class="nav-button nav-button--with-subtext"
+            active-class="selected"
+            @click="handleNavClick"
+          >
             <UserGroupIcon class="icon" />
-            <span class="text">{{ t('Groups') }}</span>
+            <div class="nav-copy">
+              <span class="text">{{ t('Groups') }}</span>
+              <span class="subtext">{{ t('Bundle related transactions') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/parties"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <UserGroupIcon class="icon" />
-            <span class="text">{{ t('Parties') }}</span>
+            <div class="nav-copy">
+              <span class="text">{{ t('Parties') }}</span>
+              <span class="subtext">{{ t('People and organizations you transact with') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/wallets"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <WalletIcon class="icon" />
-            <span class="text">{{ t('Wallets') }}</span>
+            <div class="nav-copy">
+              <span class="text">{{ t('Wallets') }}</span>
+              <span class="subtext">{{ t('Accounts money moves through') }}</span>
+            </div>
           </NuxtLink>
         </li>
         <li>
           <NuxtLink
             to="/reminders"
-            class="nav-button"
+            class="nav-button nav-button--with-subtext"
             active-class="selected"
             @click="handleNavClick"
           >
             <BellIcon class="icon" />
-            <span class="text">{{ t('Reminders') }}</span>
+            <div class="nav-copy">
+              <span class="text">{{ t('Reminders') }}</span>
+              <span class="subtext">{{ t('Track upcoming or expected transactions') }}</span>
+            </div>
           </NuxtLink>
         </li>
       </ul>
@@ -241,9 +264,9 @@ const handleButtonNavClick = (path) => {
     display: flex;
     align-items: center;
     width: calc(100% - 20px);
-    height: 56px;
+    min-height: 56px;
     border-radius: $radius-xl;
-    padding: 16px 8px;
+    padding: 12px 10px;
     gap: 12px;
     background-color: transparent;
     border: none;
@@ -252,21 +275,49 @@ const handleButtonNavClick = (path) => {
     cursor: pointer;
     transition: all 0.3s ease;
     margin-left: 10px;
+    position: relative;
 
     &:hover:not(.selected) {
       background-color: rgba(var(--color-primary-rgb), 0.15);
-      margin: 2px 10px;
-      height: 52px;
     }
 
     &.selected {
       background-color: $primary-light;
+
+      .subtext {
+        color: $text-secondary;
+      }
     }
+  }
+
+  .nav-button--with-subtext {
+    align-items: flex-start;
+  }
+
+  .nav-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .text {
+    font-size: $font-size-sm;
+    line-height: 1.2;
+    color: inherit;
+  }
+
+  .subtext {
+    font-size: $font-size-xs;
+    line-height: 1.35;
+    color: $text-muted;
   }
 
   .icon {
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
   .close-button {
