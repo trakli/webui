@@ -104,7 +104,7 @@
           :options="categories"
           :multiple="true"
           :selected="selectedAdditionalCategoryIds"
-          :disabled="isSameAsGroup"
+
           @select="handleCategorySelect"
         />
       </div>
@@ -383,11 +383,6 @@ onMounted(async () => {
     console.error('[TransactionForm] Failed to load shared data', e);
   }
 });
-
-function isSameAsGroup(category) {
-  if (!selectedGroupId.value) return false;
-  return category.id === selectedGroupId.value;
-}
 
 const selectedFileNames = ref([]);
 

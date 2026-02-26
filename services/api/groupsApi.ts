@@ -1,3 +1,5 @@
+import { API_DEFAULT_LIMIT } from './apiHelpers';
+
 interface GroupIcon {
   id: number;
   path: string;
@@ -54,15 +56,10 @@ const groupsApi = {
    * Fetch all groups
    * GET /groups
    */
-  async fetchAll(limit = 20, syncedSince?: string): Promise<GroupsResponse> {
+  async fetchAll(): Promise<GroupsResponse> {
     const api = useApi();
-    const params = new URLSearchParams();
-    params.append('limit', limit.toString());
-    if (syncedSince) {
-      params.append('synced_since', syncedSince);
-    }
 
-    const response = await api<ApiResponse<GroupsResponse>>(`/groups?${params.toString()}`);
+    const response = await api<ApiResponse<GroupsResponse>>(`/groups?limit=${API_DEFAULT_LIMIT}`);
 
     if (response.success && response.data) {
       return response.data;
