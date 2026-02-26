@@ -1,4 +1,9 @@
 /**
+ * Default page size for list endpoints that support pagination.
+ */
+export const API_DEFAULT_LIMIT = 200;
+
+/**
  * Helper function to build icon payload for API requests
  * Standardizes icon handling across all API services
  */
