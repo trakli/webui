@@ -280,7 +280,7 @@
             </div>
           </div>
           <div class="completion-actions">
-            <button class="primary-btn large" :disabled="isCompleting" @click="completOnboarding">
+            <button class="primary-btn large" :disabled="isCompleting" @click="completeOnboarding">
               <span v-if="isCompleting" class="btn-loading-spinner" />
               {{ isCompleting ? $t('Setting up...') : $t('Go to dashboard') }}
             </button>
@@ -449,7 +449,7 @@ const handleCategoriesSetup = () => {
   nextStep();
 };
 
-const completOnboarding = async () => {
+const completeOnboarding = async () => {
   if (isCompleting.value) return;
   isCompleting.value = true;
 
