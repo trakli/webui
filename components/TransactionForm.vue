@@ -104,7 +104,6 @@
           :options="categories"
           :multiple="true"
           :selected="selectedAdditionalCategoryIds"
-
           @select="handleCategorySelect"
         />
       </div>
