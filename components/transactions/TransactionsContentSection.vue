@@ -49,6 +49,7 @@
         @page-change="currentPage = $event"
         @edit="handleEdit"
         @delete="handleDelete"
+        @recurrent="handleRecurrent"
       />
 
       <!-- Desktop table -->
@@ -65,8 +66,17 @@
         @page-change="currentPage = $event"
         @edit="handleEdit"
         @delete="handleDelete"
+        @recurrent="handleRecurrent"
       />
     </ComponentLoader>
+
+    <RecurringModal
+      :is-open="showRecurringModal"
+      :transaction="selectedTransaction"
+      @save="handleRecurringSave"
+      @remove="handleRecurringRemove"
+      @cancel="showRecurringModal = false"
+    />
   </div>
 </template>
 
@@ -78,6 +88,7 @@ import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.v
 import TTableComponent from '@/components/TTableComponent.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
+import RecurringModal from '@/components/modals/RecurringModal.vue';
 
 const { t } = useI18n();
 
@@ -89,8 +100,12 @@ const {
   itemsPerPage,
   totalPages,
   deleteTransaction,
+  setRecurring,
   transactions
 } = useTransactions();
+
+const showRecurringModal = ref(false);
+const selectedTransaction = ref(null);
 
 const parseAmount = (amountStr) => {
   if (!amountStr) return 0;
@@ -138,6 +153,47 @@ function navigateToNew() {
 
 function handleEdit(txn) {
   navigateTo(`/transactions/edit/${txn.id}`);
+}
+
+function handleRecurrent(txn) {
+  selectedTransaction.value = txn;
+  showRecurringModal.value = true;
+}
+
+async function handleRecurringSave(config) {
+  if (!selectedTransaction.value) return;
+
+  try {
+    await setRecurring(selectedTransaction.value.id, config);
+    showRecurringModal.value = false;
+    selectedTransaction.value = null;
+    showSuccess(t('Recurrence updated'), t('Transaction recurrence has been updated successfully'));
+  } catch (err) {
+    showError(
+      t('Failed to update recurrence'),
+      t('Failed to update transaction recurrence. Please try again.')
+    );
+    console.error('Failed to update recurrence:', err);
+  }
+}
+
+async function handleRecurringRemove() {
+  if (!selectedTransaction.value) return;
+
+  try {
+    await setRecurring(selectedTransaction.value.id, {
+      is_recurring: false
+    });
+    showRecurringModal.value = false;
+    selectedTransaction.value = null;
+    showSuccess(t('Recurrence removed'), t('Transaction recurrence has been removed'));
+  } catch (err) {
+    showError(
+      t('Failed to update recurrence'),
+      t('Failed to update transaction recurrence. Please try again.')
+    );
+    console.error('Failed to remove recurrence:', err);
+  }
 }
 
 async function handleDelete(txn) {

@@ -6,7 +6,6 @@ export interface ApiTransaction {
   datetime: string;
   group_id: number;
   categories: any[];
-  is_recurring: boolean;
   user_id: number;
   transfer_id: number;
   wallet_client_generated_id: string;
@@ -51,6 +50,9 @@ export interface FrontendTransaction {
   walletId?: number; // Numeric ID
   description?: string;
   isRecurring?: boolean;
+  recurrencePeriod?: string;
+  recurrenceInterval?: number;
+  recurrenceEndsAt?: string;
   isTransfer?: boolean; // True if this transaction is part of a transfer
   transferId?: number; // ID of the associated transfer
   files?: TransactionFile[];
