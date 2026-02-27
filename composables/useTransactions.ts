@@ -272,6 +272,61 @@ export const useTransactions = () => {
     }
   };
 
+  const setRecurring = async (
+    id: string,
+    config: {
+      is_recurring: boolean;
+      recurrence_period?: string;
+      recurrence_interval?: number;
+      recurrence_ends_at?: string | null;
+    }
+  ) => {
+    try {
+      isLoading.value = true;
+      error.value = null;
+
+      const numericId = parseInt(id);
+      const payload = {
+        is_recurring: config.is_recurring,
+        recurrence_period: config.recurrence_period,
+        recurrence_interval: config.recurrence_interval,
+        recurrence_ends_at: config.recurrence_ends_at || undefined
+      };
+
+      const updated = await api.transactions.update(numericId, payload);
+
+      const index = transactions.value.findIndex((t) => t.id === id);
+      if (index !== -1) {
+        if (updated) {
+          const frontendTransaction = transactionMapper.toFrontend(
+            updated,
+            sharedData.parties.value,
+            sharedData.categories.value,
+            sharedData.wallets.value,
+            sharedData.groups.value
+          );
+          transactions.value.splice(index, 1, frontendTransaction);
+        } else {
+          // Optimistic update when API returns no body
+          const current = transactions.value[index];
+          transactions.value.splice(index, 1, {
+            ...current,
+            isRecurring: config.is_recurring,
+            recurrencePeriod: config.recurrence_period,
+            recurrenceInterval: config.recurrence_interval,
+            recurrenceEndsAt: config.recurrence_ends_at || undefined
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error updating recurring:', err);
+      error.value = extractApiErrors(err);
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const refreshTransactions = async () => {
     console.log('Refreshing transactions...');
     await fetchTransactionsFromApi();
@@ -348,6 +403,7 @@ export const useTransactions = () => {
     addTransaction,
     updateTransaction,
     deleteTransaction,
+    setRecurring,
     refreshTransactions,
     getTransactionById,
     getTransactionForEdit,

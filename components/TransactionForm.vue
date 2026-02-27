@@ -122,6 +122,36 @@
           </span>
         </div>
       </div>
+
+      <div class="recurring-section">
+        <label class="recurring-toggle">
+          <input v-model="formIsRecurring" type="checkbox" />
+          <span>{{ t('Make recurring') }}</span>
+        </label>
+        <div v-if="formIsRecurring" class="recurring-fields">
+          <div class="form-transaction">
+            <div class="transaction-date">
+              <span>{{ t('Recurrence period') }}</span>
+              <select v-model="formRecurrencePeriod" class="recurring-select">
+                <option value="daily">{{ t('Daily') }}</option>
+                <option value="weekly">{{ t('Weekly') }}</option>
+                <option value="monthly">{{ t('Monthly') }}</option>
+                <option value="yearly">{{ t('Yearly') }}</option>
+              </select>
+            </div>
+            <div class="transaction-date">
+              <span>{{ t('Repeat every') }}</span>
+              <input v-model.number="formRecurrenceInterval" type="number" min="1" />
+            </div>
+          </div>
+          <div class="transaction-date">
+            <span
+              >{{ t('End date') }} <span class="optional-label">({{ t('optional') }})</span></span
+            >
+            <input v-model="formRecurrenceEndsAt" type="date" />
+          </div>
+        </div>
+      </div>
     </div>
     <TButton
       :text="
@@ -188,6 +218,10 @@ const selectedWalletId = ref<number | null>(null);
 const selectedGroupId = ref(null);
 const selectedAdditionalCategoryIds = ref([]);
 const filesBase64 = ref([]);
+const formIsRecurring = ref(false);
+const formRecurrencePeriod = ref('monthly');
+const formRecurrenceInterval = ref(1);
+const formRecurrenceEndsAt = ref('');
 const sharedData = useSharedData();
 const selectedCurrency = ref(sharedData.getDefaultCurrency.value || 'USD');
 
@@ -235,7 +269,7 @@ function onSubmit() {
 
   const amountNum = Number(formAmount.value);
 
-  const payload = {
+  const payload: Record<string, any> = {
     date,
     time,
     type: isOutcomeSelected.value ? 'EXPENSE' : 'INCOME',
@@ -247,7 +281,12 @@ function onSubmit() {
     groupId: selectedGroupId.value ?? undefined,
     walletId: selectedWalletId.value,
     description: formDescription.value.trim(),
-    filesToUpload: filesBase64.value
+    filesToUpload: filesBase64.value,
+    isRecurring: formIsRecurring.value,
+    recurrencePeriod: formIsRecurring.value ? formRecurrencePeriod.value : undefined,
+    recurrenceInterval: formIsRecurring.value ? formRecurrenceInterval.value : undefined,
+    recurrenceEndsAt:
+      formIsRecurring.value && formRecurrenceEndsAt.value ? formRecurrenceEndsAt.value : undefined
   };
 
   if (props.editingItem?.id) {
@@ -473,6 +512,13 @@ watch(
     if (item.amount) {
       const num = parseFloat(String(item.amount).replace(/[^\d.]/g, ''));
       formAmount.value = Number.isFinite(num) ? String(num) : '';
+    }
+
+    if (item.isRecurring) {
+      formIsRecurring.value = true;
+      formRecurrencePeriod.value = item.recurrencePeriod || 'monthly';
+      formRecurrenceInterval.value = item.recurrenceInterval || 1;
+      formRecurrenceEndsAt.value = item.recurrenceEndsAt ? item.recurrenceEndsAt.split('T')[0] : '';
     }
   },
   { immediate: true }

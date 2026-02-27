@@ -38,6 +38,9 @@
                 <span v-if="txn.isTransfer" class="transfer-badge">
                   {{ t('Transfer') }}
                 </span>
+                <span v-if="txn.isRecurring" class="recurring-badge">
+                  {{ t('Recurring') }}
+                </span>
               </td>
               <td>
                 <span class="party">{{ txn.party || '—' }}</span>
@@ -52,6 +55,9 @@
                 <div class="actions">
                   <button class="action-btn" @click="$emit('edit', txn)">
                     <PencilSquareIcon class="action-icon" />
+                  </button>
+                  <button class="action-btn action-btn--recurring" @click="$emit('recurrent', txn)">
+                    <ArrowPathIcon class="action-icon" />
                   </button>
                   <button class="action-btn" @click="$emit('delete', txn)">
                     <TrashIcon class="action-icon" />
@@ -136,7 +142,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { PencilSquareIcon, TrashIcon, ArrowPathIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { parseAmount, getCurrencySymbol } from '@/utils/currency';
 import SearchInput from './SearchInput.vue';
@@ -162,7 +168,7 @@ const props = defineProps({
   allTransactions: { type: Array, default: () => [] }
 });
 
-defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery']);
+defineEmits(['edit', 'delete', 'recurrent', 'page-change', 'update:searchQuery']);
 
 const { getDefaultCurrency } = useSharedData();
 
@@ -393,6 +399,18 @@ const formatTimeAgo = (txn) => {
     vertical-align: middle;
   }
 
+  .recurring-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: $radius-sm;
+    font-size: 10px;
+    font-weight: bold;
+    background-color: rgba(var(--color-warning-rgb), 0.15);
+    color: $warning-text;
+    vertical-align: middle;
+  }
+
   .party {
     padding: 4px 8px;
     border-radius: $radius-md;
@@ -449,8 +467,16 @@ const formatTimeAgo = (txn) => {
     }
   }
 
+  .action-btn--recurring .action-icon {
+    color: $warning-text;
+
+    &:hover {
+      color: $warning;
+    }
+  }
+
   // Make delete icon red
-  .action-btn:nth-child(2) .action-icon {
+  .action-btn:last-child .action-icon {
     color: $error-color;
 
     &:hover {

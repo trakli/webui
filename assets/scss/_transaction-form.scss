@@ -489,6 +489,59 @@
   }
 }
 
+.recurring-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .recurring-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: $font-medium;
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: $primary;
+    }
+  }
+
+  .recurring-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid $border-color;
+    border-radius: $radius-lg;
+    background: $bg-light;
+  }
+
+  .recurring-select {
+    padding: 12px;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    font-size: 16px;
+    width: 100%;
+    height: 50px;
+    background: $bg-white;
+    color: $text-primary;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
+}
+
+.optional-label {
+  font-weight: $font-normal;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
 .wallet-field-wrapper,
 .group-field-wrapper {
   position: relative;
