@@ -7,6 +7,7 @@ import configurationsApi from './configurationsApi';
 import statsApi from './statsApi';
 import remindersApi from './remindersApi';
 import notificationsApi from './notificationsApi';
+import importsApi from './importsApi';
 import transactionApi from '../transactionApi';
 
 // Re-export individual services
@@ -19,6 +20,7 @@ export {
   statsApi,
   remindersApi,
   notificationsApi,
+  importsApi,
   transactionApi
 };
 
@@ -35,5 +37,6 @@ export const api = {
   stats: statsApi,
   reminders: remindersApi,
   notifications: notificationsApi,
+  imports: importsApi,
   transactions: transactionApi
 } as const;
