@@ -117,6 +117,20 @@
             </div>
           </NuxtLink>
         </li>
+        <li>
+          <NuxtLink
+            to="/imports"
+            class="nav-button nav-button--with-subtext"
+            active-class="selected"
+            @click="handleNavClick"
+          >
+            <ArrowUpTrayIcon class="icon" />
+            <div class="nav-copy">
+              <span class="text">{{ t('Import') }}</span>
+              <span class="subtext">{{ t('Import transactions from documents') }}</span>
+            </div>
+          </NuxtLink>
+        </li>
       </ul>
     </nav>
     <hr class="divider" />
@@ -159,6 +173,7 @@
 
 <script setup>
 import {
+  ArrowUpTrayIcon,
   BellIcon,
   BuildingLibraryIcon,
   ChatBubbleLeftRightIcon,
