@@ -45,7 +45,9 @@
             <FunnelIcon class="no-filter-results__icon" />
           </div>
           <h3 class="no-filter-results__title">{{ t('No results found') }}</h3>
-          <p class="no-filter-results__text">{{ t('No transactions match your current filters. Try adjusting or clearing them.') }}</p>
+          <p class="no-filter-results__text">
+            {{ t('No transactions match your current filters. Try adjusting or clearing them.') }}
+          </p>
           <TButton
             :text="t('Clear all filters')"
             variant="primary"
@@ -129,6 +131,7 @@ const {
   perPage,
   filteredTotals,
   filters,
+  activeFilterCount,
   deleteTransaction,
   setRecurring,
   changePage,
@@ -147,17 +150,6 @@ const selectedTransaction = ref(null);
 const totals = computed(() => filteredTotals.value);
 
 const hasTotals = computed(() => totalItems.value > 0);
-
-const activeFilterCount = computed(() => {
-  const f = filters.value;
-  let count = 0;
-  if (f.type) count++;
-  if (f.date_from || f.date_to) count++;
-  if (f.wallet_ids?.length) count++;
-  if (f.category_ids?.length) count++;
-  if (f.search) count++;
-  return count;
-});
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('en-US', {

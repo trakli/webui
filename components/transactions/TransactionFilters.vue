@@ -1,12 +1,7 @@
 <template>
   <div class="transaction-filters">
     <div class="filters-panel">
-      <button
-        type="button"
-        class="filters-close"
-        :aria-label="t('Close')"
-        @click="$emit('close')"
-      >
+      <button type="button" class="filters-close" :aria-label="t('Close')" @click="$emit('close')">
         <XMarkIcon class="filters-close__icon" />
       </button>
 
@@ -48,7 +43,10 @@
               :value="localFilters.date_from"
               :placeholder="t('Start date')"
               class="date-input"
-              @input="localFilters.date_from = ($event.target as HTMLInputElement).value || undefined; emitFilters()"
+              @input="
+                localFilters.date_from = ($event.target as HTMLInputElement).value || undefined;
+                emitFilters();
+              "
             />
             <span class="date-separator">-</span>
             <input
@@ -56,7 +54,10 @@
               :value="localFilters.date_to"
               :placeholder="t('End date')"
               class="date-input"
-              @input="localFilters.date_to = ($event.target as HTMLInputElement).value || undefined; emitFilters()"
+              @input="
+                localFilters.date_to = ($event.target as HTMLInputElement).value || undefined;
+                emitFilters();
+              "
             />
           </div>
           <div class="date-presets">
@@ -173,20 +174,30 @@ function setType(type: 'income' | 'expense' | undefined) {
   emitFilters();
 }
 
+// Format a Date as YYYY-MM-DD using local time so presets match the
+// user's calendar view (avoids UTC drift from toISOString on timezones
+// east of UTC near month/year boundaries).
+function toLocalDateString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function setDatePreset(preset: string) {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
 
   switch (preset) {
-    case 'this-month':
-      localFilters.date_from = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-      localFilters.date_to = new Date(year, month + 1, 0).toISOString().split('T')[0];
+    case 'this-month': {
+      localFilters.date_from = toLocalDateString(new Date(year, month, 1));
+      localFilters.date_to = toLocalDateString(new Date(year, month + 1, 0));
       break;
+    }
     case 'last-3-months': {
-      const threeMonthsAgo = new Date(year, month - 2, 1);
-      localFilters.date_from = threeMonthsAgo.toISOString().split('T')[0];
-      localFilters.date_to = now.toISOString().split('T')[0];
+      localFilters.date_from = toLocalDateString(new Date(year, month - 2, 1));
+      localFilters.date_to = toLocalDateString(now);
       break;
     }
     case 'this-year':
@@ -201,21 +212,20 @@ function setDatePreset(preset: string) {
   emitFilters();
 }
 
+type IdOrObject = number | { id: number };
+
+function extractIds(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return (value as IdOrObject[]).map((item) => (typeof item === 'object' ? item.id : item));
+}
+
 function handleWalletChange(value: unknown) {
-  if (Array.isArray(value)) {
-    localFilters.wallet_ids = value.map((w: any) => (typeof w === 'object' ? w.id : w));
-  } else {
-    localFilters.wallet_ids = [];
-  }
+  localFilters.wallet_ids = extractIds(value);
   emitFilters();
 }
 
 function handleCategoryChange(value: unknown) {
-  if (Array.isArray(value)) {
-    localFilters.category_ids = value.map((c: any) => (typeof c === 'object' ? c.id : c));
-  } else {
-    localFilters.category_ids = [];
-  }
+  localFilters.category_ids = extractIds(value);
   emitFilters();
 }
 
