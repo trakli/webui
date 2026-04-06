@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { reactive } from 'vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import SearchableDropdown from '@/components/SearchableDropdown.vue';
 import TButton from '@/components/TButton.vue';
