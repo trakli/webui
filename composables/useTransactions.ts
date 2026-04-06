@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import { api } from '~/services/api';
 import { transactionMapper } from '~/utils/transactionMapper';
-import type { FrontendTransaction } from '~/types/transaction';
+import type { FrontendTransaction, TransactionQueryParams } from '~/types/transaction';
 import { useSharedData } from '~/composables/useSharedData';
 import { checkAuth } from '~/utils/auth';
 import { extractApiErrors } from '~/utils/apiErrors';
@@ -9,13 +9,34 @@ import { extractApiErrors } from '~/utils/apiErrors';
 // Use FrontendTransaction as the main interface
 type Transaction = FrontendTransaction;
 
-// API mode only - no more mock data
-
 // Module-scoped shared state
 const transactions = ref<Transaction[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const lastSync = ref<string | null>(null);
+
+// Server-side pagination state
+const currentPage = ref(1);
+const totalPages = ref(1);
+const totalItems = ref(0);
+const perPage = ref(20);
+
+// Server-computed totals for filtered set (across all pages)
+const filteredTotals = ref<{ income: number; expenses: number; net: number }>({
+  income: 0,
+  expenses: 0,
+  net: 0
+});
+
+// Filter state
+const filters = ref<{
+  type?: 'income' | 'expense';
+  date_from?: string;
+  date_to?: string;
+  wallet_ids?: number[];
+  category_ids?: number[];
+  search?: string;
+}>({});
 
 // Get shared data from centralized composable
 const sharedData = useSharedData();
@@ -36,7 +57,7 @@ async function loadDependencies() {
   }
 }
 
-// Fetch transactions from API
+// Fetch transactions from API with server-side pagination & filtering
 async function fetchTransactionsFromApi() {
   if (typeof window === 'undefined') return;
 
@@ -60,8 +81,24 @@ async function fetchTransactionsFromApi() {
       await loadDependencies();
     }
 
-    const response = await api.transactions.fetchAll({ limit: 100 });
+    const params: TransactionQueryParams = {
+      limit: perPage.value,
+      page: currentPage.value,
+      ...filters.value
+    };
+
+    const response = await api.transactions.fetchAll(params);
     lastSync.value = response.last_sync;
+
+    // Update pagination state from server response
+    currentPage.value = response.current_page;
+    totalPages.value = response.last_page;
+    totalItems.value = response.total;
+    perPage.value = response.per_page;
+
+    if (response.totals) {
+      filteredTotals.value = response.totals;
+    }
 
     const transformed = transactionMapper.toFrontendBatch(
       response.data,
@@ -81,39 +118,31 @@ async function fetchTransactionsFromApi() {
 }
 
 export const useTransactions = () => {
-  // REMOVED: Auto-initialization - now controlled by data manager
-  // ensureInit();
-
-  // View-scoped state
-  const searchQuery = ref('');
-  const currentPage = ref(1);
-  const itemsPerPage = ref(10);
-
-  // Computed values
-  const filteredTransactions = computed(() => {
-    const q = searchQuery.value.trim().toLowerCase();
-    if (!q) return transactions.value;
-    return transactions.value.filter((t) => {
-      return (
-        t.party.toLowerCase().includes(q) ||
-        t.category.toLowerCase().includes(q) ||
-        t.type.toLowerCase().includes(q) ||
-        t.amount.toLowerCase().includes(q) ||
-        (t.date || '').toLowerCase().includes(q)
-      );
-    });
-  });
-
-  const totalPages = computed(() =>
-    Math.max(1, Math.ceil(filteredTransactions.value.length / itemsPerPage.value))
-  );
-
-  const paginatedTransactions = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage.value;
-    return filteredTransactions.value.slice(start, start + itemsPerPage.value);
-  });
+  // Debounce timer for search
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Actions
+  const changePage = async (page: number) => {
+    if (page < 1 || page > totalPages.value || page === currentPage.value) return;
+    currentPage.value = page;
+    await fetchTransactionsFromApi();
+  };
+
+  const applyFilters = async (newFilters: typeof filters.value) => {
+    filters.value = { ...newFilters };
+    currentPage.value = 1;
+    await fetchTransactionsFromApi();
+  };
+
+  const updateSearch = (query: string) => {
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(async () => {
+      filters.value = { ...filters.value, search: query || undefined };
+      currentPage.value = 1;
+      await fetchTransactionsFromApi();
+    }, 400);
+  };
+
   const addTransaction = async (transaction: Transaction) => {
     try {
       console.log('Creating transaction:', transaction);
@@ -181,6 +210,7 @@ export const useTransactions = () => {
           sharedData.groups.value
         );
         transactions.value = [frontendTransaction, ...transactions.value];
+        totalItems.value += 1;
         console.log('Transaction created and added to local state');
       }
     } catch (err: unknown) {
@@ -263,6 +293,7 @@ export const useTransactions = () => {
 
       // Remove from local state
       transactions.value = transactions.value.filter((t) => t.id !== id);
+      totalItems.value = Math.max(0, totalItems.value - 1);
     } catch (err) {
       console.error('Error deleting transaction:', err);
       error.value = extractApiErrors(err);
@@ -365,39 +396,36 @@ export const useTransactions = () => {
     initialized = false;
     hasAttemptedLoad = false;
     isLoading.value = false;
-
-    // REMOVED: Auto-reinitialization - now controlled by data manager
-    // Re-initialize on next tick to allow auth state to propagate
-    // if (typeof window !== 'undefined') {
-    //   nextTick(() => {
-    //     if (checkAuth()) {
-    //       forceInit();
-    //     }
-    //   });
-    // }
+    currentPage.value = 1;
+    totalPages.value = 1;
+    totalItems.value = 0;
+    filteredTotals.value = { income: 0, expenses: 0, net: 0 };
+    filters.value = {};
   };
 
   return {
     // State
     transactions,
-    searchQuery,
-    currentPage,
-    itemsPerPage,
     isLoading,
     error,
     lastSync,
     isInitialized: computed(() => initialized),
     hasAttemptedLoad: computed(() => hasAttemptedLoad),
 
+    // Server-side pagination
+    currentPage,
+    totalPages,
+    totalItems,
+    perPage,
+    filteredTotals,
+
+    // Filters
+    filters,
+
     // Dependencies (for form dropdowns) - from shared data
     parties: sharedData.parties,
     categories: sharedData.categories,
     wallets: sharedData.wallets,
-
-    // Computed
-    filteredTransactions,
-    totalPages,
-    paginatedTransactions,
 
     // Actions
     addTransaction,
@@ -407,6 +435,9 @@ export const useTransactions = () => {
     refreshTransactions,
     getTransactionById,
     getTransactionForEdit,
-    clearTransactions
+    clearTransactions,
+    changePage,
+    applyFilters,
+    updateSearch
   };
 };

@@ -84,6 +84,15 @@ export type TransactionUpdatePayload = Partial<TransactionCreatePayload>;
 export interface TransactionsResponse {
   last_sync: string;
   data: ApiTransaction[];
+  current_page: number;
+  total: number;
+  per_page: number;
+  last_page: number;
+  totals?: {
+    income: number;
+    expenses: number;
+    net: number;
+  };
 }
 
 // Generic API Response wrapper
@@ -100,6 +109,12 @@ export interface ApiResponse<T> {
 export interface TransactionQueryParams {
   type?: 'income' | 'expense';
   limit?: number;
+  page?: number;
   synced_since?: string;
   no_client_id?: boolean;
+  date_from?: string;
+  date_to?: string;
+  wallet_ids?: number[];
+  category_ids?: number[];
+  search?: string;
 }

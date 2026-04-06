@@ -21,6 +21,13 @@
       </template>
     </TTopCard>
 
+    <TransactionFilters
+      v-show="showFiltersPanel"
+      :filters="filters"
+      @update:filters="handleFilterChange"
+      @close="showFiltersPanel = false"
+    />
+
     <ComponentLoader
       :is-loading="isLoadingOrNotReady"
       :error="error"
@@ -33,40 +40,59 @@
       @create="navigateToNew"
     >
       <template #empty>
-        <OnboardingEmptyState page-type="transactions" @create="navigateToNew" />
+        <div v-if="activeFilterCount > 0" class="no-filter-results">
+          <div class="no-filter-results__icon-wrapper">
+            <FunnelIcon class="no-filter-results__icon" />
+          </div>
+          <h3 class="no-filter-results__title">{{ t('No results found') }}</h3>
+          <p class="no-filter-results__text">{{ t('No transactions match your current filters. Try adjusting or clearing them.') }}</p>
+          <TButton
+            :text="t('Clear all filters')"
+            variant="primary"
+            size="small"
+            :full-width="false"
+            @click="handleResetFilters"
+          />
+        </div>
+        <OnboardingEmptyState v-else page-type="transactions" @create="navigateToNew" />
       </template>
 
       <!-- Mobile cards -->
       <TTransactionsCardList
         class="only-mobile"
-        :transactions="paginatedTransactions"
-        :search-query="searchQuery"
+        :transactions="transactions"
+        :search-query="filters.search || ''"
         :current-page="currentPage"
-        :items-per-page="itemsPerPage"
+        :items-per-page="perPage"
         :total-pages="totalPages"
-        :total-entries="filteredTransactions.length"
-        @update:search-query="searchQuery = $event"
-        @page-change="currentPage = $event"
+        :total-entries="totalItems"
+        :active-filter-count="activeFilterCount"
+        @update:search-query="handleSearchChange"
+        @page-change="handlePageChange"
         @edit="handleEdit"
         @delete="handleDelete"
         @recurrent="handleRecurrent"
+        @toggle-filters="toggleFilters"
       />
 
       <!-- Desktop table -->
       <TTableComponent
         class="only-desktop"
-        :transactions="paginatedTransactions"
-        :all-transactions="filteredTransactions"
-        :search-query="searchQuery"
+        :transactions="transactions"
+        :all-transactions="transactions"
+        :search-query="filters.search || ''"
         :current-page="currentPage"
-        :items-per-page="itemsPerPage"
+        :items-per-page="perPage"
         :total-pages="totalPages"
-        :total-entries="filteredTransactions.length"
-        @update:search-query="searchQuery = $event"
-        @page-change="currentPage = $event"
+        :total-entries="totalItems"
+        :active-filter-count="activeFilterCount"
+        :filtered-totals="filteredTotals"
+        @update:search-query="handleSearchChange"
+        @page-change="handlePageChange"
         @edit="handleEdit"
         @delete="handleDelete"
         @recurrent="handleRecurrent"
+        @toggle-filters="toggleFilters"
       />
     </ComponentLoader>
 
@@ -83,54 +109,55 @@
 <script setup>
 import { useTransactions } from '@/composables/useTransactions';
 import { useNotifications } from '@/composables/useNotifications';
+import { FunnelIcon } from '@heroicons/vue/24/outline';
 import TTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
+import TransactionFilters from '@/components/transactions/TransactionFilters.vue';
+import TButton from '@/components/TButton.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
 import RecurringModal from '@/components/modals/RecurringModal.vue';
 
 const { t } = useI18n();
 
 const {
-  paginatedTransactions,
-  filteredTransactions,
-  searchQuery,
+  transactions,
   currentPage,
-  itemsPerPage,
   totalPages,
+  totalItems,
+  perPage,
+  filteredTotals,
+  filters,
   deleteTransaction,
   setRecurring,
-  transactions
+  changePage,
+  applyFilters,
+  updateSearch
 } = useTransactions();
 
 const showRecurringModal = ref(false);
+const showFiltersPanel = ref(false);
+
+function toggleFilters() {
+  showFiltersPanel.value = !showFiltersPanel.value;
+}
 const selectedTransaction = ref(null);
 
-const parseAmount = (amountStr) => {
-  if (!amountStr) return 0;
-  const cleaned = String(amountStr).replace(/[^0-9.-]/g, '');
-  return parseFloat(cleaned) || 0;
-};
+const totals = computed(() => filteredTotals.value);
 
-const totals = computed(() => {
-  const txns = filteredTransactions.value;
-  let income = 0;
-  let expenses = 0;
+const hasTotals = computed(() => totalItems.value > 0);
 
-  txns.forEach((txn) => {
-    const amount = parseAmount(txn.amount);
-    if (txn.type === 'INCOME') {
-      income += amount;
-    } else {
-      expenses += amount;
-    }
-  });
-
-  return { income, expenses, net: income - expenses };
+const activeFilterCount = computed(() => {
+  const f = filters.value;
+  let count = 0;
+  if (f.type) count++;
+  if (f.date_from || f.date_to) count++;
+  if (f.wallet_ids?.length) count++;
+  if (f.category_ids?.length) count++;
+  if (f.search) count++;
+  return count;
 });
-
-const hasTotals = computed(() => filteredTransactions.value.length > 0);
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('en-US', {
@@ -158,6 +185,23 @@ function handleEdit(txn) {
 function handleRecurrent(txn) {
   selectedTransaction.value = txn;
   showRecurringModal.value = true;
+}
+
+function handleFilterChange(newFilters) {
+  applyFilters(newFilters);
+}
+
+function handleResetFilters() {
+  applyFilters({});
+  showFiltersPanel.value = false;
+}
+
+function handleSearchChange(query) {
+  updateSearch(query);
+}
+
+function handlePageChange(page) {
+  changePage(page);
 }
 
 async function handleRecurringSave(config) {
@@ -220,6 +264,47 @@ async function handleDelete(txn) {
   gap: 2rem;
   align-items: center;
   width: 100%;
+}
+
+.no-filter-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+
+  &__icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: $primary-light;
+    margin-bottom: 0.25rem;
+  }
+
+  &__icon {
+    width: 28px;
+    height: 28px;
+    color: $primary;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: $font-semibold;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  &__text {
+    color: $text-muted;
+    font-size: $font-size-sm;
+    margin: 0;
+    max-width: 320px;
+    line-height: 1.5;
+  }
 }
 
 .totals-summary {

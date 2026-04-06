@@ -26,11 +26,29 @@ const transactionApi = {
     if (params?.limit) {
       queryParams.append('limit', params.limit.toString());
     }
+    if (params?.page) {
+      queryParams.append('page', params.page.toString());
+    }
     if (params?.synced_since) {
       queryParams.append('synced_since', params.synced_since);
     }
     if (params?.no_client_id) {
       queryParams.append('no_client_id', params.no_client_id.toString());
+    }
+    if (params?.date_from) {
+      queryParams.append('date_from', params.date_from);
+    }
+    if (params?.date_to) {
+      queryParams.append('date_to', params.date_to);
+    }
+    if (params?.wallet_ids?.length) {
+      params.wallet_ids.forEach((id) => queryParams.append('wallet_ids[]', id.toString()));
+    }
+    if (params?.category_ids?.length) {
+      params.category_ids.forEach((id) => queryParams.append('category_ids[]', id.toString()));
+    }
+    if (params?.search) {
+      queryParams.append('search', params.search);
     }
 
     const queryString = queryParams.toString();
@@ -38,19 +56,24 @@ const transactionApi = {
 
     const response = await api<ApiResponse<TransactionsResponse>>(url);
 
+    const defaults: TransactionsResponse = {
+      last_sync: new Date().toISOString(),
+      data: [],
+      current_page: 1,
+      total: 0,
+      per_page: params?.limit || 20,
+      last_page: 1,
+      totals: { income: 0, expenses: 0, net: 0 }
+    };
+
     // Handle different response formats
     if (response?.data) {
-      return response.data;
+      return { ...defaults, ...response.data };
     } else if (response?.last_sync) {
-      // Direct response format without nested data
-      return response as TransactionsResponse;
+      return { ...defaults, ...(response as TransactionsResponse) };
     }
 
-    // Fallback
-    return {
-      last_sync: new Date().toISOString(),
-      data: []
-    };
+    return defaults;
   },
 
   /**
