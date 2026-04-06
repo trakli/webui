@@ -57,9 +57,17 @@ async function loadDependencies() {
   }
 }
 
+// Monotonic counter used to ensure only the latest fetch's response is
+// applied to state. Prevents race conditions when a user types quickly
+// or changes filters rapidly and older in-flight requests resolve after
+// newer ones.
+let fetchRequestId = 0;
+
 // Fetch transactions from API with server-side pagination & filtering
 async function fetchTransactionsFromApi() {
   if (typeof window === 'undefined') return;
+
+  const requestId = ++fetchRequestId;
 
   try {
     if (!checkAuth()) {
@@ -88,6 +96,10 @@ async function fetchTransactionsFromApi() {
     };
 
     const response = await api.transactions.fetchAll(params);
+
+    // Discard stale responses: a newer fetch has been dispatched.
+    if (requestId !== fetchRequestId) return;
+
     lastSync.value = response.last_sync;
 
     // Update pagination state from server response
@@ -110,10 +122,13 @@ async function fetchTransactionsFromApi() {
 
     transactions.value = transformed;
   } catch (err) {
+    if (requestId !== fetchRequestId) return;
     console.error('Error fetching transactions:', err);
     error.value = extractApiErrors(err);
   } finally {
-    isLoading.value = false;
+    if (requestId === fetchRequestId) {
+      isLoading.value = false;
+    }
   }
 }
 
@@ -389,6 +404,17 @@ export const useTransactions = () => {
     }
   };
 
+  const activeFilterCount = computed(() => {
+    const f = filters.value;
+    let count = 0;
+    if (f.type) count++;
+    if (f.date_from || f.date_to) count++;
+    if (f.wallet_ids?.length) count++;
+    if (f.category_ids?.length) count++;
+    if (f.search) count++;
+    return count;
+  });
+
   const clearTransactions = () => {
     transactions.value = [];
     error.value = null;
@@ -421,6 +447,7 @@ export const useTransactions = () => {
 
     // Filters
     filters,
+    activeFilterCount,
 
     // Dependencies (for form dropdowns) - from shared data
     parties: sharedData.parties,
