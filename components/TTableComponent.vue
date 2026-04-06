@@ -9,6 +9,10 @@
           :debounce="0"
           @update:model-value="$emit('update:searchQuery', $event)"
         />
+        <button class="filter-toggle-btn" @click="$emit('toggle-filters')">
+          <FunnelIcon class="filter-toggle-icon" />
+          <span v-if="activeFilterCount" class="filter-count-badge">{{ activeFilterCount }}</span>
+        </button>
       </div>
     </div>
 
@@ -142,7 +146,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { PencilSquareIcon, TrashIcon, ArrowPathIcon } from '@heroicons/vue/24/outline';
+import { PencilSquareIcon, TrashIcon, ArrowPathIcon, FunnelIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { parseAmount, getCurrencySymbol } from '@/utils/currency';
 import SearchInput from './SearchInput.vue';
@@ -165,10 +169,12 @@ const props = defineProps({
   totalPages: { type: Number, default: 1 },
   totalEntries: { type: Number, default: 0 },
   headerType: { type: String, default: 'default' },
-  allTransactions: { type: Array, default: () => [] }
+  allTransactions: { type: Array, default: () => [] },
+  activeFilterCount: { type: Number, default: 0 },
+  filteredTotals: { type: Object, default: null }
 });
 
-defineEmits(['edit', 'delete', 'recurrent', 'page-change', 'update:searchQuery']);
+defineEmits(['edit', 'delete', 'recurrent', 'page-change', 'update:searchQuery', 'toggle-filters']);
 
 const { getDefaultCurrency } = useSharedData();
 
@@ -183,6 +189,11 @@ const convertCurrency = (amount, fromCurrency, toCurrency) => {
 };
 
 const totals = computed(() => {
+  // Prefer server-computed totals (covers all pages of filtered set)
+  if (props.filteredTotals) {
+    return props.filteredTotals;
+  }
+
   const txns = props.allTransactions.length > 0 ? props.allTransactions : props.transactions;
   const targetCurrency = getDefaultCurrency.value;
   let income = 0;
@@ -309,6 +320,50 @@ const formatTimeAgo = (txn) => {
 .input-controls {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.filter-toggle-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  background: $bg-white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: $primary;
+    background: rgba(var(--color-primary-rgb), 0.05);
+  }
+
+  .filter-toggle-icon {
+    width: 16px;
+    height: 16px;
+    color: $text-muted;
+  }
+
+  .filter-count-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background-color: $primary;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .table-wrapper {
