@@ -62,6 +62,15 @@ export interface ConfirmPayload {
     description?: string;
     date?: string;
   }>;
+  auto_create_wallets?: boolean;
+  auto_create_parties?: boolean;
+  auto_create_categories?: boolean;
+}
+
+export interface AutoCreateOptions {
+  wallets: boolean;
+  parties: boolean;
+  categories: boolean;
 }
 
 export interface ConfirmResponse {

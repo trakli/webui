@@ -1,6 +1,7 @@
 import type {
   ImportSession,
   SuggestionWithDuplicate,
+  AutoCreateOptions,
   ConfirmPayload,
   ConfirmResponse
 } from '~/types/import';
@@ -143,7 +144,7 @@ export const useImports = () => {
     }
   };
 
-  const confirmImport = async (): Promise<ConfirmResponse | null> => {
+  const confirmImport = async (autoCreate?: AutoCreateOptions): Promise<ConfirmResponse | null> => {
     if (!currentSession.value) return null;
 
     isConfirming.value = true;
@@ -154,14 +155,14 @@ export const useImports = () => {
       .map((s) => {
         const item: ConfirmPayload['accepted'][number] = { index: s.index };
         if (s.edited) {
-          if (s.amount !== null) item.amount = s.amount;
-          if (s.currency) item.currency = s.currency ?? undefined;
-          if (s.type) item.type = s.type;
-          if (s.party) item.party = s.party;
-          if (s.wallet) item.wallet = s.wallet;
-          if (s.category) item.category = s.category;
-          if (s.description) item.description = s.description;
-          if (s.date) item.date = s.date;
+          item.amount = s.amount ?? undefined;
+          item.currency = s.currency ?? undefined;
+          item.type = s.type ?? undefined;
+          item.party = s.party ?? undefined;
+          item.wallet = s.wallet ?? undefined;
+          item.category = s.category ?? undefined;
+          item.description = s.description ?? undefined;
+          item.date = s.date ?? undefined;
         }
         return item;
       });
@@ -169,9 +170,14 @@ export const useImports = () => {
     try {
       const result = await api.imports.confirm({
         session_id: currentSession.value.id,
-        accepted
+        accepted,
+        auto_create_wallets: autoCreate?.wallets ?? false,
+        auto_create_parties: autoCreate?.parties ?? false,
+        auto_create_categories: autoCreate?.categories ?? false
       });
-      currentSession.value.status = 'confirmed';
+      if (result.errors.length === 0) {
+        currentSession.value.status = 'confirmed';
+      }
       return result;
     } catch (err: unknown) {
       error.value = extractApiErrors(err);

@@ -17,13 +17,56 @@
         <div v-if="rejectedCount > 0" class="dialog__info">
           {{ t('{count} suggestions will be skipped.', { count: rejectedCount }) }}
         </div>
+
+        <div v-if="hasNewEntities" class="dialog__auto-create">
+          <p class="dialog__auto-create-label">
+            {{ t("Some transactions reference items that don't exist yet:") }}
+          </p>
+
+          <label v-if="newWalletCount > 0" class="dialog__toggle">
+            <input v-model="autoCreateWallets" type="checkbox" />
+            <span>
+              {{ t('Create {count} new wallets', { count: newWalletCount }) }}
+            </span>
+          </label>
+
+          <label v-if="newPartyCount > 0" class="dialog__toggle">
+            <input v-model="autoCreateParties" type="checkbox" />
+            <span>
+              {{ t('Create {count} new parties', { count: newPartyCount }) }}
+            </span>
+          </label>
+
+          <label v-if="newCategoryCount > 0" class="dialog__toggle">
+            <input v-model="autoCreateCategories" type="checkbox" />
+            <span>
+              {{ t('Create {count} new categories', { count: newCategoryCount }) }}
+            </span>
+          </label>
+
+          <p class="dialog__auto-create-hint">
+            {{ t('Unchecked items will be skipped and not linked to the transaction.') }}
+          </p>
+
+          <p v-if="walletRequired" class="dialog__auto-create-warning">
+            {{
+              t(
+                'Wallets are required. Check "Create new wallets" or go back and assign existing ones.'
+              )
+            }}
+          </p>
+        </div>
       </div>
 
       <div class="dialog__actions">
         <button class="btn btn--secondary" @click="$emit('cancel')">
           {{ t('Cancel') }}
         </button>
-        <button class="btn btn--primary" :disabled="isConfirming" @click="$emit('confirm')">
+        <button
+          class="btn btn--primary"
+          :disabled="isConfirming || walletRequired"
+          @click="handleConfirm"
+        >
           {{ isConfirming ? t('Importing...') : t('Confirm import') }}
         </button>
       </div>
@@ -32,20 +75,43 @@
 </template>
 
 <script setup lang="ts">
+import type { AutoCreateOptions } from '~/types/import';
+
 const { t } = useI18n();
 
-defineProps<{
+const props = defineProps<{
   show: boolean;
   acceptedCount: number;
   rejectedCount: number;
   duplicatesInAccepted: number;
   isConfirming: boolean;
+  newWalletCount: number;
+  newPartyCount: number;
+  newCategoryCount: number;
 }>();
 
-defineEmits<{
-  confirm: [];
+const emit = defineEmits<{
+  confirm: [autoCreate: AutoCreateOptions];
   cancel: [];
 }>();
+
+const autoCreateWallets = ref(false);
+const autoCreateParties = ref(false);
+const autoCreateCategories = ref(false);
+
+const hasNewEntities = computed(
+  () => props.newWalletCount > 0 || props.newPartyCount > 0 || props.newCategoryCount > 0
+);
+
+const walletRequired = computed(() => props.newWalletCount > 0 && !autoCreateWallets.value);
+
+const handleConfirm = () => {
+  emit('confirm', {
+    wallets: autoCreateWallets.value,
+    parties: autoCreateParties.value,
+    categories: autoCreateCategories.value
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -104,6 +170,48 @@ defineEmits<{
     border-radius: $radius-lg;
     font-size: $font-size-sm;
     margin-top: 8px;
+  }
+
+  &__auto-create {
+    margin-top: 12px;
+    padding: 12px;
+    background-color: $bg-slate;
+    border-radius: $radius-lg;
+    border: 1px solid $border-light;
+  }
+
+  &__auto-create-label {
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: $text-primary;
+    font-size: $font-size-sm;
+  }
+
+  &__auto-create-hint {
+    margin: 8px 0 0;
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+
+  &__auto-create-warning {
+    margin: 8px 0 0;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $error-color;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+
+    input[type='checkbox'] {
+      cursor: pointer;
+    }
   }
 
   &__actions {
