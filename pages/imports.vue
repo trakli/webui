@@ -97,6 +97,9 @@
           :rejected-count="rejectedCount"
           :duplicates-in-accepted="duplicatesInAccepted"
           :is-confirming="isConfirming"
+          :new-wallet-count="newWalletCount"
+          :new-party-count="newPartyCount"
+          :new-category-count="newCategoryCount"
           @confirm="handleConfirm"
           @cancel="showConfirmDialog = false"
         />
@@ -111,6 +114,7 @@ import ImportUpload from '~/components/imports/ImportUpload.vue';
 import ImportAnalyzing from '~/components/imports/ImportAnalyzing.vue';
 import SuggestionReviewTable from '~/components/imports/SuggestionReviewTable.vue';
 import ImportConfirmDialog from '~/components/imports/ImportConfirmDialog.vue';
+import type { AutoCreateOptions } from '~/types/import';
 
 definePageMeta({
   layout: 'dashboard',
@@ -118,8 +122,8 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-const { showSuccess } = useNotifications();
-const { wallets, categories, parties } = useSharedData();
+const { showSuccess, showError, showWarning } = useNotifications();
+const { wallets, categories, parties, loadWallets, loadCategories, loadParties } = useSharedData();
 
 const {
   currentSession,
@@ -151,6 +155,38 @@ const missingWalletCount = computed(
   () => suggestions.value.filter((s) => s.status === 'accepted' && !s.wallet).length
 );
 
+const walletNames = computed(() => new Set(wallets.value.map((w) => w.name)));
+const partyNames = computed(() => new Set(parties.value.map((p) => p.name)));
+const categoryNames = computed(() => new Set(categories.value.map((c) => c.name)));
+
+const acceptedSuggestions = computed(() =>
+  suggestions.value.filter((s) => s.status === 'accepted')
+);
+
+const newWalletCount = computed(() => {
+  const names = new Set<string>();
+  for (const s of acceptedSuggestions.value) {
+    if (s.wallet && !walletNames.value.has(s.wallet)) names.add(s.wallet);
+  }
+  return names.size;
+});
+
+const newPartyCount = computed(() => {
+  const names = new Set<string>();
+  for (const s of acceptedSuggestions.value) {
+    if (s.party && !partyNames.value.has(s.party)) names.add(s.party);
+  }
+  return names.size;
+});
+
+const newCategoryCount = computed(() => {
+  const names = new Set<string>();
+  for (const s of acceptedSuggestions.value) {
+    if (s.category && !categoryNames.value.has(s.category)) names.add(s.category);
+  }
+  return names.size;
+});
+
 const lowConfidencePercent = computed(() => {
   if (suggestions.value.length === 0) return 0;
   const lowCount = suggestions.value.filter((s) => s.confidence < 0.6).length;
@@ -162,12 +198,42 @@ const handleUpload = (file: File, documentType?: string) => {
   analyzeFile(file, documentType);
 };
 
-const handleConfirm = async () => {
-  const result = await confirmImport();
+const handleConfirm = async (autoCreate: AutoCreateOptions) => {
+  const result = await confirmImport(autoCreate);
   showConfirmDialog.value = false;
 
   if (result) {
-    showSuccess(t('{count} transactions imported successfully.', { count: result.created_count }));
+    // Refresh shared data so newly created entities are available immediately
+    if (result.created_count > 0) {
+      loadWallets(true);
+      loadCategories(true);
+      loadParties(true);
+    }
+
+    if (result.errors.length > 0 && result.created_count === 0) {
+      const uniqueReasons = [
+        ...new Set(result.errors.map((e) => e.replace(/at index \d+:\s*/, '')))
+      ];
+      showError(
+        t('{count} transactions failed to import', { count: result.errors.length }),
+        uniqueReasons.join('; ')
+      );
+    } else if (result.errors.length > 0) {
+      const uniqueReasons = [
+        ...new Set(result.errors.map((e) => e.replace(/at index \d+:\s*/, '')))
+      ];
+      showWarning(
+        t('{count} imported, {failed} failed', {
+          count: result.created_count,
+          failed: result.errors.length
+        }),
+        uniqueReasons.join('; ')
+      );
+    } else {
+      showSuccess(
+        t('{count} transactions imported successfully.', { count: result.created_count })
+      );
+    }
   }
 };
 

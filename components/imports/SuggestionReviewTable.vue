@@ -98,6 +98,7 @@
               <td>
                 <select
                   class="inline-edit"
+                  :class="{ 'inline-edit--new': isNewParty(suggestion.party) }"
                   :value="suggestion.party || ''"
                   @change="
                     handleEdit(
@@ -108,12 +109,16 @@
                   "
                 >
                   <option value="">--</option>
+                  <option v-if="isNewParty(suggestion.party)" :value="suggestion.party!">
+                    {{ suggestion.party }} ({{ t('new') }})
+                  </option>
                   <option v-for="p in parties" :key="p.id" :value="p.name">{{ p.name }}</option>
                 </select>
               </td>
               <td>
                 <select
                   class="inline-edit"
+                  :class="{ 'inline-edit--new': isNewCategory(suggestion.category) }"
                   :value="suggestion.category || ''"
                   @change="
                     handleEdit(
@@ -124,12 +129,16 @@
                   "
                 >
                   <option value="">--</option>
+                  <option v-if="isNewCategory(suggestion.category)" :value="suggestion.category!">
+                    {{ suggestion.category }} ({{ t('new') }})
+                  </option>
                   <option v-for="c in categories" :key="c.id" :value="c.name">{{ c.name }}</option>
                 </select>
               </td>
               <td>
                 <select
                   class="inline-edit"
+                  :class="{ 'inline-edit--new': isNewWallet(suggestion.wallet) }"
                   :value="suggestion.wallet || ''"
                   @change="
                     handleEdit(
@@ -140,6 +149,9 @@
                   "
                 >
                   <option value="">--</option>
+                  <option v-if="isNewWallet(suggestion.wallet)" :value="suggestion.wallet!">
+                    {{ suggestion.wallet }} ({{ t('new') }})
+                  </option>
                   <option v-for="w in wallets" :key="w.id" :value="w.name">
                     {{ w.name }} ({{ w.currency }})
                   </option>
@@ -219,7 +231,7 @@ import { ChevronDownIcon } from '@heroicons/vue/24/outline';
 
 const { t } = useI18n();
 
-defineProps<{
+const props = defineProps<{
   suggestions: SuggestionWithDuplicate[];
   wallets: readonly Wallet[];
   categories: readonly Category[];
@@ -228,6 +240,14 @@ defineProps<{
   rejectedCount: number;
   pendingCount: number;
 }>();
+
+const walletNames = computed(() => new Set(props.wallets.map((w) => w.name)));
+const partyNames = computed(() => new Set(props.parties.map((p) => p.name)));
+const categoryNames = computed(() => new Set(props.categories.map((c) => c.name)));
+
+const isNewWallet = (name: string | null) => !!name && !walletNames.value.has(name);
+const isNewParty = (name: string | null) => !!name && !partyNames.value.has(name);
+const isNewCategory = (name: string | null) => !!name && !categoryNames.value.has(name);
 
 const emit = defineEmits<{
   toggle: [index: number];
@@ -250,9 +270,12 @@ const handleEdit = (index: number, field: string, value: any) => {
   emit('edit', index, { [field]: value });
 };
 
+const isRowInvalid = (s: SuggestionWithDuplicate) => !s.wallet || isNewWallet(s.wallet);
+
 const rowClass = (s: SuggestionWithDuplicate) => ({
-  'row--accepted': s.status === 'accepted',
-  'row--rejected': s.status === 'rejected'
+  'row--accepted': s.status === 'accepted' && !isRowInvalid(s),
+  'row--rejected': s.status === 'rejected',
+  'row--invalid': s.status === 'accepted' && isRowInvalid(s)
 });
 
 const confidenceClass = (confidence: number) => ({
@@ -376,6 +399,11 @@ td {
   opacity: 0.6;
 }
 
+.row--invalid {
+  background-color: rgba(var(--color-error-rgb), 0.08);
+  border-left: 3px solid $error-color;
+}
+
 .inline-edit {
   width: 100%;
   min-width: 80px;
@@ -400,6 +428,11 @@ td {
   &--number {
     min-width: 90px;
     text-align: right;
+  }
+
+  &--new {
+    border-color: $warning-text;
+    background-color: rgba(var(--color-warning-rgb), 0.06);
   }
 }
 
