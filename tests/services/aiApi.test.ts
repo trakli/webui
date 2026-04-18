@@ -78,10 +78,15 @@ describe('aiApi', () => {
   it('deletes a session', async () => {
     mockApi.mockResolvedValueOnce(undefined);
 
-    const result = await aiApi.deleteSession(1);
+    await aiApi.deleteSession(1);
 
     expect(mockApi).toHaveBeenCalledWith('/ai/chats/1', { method: 'DELETE' });
-    expect(result).toBe(true);
+  });
+
+  it('propagates the error when delete fails', async () => {
+    mockApi.mockRejectedValueOnce(new Error('boom'));
+
+    await expect(aiApi.deleteSession(1)).rejects.toThrow('boom');
   });
 
   it('checks health', async () => {

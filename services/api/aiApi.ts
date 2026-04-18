@@ -91,10 +91,9 @@ const aiApi = {
     return response?.data || null;
   },
 
-  async deleteSession(id: number): Promise<boolean> {
+  async deleteSession(id: number): Promise<void> {
     const api = useApi();
     await api(`/ai/chats/${id}`, { method: 'DELETE' });
-    return true;
   },
 
   async checkHealth(): Promise<HealthResponse> {
