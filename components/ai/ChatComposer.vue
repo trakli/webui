@@ -43,7 +43,8 @@ const autoResize = () => {
   const el = textareaEl.value;
   if (!el) return;
   el.style.height = 'auto';
-  el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  const maxHeight = parseInt(getComputedStyle(el).maxHeight, 10) || Infinity;
+  el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
 };
 
 const handleInput = (event: Event) => {
