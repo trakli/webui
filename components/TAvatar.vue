@@ -1,6 +1,6 @@
 <template>
   <div ref="rootRef" class="t-avatar">
-    <button class="t-avatar-button" :aria-label="t('Account menu')" @click="toggleDropdown">
+    <button class="t-avatar-button" :aria-label="t('Account menu')" @click="toggle">
       <img :src="imageUrl" alt="User Avatar" class="avatar-image" />
       <div v-if="showName && userName" class="user-info">
         <span class="user-name-text">{{ userName }}</span>
@@ -32,10 +32,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Settings, LogOut } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
+import { useDropdown } from '@/composables/useDropdown';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -60,36 +60,17 @@ defineProps({
   }
 });
 
-const isOpen = ref(false);
-const rootRef = ref(null);
-
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-};
-
-const closeDropdown = (event) => {
-  if (rootRef.value && !rootRef.value.contains(event.target)) {
-    isOpen.value = false;
-  }
-};
+const { isOpen, rootRef, toggle, close } = useDropdown();
 
 const goToSettings = () => {
-  isOpen.value = false;
+  close();
   router.push('/settings');
 };
 
 const handleLogout = async () => {
-  isOpen.value = false;
+  close();
   await logout();
 };
-
-onMounted(() => {
-  document.addEventListener('click', closeDropdown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeDropdown);
-});
 </script>
 
 <style lang="scss" scoped>
@@ -238,7 +219,9 @@ onUnmounted(() => {
 
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .dropdown-enter-from,

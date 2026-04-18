@@ -1,10 +1,10 @@
 <template>
-  <div class="language-selector">
+  <div ref="rootRef" class="language-selector">
     <button
       class="icon-button"
       :aria-label="currentLanguage.name"
       :title="currentLanguage.name"
-      @click="toggleDropdown"
+      @click="toggle"
     >
       <img :src="currentLanguage.flagUrl" :alt="currentLanguage.name" class="flag-icon" />
     </button>
@@ -33,12 +33,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { computed } from 'vue';
 import { Check } from 'lucide-vue-next';
+import { useDropdown } from '@/composables/useDropdown';
 
 const { t, locale, setLocale } = useI18n();
 
-const isOpen = ref(false);
+const { isOpen, rootRef, toggle, close } = useDropdown();
 
 const languages = [
   { code: 'en', name: 'English', flagUrl: '/flags/gb.svg' },
@@ -53,28 +54,10 @@ const currentLanguage = computed(() => {
   return languages.find((lang) => lang.code === locale.value) || languages[0];
 });
 
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-};
-
 const selectLanguage = (code) => {
   setLocale(code);
-  isOpen.value = false;
+  close();
 };
-
-const closeDropdown = (event) => {
-  if (!event.target.closest('.language-selector')) {
-    isOpen.value = false;
-  }
-};
-
-onMounted(() => {
-  document.addEventListener('click', closeDropdown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeDropdown);
-});
 </script>
 
 <style lang="scss" scoped>
@@ -166,7 +149,9 @@ onUnmounted(() => {
 
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .dropdown-enter-from,

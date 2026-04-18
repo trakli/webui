@@ -1,11 +1,6 @@
 <template>
-  <div class="theme-selector">
-    <button
-      class="icon-button"
-      :aria-label="t('Theme')"
-      :title="t('Theme')"
-      @click="toggleDropdown"
-    >
+  <div ref="rootRef" class="theme-selector">
+    <button class="icon-button" :aria-label="t('Theme')" :title="t('Theme')" @click="toggle">
       <component :is="triggerIcon" class="icon" />
     </button>
 
@@ -33,14 +28,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { computed } from 'vue';
 import { Sun, Moon, Monitor, Check } from 'lucide-vue-next';
 import { useTheme, type ThemeMode } from '@/composables/useTheme';
+import { useDropdown } from '@/composables/useDropdown';
 
 const { t } = useI18n();
 const { theme, isDark, setTheme } = useTheme();
 
-const isOpen = ref(false);
+const { isOpen, rootRef, toggle, close } = useDropdown();
 
 const options: Array<{ value: ThemeMode; label: string; icon: typeof Sun }> = [
   { value: 'light', label: 'Light', icon: Sun },
@@ -53,29 +49,10 @@ const triggerIcon = computed(() => {
   return isDark.value ? Moon : Sun;
 });
 
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-};
-
 const selectTheme = (value: ThemeMode) => {
   setTheme(value);
-  isOpen.value = false;
+  close();
 };
-
-const closeDropdown = (event: MouseEvent) => {
-  const target = event.target as HTMLElement | null;
-  if (!target?.closest('.theme-selector')) {
-    isOpen.value = false;
-  }
-};
-
-onMounted(() => {
-  document.addEventListener('click', closeDropdown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeDropdown);
-});
 </script>
 
 <style lang="scss" scoped>
@@ -174,7 +151,9 @@ onUnmounted(() => {
 
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .dropdown-enter-from,
