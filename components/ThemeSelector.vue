@@ -1,30 +1,30 @@
 <template>
-  <div class="language-selector">
+  <div class="theme-selector">
     <button
       class="icon-button"
-      :aria-label="currentLanguage.name"
-      :title="currentLanguage.name"
+      :aria-label="t('Theme')"
+      :title="t('Theme')"
       @click="toggleDropdown"
     >
-      <img :src="currentLanguage.flagUrl" :alt="currentLanguage.name" class="flag-icon" />
+      <component :is="triggerIcon" class="icon" />
     </button>
 
     <Transition name="dropdown">
-      <div v-if="isOpen" class="language-dropdown">
+      <div v-if="isOpen" class="theme-dropdown">
         <div class="dropdown-header">
-          <h3>{{ t('Language') }}</h3>
+          <h3>{{ t('Theme') }}</h3>
         </div>
-        <div class="language-list">
+        <div class="theme-list">
           <button
-            v-for="lang in languages"
-            :key="lang.code"
-            class="language-item"
-            :class="{ active: locale === lang.code }"
-            @click="selectLanguage(lang.code)"
+            v-for="option in options"
+            :key="option.value"
+            class="theme-item"
+            :class="{ active: theme === option.value }"
+            @click="selectTheme(option.value)"
           >
-            <img :src="lang.flagUrl" :alt="lang.name" class="flag-icon" />
-            <span class="language-name">{{ lang.name }}</span>
-            <Check v-if="locale === lang.code" class="check-icon" />
+            <component :is="option.icon" class="theme-icon" />
+            <span class="theme-name">{{ t(option.label) }}</span>
+            <Check v-if="theme === option.value" class="check-icon" />
           </button>
         </div>
       </div>
@@ -32,38 +32,39 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Check } from 'lucide-vue-next';
+import { Sun, Moon, Monitor, Check } from 'lucide-vue-next';
+import { useTheme, type ThemeMode } from '@/composables/useTheme';
 
-const { t, locale, setLocale } = useI18n();
+const { t } = useI18n();
+const { theme, isDark, setTheme } = useTheme();
 
 const isOpen = ref(false);
 
-const languages = [
-  { code: 'en', name: 'English', flagUrl: '/flags/gb.svg' },
-  { code: 'fr', name: 'Français', flagUrl: '/flags/fr.svg' },
-  { code: 'de', name: 'Deutsch', flagUrl: '/flags/de.svg' },
-  { code: 'es', name: 'Español', flagUrl: '/flags/es.svg' },
-  { code: 'pt', name: 'Português', flagUrl: '/flags/pt.svg' },
-  { code: 'it', name: 'Italiano', flagUrl: '/flags/it.svg' }
+const options: Array<{ value: ThemeMode; label: string; icon: typeof Sun }> = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor }
 ];
 
-const currentLanguage = computed(() => {
-  return languages.find((lang) => lang.code === locale.value) || languages[0];
+const triggerIcon = computed(() => {
+  if (theme.value === 'system') return Monitor;
+  return isDark.value ? Moon : Sun;
 });
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const selectLanguage = (code) => {
-  setLocale(code);
+const selectTheme = (value: ThemeMode) => {
+  setTheme(value);
   isOpen.value = false;
 };
 
-const closeDropdown = (event) => {
-  if (!event.target.closest('.language-selector')) {
+const closeDropdown = (event: MouseEvent) => {
+  const target = event.target as HTMLElement | null;
+  if (!target?.closest('.theme-selector')) {
     isOpen.value = false;
   }
 };
@@ -81,23 +82,22 @@ onUnmounted(() => {
 @use '@/assets/scss/_variables.scss' as *;
 @use '@/assets/scss/_utilities.scss' as *;
 
-.language-selector {
+.theme-selector {
   position: relative;
   display: inline-block;
 }
 
-.flag-icon {
+.icon {
   width: 20px;
-  height: 15px;
-  border-radius: 2px;
-  object-fit: cover;
+  height: 20px;
+  color: $text-primary;
 }
 
-.language-dropdown {
+.theme-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 240px;
+  width: 220px;
   background: $bg-white;
   border: 1px solid $border-color;
   border-radius: $radius-xl;
@@ -123,13 +123,11 @@ onUnmounted(() => {
   }
 }
 
-.language-list {
-  max-height: 320px;
-  overflow-y: auto;
+.theme-list {
   padding: 0.25rem 0;
 }
 
-.language-item {
+.theme-item {
   width: 100%;
   display: flex;
   align-items: center;
@@ -140,6 +138,7 @@ onUnmounted(() => {
   cursor: pointer;
   font-size: $font-size-sm;
   color: $text-primary;
+  text-align: left;
   transition: background-color 0.2s;
 
   &:hover {
@@ -150,11 +149,20 @@ onUnmounted(() => {
     background: rgba(var(--color-primary-rgb), 0.08);
     color: $primary;
     font-weight: $font-semibold;
+
+    .theme-icon {
+      color: $primary;
+    }
   }
 
-  .language-name {
+  .theme-icon {
+    width: 18px;
+    height: 18px;
+    color: $text-secondary;
+  }
+
+  .theme-name {
     flex: 1;
-    text-align: left;
   }
 
   .check-icon {
