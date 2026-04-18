@@ -1,7 +1,7 @@
-import { ref, computed, onUnmounted } from 'vue';
-import { aiApi, type ChatSession, type ChatMessage, type FormatType } from '@/services/api/aiApi';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { aiApi, type ChatSession, type FormatType } from '@/services/api/aiApi';
 
-const POLL_INTERVAL_MS = 1500;
+const POLL_INTERVAL_MS = 3000;
 
 export function useAiChats() {
   const sessions = ref<ChatSession[]>([]);
@@ -97,6 +97,7 @@ export function useAiChats() {
 
   function maybeStartPolling() {
     if (pollTimer || !isPolling.value) return;
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
     pollTimer = setInterval(refreshCurrent, POLL_INTERVAL_MS);
   }
 
@@ -107,7 +108,26 @@ export function useAiChats() {
     }
   }
 
-  onUnmounted(stopPolling);
+  function handleVisibilityChange() {
+    if (document.visibilityState === 'hidden') {
+      stopPolling();
+    } else if (isPolling.value) {
+      maybeStartPolling();
+    }
+  }
+
+  onMounted(() => {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+  });
+
+  onUnmounted(() => {
+    stopPolling();
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }
+  });
 
   return {
     sessions,
