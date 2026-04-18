@@ -8,6 +8,8 @@
         <TButton
           class="add-transaction-btn"
           size="small"
+          variant="outline"
+          :full-width="false"
           :text="t('Add transaction')"
           to="/transactions/new"
         >
@@ -16,6 +18,7 @@
           </template>
         </TButton>
         <LanguageSelector />
+        <ThemeSelector />
         <NotificationBell />
         <button
           class="icon-button info-btn"
@@ -39,6 +42,7 @@
 import TAvatar from './TAvatar.vue';
 import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
+import ThemeSelector from './ThemeSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
 import NotificationBell from './NotificationBell.vue';
 import { PlusIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';

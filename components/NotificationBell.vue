@@ -1,7 +1,7 @@
 <template>
   <div ref="bellRef" class="notification-bell">
     <button
-      class="bell-button"
+      class="icon-button bell-button"
       :aria-label="t('Notifications')"
       :title="t('Notifications')"
       @click="toggleDropdown"
@@ -194,6 +194,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+@use '@/assets/scss/_utilities.scss' as *;
 
 .notification-bell {
   position: relative;
@@ -201,25 +202,11 @@ onUnmounted(() => {
 
 .bell-button {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background: rgba(var(--color-primary-rgb), 0.1);
-  }
 }
 
 .bell-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: $text-secondary;
 }
 
