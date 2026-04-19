@@ -5,7 +5,7 @@ import type {
   CategoriesResponse,
   ApiResponse
 } from '~/types/category';
-import { buildIconPayload, extractResponseData } from './apiHelpers';
+import { API_DEFAULT_LIMIT, buildIconPayload, fetchAllPages } from './apiHelpers';
 
 function createApiBusinessError(message: string, errors: string[] = []): Error {
   const err = new Error(message) as Error & { _data?: { message: string; errors: string[] } };
@@ -53,14 +53,12 @@ const categoriesApi = {
    */
   async fetchByType(type: 'income' | 'expense'): Promise<CategoriesResponse> {
     const api = useApi();
-    const url = `/categories?type=${type}`;
-
-    const response = await api<ApiResponse<CategoriesResponse>>(url);
-
-    return extractResponseData(response, {
-      last_sync: new Date().toISOString(),
-      data: []
-    });
+    const { data } = await fetchAllPages<Category>((page) =>
+      api<ApiResponse<CategoriesResponse>>(
+        `/categories?type=${type}&limit=${API_DEFAULT_LIMIT}&page=${page}`
+      )
+    );
+    return { data };
   },
 
   /**
@@ -69,12 +67,10 @@ const categoriesApi = {
    */
   async fetchAll(): Promise<CategoriesResponse> {
     const api = useApi();
-    const response = await api<ApiResponse<CategoriesResponse>>('/categories');
-
-    return extractResponseData(response, {
-      last_sync: new Date().toISOString(),
-      data: []
-    });
+    const { data } = await fetchAllPages<Category>((page) =>
+      api<ApiResponse<CategoriesResponse>>(`/categories?limit=${API_DEFAULT_LIMIT}&page=${page}`)
+    );
+    return { data };
   },
 
   /**

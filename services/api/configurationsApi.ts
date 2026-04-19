@@ -10,10 +10,7 @@ const configurationsApi = {
   async fetchAll(): Promise<ConfigurationsResponse> {
     const api = useApi();
     const response = await api<ApiResponse<ConfigurationsResponse>>('/configurations');
-    return extractResponseData(response, {
-      last_sync: new Date().toISOString(),
-      data: []
-    });
+    return extractResponseData(response, { data: [] });
   },
 
   async create(payload: {

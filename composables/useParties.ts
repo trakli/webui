@@ -67,7 +67,6 @@ export const useParties = () => {
 
   return {
     parties: sharedData.parties,
-    lastSync: sharedData.partiesLastSync,
     isLoading: sharedData.partiesLoading,
     error: sharedData.partiesError,
     fetchParties,

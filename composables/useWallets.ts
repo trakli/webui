@@ -68,7 +68,6 @@ export const useWallets = () => {
 
   return {
     wallets: sharedData.wallets,
-    lastSync: sharedData.walletsLastSync,
     isLoading: sharedData.walletsLoading,
     error: sharedData.walletsError,
     fetchWallets,
