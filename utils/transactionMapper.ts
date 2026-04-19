@@ -90,7 +90,9 @@ export const transactionMapper = {
       recurrenceEndsAt: api.recurring_rules?.recurrence_ends_at,
       isTransfer,
       transferId: api.transfer_id || undefined,
-      files: api.files || []
+      files: api.files || [],
+      isRefund: !!api.is_refund,
+      refundOfTransactionId: api.refund_of_transaction_id ?? null
     };
   },
 
@@ -148,7 +150,9 @@ export const transactionMapper = {
       recurrenceEndsAt: api.recurring_rules?.recurrence_ends_at,
       isTransfer: !!api.transfer_id,
       transferId: api.transfer_id || undefined,
-      files: api.files || []
+      files: api.files || [],
+      isRefund: !!api.is_refund,
+      refundOfTransactionId: api.refund_of_transaction_id ?? null
     };
   },
 

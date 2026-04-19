@@ -19,7 +19,20 @@
           </span>
         </div>
       </template>
+      <template #actions>
+        <button
+          type="button"
+          class="spreadsheet-trigger"
+          :aria-label="t('Spreadsheet mode')"
+          :title="t('Open spreadsheet view')"
+          @click="showSpreadsheet = true"
+        >
+          <TableCellsIcon class="icon" />
+        </button>
+      </template>
     </TTopCard>
+
+    <TransactionsSpreadsheet v-if="showSpreadsheet" @close="showSpreadsheet = false" />
 
     <TransactionFilters
       v-show="showFiltersPanel"
@@ -111,12 +124,13 @@
 <script setup>
 import { useTransactions } from '@/composables/useTransactions';
 import { useNotifications } from '@/composables/useNotifications';
-import { FunnelIcon } from '@heroicons/vue/24/outline';
+import { FunnelIcon, TableCellsIcon } from '@heroicons/vue/24/outline';
 import TTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import TTableComponent from '@/components/TTableComponent.vue';
 import TTransactionsCardList from '@/components/transactions/TTransactionsCardList.vue';
 import TransactionFilters from '@/components/transactions/TransactionFilters.vue';
+import TransactionsSpreadsheet from '@/components/transactions/TransactionsSpreadsheet.vue';
 import TButton from '@/components/TButton.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
 import RecurringModal from '@/components/modals/RecurringModal.vue';
@@ -141,6 +155,7 @@ const {
 
 const showRecurringModal = ref(false);
 const showFiltersPanel = ref(false);
+const showSpreadsheet = ref(false);
 
 function toggleFilters() {
   showFiltersPanel.value = !showFiltersPanel.value;
@@ -253,7 +268,7 @@ async function handleDelete(txn) {
 .content-area {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 0.75rem;
   align-items: center;
   width: 100%;
 }
@@ -296,6 +311,31 @@ async function handleDelete(txn) {
     margin: 0;
     max-width: 320px;
     line-height: 1.5;
+  }
+}
+
+.spreadsheet-trigger {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-muted;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: $primary;
+    border-color: $primary-muted;
+    background: rgba(var(--color-primary-rgb), 0.05);
   }
 }
 

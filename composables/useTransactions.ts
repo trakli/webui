@@ -13,13 +13,12 @@ type Transaction = FrontendTransaction;
 const transactions = ref<Transaction[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
-const lastSync = ref<string | null>(null);
 
 // Server-side pagination state
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
-const perPage = ref(20);
+const perPage = ref(10);
 
 // Server-computed totals for filtered set (across all pages)
 const filteredTotals = ref<{ income: number; expenses: number; net: number }>({
@@ -99,8 +98,6 @@ async function fetchTransactionsFromApi() {
 
     // Discard stale responses: a newer fetch has been dispatched.
     if (requestId !== fetchRequestId) return;
-
-    lastSync.value = response.last_sync;
 
     // Update pagination state from server response
     currentPage.value = response.current_page;
@@ -196,6 +193,19 @@ export const useTransactions = () => {
       console.log('Transaction created:', created);
 
       if (created) {
+        // Sync refund flag now that the transaction has a server id.
+        // Income-only; backend rejects attempts on expenses.
+        if (payload.type === 'income' && transaction.isRefund) {
+          try {
+            await api.transactions.markRefund(
+              created.id,
+              transaction.refundOfTransactionId ?? null
+            );
+          } catch (e) {
+            console.error('[addTransaction] Failed to mark refund:', e);
+          }
+        }
+
         // If files were provided, upload them and use the updated transaction
         let createdOrUpdated = created;
         const filesToUpload = Array.isArray(transaction.filesToUpload)
@@ -273,9 +283,34 @@ export const useTransactions = () => {
       const updated = await api.transactions.update(numericId, payload);
 
       if (updated) {
+        // Sync refund flag. Only meaningful on income; a change from
+        // income to expense (or type absent) unmarks any prior refund.
+        if (updated.type === 'income') {
+          try {
+            if (updates.isRefund) {
+              await api.transactions.markRefund(numericId, updates.refundOfTransactionId ?? null);
+            } else if (updates.isRefund === false) {
+              await api.transactions.unmarkRefund(numericId);
+            }
+          } catch (e) {
+            console.error('[updateTransaction] Failed to sync refund flag:', e);
+          }
+        } else if (updated.type === 'expense') {
+          try {
+            await api.transactions.unmarkRefund(numericId);
+          } catch {
+            // non-fatal — may have never been a refund
+          }
+        }
+
+        // Refetch to pick up refund fields in serialized response
+        const fresh =
+          updated.type === 'income' ? await api.transactions.fetchById(numericId) : updated;
+        const finalApiTxn = fresh ?? updated;
+
         // Update local state instead of full API refetch for better performance
         const frontendTransaction = transactionMapper.toFrontend(
-          updated,
+          finalApiTxn,
           sharedData.parties.value,
           sharedData.categories.value,
           sharedData.wallets.value,
@@ -418,7 +453,6 @@ export const useTransactions = () => {
   const clearTransactions = () => {
     transactions.value = [];
     error.value = null;
-    lastSync.value = null;
     initialized = false;
     hasAttemptedLoad = false;
     isLoading.value = false;
@@ -434,7 +468,6 @@ export const useTransactions = () => {
     transactions,
     isLoading,
     error,
-    lastSync,
     isInitialized: computed(() => initialized),
     hasAttemptedLoad: computed(() => hasAttemptedLoad),
 

@@ -489,6 +489,52 @@
   }
 }
 
+.refund-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  background: $bg-light;
+
+  .refund-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: $font-medium;
+    color: $text-primary;
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: $primary;
+    }
+  }
+
+  .refund-hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: $text-muted;
+    line-height: 1.4;
+  }
+
+  .refund-link {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .refund-link-hint {
+    margin: 4px 0 0;
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+}
+
 .recurring-section {
   display: flex;
   flex-direction: column;
