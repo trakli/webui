@@ -37,14 +37,12 @@ export interface CategoryUpdatePayload {
 }
 
 export interface CategoriesResponse {
-  last_sync: string;
   data: Category[];
 }
 
 export interface ApiResponse<T> {
   success?: boolean;
   data?: T;
-  last_sync?: string;
   message?: string;
   errors?: string[];
   status?: number;

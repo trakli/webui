@@ -84,10 +84,15 @@ export const transactionMapper = {
       wallet: wallet?.name || '',
       walletId: wallet?.id,
       description: api.description || '',
-      isRecurring: api.is_recurring || false,
+      isRecurring: !!api.recurring_rules,
+      recurrencePeriod: api.recurring_rules?.recurrence_period,
+      recurrenceInterval: api.recurring_rules?.recurrence_interval,
+      recurrenceEndsAt: api.recurring_rules?.recurrence_ends_at,
       isTransfer,
       transferId: api.transfer_id || undefined,
-      files: api.files || []
+      files: api.files || [],
+      isRefund: !!api.is_refund,
+      refundOfTransactionId: api.refund_of_transaction_id ?? null
     };
   },
 
@@ -139,10 +144,15 @@ export const transactionMapper = {
       wallet: wallet?.name || '',
       walletId: wallet?.id,
       description: api.description || '',
-      isRecurring: api.is_recurring || false,
+      isRecurring: !!api.recurring_rules,
+      recurrencePeriod: api.recurring_rules?.recurrence_period,
+      recurrenceInterval: api.recurring_rules?.recurrence_interval,
+      recurrenceEndsAt: api.recurring_rules?.recurrence_ends_at,
       isTransfer: !!api.transfer_id,
       transferId: api.transfer_id || undefined,
-      files: api.files || []
+      files: api.files || [],
+      isRefund: !!api.is_refund,
+      refundOfTransactionId: api.refund_of_transaction_id ?? null
     };
   },
 
@@ -184,18 +194,25 @@ export const transactionMapper = {
 
     const groupId = frontend.groupId || defaultGroup?.id || null;
 
-    const payload = {
+    const payload: TransactionCreatePayload = {
       amount,
       type: (frontend.type?.toLowerCase() as 'income' | 'expense') || 'income',
       description: frontend.description || '',
       datetime,
-      party_id: partyId,
-      wallet_id: walletId,
-      group_id: groupId,
+      party_id: partyId ?? undefined,
+      wallet_id: walletId ?? undefined,
+      group_id: groupId ?? undefined,
       categories:
         frontend.categoryIds && frontend.categoryIds.length > 0 ? frontend.categoryIds : [],
       files: frontend.filesToUpload || []
     };
+
+    if (frontend.isRecurring) {
+      payload.is_recurring = true;
+      payload.recurrence_period = frontend.recurrencePeriod;
+      payload.recurrence_interval = frontend.recurrenceInterval;
+      payload.recurrence_ends_at = frontend.recurrenceEndsAt;
+    }
 
     return payload;
   },

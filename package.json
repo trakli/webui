@@ -1,6 +1,6 @@
 {
   "name": "nuxt-app",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -28,6 +28,7 @@
     "libphonenumber-js": "^1.12.9",
     "lucide-vue-next": "^0.525.0",
     "nuxt": "^3.12.4",
+    "radix-vue": "^1.9.17",
     "vue": "latest",
     "vue3-apexcharts": "^1.8.0"
   },

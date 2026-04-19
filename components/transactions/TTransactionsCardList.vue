@@ -9,6 +9,10 @@
           :debounce="0"
           @update:model-value="$emit('update:searchQuery', $event)"
         />
+        <button class="filter-toggle-btn" @click="$emit('toggle-filters')">
+          <FunnelIcon class="filter-toggle-icon" />
+          <span v-if="activeFilterCount" class="filter-count-badge">{{ activeFilterCount }}</span>
+        </button>
       </div>
     </div>
 
@@ -29,7 +33,12 @@
             <span class="prefix">{{ directionLabel(txn.type) }}</span>
             <UserIcon class="user-icon" />
             <span class="party">{{ txn.party || '—' }}</span>
-            <span v-if="txn.isTransfer" class="transfer-indicator">Transfer</span>
+            <span v-if="txn.isTransfer" class="transfer-indicator">{{ t('Transfer') }}</span>
+            <span v-if="txn.isRefund" class="refund-indicator">{{ t('Refund') }}</span>
+            <span v-if="txn.isRecurring" class="recurring-indicator">
+              <ArrowPathIcon class="recurring-icon" />
+              {{ t('Recurring') }}
+            </span>
           </div>
           <div class="amount" :class="txn.type === 'INCOME' ? 'amount--income' : 'amount--expense'">
             {{ formatShortAmount(txn.amount) }}
@@ -49,7 +58,16 @@
         </div>
         <div class="txn-card__bottom">
           <div class="desc" :title="txn.description">{{ txn.description }}</div>
-          <div class="date">{{ formatShortDate(txn) }}</div>
+          <div class="bottom-right">
+            <button
+              class="card-action-btn"
+              :title="t('Make recurring')"
+              @click.stop="$emit('recurrent', txn)"
+            >
+              <ArrowPathIcon class="card-action-icon" />
+            </button>
+            <div class="date">{{ formatShortDate(txn) }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -96,7 +114,9 @@ import {
   LockClosedIcon,
   CreditCardIcon,
   ArrowUpRightIcon,
-  ArrowDownLeftIcon
+  ArrowDownLeftIcon,
+  ArrowPathIcon,
+  FunnelIcon
 } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { formatShortAmount } from '@/utils/currency';
@@ -108,10 +128,13 @@ const props = defineProps({
   currentPage: { type: Number, default: 1 },
   itemsPerPage: { type: Number, default: 10 },
   totalPages: { type: Number, default: 1 },
-  totalEntries: { type: Number, default: 0 }
+  totalEntries: { type: Number, default: 0 },
+  activeFilterCount: { type: Number, default: 0 }
 });
 
-defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery']);
+const { t } = useI18n();
+
+defineEmits(['edit', 'delete', 'recurrent', 'page-change', 'update:searchQuery', 'toggle-filters']);
 
 const displayedTransactions = computed(() => props.transactions);
 
@@ -174,6 +197,49 @@ function formatShortDate(txn) {
 @use '@/assets/scss/_variables.scss' as *;
 @use '@/assets/scss/_transactions-cards.scss' as *;
 
+.filter-toggle-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  background: $bg-white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: $primary;
+    background: rgba(var(--color-primary-rgb), 0.05);
+  }
+
+  .filter-toggle-icon {
+    width: 16px;
+    height: 16px;
+    color: $text-muted;
+  }
+
+  .filter-count-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background-color: $primary;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .transfer-indicator {
   display: inline-block;
   margin-left: 6px;
@@ -184,5 +250,64 @@ function formatShortDate(txn) {
   background-color: rgba(var(--color-primary-rgb), 0.15);
   color: $primary;
   vertical-align: middle;
+}
+
+.recurring-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: $radius-sm;
+  font-size: 10px;
+  font-weight: bold;
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: $warning-text;
+  vertical-align: middle;
+
+  .recurring-icon {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.refund-indicator {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: $radius-sm;
+  font-size: 10px;
+  font-weight: bold;
+  background-color: rgba(255, 159, 67, 0.18);
+  color: #b45309;
+  vertical-align: middle;
+}
+
+.bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(var(--color-warning-rgb), 0.1);
+  }
+
+  .card-action-icon {
+    width: 14px;
+    height: 14px;
+    color: $warning-text;
+  }
 }
 </style>

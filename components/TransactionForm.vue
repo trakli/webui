@@ -104,7 +104,6 @@
           :options="categories"
           :multiple="true"
           :selected="selectedAdditionalCategoryIds"
-          :disabled="isSameAsGroup"
           @select="handleCategorySelect"
         />
       </div>
@@ -123,6 +122,63 @@
           </span>
         </div>
       </div>
+
+      <div v-if="!isOutcomeSelected" class="refund-section">
+        <label class="refund-toggle">
+          <input v-model="formIsRefund" type="checkbox" />
+          <span>{{ t('This is a refund') }}</span>
+        </label>
+        <p class="refund-hint">
+          {{
+            t('Mark this income as refunding a past expense. Budgets subtract it from their spend.')
+          }}
+        </p>
+        <div v-if="formIsRefund" class="refund-link">
+          <SearchableDropdown
+            v-model="refundPickerQuery"
+            :label="t('Refund of')"
+            :placeholder="
+              recentExpenses.length ? t('Search expenses...') : t('Loading expenses...')
+            "
+            :options="refundOptions"
+            @select="handleRefundSelect"
+            @clear="formRefundOfTransactionId = null"
+          />
+          <p class="refund-link-hint">
+            {{ t('Leave blank to mark the refund without linking to a specific expense.') }}
+          </p>
+        </div>
+      </div>
+
+      <div class="recurring-section">
+        <label class="recurring-toggle">
+          <input v-model="formIsRecurring" type="checkbox" />
+          <span>{{ t('Make recurring') }}</span>
+        </label>
+        <div v-if="formIsRecurring" class="recurring-fields">
+          <div class="form-transaction">
+            <div class="transaction-date">
+              <span>{{ t('Recurrence period') }}</span>
+              <select v-model="formRecurrencePeriod" class="recurring-select">
+                <option value="daily">{{ t('Daily') }}</option>
+                <option value="weekly">{{ t('Weekly') }}</option>
+                <option value="monthly">{{ t('Monthly') }}</option>
+                <option value="yearly">{{ t('Yearly') }}</option>
+              </select>
+            </div>
+            <div class="transaction-date">
+              <span>{{ t('Repeat every') }}</span>
+              <input v-model.number="formRecurrenceInterval" type="number" min="1" />
+            </div>
+          </div>
+          <div class="transaction-date">
+            <span
+              >{{ t('End date') }} <span class="optional-label">({{ t('optional') }})</span></span
+            >
+            <input v-model="formRecurrenceEndsAt" type="date" />
+          </div>
+        </div>
+      </div>
     </div>
     <TButton
       :text="
@@ -136,6 +192,8 @@
       "
       class="submit-button"
       :class="{ 'submit-button--expense': isOutcomeSelected }"
+      :disabled="props.isSubmitting"
+      :loading="props.isSubmitting"
       @click="onSubmit"
     >
       <template #left-icon>
@@ -152,6 +210,7 @@ import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '~/composables/useSharedData';
+import { fetchAllPages } from '~/services/api/apiHelpers';
 
 const { t } = useI18n();
 
@@ -165,6 +224,10 @@ const props = defineProps({
   editingItem: {
     type: Object,
     default: null
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -183,6 +246,15 @@ const selectedWalletId = ref<number | null>(null);
 const selectedGroupId = ref(null);
 const selectedAdditionalCategoryIds = ref([]);
 const filesBase64 = ref([]);
+const formIsRecurring = ref(false);
+const formRecurrencePeriod = ref('monthly');
+const formRecurrenceInterval = ref(1);
+const formRecurrenceEndsAt = ref('');
+const formIsRefund = ref(false);
+const formRefundOfTransactionId = ref<number | null>(null);
+const recentExpenses = ref<any[]>([]);
+const refundPickerQuery = ref('');
+let recentExpensesLoaded = false;
 const sharedData = useSharedData();
 const selectedCurrency = ref(sharedData.getDefaultCurrency.value || 'USD');
 
@@ -215,6 +287,10 @@ function validateRequiredFields() {
 }
 
 function onSubmit() {
+  if (props.isSubmitting) {
+    return;
+  }
+
   const isValid = validateRequiredFields();
   if (!isValid) {
     return;
@@ -226,7 +302,7 @@ function onSubmit() {
 
   const amountNum = Number(formAmount.value);
 
-  const payload = {
+  const payload: Record<string, any> = {
     date,
     time,
     type: isOutcomeSelected.value ? 'EXPENSE' : 'INCOME',
@@ -238,7 +314,15 @@ function onSubmit() {
     groupId: selectedGroupId.value ?? undefined,
     walletId: selectedWalletId.value,
     description: formDescription.value.trim(),
-    filesToUpload: filesBase64.value
+    filesToUpload: filesBase64.value,
+    isRecurring: formIsRecurring.value,
+    recurrencePeriod: formIsRecurring.value ? formRecurrencePeriod.value : undefined,
+    recurrenceInterval: formIsRecurring.value ? formRecurrenceInterval.value : undefined,
+    recurrenceEndsAt:
+      formIsRecurring.value && formRecurrenceEndsAt.value ? formRecurrenceEndsAt.value : undefined,
+    isRefund: !isOutcomeSelected.value && formIsRefund.value,
+    refundOfTransactionId:
+      !isOutcomeSelected.value && formIsRefund.value ? formRefundOfTransactionId.value : null
   };
 
   if (props.editingItem?.id) {
@@ -348,6 +432,61 @@ function handleCategorySelect(categoryIds) {
   selectedAdditionalCategoryIds.value = categoryIds;
 }
 
+async function loadRecentExpenses() {
+  if (recentExpensesLoaded) return;
+  try {
+    const apiFetch = useApi();
+    const { data } = await fetchAllPages<any>((page) =>
+      apiFetch(`/transactions?type=expense&limit=200&page=${page}`)
+    );
+    recentExpenses.value = data;
+    recentExpensesLoaded = true;
+  } catch (e) {
+    console.error('[TransactionForm] Failed to load recent expenses', e);
+  }
+}
+
+function formatExpenseOption(exp) {
+  const dt = exp.datetime ? new Date(exp.datetime) : null;
+  const date = dt && !isNaN(dt.getTime()) ? dt.toLocaleDateString() : '';
+  const amount = Number(exp.amount || 0).toFixed(2);
+  const currency = exp.wallet?.currency ?? '';
+  const desc = exp.description || exp.party?.name || t('Untitled transaction');
+  return `${date} · ${amount} ${currency} · ${desc}`.trim();
+}
+
+// SearchableDropdown consumes { id, name } so pre-format every expense
+// into a single searchable label. Client-side search works against `name`.
+const refundOptions = computed(() =>
+  recentExpenses.value.map((exp) => ({
+    id: Number(exp.id),
+    name: formatExpenseOption(exp)
+  }))
+);
+
+function handleRefundSelect(option) {
+  formRefundOfTransactionId.value = option?.id ?? null;
+  refundPickerQuery.value = option?.name ?? '';
+}
+
+watch(formIsRefund, (flag) => {
+  if (flag) {
+    loadRecentExpenses();
+  } else {
+    formRefundOfTransactionId.value = null;
+    refundPickerQuery.value = '';
+  }
+});
+
+// Clear the refund flag when the user flips to expense — the backend rejects
+// it anyway, but this keeps the local state tidy.
+watch(isOutcomeSelected, (isExpense) => {
+  if (isExpense) {
+    formIsRefund.value = false;
+    formRefundOfTransactionId.value = null;
+  }
+});
+
 onMounted(async () => {
   try {
     await sharedData.loadAllData();
@@ -373,11 +512,6 @@ onMounted(async () => {
     console.error('[TransactionForm] Failed to load shared data', e);
   }
 });
-
-function isSameAsGroup(category) {
-  if (!selectedGroupId.value) return false;
-  return category.id === selectedGroupId.value;
-}
 
 const selectedFileNames = ref([]);
 
@@ -469,6 +603,25 @@ watch(
     if (item.amount) {
       const num = parseFloat(String(item.amount).replace(/[^\d.]/g, ''));
       formAmount.value = Number.isFinite(num) ? String(num) : '';
+    }
+
+    if (item.isRecurring) {
+      formIsRecurring.value = true;
+      formRecurrencePeriod.value = item.recurrencePeriod || 'monthly';
+      formRecurrenceInterval.value = item.recurrenceInterval || 1;
+      formRecurrenceEndsAt.value = item.recurrenceEndsAt ? item.recurrenceEndsAt.split('T')[0] : '';
+    }
+
+    if (item.isRefund) {
+      formIsRefund.value = true;
+      formRefundOfTransactionId.value = item.refundOfTransactionId ?? null;
+      await loadRecentExpenses();
+      if (formRefundOfTransactionId.value) {
+        const match = recentExpenses.value.find(
+          (exp) => Number(exp.id) === formRefundOfTransactionId.value
+        );
+        if (match) refundPickerQuery.value = formatExpenseOption(match);
+      }
     }
   },
   { immediate: true }

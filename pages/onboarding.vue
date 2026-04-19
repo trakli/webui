@@ -280,8 +280,9 @@
             </div>
           </div>
           <div class="completion-actions">
-            <button class="primary-btn large" @click="completOnboarding">
-              {{ $t('Go to dashboard') }}
+            <button class="primary-btn large" :disabled="isCompleting" @click="completeOnboarding">
+              <span v-if="isCompleting" class="btn-loading-spinner" />
+              {{ isCompleting ? $t('Setting up...') : $t('Go to dashboard') }}
             </button>
           </div>
         </div>
@@ -367,6 +368,7 @@ const newWalletName = ref('');
 const newWalletCurrency = ref('');
 const selectedCurrency = ref('USD');
 const wantDefaultCategories = ref(true);
+const isCompleting = ref(false);
 
 const availableCurrencies = CURRENCIES;
 
@@ -447,146 +449,153 @@ const handleCategoriesSetup = () => {
   nextStep();
 };
 
-const completOnboarding = async () => {
-  // Save all user selections at the end of onboarding
-  const configurationsToSave = [];
+const completeOnboarding = async () => {
+  if (isCompleting.value) return;
+  isCompleting.value = true;
 
-  // Save language if selected
-  if (selectedLanguage.value) {
-    configurationsToSave.push({
-      key: CONFIGURATION_KEYS.LANGUAGE,
-      value: selectedLanguage.value,
-      type: 'string'
-    });
-  }
+  try {
+    // Save all user selections at the end of onboarding
+    const configurationsToSave = [];
 
-  // Save currency if selected
-  if (selectedCurrency.value) {
-    configurationsToSave.push({
-      key: CONFIGURATION_KEYS.CURRENCY,
-      value: selectedCurrency.value,
-      type: 'string'
-    });
-  }
+    // Save language if selected
+    if (selectedLanguage.value) {
+      configurationsToSave.push({
+        key: CONFIGURATION_KEYS.LANGUAGE,
+        value: selectedLanguage.value,
+        type: 'string'
+      });
+    }
 
-  // Ensure a wallet exists and persist default-wallet
-  let targetWalletId: string | null = null;
+    // Save currency if selected
+    if (selectedCurrency.value) {
+      configurationsToSave.push({
+        key: CONFIGURATION_KEYS.CURRENCY,
+        value: selectedCurrency.value,
+        type: 'string'
+      });
+    }
 
-  if (walletChoice.value === 'use-default' || walletChoice.value === 'rename-default') {
-    let existing = sharedData.getDefaultWallet.value || wallets.value[0];
+    // Ensure a wallet exists and persist default-wallet
+    let targetWalletId: string | null = null;
 
-    if (!existing) {
-      const name =
-        walletChoice.value === 'rename-default' && newWalletName.value.trim().length > 0
-          ? newWalletName.value.trim()
-          : 'Main Wallet';
+    if (walletChoice.value === 'use-default' || walletChoice.value === 'rename-default') {
+      let existing = sharedData.getDefaultWallet.value || wallets.value[0];
 
-      const createdRes = await createWallet({
-        name,
-        type: 'cash',
-        description: 'Created during onboarding',
-        currency: selectedCurrency.value
-      }).catch(() => ({
-        data: null
-      }));
-      const created = createdRes?.data as any;
-      if (created) {
-        existing = created;
+      if (!existing) {
+        const name =
+          walletChoice.value === 'rename-default' && newWalletName.value.trim().length > 0
+            ? newWalletName.value.trim()
+            : 'Main Wallet';
+
+        const createdRes = await createWallet({
+          name,
+          type: 'cash',
+          description: 'Created during onboarding',
+          currency: selectedCurrency.value
+        }).catch(() => ({
+          data: null
+        }));
+        const created = createdRes?.data as any;
+        if (created) {
+          existing = created;
+        }
+      } else if (existing) {
+        const updates: Record<string, string> = {};
+
+        if (
+          walletChoice.value === 'rename-default' &&
+          newWalletName.value.trim().length > 0 &&
+          existing.name !== newWalletName.value.trim()
+        ) {
+          updates.name = newWalletName.value.trim();
+        }
+
+        if (selectedCurrency.value && existing.currency !== selectedCurrency.value) {
+          updates.currency = selectedCurrency.value;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await updateWallet(existing.id, updates).catch(() => null);
+        }
       }
-    } else if (existing) {
-      const updates: Record<string, string> = {};
 
-      if (
-        walletChoice.value === 'rename-default' &&
-        newWalletName.value.trim().length > 0 &&
-        existing.name !== newWalletName.value.trim()
-      ) {
-        updates.name = newWalletName.value.trim();
+      if (existing) {
+        targetWalletId = String(existing.id);
       }
+    } else if (walletChoice.value === 'create-new') {
+      const name = newWalletName.value.trim();
 
-      if (selectedCurrency.value && existing.currency !== selectedCurrency.value) {
-        updates.currency = selectedCurrency.value;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        await updateWallet(existing.id, updates).catch(() => null);
+      if (name && newWalletCurrency.value) {
+        const createdRes = await createWallet({
+          name,
+          type: 'cash',
+          description: 'Created during onboarding',
+          currency: newWalletCurrency.value
+        }).catch(() => ({
+          data: null
+        }));
+        const created = createdRes?.data as any;
+        if (created) {
+          targetWalletId = String(created.id);
+        }
       }
     }
 
-    if (existing) {
-      targetWalletId = String(existing.id);
+    if (targetWalletId) {
+      configurationsToSave.push({
+        key: CONFIGURATION_KEYS.WALLET,
+        value: targetWalletId,
+        type: 'string'
+      });
     }
-  } else if (walletChoice.value === 'create-new') {
-    const name = newWalletName.value.trim();
 
-    if (name && newWalletCurrency.value) {
-      const createdRes = await createWallet({
-        name,
-        type: 'cash',
-        description: 'Created during onboarding',
-        currency: newWalletCurrency.value
-      }).catch(() => ({
-        data: null
-      }));
-      const created = createdRes?.data as any;
-      if (created) {
-        targetWalletId = String(created.id);
+    // Save all configurations
+    for (const config of configurationsToSave) {
+      const createRes = await configurationsApi.create(config).catch(() => null);
+      if (!createRes) {
+        await configurationsApi.update(config.key, config).catch(() => null);
       }
     }
-  }
 
-  if (targetWalletId) {
-    configurationsToSave.push({
-      key: CONFIGURATION_KEYS.WALLET,
-      value: targetWalletId,
-      type: 'string'
-    });
-  }
-
-  // Save all configurations
-  for (const config of configurationsToSave) {
-    const createRes = await configurationsApi.create(config).catch(() => null);
-    if (!createRes) {
-      await configurationsApi.update(config.key, config).catch(() => null);
+    // Create default categories if user opted in
+    if (wantDefaultCategories.value) {
+      await categoriesApi.seedDefaults().catch((e) => {
+        console.error('Failed to seed default categories:', e);
+      });
     }
-  }
 
-  // Create default categories if user opted in
-  if (wantDefaultCategories.value) {
-    await categoriesApi.seedDefaults().catch((e) => {
-      console.error('Failed to seed default categories:', e);
-    });
-  }
-
-  // Mark onboarding as complete
-  const completeRes = await configurationsApi
-    .create({
-      key: CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
-      value: true,
-      type: 'bool'
-    })
-    .catch(() => null);
-
-  if (!completeRes) {
-    await configurationsApi
-      .update(CONFIGURATION_KEYS.ONBOARDING_COMPLETE, {
+    // Mark onboarding as complete
+    const completeRes = await configurationsApi
+      .create({
+        key: CONFIGURATION_KEYS.ONBOARDING_COMPLETE,
         value: true,
         type: 'bool'
       })
       .catch(() => null);
+
+    if (!completeRes) {
+      await configurationsApi
+        .update(CONFIGURATION_KEYS.ONBOARDING_COMPLETE, {
+          value: true,
+          type: 'bool'
+        })
+        .catch(() => null);
+    }
+
+    showSuccess('Welcome to Trakli!', "You're ready to take control of your finances!");
+
+    // Always proceed with navigation
+    localStorage.setItem('onboarding-completed', 'true');
+    localStorage.removeItem('onboarding-step');
+    // Refresh caches so default wallet/currency reflect immediately after onboarding
+    await Promise.all([
+      sharedData.loadConfigurations(true).catch(() => {}),
+      sharedData.loadWallets(true).catch(() => {})
+    ]);
+    await navigateTo(returnTo.value, { replace: true });
+  } finally {
+    isCompleting.value = false;
   }
-
-  showSuccess('Welcome to Trakli!', "You're ready to take control of your finances!");
-
-  // Always proceed with navigation
-  localStorage.setItem('onboarding-completed', 'true');
-  localStorage.removeItem('onboarding-step');
-  // Refresh caches so default wallet/currency reflect immediately after onboarding
-  await Promise.all([
-    sharedData.loadConfigurations(true).catch(() => {}),
-    sharedData.loadWallets(true).catch(() => {})
-  ]);
-  await navigateTo(returnTo.value, { replace: true });
 };
 
 onMounted(() => {

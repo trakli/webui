@@ -1,11 +1,18 @@
 <template>
   <div class="form-container">
-    <TransferForm @submit="handleSubmit" />
+    <TransferForm :is-submitting="isSubmitting" @submit="handleSubmit" />
   </div>
 </template>
 
 <script setup>
 import TransferForm from './TransferForm.vue';
+
+defineProps({
+  isSubmitting: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const emit = defineEmits(['submit']);
 

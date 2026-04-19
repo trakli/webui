@@ -18,6 +18,7 @@
       </div>
       <div class="action-buttons">
         <TInfoButton />
+        <slot name="actions" />
         <TButton
           v-if="showAddButton"
           :text="buttonText || t('Add {item}', { item: t(pageName).toLowerCase() })"

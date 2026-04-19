@@ -104,6 +104,39 @@ const buttonClasses = [
     }
   }
 
+  &--secondary {
+    background-color: $bg-gray;
+    color: $text-primary;
+    border-color: $border-light;
+
+    &:hover:not(:disabled) {
+      background-color: $bg-white;
+      border-color: $border-medium;
+    }
+  }
+
+  &--outline {
+    background-color: transparent;
+    color: $primary;
+    border-color: $primary;
+
+    &:hover:not(:disabled) {
+      background-color: $primary-light;
+      color: $primary-hover;
+      border-color: $primary-hover;
+    }
+  }
+
+  &--text {
+    background-color: transparent;
+    color: $primary;
+    border-color: transparent;
+
+    &:hover:not(:disabled) {
+      background-color: $primary-light;
+    }
+  }
+
   // Sizes
   &--small {
     padding: $spacing-2 $spacing-4;

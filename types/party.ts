@@ -37,14 +37,12 @@ export interface PartyUpdatePayload {
 }
 
 export interface PartiesResponse {
-  last_sync: string;
   data: Party[];
 }
 
 export interface ApiResponse<T> {
   success?: boolean;
   data?: T;
-  last_sync?: string;
   message?: string;
   errors?: string[];
   status?: number;

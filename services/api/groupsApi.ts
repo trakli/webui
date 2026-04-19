@@ -1,3 +1,5 @@
+import { API_DEFAULT_LIMIT, fetchAllPages } from './apiHelpers';
+
 interface GroupIcon {
   id: number;
   path: string;
@@ -41,7 +43,6 @@ interface ApiResponse<T> {
 }
 
 interface GroupsResponse {
-  last_sync: string;
   data: Group[];
 }
 
@@ -54,24 +55,12 @@ const groupsApi = {
    * Fetch all groups
    * GET /groups
    */
-  async fetchAll(limit = 20, syncedSince?: string): Promise<GroupsResponse> {
+  async fetchAll(): Promise<GroupsResponse> {
     const api = useApi();
-    const params = new URLSearchParams();
-    params.append('limit', limit.toString());
-    if (syncedSince) {
-      params.append('synced_since', syncedSince);
-    }
-
-    const response = await api<ApiResponse<GroupsResponse>>(`/groups?${params.toString()}`);
-
-    if (response.success && response.data) {
-      return response.data;
-    }
-
-    return {
-      last_sync: new Date().toISOString(),
-      data: []
-    };
+    const { data } = await fetchAllPages<Group>((page) =>
+      api<ApiResponse<GroupsResponse>>(`/groups?limit=${API_DEFAULT_LIMIT}&page=${page}`)
+    );
+    return { data };
   },
 
   /**

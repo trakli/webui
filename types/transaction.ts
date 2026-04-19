@@ -6,7 +6,6 @@ export interface ApiTransaction {
   datetime: string;
   group_id: number;
   categories: any[];
-  is_recurring: boolean;
   user_id: number;
   transfer_id: number;
   wallet_client_generated_id: string;
@@ -15,6 +14,8 @@ export interface ApiTransaction {
   party?: any;
   files?: TransactionFile[];
   recurring_rules?: RecurringRules;
+  is_refund?: boolean;
+  refund_of_transaction_id?: number | null;
 }
 
 // Transaction File attachment
@@ -51,10 +52,15 @@ export interface FrontendTransaction {
   walletId?: number; // Numeric ID
   description?: string;
   isRecurring?: boolean;
+  recurrencePeriod?: string;
+  recurrenceInterval?: number;
+  recurrenceEndsAt?: string;
   isTransfer?: boolean; // True if this transaction is part of a transfer
   transferId?: number; // ID of the associated transfer
   files?: TransactionFile[];
   filesToUpload?: string[];
+  isRefund?: boolean; // User explicitly flagged this income as refunding an expense
+  refundOfTransactionId?: number | null; // Optional link to the refunded expense
 }
 
 // Transaction Create/Update Payload (for POST/PUT)
@@ -80,15 +86,22 @@ export type TransactionUpdatePayload = Partial<TransactionCreatePayload>;
 
 // Transactions List API Response
 export interface TransactionsResponse {
-  last_sync: string;
   data: ApiTransaction[];
+  current_page: number;
+  total: number;
+  per_page: number;
+  last_page: number;
+  totals?: {
+    income: number;
+    expenses: number;
+    net: number;
+  };
 }
 
 // Generic API Response wrapper
 export interface ApiResponse<T> {
   success?: boolean;
   data?: T;
-  last_sync?: string;
   message?: string;
   errors?: string[];
   status?: number;
@@ -98,6 +111,12 @@ export interface ApiResponse<T> {
 export interface TransactionQueryParams {
   type?: 'income' | 'expense';
   limit?: number;
+  page?: number;
   synced_since?: string;
   no_client_id?: boolean;
+  date_from?: string;
+  date_to?: string;
+  wallet_ids?: number[];
+  category_ids?: number[];
+  search?: string;
 }

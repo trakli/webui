@@ -1,17 +1,5 @@
 <template>
   <div>
-    <TTopCard
-      page-name="Transaction"
-      page-name-plural="Transactions"
-      action="Edit"
-      :show-add-button="false"
-      :breadcrumb-items="[
-        { text: 'Home', clickable: false },
-        { text: 'Transactions', clickable: true, action: 'back' },
-        { text: 'Edit Transaction', current: true }
-      ]"
-      @back="$router.push('/transactions')"
-    />
     <div
       v-if="errorMessage"
       style="
@@ -30,6 +18,7 @@
       <TransactionFormContainer
         :editing-item="transactionToEdit"
         :is-outcome-selected="transactionToEdit?.type === 'EXPENSE'"
+        :is-submitting="isSubmitting"
         @submit="handleSubmit"
       />
       <TipsSection page-name="Transaction" />
@@ -41,7 +30,6 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
-import TTopCard from '@/components/TTopCard.vue';
 import TransactionFormContainer from '@/components/TransactionFormContainer.vue';
 import TipsSection from '@/components/TipsSection.vue';
 
@@ -54,8 +42,12 @@ const { updateTransaction, getTransactionForEdit } = useTransactions();
 const errorMessage = ref('');
 const transactionToEdit = ref(null);
 const isLoadingTransaction = ref(false);
+const isSubmitting = ref(false);
 
 const handleSubmit = async (data) => {
+  if (isSubmitting.value) return;
+
+  isSubmitting.value = true;
   errorMessage.value = '';
   try {
     await updateTransaction(route.params.id, data);
@@ -74,6 +66,8 @@ const handleSubmit = async (data) => {
     } else {
       errorMessage.value = t('Failed to update transaction. Please check all fields.');
     }
+  } finally {
+    isSubmitting.value = false;
   }
 };
 

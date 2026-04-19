@@ -9,6 +9,10 @@
           :debounce="0"
           @update:model-value="$emit('update:searchQuery', $event)"
         />
+        <button class="filter-toggle-btn" @click="$emit('toggle-filters')">
+          <FunnelIcon class="filter-toggle-icon" />
+          <span v-if="activeFilterCount" class="filter-count-badge">{{ activeFilterCount }}</span>
+        </button>
       </div>
     </div>
 
@@ -38,6 +42,12 @@
                 <span v-if="txn.isTransfer" class="transfer-badge">
                   {{ t('Transfer') }}
                 </span>
+                <span v-if="txn.isRefund" class="refund-badge">
+                  {{ t('Refund') }}
+                </span>
+                <span v-if="txn.isRecurring" class="recurring-badge">
+                  {{ t('Recurring') }}
+                </span>
               </td>
               <td>
                 <span class="party">{{ txn.party || '—' }}</span>
@@ -52,6 +62,9 @@
                 <div class="actions">
                   <button class="action-btn" @click="$emit('edit', txn)">
                     <PencilSquareIcon class="action-icon" />
+                  </button>
+                  <button class="action-btn action-btn--recurring" @click="$emit('recurrent', txn)">
+                    <ArrowPathIcon class="action-icon" />
                   </button>
                   <button class="action-btn" @click="$emit('delete', txn)">
                     <TrashIcon class="action-icon" />
@@ -136,7 +149,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { PencilSquareIcon, TrashIcon, ArrowPathIcon, FunnelIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '@/composables/useSharedData';
 import { parseAmount, getCurrencySymbol } from '@/utils/currency';
 import SearchInput from './SearchInput.vue';
@@ -159,10 +172,12 @@ const props = defineProps({
   totalPages: { type: Number, default: 1 },
   totalEntries: { type: Number, default: 0 },
   headerType: { type: String, default: 'default' },
-  allTransactions: { type: Array, default: () => [] }
+  allTransactions: { type: Array, default: () => [] },
+  activeFilterCount: { type: Number, default: 0 },
+  filteredTotals: { type: Object, default: null }
 });
 
-defineEmits(['edit', 'delete', 'page-change', 'update:searchQuery']);
+defineEmits(['edit', 'delete', 'recurrent', 'page-change', 'update:searchQuery', 'toggle-filters']);
 
 const { getDefaultCurrency } = useSharedData();
 
@@ -177,6 +192,11 @@ const convertCurrency = (amount, fromCurrency, toCurrency) => {
 };
 
 const totals = computed(() => {
+  // Prefer server-computed totals (covers all pages of filtered set)
+  if (props.filteredTotals) {
+    return props.filteredTotals;
+  }
+
   const txns = props.allTransactions.length > 0 ? props.allTransactions : props.transactions;
   const targetCurrency = getDefaultCurrency.value;
   let income = 0;
@@ -303,23 +323,93 @@ const formatTimeAgo = (txn) => {
 .input-controls {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.filter-toggle-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  background: $bg-white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: $primary;
+    background: rgba(var(--color-primary-rgb), 0.05);
+  }
+
+  .filter-toggle-icon {
+    width: 16px;
+    height: 16px;
+    color: $text-muted;
+  }
+
+  .filter-count-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background-color: $primary;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .table-wrapper {
   width: 100%;
+  max-height: calc(100vh - 220px);
   border-radius: $radius-lg;
-  overflow-x: auto;
+  overflow: auto;
   background-color: $bg-gray;
   box-shadow: $shadow-sm;
   -webkit-overflow-scrolling: touch;
+
+  @media (max-width: $breakpoint-md) {
+    max-height: calc(100vh - 260px);
+  }
 }
 
 .custom-table {
   width: 100%;
   min-width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-family: $font-family-sans;
   table-layout: auto;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  tfoot .totals-row,
+  tfoot .pagination-row {
+    position: sticky;
+    z-index: 2;
+  }
+
+  tfoot .pagination-row {
+    bottom: 0;
+  }
+
+  tfoot .totals-row {
+    bottom: 52px;
+  }
 
   th,
   td {
@@ -333,7 +423,7 @@ const formatTimeAgo = (txn) => {
     background-color: $table-header-bg;
     color: #ffffff;
     text-align: left;
-    padding: 10px;
+    padding: $table-header-padding;
     font-size: $font-size-sm;
   }
 
@@ -342,10 +432,10 @@ const formatTimeAgo = (txn) => {
   }
 
   td {
-    padding: 10px;
+    padding: $table-cell-padding;
     background-color: $bg-light;
     border-bottom: 1px solid $border-light;
-    vertical-align: top;
+    vertical-align: middle;
     font-size: $font-size-sm;
   }
 
@@ -390,6 +480,30 @@ const formatTimeAgo = (txn) => {
     font-weight: bold;
     background-color: rgba(var(--color-primary-rgb), 0.15);
     color: $primary;
+    vertical-align: middle;
+  }
+
+  .recurring-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: $radius-sm;
+    font-size: 10px;
+    font-weight: bold;
+    background-color: rgba(var(--color-warning-rgb), 0.15);
+    color: $warning-text;
+    vertical-align: middle;
+  }
+
+  .refund-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: $radius-sm;
+    font-size: 10px;
+    font-weight: bold;
+    background-color: rgba(255, 159, 67, 0.18);
+    color: #b45309;
     vertical-align: middle;
   }
 
@@ -449,8 +563,16 @@ const formatTimeAgo = (txn) => {
     }
   }
 
+  .action-btn--recurring .action-icon {
+    color: $warning-text;
+
+    &:hover {
+      color: $warning;
+    }
+  }
+
   // Make delete icon red
-  .action-btn:nth-child(2) .action-icon {
+  .action-btn:last-child .action-icon {
     color: $error-color;
 
     &:hover {
@@ -475,18 +597,20 @@ const formatTimeAgo = (txn) => {
 
   .total-section {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    padding: 12px 8px;
+    gap: 6px;
+    padding: 8px 10px;
     text-align: center;
+    line-height: 1.2;
 
     .total-label {
       font-size: $font-size-xs;
       font-weight: $font-medium;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 2px;
+      margin-bottom: 0;
     }
 
     .total-value {
@@ -498,7 +622,7 @@ const formatTimeAgo = (txn) => {
       background-color: $table-header-bg;
       .total-label {
         color: white;
-        font-size: $font-size-sm;
+        font-size: $font-size-xs;
         font-weight: $font-bold;
       }
     }
@@ -551,7 +675,7 @@ const formatTimeAgo = (txn) => {
   td {
     background-color: $bg-light !important;
     border-bottom: none !important;
-    padding: 16px 12px !important;
+    padding: 10px 12px !important;
   }
 }
 

@@ -5,7 +5,42 @@ import type {
   CategoriesResponse,
   ApiResponse
 } from '~/types/category';
-import { buildIconPayload, extractResponseData } from './apiHelpers';
+import { API_DEFAULT_LIMIT, buildIconPayload, fetchAllPages } from './apiHelpers';
+
+function createApiBusinessError(message: string, errors: string[] = []): Error {
+  const err = new Error(message) as Error & { _data?: { message: string; errors: string[] } };
+  err._data = { message, errors };
+  return err;
+}
+
+function extractCategoryMutationResult(
+  response: ApiResponse<Category> | Category | null | undefined,
+  fallbackMessage: string
+): Category {
+  if (!response) {
+    throw createApiBusinessError(fallbackMessage);
+  }
+
+  if (
+    typeof response === 'object' &&
+    'id' in response &&
+    typeof (response as Category).id === 'number'
+  ) {
+    return response as Category;
+  }
+
+  const apiResponse = response as ApiResponse<Category>;
+
+  if (apiResponse.success === false) {
+    throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+  }
+
+  if (apiResponse.data) {
+    return apiResponse.data;
+  }
+
+  throw createApiBusinessError(apiResponse.message || fallbackMessage, apiResponse.errors || []);
+}
 
 /**
  * Categories API Service
@@ -18,14 +53,12 @@ const categoriesApi = {
    */
   async fetchByType(type: 'income' | 'expense'): Promise<CategoriesResponse> {
     const api = useApi();
-    const url = `/categories?type=${type}`;
-
-    const response = await api<ApiResponse<CategoriesResponse>>(url);
-
-    return extractResponseData(response, {
-      last_sync: new Date().toISOString(),
-      data: []
-    });
+    const { data } = await fetchAllPages<Category>((page) =>
+      api<ApiResponse<CategoriesResponse>>(
+        `/categories?type=${type}&limit=${API_DEFAULT_LIMIT}&page=${page}`
+      )
+    );
+    return { data };
   },
 
   /**
@@ -34,12 +67,10 @@ const categoriesApi = {
    */
   async fetchAll(): Promise<CategoriesResponse> {
     const api = useApi();
-    const response = await api<ApiResponse<CategoriesResponse>>('/categories');
-
-    return extractResponseData(response, {
-      last_sync: new Date().toISOString(),
-      data: []
-    });
+    const { data } = await fetchAllPages<Category>((page) =>
+      api<ApiResponse<CategoriesResponse>>(`/categories?limit=${API_DEFAULT_LIMIT}&page=${page}`)
+    );
+    return { data };
   },
 
   /**
@@ -59,7 +90,7 @@ const categoriesApi = {
         method: 'POST',
         body: payload
       });
-      return response?.data || null;
+      return extractCategoryMutationResult(response, 'Failed to create category');
     } catch (error) {
       console.error('Error creating category:', error);
       throw error;
@@ -83,7 +114,7 @@ const categoriesApi = {
         method: 'PUT',
         body: payload
       });
-      return response?.data || null;
+      return extractCategoryMutationResult(response, 'Failed to update category');
     } catch (error) {
       console.error('Error updating category:', error);
       throw error;

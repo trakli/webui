@@ -71,7 +71,6 @@ export const useGroups = () => {
 
   return {
     groups: sharedData.groups,
-    lastSync: sharedData.groupsLastSync,
     isLoading: sharedData.groupsLoading,
     error: sharedData.groupsError,
     fetchGroups,

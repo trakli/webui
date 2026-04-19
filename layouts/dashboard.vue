@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-layout">
     <TSidebar />
-    <div class="main-content">
+    <div class="main-content" :class="{ 'main-content--collapsed': sidebarCollapsed }">
       <TNavbar />
       <div class="content-wrapper">
         <div class="dashboard-content">
@@ -23,8 +23,10 @@ import TSidebar from '@/components/TSidebar.vue';
 import NotificationsContainer from '@/components/NotificationsContainer.vue';
 import LearningModal from '@/components/modals/LearningModal.vue';
 import { useAuth } from '@/composables/useAuth';
+import { useSidebar } from '@/composables/useSidebar';
 
 const { fetchUser } = useAuth();
+const { sidebarCollapsed } = useSidebar();
 
 const showLearningModal = ref(false);
 
@@ -46,20 +48,29 @@ onMounted(() => {
 
 .dashboard-layout {
   background-color: $bg-gray;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .main-content {
-  transition: margin-left 0.3s ease;
-  overflow-x: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition:
+    margin-left 0.25s ease,
+    width 0.25s ease;
 
-  // Desktop - account for sidebar
   @media (min-width: $breakpoint-md) {
     margin-left: $sidebar-width;
     width: calc(100% - #{$sidebar-width});
+
+    &--collapsed {
+      margin-left: $sidebar-rail-width;
+      width: calc(100% - #{$sidebar-rail-width});
+    }
   }
 
-  // Mobile - full width
   @media (max-width: #{$breakpoint-md - 1px}) {
     margin-left: 0;
     width: 100%;
@@ -69,44 +80,47 @@ onMounted(() => {
 .content-wrapper {
   width: 100%;
   margin-top: $navbar-height;
+  height: calc(100vh - #{$navbar-height});
   box-sizing: border-box;
-  padding: 0.5rem 2rem;
+  padding: 0.25rem 1.25rem 0.5rem;
+  overflow: hidden;
 
   @media (max-width: $breakpoint-lg) {
-    padding: 1rem 1.5rem;
+    padding: 0.25rem 1rem 0.5rem;
   }
 
   @media (max-width: $breakpoint-md) {
-    padding: 0.75rem;
+    padding: 0.25rem 0.5rem 0.5rem;
   }
 
   @media (max-width: $breakpoint-sm) {
-    padding: 0.5rem;
+    padding: 0.25rem;
   }
 }
 
 .dashboard-content {
-  min-height: calc(100vh - 100px);
+  height: 100%;
   background-color: $bg-white;
-  border-radius: 2rem;
+  border-radius: 1.25rem;
   border: 1px solid $bg-gray;
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   @media (max-width: $breakpoint-lg) {
-    padding: 1.25rem;
-    border-radius: 1.5rem;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    padding: 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 1rem;
   }
 
-  @media (max-width: $breakpoint-sm) {
+  @media (max-width: $breakpoint-md) {
     padding: 0.75rem;
     border-radius: 0.75rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
   }
 
   &-container {

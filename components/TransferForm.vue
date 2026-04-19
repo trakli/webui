@@ -85,7 +85,13 @@
       </div>
     </div>
 
-    <TButton :text="t('Make Transfer')" class="submit-button" @click="onSubmit">
+    <TButton
+      :text="t('Make Transfer')"
+      class="submit-button"
+      :disabled="props.isSubmitting"
+      :loading="props.isSubmitting"
+      @click="onSubmit"
+    >
       <template #left-icon>
         <ArrowsRightLeftIcon />
       </template>
@@ -103,6 +109,12 @@ import { useSharedData } from '~/composables/useSharedData';
 const { t } = useI18n();
 
 const emit = defineEmits(['submit']);
+const props = defineProps({
+  isSubmitting: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const now = new Date();
 const formDate = ref(now.toISOString().slice(0, 10));
@@ -220,6 +232,10 @@ function validateRequiredFields(): boolean {
 }
 
 function onSubmit() {
+  if (props.isSubmitting) {
+    return;
+  }
+
   if (!validateRequiredFields()) {
     return;
   }

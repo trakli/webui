@@ -173,11 +173,35 @@
 
 .primary-btn {
   background: $primary;
-  color: white;
+  color: $text-inverse;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: $primary-hover;
     transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.btn-loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: $text-inverse;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -206,7 +230,7 @@
   svg {
     width: 40px;
     height: 40px;
-    color: white;
+    color: $text-inverse;
   }
 }
 

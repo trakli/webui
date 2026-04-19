@@ -16,12 +16,12 @@
             v-model="form.name"
             type="text"
             class="form-input"
-            :class="{ error: nameError || apiError }"
+            :class="{ error: nameError || props.apiError }"
             :placeholder="t('Enter group name')"
             required
           />
           <div v-if="nameError" class="error-text">{{ t('Group name is required.') }}</div>
-          <div v-if="apiError" class="error-text">{{ apiError }}</div>
+          <div v-if="props.apiError" class="error-text">{{ props.apiError }}</div>
         </div>
         <div class="icon-col">
           <button
@@ -66,8 +66,8 @@
       <button type="button" class="btn btn-secondary" @click="handleClose">
         {{ t('Cancel') }}
       </button>
-      <button type="submit" class="btn btn-primary" :disabled="isLoading">
-        <span v-if="isLoading">{{ isEditing ? t('Updating...') : t('Creating...') }}</span>
+      <button type="submit" class="btn btn-primary" :disabled="props.isSubmitting">
+        <span v-if="props.isSubmitting">{{ isEditing ? t('Updating...') : t('Creating...') }}</span>
         <span v-else>{{ isEditing ? t('Update Group') : t('Create Group') }}</span>
       </button>
     </div>
@@ -86,6 +86,14 @@ const props = defineProps({
   editingItem: {
     type: Object,
     default: null
+  },
+  apiError: {
+    type: String,
+    default: ''
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -99,8 +107,6 @@ const form = ref({
 
 const nameError = ref(false);
 const descriptionError = ref(false);
-const isLoading = ref(false);
-const apiError = ref(null);
 const showIconPicker = ref(false);
 
 const selectedIconComponent = computed(() => {
@@ -137,7 +143,6 @@ function resetForm() {
   form.value = { name: '', description: '', icon: '' };
   nameError.value = false;
   descriptionError.value = false;
-  apiError.value = null;
   showIconPicker.value = false;
 }
 
@@ -147,7 +152,6 @@ function validateForm() {
   // Reset errors
   nameError.value = false;
   descriptionError.value = false;
-  apiError.value = null;
 
   // Validate name
   if (!form.value.name || form.value.name.trim() === '') {
@@ -164,34 +168,28 @@ function validateForm() {
   return isValid;
 }
 
-async function handleSubmit() {
+function handleSubmit() {
+  if (props.isSubmitting) {
+    return;
+  }
+
   if (!validateForm()) return;
 
-  try {
-    isLoading.value = true;
-    const formData = {
-      name: form.value.name.trim(),
-      description: form.value.description.trim()
-    };
-    if (form.value.icon && form.value.icon.trim() !== '') {
-      formData.icon = form.value.icon;
-      formData.icon_type = 'image';
-    }
-
-    if (isEditing.value && props.editingItem) {
-      emit('updated', { id: props.editingItem.id, ...formData });
-    } else {
-      emit('created', formData);
-    }
-
-    // Don't close or reset form here - let the parent component handle that
-    // after successful creation/update
-  } catch (err) {
-    console.error('Error submitting group form:', err);
-    apiError.value = err.message || t('Failed to save group. Please try again.');
-  } finally {
-    isLoading.value = false;
+  const formData = {
+    name: form.value.name.trim(),
+    description: form.value.description.trim()
+  };
+  if (form.value.icon && form.value.icon.trim() !== '') {
+    formData.icon = form.value.icon;
+    formData.icon_type = 'image';
   }
+
+  if (isEditing.value && props.editingItem) {
+    emit('updated', { id: props.editingItem.id, ...formData });
+    return;
+  }
+
+  emit('created', formData);
 }
 
 function onIconSelected() {

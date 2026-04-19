@@ -1,6 +1,11 @@
 <template>
   <div class="form-section">
-    <FormSection :editing-item="editingItem" @submit="handleSubmit" @transfer="handleTransfer" />
+    <FormSection
+      :editing-item="editingItem"
+      :is-submitting="isSubmitting"
+      @submit="handleSubmit"
+      @transfer="handleTransfer"
+    />
     <TipsSection page-name="Transaction" />
   </div>
 </template>
@@ -13,6 +18,10 @@ defineProps({
   editingItem: {
     type: Object,
     default: null
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
   }
 });
 

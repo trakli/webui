@@ -1,116 +1,74 @@
 <template>
-  <div class="ai-chat card">
-    <h2 class="title">{{ t('AI Insights Chat') }}</h2>
-    <div ref="chatWindow" class="chat-window">
-      <div
-        v-for="(message, index) in chatHistory"
-        :key="index"
-        class="chat-row"
-        :class="message.type"
-      >
-        <div class="bubble" :class="message.type">
-          <div class="message-text">{{ message.text }}</div>
-          <div v-if="message.results?.length && message.formatType" class="results-container">
-            <template v-if="message.formatType === 'scalar'">
-              <div class="result-scalar">
-                {{ formatValue(Object.values(message.results[0])[0]) }}
-              </div>
-            </template>
-            <template v-else-if="message.formatType === 'pair'">
-              <div class="result-pair">
-                <span class="pair-label">{{ Object.keys(message.results[0])[0] }}:</span>
-                <span class="pair-value">{{
-                  formatValue(Object.values(message.results[0])[1])
-                }}</span>
-              </div>
-            </template>
-            <template v-else-if="message.formatType === 'record'">
-              <div class="result-record">
-                <div v-for="(value, key) in message.results[0]" :key="key" class="record-row">
-                  <span class="record-key">{{ formatKey(key) }}:</span>
-                  <span class="record-value">{{ formatValue(value) }}</span>
-                </div>
-              </div>
-            </template>
-            <template v-else-if="message.formatType === 'list'">
-              <ul class="result-list">
-                <li v-for="(row, i) in message.results" :key="i">
-                  {{ formatValue(Object.values(row)[0]) }}
-                </li>
-              </ul>
-            </template>
-            <template v-else-if="message.formatType === 'pair_list'">
-              <div class="result-pair-list">
-                <div v-for="(row, i) in message.results" :key="i" class="pair-row">
-                  <span class="pair-label">{{ Object.values(row)[0] }}:</span>
-                  <span class="pair-value">{{ formatValue(Object.values(row)[1]) }}</span>
-                </div>
-              </div>
-            </template>
-            <template v-else-if="message.formatType === 'table'">
-              <div class="result-table-wrapper">
-                <table class="result-table">
-                  <thead>
-                    <tr>
-                      <th v-for="key in Object.keys(message.results[0])" :key="key">
-                        {{ formatKey(key) }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(row, i) in message.results" :key="i">
-                      <td v-for="(value, key) in row" :key="key">{{ formatValue(value) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </template>
-            <template v-else>
-              <pre class="result-raw">{{ JSON.stringify(message.results, null, 2) }}</pre>
-            </template>
-          </div>
-        </div>
+  <div class="ai-chat">
+    <ChatSidebar
+      :sessions="sessions"
+      :current-session-id="currentSession?.id ?? null"
+      :is-loading="isLoadingSessions"
+      @new-chat="handleNew"
+      @open-session="handleOpen"
+      @delete-session="handleDelete"
+    />
+
+    <section class="chat-pane">
+      <header class="chat-header">
+        <Bot :size="18" class="chat-header-icon" />
+        <h2 class="chat-title">
+          {{ currentSession?.title || t('AI Insights') }}
+        </h2>
+      </header>
+
+      <div ref="chatWindow" class="chat-window">
+        <ChatMessageList
+          v-if="currentSession?.messages?.length"
+          :messages="currentSession.messages"
+        />
+        <ChatEmptyState v-else @pick="handleSuggestion" />
       </div>
-      <div v-if="isLoading" class="chat-row ai">
-        <div class="bubble ai loading">{{ t('Thinking...') }}</div>
-      </div>
-    </div>
-    <form class="composer" @submit.prevent="handleSendMessage">
-      <input
-        v-model="input"
-        type="text"
-        class="chat-input"
-        :placeholder="t('Ask me anything about your finances...')"
-        :disabled="isLoading"
-      />
-      <button type="submit" class="send-btn" :disabled="isLoading || !input.trim()">
-        {{ isLoading ? '...' : t('Send') }}
-      </button>
-    </form>
+
+      <ChatComposer ref="composerEl" v-model="input" :disabled="isSending" @submit="handleSubmit" />
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue';
-import { aiApi, type FormatType } from '@/services/api/aiApi';
+import { ref, nextTick, watch, onMounted } from 'vue';
+import { Bot } from 'lucide-vue-next';
+import { useAiChats } from '@/composables/useAiChats';
+import ChatSidebar from '@/components/ai/ChatSidebar.vue';
+import ChatMessageList from '@/components/ai/ChatMessageList.vue';
+import ChatEmptyState from '@/components/ai/ChatEmptyState.vue';
+import ChatComposer from '@/components/ai/ChatComposer.vue';
 
 const { t } = useI18n();
 
-interface ChatMessage {
-  type: 'user' | 'ai';
-  text: string;
-  results?: Record<string, unknown>[];
-  formatType?: FormatType | null;
-}
+const {
+  sessions,
+  currentSession,
+  isLoadingSessions,
+  isSending,
+  loadSessions,
+  openSession,
+  newSession,
+  send,
+  remove
+} = useAiChats();
 
-const initialMessage = computed(() =>
-  t('Hello! I am your personal financial assistant. How can I help you today?')
-);
-
-const chatHistory = ref<ChatMessage[]>([{ type: 'ai', text: initialMessage.value }]);
 const input = ref('');
-const isLoading = ref(false);
 const chatWindow = ref<HTMLElement | null>(null);
+const composerEl = ref<InstanceType<typeof ChatComposer> | null>(null);
+
+onMounted(() => {
+  loadSessions();
+});
+
+watch(
+  () => currentSession.value?.messages?.length,
+  () => scrollToBottom()
+);
+watch(
+  () => currentSession.value?.messages?.map((m) => m.status).join(','),
+  () => scrollToBottom()
+);
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -120,269 +78,92 @@ const scrollToBottom = () => {
   });
 };
 
-const formatKey = (key: string): string => {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-};
-
-const formatValue = (value: unknown): string => {
-  if (value === null || value === undefined) return '-';
-  if (typeof value === 'number') {
-    return Number.isInteger(value)
-      ? value.toString()
-      : value.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-  }
-  return String(value);
-};
-
-const handleSendMessage = async () => {
-  if (!input.value.trim() || isLoading.value) return;
-
-  const userMessage: ChatMessage = { type: 'user', text: input.value };
-  chatHistory.value.push(userMessage);
-  const question = input.value;
+const handleSubmit = async () => {
+  const message = input.value.trim();
+  if (!message) return;
   input.value = '';
-  isLoading.value = true;
+  await send(message);
   scrollToBottom();
+};
 
-  try {
-    const response = await aiApi.ask(question);
+const handleSuggestion = async (prompt: string) => {
+  input.value = prompt;
+  await handleSubmit();
+};
 
-    if (response.success && response.data) {
-      chatHistory.value.push({
-        type: 'ai',
-        text: response.data.answer,
-        results: response.data.results,
-        formatType: response.data.format_type
-      });
-    } else {
-      chatHistory.value.push({
-        type: 'ai',
-        text: response.message || t('Sorry, I could not process your request. Please try again.')
-      });
-    }
-  } catch {
-    chatHistory.value.push({
-      type: 'ai',
-      text: t('Sorry, the AI service is currently unavailable. Please try again later.')
-    });
-  } finally {
-    isLoading.value = false;
-    scrollToBottom();
-  }
+const handleOpen = async (id: number) => {
+  await openSession(id);
+  scrollToBottom();
+};
+
+const handleNew = () => {
+  newSession();
+  input.value = '';
+  composerEl.value?.focus();
+};
+
+const handleDelete = async (id: number) => {
+  await remove(id);
 };
 </script>
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
-.card {
+.ai-chat {
   background: $bg-white;
+  border: 1px solid $border-light;
   border-radius: $radius-xl;
   box-shadow: $shadow-md;
-  padding: $spacing-4;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.title {
-  font-size: $font-size-xl;
-  font-weight: $font-bold;
-  margin-bottom: $spacing-3;
-  color: $text-primary;
-}
-.chat-window {
-  flex: 1;
-  min-height: 60vh;
-  overflow-y: auto;
-  padding: $spacing-2;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-2;
-}
-.chat-row {
-  display: flex;
-  width: 100%;
-}
-.chat-row.ai {
-  justify-content: flex-start;
-}
-.chat-row.user {
-  justify-content: flex-end;
-}
-.bubble {
-  max-width: min(80%, 520px);
-  padding: $spacing-2 $spacing-3;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-  font-size: $font-size-base;
-  line-height: 1.5;
-  word-break: break-word;
-}
-.bubble.ai {
-  background: $primary-light;
-  color: $primary;
-  border: 1px solid $primary-muted;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  height: calc(100vh - 120px);
+  min-height: 560px;
+  overflow: hidden;
 
-  &.loading {
-    opacity: 0.7;
-    animation: pulse 1.5s ease-in-out infinite;
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+    height: calc(100vh - 100px);
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 0.4;
-  }
+.chat-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
-.bubble.user {
-  background: $bg-gray;
-  color: $text-primary;
-}
-.composer {
+
+.chat-header {
   display: flex;
   align-items: center;
   gap: $spacing-2;
-  margin-top: $spacing-2;
-}
-.chat-input {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid $border-light;
-  border-radius: 9999px;
-  outline: none;
-  font-size: $font-size-base;
-  background: $bg-white;
-  color: $text-primary;
-  transition: $transition-base;
-
-  &::placeholder {
-    color: $text-muted;
-  }
-
-  &:focus {
-    border-color: $primary;
-    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.15);
-  }
-}
-.send-btn {
-  padding: 0.6rem 1rem;
-  border-radius: 9999px;
-  background: $primary;
-  color: $bg-white;
-  font-weight: $font-semibold;
-  transition: $transition-base;
-
-  &:hover {
-    background: $primary-hover;
-  }
+  padding: $spacing-3 $spacing-4;
+  border-bottom: 1px solid $border-light;
 }
 
-.message-text {
-  white-space: pre-wrap;
-}
-
-.results-container {
-  margin-top: $spacing-2;
-  padding-top: $spacing-2;
-  border-top: 1px solid $primary-border;
-}
-
-.result-scalar {
-  font-size: $font-size-2xl;
-  font-weight: $font-bold;
+.chat-header-icon {
   color: $primary;
 }
 
-.result-pair,
-.pair-row {
-  display: flex;
-  gap: $spacing-2;
-  padding: $spacing-1 0;
-
-  .pair-label {
-    font-weight: $font-semibold;
-    color: $text-secondary;
-  }
-
-  .pair-value {
-    font-weight: $font-bold;
-  }
-}
-
-.result-record {
-  .record-row {
-    display: flex;
-    gap: $spacing-2;
-    padding: $spacing-1 0;
-    border-bottom: 1px solid $primary-muted;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .record-key {
-      font-weight: $font-semibold;
-      color: $text-secondary;
-      min-width: 100px;
-    }
-  }
-}
-
-.result-list {
+.chat-title {
   margin: 0;
-  padding-left: $spacing-4;
-
-  li {
-    padding: $spacing-1 0;
-  }
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  color: $text-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.result-pair-list {
+.chat-window {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: $spacing-4;
   display: flex;
   flex-direction: column;
-  gap: $spacing-1;
-}
-
-.result-table-wrapper {
-  overflow-x: auto;
-  margin-top: $spacing-1;
-}
-
-.result-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: $font-size-sm;
-
-  th,
-  td {
-    padding: $spacing-1 $spacing-2;
-    text-align: left;
-    border-bottom: 1px solid $primary-muted;
-  }
-
-  th {
-    font-weight: $font-semibold;
-    background: $primary-light;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-}
-
-.result-raw {
-  background: $bg-gray;
-  padding: $spacing-2;
-  border-radius: $radius-md;
-  overflow-x: auto;
-  font-size: $font-size-sm;
-  margin: 0;
+  gap: $spacing-3;
 }
 </style>
