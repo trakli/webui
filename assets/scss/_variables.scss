@@ -207,6 +207,13 @@ $navbar-icon-button-height: 36px;
 $sidebar-width: 300px;
 $sidebar-width-collapsed: 80px;
 $sidebar-mobile-width: 280px;
+$sidebar-rail-width: 80px;
+$sidebar-sub-width: 220px;
+
+// Table density
+// Applied uniformly by every table component so the app reads at one density.
+$table-cell-padding: 6px 10px;
+$table-header-padding: 6px 10px;
 
 // Transitions
 $transition-base: all 0.2s ease-in-out;
