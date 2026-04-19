@@ -419,9 +419,9 @@ onUnmounted(() => {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--color-info);
-  background: rgba(var(--color-info-rgb), 0.12);
-  border: 1px solid rgba(var(--color-info-rgb), 0.25);
+  color: #b45309;
+  background: rgba(255, 159, 67, 0.18);
+  border: 1px solid rgba(255, 159, 67, 0.35);
   text-transform: uppercase;
 }
 </style>

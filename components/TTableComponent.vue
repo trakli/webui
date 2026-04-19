@@ -42,6 +42,9 @@
                 <span v-if="txn.isTransfer" class="transfer-badge">
                   {{ t('Transfer') }}
                 </span>
+                <span v-if="txn.isRefund" class="refund-badge">
+                  {{ t('Refund') }}
+                </span>
                 <span v-if="txn.isRecurring" class="recurring-badge">
                   {{ t('Recurring') }}
                 </span>
@@ -489,6 +492,18 @@ const formatTimeAgo = (txn) => {
     font-weight: bold;
     background-color: rgba(var(--color-warning-rgb), 0.15);
     color: $warning-text;
+    vertical-align: middle;
+  }
+
+  .refund-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: $radius-sm;
+    font-size: 10px;
+    font-weight: bold;
+    background-color: rgba(255, 159, 67, 0.18);
+    color: #b45309;
     vertical-align: middle;
   }
 

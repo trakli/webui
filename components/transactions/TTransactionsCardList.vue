@@ -33,7 +33,8 @@
             <span class="prefix">{{ directionLabel(txn.type) }}</span>
             <UserIcon class="user-icon" />
             <span class="party">{{ txn.party || '—' }}</span>
-            <span v-if="txn.isTransfer" class="transfer-indicator">Transfer</span>
+            <span v-if="txn.isTransfer" class="transfer-indicator">{{ t('Transfer') }}</span>
+            <span v-if="txn.isRefund" class="refund-indicator">{{ t('Refund') }}</span>
             <span v-if="txn.isRecurring" class="recurring-indicator">
               <ArrowPathIcon class="recurring-icon" />
               {{ t('Recurring') }}
@@ -268,6 +269,18 @@ function formatShortDate(txn) {
     width: 10px;
     height: 10px;
   }
+}
+
+.refund-indicator {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: $radius-sm;
+  font-size: 10px;
+  font-weight: bold;
+  background-color: rgba(255, 159, 67, 0.18);
+  color: #b45309;
+  vertical-align: middle;
 }
 
 .bottom-right {
