@@ -123,6 +123,33 @@
         </div>
       </div>
 
+      <div v-if="!isOutcomeSelected" class="refund-section">
+        <label class="refund-toggle">
+          <input v-model="formIsRefund" type="checkbox" />
+          <span>{{ t('This is a refund') }}</span>
+        </label>
+        <p class="refund-hint">
+          {{
+            t('Mark this income as refunding a past expense. Budgets subtract it from their spend.')
+          }}
+        </p>
+        <div v-if="formIsRefund" class="refund-link">
+          <SearchableDropdown
+            v-model="refundPickerQuery"
+            :label="t('Refund of')"
+            :placeholder="
+              recentExpenses.length ? t('Search expenses...') : t('Loading expenses...')
+            "
+            :options="refundOptions"
+            @select="handleRefundSelect"
+            @clear="formRefundOfTransactionId = null"
+          />
+          <p class="refund-link-hint">
+            {{ t('Leave blank to mark the refund without linking to a specific expense.') }}
+          </p>
+        </div>
+      </div>
+
       <div class="recurring-section">
         <label class="recurring-toggle">
           <input v-model="formIsRecurring" type="checkbox" />
@@ -183,6 +210,7 @@ import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '~/composables/useSharedData';
+import { api } from '~/services/api';
 
 const { t } = useI18n();
 
@@ -222,6 +250,11 @@ const formIsRecurring = ref(false);
 const formRecurrencePeriod = ref('monthly');
 const formRecurrenceInterval = ref(1);
 const formRecurrenceEndsAt = ref('');
+const formIsRefund = ref(false);
+const formRefundOfTransactionId = ref<number | null>(null);
+const recentExpenses = ref<any[]>([]);
+const refundPickerQuery = ref('');
+let recentExpensesLoaded = false;
 const sharedData = useSharedData();
 const selectedCurrency = ref(sharedData.getDefaultCurrency.value || 'USD');
 
@@ -286,7 +319,10 @@ function onSubmit() {
     recurrencePeriod: formIsRecurring.value ? formRecurrencePeriod.value : undefined,
     recurrenceInterval: formIsRecurring.value ? formRecurrenceInterval.value : undefined,
     recurrenceEndsAt:
-      formIsRecurring.value && formRecurrenceEndsAt.value ? formRecurrenceEndsAt.value : undefined
+      formIsRecurring.value && formRecurrenceEndsAt.value ? formRecurrenceEndsAt.value : undefined,
+    isRefund: !isOutcomeSelected.value && formIsRefund.value,
+    refundOfTransactionId:
+      !isOutcomeSelected.value && formIsRefund.value ? formRefundOfTransactionId.value : null
   };
 
   if (props.editingItem?.id) {
@@ -395,6 +431,72 @@ const walletSearchQuery = ref('');
 function handleCategorySelect(categoryIds) {
   selectedAdditionalCategoryIds.value = categoryIds;
 }
+
+async function loadRecentExpenses() {
+  if (recentExpensesLoaded) return;
+  try {
+    // Walk every page so a user with hundreds of expenses still finds the
+    // one they're refunding. Reuses the same pagination helper all other
+    // list endpoints use now.
+    const all: any[] = [];
+    let page = 1;
+    const ceiling = 200;
+    while (page <= ceiling) {
+      const resp = await api.transactions.fetchAll({ type: 'expense', limit: 200, page });
+      const rows = Array.isArray(resp?.data) ? resp.data : [];
+      all.push(...rows);
+      const lastPage = resp?.last_page ?? 1;
+      const current = resp?.current_page ?? page;
+      if (rows.length === 0 || current >= lastPage) break;
+      page = current + 1;
+    }
+    recentExpenses.value = all;
+    recentExpensesLoaded = true;
+  } catch (e) {
+    console.error('[TransactionForm] Failed to load recent expenses', e);
+  }
+}
+
+function formatExpenseOption(exp) {
+  const dt = exp.datetime ? new Date(exp.datetime) : null;
+  const date = dt && !isNaN(dt.getTime()) ? dt.toLocaleDateString() : '';
+  const amount = Number(exp.amount || 0).toFixed(2);
+  const currency = exp.wallet?.currency ?? '';
+  const desc = exp.description || exp.party?.name || t('Untitled transaction');
+  return `${date} · ${amount} ${currency} · ${desc}`.trim();
+}
+
+// SearchableDropdown consumes { id, name } so pre-format every expense
+// into a single searchable label. Client-side search works against `name`.
+const refundOptions = computed(() =>
+  recentExpenses.value.map((exp) => ({
+    id: Number(exp.id),
+    name: formatExpenseOption(exp)
+  }))
+);
+
+function handleRefundSelect(option) {
+  formRefundOfTransactionId.value = option?.id ?? null;
+  refundPickerQuery.value = option?.name ?? '';
+}
+
+watch(formIsRefund, (flag) => {
+  if (flag) {
+    loadRecentExpenses();
+  } else {
+    formRefundOfTransactionId.value = null;
+    refundPickerQuery.value = '';
+  }
+});
+
+// Clear the refund flag when the user flips to expense — the backend rejects
+// it anyway, but this keeps the local state tidy.
+watch(isOutcomeSelected, (isExpense) => {
+  if (isExpense) {
+    formIsRefund.value = false;
+    formRefundOfTransactionId.value = null;
+  }
+});
 
 onMounted(async () => {
   try {
@@ -519,6 +621,18 @@ watch(
       formRecurrencePeriod.value = item.recurrencePeriod || 'monthly';
       formRecurrenceInterval.value = item.recurrenceInterval || 1;
       formRecurrenceEndsAt.value = item.recurrenceEndsAt ? item.recurrenceEndsAt.split('T')[0] : '';
+    }
+
+    if (item.isRefund) {
+      formIsRefund.value = true;
+      formRefundOfTransactionId.value = item.refundOfTransactionId ?? null;
+      await loadRecentExpenses();
+      if (formRefundOfTransactionId.value) {
+        const match = recentExpenses.value.find(
+          (exp) => Number(exp.id) === formRefundOfTransactionId.value
+        );
+        if (match) refundPickerQuery.value = formatExpenseOption(match);
+      }
     }
   },
   { immediate: true }

@@ -353,7 +353,7 @@ thead {
   background-color: $bg-gray;
 
   th {
-    padding: 10px 8px;
+    padding: $table-header-padding;
     text-align: left;
     font-weight: 600;
     color: $text-secondary;
@@ -372,7 +372,7 @@ tbody tr {
 }
 
 td {
-  padding: 6px 8px;
+  padding: $table-cell-padding;
   vertical-align: middle;
 }
 

@@ -352,7 +352,7 @@ const visiblePages = computed(() => {
       color: white;
       font-weight: $font-semibold;
       text-align: left;
-      padding: 0.75rem 1rem;
+      padding: $table-header-padding;
       font-size: $font-size-sm;
       white-space: nowrap;
 
@@ -393,7 +393,7 @@ const visiblePages = computed(() => {
       }
 
       td {
-        padding: 0.75rem 1rem;
+        padding: $table-cell-padding;
         border-bottom: 1px solid $border-light;
         font-size: $font-size-sm;
         vertical-align: middle;

@@ -14,6 +14,8 @@ export interface ApiTransaction {
   party?: any;
   files?: TransactionFile[];
   recurring_rules?: RecurringRules;
+  is_refund?: boolean;
+  refund_of_transaction_id?: number | null;
 }
 
 // Transaction File attachment
@@ -57,6 +59,8 @@ export interface FrontendTransaction {
   transferId?: number; // ID of the associated transfer
   files?: TransactionFile[];
   filesToUpload?: string[];
+  isRefund?: boolean; // User explicitly flagged this income as refunding an expense
+  refundOfTransactionId?: number | null; // Optional link to the refunded expense
 }
 
 // Transaction Create/Update Payload (for POST/PUT)
@@ -82,7 +86,6 @@ export type TransactionUpdatePayload = Partial<TransactionCreatePayload>;
 
 // Transactions List API Response
 export interface TransactionsResponse {
-  last_sync: string;
   data: ApiTransaction[];
   current_page: number;
   total: number;
@@ -99,7 +102,6 @@ export interface TransactionsResponse {
 export interface ApiResponse<T> {
   success?: boolean;
   data?: T;
-  last_sync?: string;
   message?: string;
   errors?: string[];
   status?: number;

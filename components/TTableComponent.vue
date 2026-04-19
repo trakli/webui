@@ -368,19 +368,45 @@ const formatTimeAgo = (txn) => {
 
 .table-wrapper {
   width: 100%;
+  max-height: calc(100vh - 220px);
   border-radius: $radius-lg;
-  overflow-x: auto;
+  overflow: auto;
   background-color: $bg-gray;
   box-shadow: $shadow-sm;
   -webkit-overflow-scrolling: touch;
+
+  @media (max-width: $breakpoint-md) {
+    max-height: calc(100vh - 260px);
+  }
 }
 
 .custom-table {
   width: 100%;
   min-width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-family: $font-family-sans;
   table-layout: auto;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  tfoot .totals-row,
+  tfoot .pagination-row {
+    position: sticky;
+    z-index: 2;
+  }
+
+  tfoot .pagination-row {
+    bottom: 0;
+  }
+
+  tfoot .totals-row {
+    bottom: 52px;
+  }
 
   th,
   td {
@@ -394,7 +420,7 @@ const formatTimeAgo = (txn) => {
     background-color: $table-header-bg;
     color: #ffffff;
     text-align: left;
-    padding: 10px;
+    padding: $table-header-padding;
     font-size: $font-size-sm;
   }
 
@@ -403,10 +429,10 @@ const formatTimeAgo = (txn) => {
   }
 
   td {
-    padding: 10px;
+    padding: $table-cell-padding;
     background-color: $bg-light;
     border-bottom: 1px solid $border-light;
-    vertical-align: top;
+    vertical-align: middle;
     font-size: $font-size-sm;
   }
 
@@ -556,18 +582,20 @@ const formatTimeAgo = (txn) => {
 
   .total-section {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    padding: 12px 8px;
+    gap: 6px;
+    padding: 8px 10px;
     text-align: center;
+    line-height: 1.2;
 
     .total-label {
       font-size: $font-size-xs;
       font-weight: $font-medium;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 2px;
+      margin-bottom: 0;
     }
 
     .total-value {
@@ -579,7 +607,7 @@ const formatTimeAgo = (txn) => {
       background-color: $table-header-bg;
       .total-label {
         color: white;
-        font-size: $font-size-sm;
+        font-size: $font-size-xs;
         font-weight: $font-bold;
       }
     }
@@ -632,7 +660,7 @@ const formatTimeAgo = (txn) => {
   td {
     background-color: $bg-light !important;
     border-bottom: none !important;
-    padding: 16px 12px !important;
+    padding: 10px 12px !important;
   }
 }
 
