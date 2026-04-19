@@ -1,8 +1,23 @@
-<p align="center"><a href="#" target="_blank"><img src="https://raw.githubusercontent.com/whilesmart/trakli/main/logo.svg" width="200" alt="Trakli Logo"></a></p>
+<p align="center"><a href="#" target="_blank"><img src="./public/logo.svg" width="200" alt="Trakli Logo"></a></p>
 
-## Trakli UI
+<p align="center"><img src="./.github/assets/trakli-dashboard-showcase.png" alt="Trakli dashboard and mobile preview" width="820"></p>
 
-Web UI for [Trakli](https://github.com/whilesmart/trakli)
+# Trakli UI
+
+[![CI](https://github.com/trakli/webui/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/trakli/webui/actions/workflows/checks.yml)
+
+Web UI for [Trakli](https://github.com/trakli/trakli).
+
+## Features
+
+- **Transactions:** Income and expenses across multiple wallets, with attachments and recurring rules.
+- **Transfers:** Move money between wallets, including cross-currency at user-set rates.
+- **Budgets:** Scoped to categories, groups, or wallets; weekly / monthly / yearly / custom range; optional rollover; threshold and forecast alerts.
+- **Refunds:** Mark an income as refunding an earlier expense; matching budgets adjust automatically.
+- **Reminders:** Bills, budget alerts, and custom events with pause, resume, and snooze.
+- **Imports:** Pull transactions from CSVs, PDFs, and photos of receipts.
+- **Insights & AI:** Dashboard stats, digest emails, and a chat assistant for your finances.
+- **Offline-first:** Changes made on mobile sync cleanly when the device reconnects.
 
 ## Setup Instructions
 
