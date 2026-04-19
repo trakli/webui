@@ -47,10 +47,7 @@ const remindersApi = {
     const api = useApi();
     const response = await api<ApiResponse<RemindersResponse>>('/reminders');
 
-    return extractResponseData(response, {
-      last_sync: new Date().toISOString(),
-      data: []
-    });
+    return extractResponseData(response, { data: [] });
   },
 
   async fetch(id: number): Promise<Reminder | null> {

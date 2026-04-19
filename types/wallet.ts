@@ -49,14 +49,12 @@ export interface WalletUpdatePayload {
 }
 
 export interface WalletsResponse {
-  last_sync: string;
   data: Wallet[];
 }
 
 export interface ApiResponse<T> {
   success?: boolean;
   data?: T;
-  last_sync?: string;
   message?: string;
   errors?: string[];
   status?: number;

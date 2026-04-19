@@ -51,14 +51,12 @@ export interface ReminderSnoozePayload {
 }
 
 export interface RemindersResponse {
-  last_sync: string;
   data: Reminder[];
 }
 
 export interface ApiResponse<T> {
   success?: boolean;
   data?: T;
-  last_sync?: string;
   message?: string;
   errors?: string[];
   status?: number;

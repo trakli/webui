@@ -5,7 +5,7 @@ import type {
   WalletsResponse,
   ApiResponse
 } from '~/types/wallet';
-import { API_DEFAULT_LIMIT, buildIconPayload, extractResponseData } from './apiHelpers';
+import { API_DEFAULT_LIMIT, buildIconPayload, fetchAllPages } from './apiHelpers';
 
 function createApiBusinessError(message: string, errors: string[] = []): Error {
   const err = new Error(message) as Error & { _data?: { message: string; errors: string[] } };
@@ -53,13 +53,10 @@ const walletsApi = {
    */
   async fetchAll(): Promise<WalletsResponse> {
     const api = useApi();
-
-    const response = await api<ApiResponse<WalletsResponse>>(`/wallets?limit=${API_DEFAULT_LIMIT}`);
-
-    return extractResponseData(response, {
-      last_sync: new Date().toISOString(),
-      data: []
-    });
+    const { data } = await fetchAllPages<Wallet>((page) =>
+      api<ApiResponse<WalletsResponse>>(`/wallets?limit=${API_DEFAULT_LIMIT}&page=${page}`)
+    );
+    return { data };
   },
 
   /**

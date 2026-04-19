@@ -15,7 +15,6 @@ export interface ConfigurationPayload {
 
 export interface ConfigurationsResponse {
   data: ConfigurationItem[];
-  last_sync?: string;
 }
 
 export interface ApiResponse<T> {

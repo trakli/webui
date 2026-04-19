@@ -50,7 +50,6 @@ export const useCategories = () => {
 
   return {
     categories: sharedData.categories,
-    lastSync: sharedData.categoriesLastSync,
     isLoading: sharedData.categoriesLoading,
     error: sharedData.categoriesError,
     fetchCategories,
