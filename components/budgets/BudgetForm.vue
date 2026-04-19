@@ -184,9 +184,7 @@ const currencyOptions = computed<string[]>(() => {
   const wallets = (shared.wallets?.value ?? []) as Array<{ currency?: string }>;
   const codes = new Set<string>();
   for (const w of wallets) {
-    if (w.currency && w.currency.length === 3) {
-      codes.add(w.currency.toUpperCase());
-    }
+    if (w.currency) codes.add(w.currency.toUpperCase());
   }
   if (codes.size === 0 && defaultCurrency.value) {
     codes.add(defaultCurrency.value.toUpperCase());

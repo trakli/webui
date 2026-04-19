@@ -210,7 +210,7 @@ import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '~/composables/useSharedData';
-import { api } from '~/services/api';
+import { fetchAllPages } from '~/services/api/apiHelpers';
 
 const { t } = useI18n();
 
@@ -435,22 +435,11 @@ function handleCategorySelect(categoryIds) {
 async function loadRecentExpenses() {
   if (recentExpensesLoaded) return;
   try {
-    // Walk every page so a user with hundreds of expenses still finds the
-    // one they're refunding. Reuses the same pagination helper all other
-    // list endpoints use now.
-    const all: any[] = [];
-    let page = 1;
-    const ceiling = 200;
-    while (page <= ceiling) {
-      const resp = await api.transactions.fetchAll({ type: 'expense', limit: 200, page });
-      const rows = Array.isArray(resp?.data) ? resp.data : [];
-      all.push(...rows);
-      const lastPage = resp?.last_page ?? 1;
-      const current = resp?.current_page ?? page;
-      if (rows.length === 0 || current >= lastPage) break;
-      page = current + 1;
-    }
-    recentExpenses.value = all;
+    const apiFetch = useApi();
+    const { data } = await fetchAllPages<any>((page) =>
+      apiFetch(`/transactions?type=expense&limit=200&page=${page}`)
+    );
+    recentExpenses.value = data;
     recentExpensesLoaded = true;
   } catch (e) {
     console.error('[TransactionForm] Failed to load recent expenses', e);
