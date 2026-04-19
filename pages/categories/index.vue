@@ -1,6 +1,7 @@
 <template>
   <div>
     <ContentTopCard
+      v-if="!showForm"
       page-name="Category"
       page-name-plural="Categories"
       @add="handleOpenFormForCreation"

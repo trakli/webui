@@ -1,6 +1,7 @@
 <template>
   <div class="reminders-page">
     <ContentTopCard
+      v-if="!showForm"
       page-name="Reminder"
       page-name-plural="Reminders"
       @add="handleOpenFormForCreation"

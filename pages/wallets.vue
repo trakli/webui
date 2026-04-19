@@ -1,6 +1,7 @@
 <template>
   <div>
     <ContentTopCard
+      v-if="!showForm"
       page-name="Wallet"
       page-name-plural="Wallets"
       @add="handleOpenFormForCreation"

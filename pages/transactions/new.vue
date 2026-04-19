@@ -1,16 +1,5 @@
 <template>
   <div>
-    <TTopCard
-      page-name="Transaction"
-      page-name-plural="Transactions"
-      :show-add-button="false"
-      :breadcrumb-items="[
-        { text: 'Home', clickable: false },
-        { text: 'Transactions', clickable: true, action: 'back' },
-        { text: 'New Transaction', current: true }
-      ]"
-      @back="$router.push('/transactions')"
-    />
     <div v-if="errorMessage" class="error-message">
       <strong>{{ t('Error:') }}</strong> {{ errorMessage }}
     </div>
@@ -28,7 +17,6 @@ import { useRouter } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
 import { useSharedData } from '@/composables/useSharedData';
 import transfersApi from '@/services/api/transfersApi';
-import TTopCard from '@/components/TTopCard.vue';
 import TransactionFormSection from '@/components/TransactionFormSection.vue';
 
 const { t } = useI18n();
