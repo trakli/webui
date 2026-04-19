@@ -1,6 +1,11 @@
 <template>
   <div>
-    <ContentTopCard page-name="Group" page-name-plural="Groups" @add="handleOpenFormForCreation" />
+    <ContentTopCard
+      v-if="!showForm"
+      page-name="Group"
+      page-name-plural="Groups"
+      @add="handleOpenFormForCreation"
+    />
     <div class="content-area">
       <div v-if="showForm" class="form-section">
         <div class="form-wrapper">

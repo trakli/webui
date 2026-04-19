@@ -1,6 +1,7 @@
 <template>
   <div>
     <ContentTopCard
+      v-if="!showForm"
       page-name="Budget"
       page-name-plural="Budgets"
       @add="handleOpenFormForCreation"
@@ -330,7 +331,7 @@ definePageMeta({
   background: $bg-slate;
   border: 1px solid $border-color;
   border-radius: $radius-xl;
-  padding: 1.25rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -345,14 +346,15 @@ definePageMeta({
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: $font-size-base;
+    font-size: $font-size-xl;
     font-weight: $font-semibold;
     color: $text-primary;
-    margin: 0;
+    margin: 0 0 0.25rem;
+    line-height: 1.2;
 
     .icon {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       color: $primary;
     }
   }

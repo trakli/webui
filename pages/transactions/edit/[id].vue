@@ -1,17 +1,5 @@
 <template>
   <div>
-    <TTopCard
-      page-name="Transaction"
-      page-name-plural="Transactions"
-      action="Edit"
-      :show-add-button="false"
-      :breadcrumb-items="[
-        { text: 'Home', clickable: false },
-        { text: 'Transactions', clickable: true, action: 'back' },
-        { text: 'Edit Transaction', current: true }
-      ]"
-      @back="$router.push('/transactions')"
-    />
     <div
       v-if="errorMessage"
       style="
@@ -42,7 +30,6 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
-import TTopCard from '@/components/TTopCard.vue';
 import TransactionFormContainer from '@/components/TransactionFormContainer.vue';
 import TipsSection from '@/components/TipsSection.vue';
 

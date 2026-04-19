@@ -1,5 +1,6 @@
 <template>
   <ContentTopCard
+    v-if="!showForm"
     :page-name="pageName"
     :page-name-plural="pageNamePlural"
     @add="handleOpenFormForCreation"
