@@ -48,7 +48,8 @@ import {
   TagIcon,
   ArrowsRightLeftIcon,
   UsersIcon,
-  FolderIcon
+  FolderIcon,
+  ChartPieIcon
 } from '@heroicons/vue/24/outline';
 
 const { t } = useI18n();
@@ -58,7 +59,7 @@ const props = defineProps({
     type: String,
     required: true,
     validator: (value) =>
-      ['wallets', 'categories', 'transactions', 'parties', 'groups'].includes(value)
+      ['wallets', 'categories', 'transactions', 'parties', 'groups', 'budgets'].includes(value)
   }
 });
 
@@ -69,7 +70,8 @@ const iconComponents = {
   categories: TagIcon,
   transactions: ArrowsRightLeftIcon,
   parties: UsersIcon,
-  groups: FolderIcon
+  groups: FolderIcon,
+  budgets: ChartPieIcon
 };
 
 const onboardingConfigs = {
@@ -133,6 +135,18 @@ const onboardingConfigs = {
     ],
     primaryAction: 'Add First Group',
     tip: '💡 Think of groups as project folders for your money - perfect for tracking specific goals!'
+  },
+  budgets: {
+    title: 'Take Control of Your Spending',
+    subtitle:
+      "Budgets put a cap on what you spend in a category, group, or wallet — and tell you when you're drifting off track before the month is over.",
+    steps: [
+      'Pick what to budget — a category, group, or even a specific wallet',
+      'Set an amount and period (weekly, monthly, yearly, or a custom range)',
+      'Choose whether unused amounts roll over to the next period',
+      "Get alerts as you approach the limit, and forecast warnings when you're on pace to breach"
+    ],
+    primaryAction: 'Create First Budget'
   }
 };
 
