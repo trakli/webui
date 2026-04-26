@@ -98,64 +98,62 @@
               <td>
                 <select
                   class="inline-edit"
-                  :class="{ 'inline-edit--new': isNewParty(suggestion.party) }"
-                  :value="suggestion.party || ''"
+                  :value="suggestion.party_id ?? ''"
                   @change="
-                    handleEdit(
+                    handleIdEdit(
                       suggestion.index,
-                      'party',
+                      'party_id',
                       ($event.target as HTMLSelectElement).value
                     )
                   "
                 >
                   <option value="">--</option>
-                  <option v-if="isNewParty(suggestion.party)" :value="suggestion.party!">
-                    {{ suggestion.party }} ({{ t('new') }})
-                  </option>
-                  <option v-for="p in parties" :key="p.id" :value="p.name">{{ p.name }}</option>
+                  <option v-for="p in parties" :key="p.id" :value="p.id">{{ p.name }}</option>
                 </select>
+                <span v-if="suggestion.party && !suggestion.party_id" class="inline-hint">
+                  {{ t('Suggested') }}: {{ suggestion.party }}
+                </span>
               </td>
               <td>
                 <select
                   class="inline-edit"
-                  :class="{ 'inline-edit--new': isNewCategory(suggestion.category) }"
-                  :value="suggestion.category || ''"
+                  :value="suggestion.category_id ?? ''"
                   @change="
-                    handleEdit(
+                    handleIdEdit(
                       suggestion.index,
-                      'category',
+                      'category_id',
                       ($event.target as HTMLSelectElement).value
                     )
                   "
                 >
                   <option value="">--</option>
-                  <option v-if="isNewCategory(suggestion.category)" :value="suggestion.category!">
-                    {{ suggestion.category }} ({{ t('new') }})
-                  </option>
-                  <option v-for="c in categories" :key="c.id" :value="c.name">{{ c.name }}</option>
+                  <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
                 </select>
+                <span v-if="suggestion.category && !suggestion.category_id" class="inline-hint">
+                  {{ t('Suggested') }}: {{ suggestion.category }}
+                </span>
               </td>
               <td>
                 <select
                   class="inline-edit"
-                  :class="{ 'inline-edit--new': isNewWallet(suggestion.wallet) }"
-                  :value="suggestion.wallet || ''"
+                  :class="{ 'inline-edit--missing': !suggestion.wallet_id }"
+                  :value="suggestion.wallet_id ?? ''"
                   @change="
-                    handleEdit(
+                    handleIdEdit(
                       suggestion.index,
-                      'wallet',
+                      'wallet_id',
                       ($event.target as HTMLSelectElement).value
                     )
                   "
                 >
-                  <option value="">--</option>
-                  <option v-if="isNewWallet(suggestion.wallet)" :value="suggestion.wallet!">
-                    {{ suggestion.wallet }} ({{ t('new') }})
-                  </option>
-                  <option v-for="w in wallets" :key="w.id" :value="w.name">
+                  <option value="">{{ t('Select wallet') }}</option>
+                  <option v-for="w in wallets" :key="w.id" :value="w.id">
                     {{ w.name }} ({{ w.currency }})
                   </option>
                 </select>
+                <span v-if="suggestion.wallet && !suggestion.wallet_id" class="inline-hint">
+                  {{ t('Suggested') }}: {{ suggestion.wallet }}
+                </span>
               </td>
               <td class="col-confidence">
                 <span class="confidence-badge" :class="confidenceClass(suggestion.confidence)">
@@ -231,7 +229,7 @@ import { ChevronDownIcon } from '@heroicons/vue/24/outline';
 
 const { t } = useI18n();
 
-const props = defineProps<{
+defineProps<{
   suggestions: SuggestionWithDuplicate[];
   wallets: readonly Wallet[];
   categories: readonly Category[];
@@ -240,14 +238,6 @@ const props = defineProps<{
   rejectedCount: number;
   pendingCount: number;
 }>();
-
-const walletNames = computed(() => new Set(props.wallets.map((w) => w.name)));
-const partyNames = computed(() => new Set(props.parties.map((p) => p.name)));
-const categoryNames = computed(() => new Set(props.categories.map((c) => c.name)));
-
-const isNewWallet = (name: string | null) => !!name && !walletNames.value.has(name);
-const isNewParty = (name: string | null) => !!name && !partyNames.value.has(name);
-const isNewCategory = (name: string | null) => !!name && !categoryNames.value.has(name);
 
 const emit = defineEmits<{
   toggle: [index: number];
@@ -270,7 +260,17 @@ const handleEdit = (index: number, field: string, value: any) => {
   emit('edit', index, { [field]: value });
 };
 
-const isRowInvalid = (s: SuggestionWithDuplicate) => !s.wallet || isNewWallet(s.wallet);
+// ID selects emit a string from the <select> element; coerce to number or null.
+const handleIdEdit = (
+  index: number,
+  field: 'wallet_id' | 'party_id' | 'category_id',
+  value: string
+) => {
+  const id = value === '' ? null : Number(value);
+  emit('edit', index, { [field]: id });
+};
+
+const isRowInvalid = (s: SuggestionWithDuplicate) => !s.wallet_id;
 
 const rowClass = (s: SuggestionWithDuplicate) => ({
   'row--accepted': s.status === 'accepted' && !isRowInvalid(s),
@@ -430,10 +430,17 @@ td {
     text-align: right;
   }
 
-  &--new {
-    border-color: $warning-text;
-    background-color: rgba(var(--color-warning-rgb), 0.06);
+  &--missing {
+    border-color: $error-color;
+    background-color: rgba(var(--color-error-rgb), 0.06);
   }
+}
+
+.inline-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: $font-size-xs;
+  color: $text-muted;
 }
 
 select.inline-edit {
