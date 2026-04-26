@@ -26,6 +26,9 @@ export interface SuggestionWithDuplicate extends TransactionSuggestion {
   status: 'pending' | 'accepted' | 'rejected';
   edited: boolean;
   index: number;
+  wallet_id: number | null;
+  party_id: number | null;
+  category_id: number | null;
 }
 
 export interface ImportSession {
@@ -53,12 +56,11 @@ export interface ConfirmPayload {
   session_id: number;
   accepted: Array<{
     index: number;
+    wallet_id?: number;
+    party_id?: number;
+    category_id?: number;
     amount?: number;
-    currency?: string;
     type?: 'income' | 'expense';
-    party?: string;
-    wallet?: string;
-    category?: string;
     description?: string;
     date?: string;
   }>;
