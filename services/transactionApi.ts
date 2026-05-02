@@ -75,17 +75,20 @@ const transactionApi = {
   },
 
   /**
-   * Add multiple files (base64 strings) to a transaction
+   * Add multiple files to a transaction as multipart upload.
    * POST /transactions/{id}/files
-   * Body: { files: string[] }
-   * Returns updated transaction
+   * Returns updated transaction.
    */
-  async addFilesBulk(id: number, files: string[]): Promise<ApiTransaction | null> {
+  async addFilesBulk(id: number, files: File[]): Promise<ApiTransaction | null> {
     const api = useApi();
     try {
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append('files[]', file, file.name);
+      }
       const response = await api<ApiResponse<ApiTransaction>>(`/transactions/${id}/files`, {
         method: 'POST',
-        body: { files }
+        body: formData
       });
       return response?.data || null;
     } catch (error) {

@@ -245,7 +245,7 @@ const selectedPartyId = ref<number | null>(null);
 const selectedWalletId = ref<number | null>(null);
 const selectedGroupId = ref(null);
 const selectedAdditionalCategoryIds = ref([]);
-const filesBase64 = ref([]);
+const filesToUpload = ref([]);
 const formIsRecurring = ref(false);
 const formRecurrencePeriod = ref('monthly');
 const formRecurrenceInterval = ref(1);
@@ -314,7 +314,7 @@ function onSubmit() {
     groupId: selectedGroupId.value ?? undefined,
     walletId: selectedWalletId.value,
     description: formDescription.value.trim(),
-    filesToUpload: filesBase64.value,
+    filesToUpload: filesToUpload.value,
     isRecurring: formIsRecurring.value,
     recurrencePeriod: formIsRecurring.value ? formRecurrencePeriod.value : undefined,
     recurrenceInterval: formIsRecurring.value ? formRecurrenceInterval.value : undefined,
@@ -519,34 +519,16 @@ function onFilesSelected(event) {
   const input = event.target;
   const files = input.files;
   if (!files) return;
-  filesBase64.value = [];
+  filesToUpload.value = [];
   selectedFileNames.value = [];
-  const tasks = [];
   for (const file of Array.from(files)) {
-    tasks.push(
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result;
-          const base64 = result.includes(',') ? result.split(',')[1] : result;
-          filesBase64.value.push(base64);
-          selectedFileNames.value.push({ name: file.name, size: file.size });
-          resolve();
-        };
-        reader.onerror = (e) => reject(e);
-        reader.readAsDataURL(file);
-      })
-    );
+    filesToUpload.value.push(file);
+    selectedFileNames.value.push({ name: file.name, size: file.size });
   }
-  Promise.all(tasks)
-    .then(() => {
-      console.log('Files processed successfully');
-    })
-    .catch((err) => console.error('Failed to read files', err));
 }
 
 function removeFile(index) {
-  filesBase64.value.splice(index, 1);
+  filesToUpload.value.splice(index, 1);
   selectedFileNames.value.splice(index, 1);
 }
 
