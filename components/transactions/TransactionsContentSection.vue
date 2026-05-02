@@ -150,7 +150,8 @@ const {
   setRecurring,
   changePage,
   applyFilters,
-  updateSearch
+  updateSearch,
+  refreshTransactions
 } = useTransactions();
 
 const showRecurringModal = ref(false);
@@ -175,7 +176,33 @@ const formatCurrency = (value) => {
 
 // Use centralized data manager states and initialization
 const { isLoading, error, isInitialized } = useDataManagerStates();
-useDataInitialization();
+const { isAuthenticated } = useDataInitialization();
+
+// Pick up records that were synced from other clients (e.g. mobile) since this
+// list relies on a module-scoped cache that would otherwise stay stale until logout.
+onMounted(() => {
+  if (isAuthenticated.value && isInitialized.value) {
+    refreshTransactions();
+  }
+});
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible' && isAuthenticated.value && isInitialized.value) {
+    refreshTransactions();
+  }
+};
+
+onMounted(() => {
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof document !== 'undefined') {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }
+});
 
 const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
 
