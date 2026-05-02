@@ -203,8 +203,7 @@ export const transactionMapper = {
       wallet_id: walletId ?? undefined,
       group_id: groupId ?? undefined,
       categories:
-        frontend.categoryIds && frontend.categoryIds.length > 0 ? frontend.categoryIds : [],
-      files: frontend.filesToUpload || []
+        frontend.categoryIds && frontend.categoryIds.length > 0 ? frontend.categoryIds : []
     };
 
     if (frontend.isRecurring) {
