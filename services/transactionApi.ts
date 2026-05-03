@@ -75,23 +75,55 @@ const transactionApi = {
   },
 
   /**
-   * Add multiple files (base64 strings) to a transaction
+   * Add multiple files to a transaction as multipart upload.
    * POST /transactions/{id}/files
-   * Body: { files: string[] }
-   * Returns updated transaction
+   * Returns updated transaction.
    */
-  async addFilesBulk(id: number, files: string[]): Promise<ApiTransaction | null> {
+  async addFilesBulk(id: number, files: File[]): Promise<ApiTransaction | null> {
     const api = useApi();
     try {
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append('files[]', file, file.name);
+      }
       const response = await api<ApiResponse<ApiTransaction>>(`/transactions/${id}/files`, {
         method: 'POST',
-        body: { files }
+        body: formData
       });
       return response?.data || null;
     } catch (error) {
       console.error('Error adding files to transaction:', error);
       throw error;
     }
+  },
+
+  /**
+   * Remove a single attachment from a transaction.
+   * DELETE /transactions/{id}/files/{fileId}
+   * Returns the refreshed transaction.
+   */
+  async deleteFile(id: number, fileId: number): Promise<ApiTransaction | null> {
+    const api = useApi();
+    try {
+      const response = await api<ApiResponse<ApiTransaction>>(
+        `/transactions/${id}/files/${fileId}`,
+        { method: 'DELETE' }
+      );
+      return response?.data || null;
+    } catch (error) {
+      console.error('Error deleting transaction file:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch a single file's binary content as a Blob via the auth-gated
+   * /files/{id} endpoint, so the browser can render previews without
+   * losing the bearer token.
+   */
+  async fetchFileBlob(fileId: number): Promise<Blob> {
+    const api = useApi();
+    return api<Blob>(`/files/${fileId}`, { responseType: 'blob' });
   },
 
   /**

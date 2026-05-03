@@ -1,7 +1,7 @@
 import type {
+  AutoCreateOptions,
   ImportSession,
   SuggestionWithDuplicate,
-  AutoCreateOptions,
   ConfirmPayload,
   ConfirmResponse
 } from '~/types/import';
@@ -34,11 +34,17 @@ export const useImports = () => {
 
   const populateSuggestions = (session: ImportSession) => {
     currentSession.value = session;
+    // wallet_id / party_id / category_id start as null. The page wires up a
+    // reactive resolver that fills them in once the wallets/parties/categories
+    // caches load -- doing it here would freeze a snapshot and miss late loads.
     suggestions.value = (session.suggestions || []).map((s, index) => ({
       ...s,
       status: s.duplicate?.match_type === 'exact' ? ('rejected' as const) : ('accepted' as const),
       edited: false,
-      index
+      index,
+      wallet_id: null,
+      party_id: null,
+      category_id: null
     }));
   };
 
@@ -56,7 +62,6 @@ export const useImports = () => {
       try {
         const session = await api.imports.getSession(sessionId);
 
-        // Update session so UI can react to stage changes
         currentSession.value = session;
 
         if (session.status === 'ready') {
@@ -69,7 +74,6 @@ export const useImports = () => {
           error.value = session.metadata?.error || 'Analysis failed';
           currentSession.value = null;
         }
-        // else still processing (analyzing/extracting/enriching/checking) — keep polling
       } catch {
         stopPolling();
         isAnalyzing.value = false;
@@ -89,7 +93,6 @@ export const useImports = () => {
       currentSession.value = session;
 
       if (session.status === 'ready') {
-        // Synchronous completion (e.g. fast CSV)
         isAnalyzing.value = false;
         populateSuggestions(session);
       } else if (session.status === 'failed') {
@@ -97,7 +100,6 @@ export const useImports = () => {
         error.value = session.metadata?.error || 'Analysis failed';
         currentSession.value = null;
       } else {
-        // Async — poll for completion
         pollSession(session.id);
       }
     } catch (err: unknown) {
@@ -144,36 +146,38 @@ export const useImports = () => {
     }
   };
 
-  const confirmImport = async (autoCreate?: AutoCreateOptions): Promise<ConfirmResponse | null> => {
+  const confirmImport = async (
+    autoCreate: AutoCreateOptions = { wallets: false, parties: false, categories: false }
+  ): Promise<ConfirmResponse | null> => {
     if (!currentSession.value) return null;
 
     isConfirming.value = true;
     error.value = null;
 
-    const accepted: ConfirmPayload['accepted'] = suggestions.value
-      .filter((s) => s.status === 'accepted')
-      .map((s) => {
-        const item: ConfirmPayload['accepted'][number] = { index: s.index };
-        if (s.edited) {
-          item.amount = s.amount ?? undefined;
-          item.currency = s.currency ?? undefined;
-          item.type = s.type ?? undefined;
-          item.party = s.party ?? undefined;
-          item.wallet = s.wallet ?? undefined;
-          item.category = s.category ?? undefined;
-          item.description = s.description ?? undefined;
-          item.date = s.date ?? undefined;
-        }
-        return item;
-      });
+    const accepted: ConfirmPayload['accepted'] = [];
+    for (const s of suggestions.value) {
+      if (s.status !== 'accepted') continue;
+
+      const item: ConfirmPayload['accepted'][number] = { index: s.index };
+      if (s.wallet_id != null) item.wallet_id = s.wallet_id;
+      if (s.party_id != null) item.party_id = s.party_id;
+      if (s.category_id != null) item.category_id = s.category_id;
+      if (s.edited) {
+        if (s.amount != null) item.amount = s.amount;
+        if (s.type) item.type = s.type;
+        if (s.description != null) item.description = s.description;
+        if (s.date) item.date = s.date;
+      }
+      accepted.push(item);
+    }
 
     try {
       const result = await api.imports.confirm({
         session_id: currentSession.value.id,
         accepted,
-        auto_create_wallets: autoCreate?.wallets ?? false,
-        auto_create_parties: autoCreate?.parties ?? false,
-        auto_create_categories: autoCreate?.categories ?? false
+        auto_create_wallets: autoCreate.wallets,
+        auto_create_parties: autoCreate.parties,
+        auto_create_categories: autoCreate.categories
       });
       if (result.errors.length === 0) {
         currentSession.value.status = 'confirmed';
@@ -196,7 +200,6 @@ export const useImports = () => {
     isConfirming.value = false;
   };
 
-  // Clean up polling on unmount
   if (import.meta.client) {
     onUnmounted(() => stopPolling());
   }

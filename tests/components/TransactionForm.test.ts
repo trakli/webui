@@ -1,7 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { ref } from 'vue';
 import TransactionForm from '@/components/TransactionForm.vue';
+
+vi.mock('@/services/api', () => ({
+  api: {
+    transactions: {
+      fetchFileBlob: vi.fn().mockResolvedValue(new Blob(['x'], { type: 'image/png' })),
+      deleteFile: vi.fn().mockResolvedValue({})
+    }
+  }
+}));
 
 const mockSharedData = {
   parties: ref([
@@ -250,6 +259,13 @@ describe('TransactionForm', () => {
   });
 
   describe('file attachments', () => {
+    const setFiles = async (wrapper: ReturnType<typeof mount>, files: File[]) => {
+      const input = wrapper.find('input[type="file"]');
+      Object.defineProperty(input.element, 'files', { value: files, configurable: true });
+      await input.trigger('change');
+      await flushPromises();
+    };
+
     it('renders file upload section', () => {
       const wrapper = mount(TransactionForm, {
         global: { stubs }
@@ -265,6 +281,92 @@ describe('TransactionForm', () => {
       });
 
       expect(wrapper.text()).toContain('Images, PDFs or docs');
+    });
+
+    it('renders a card with the filename when a file is picked', async () => {
+      const wrapper = mount(TransactionForm, { global: { stubs } });
+
+      await setFiles(wrapper, [new File(['x'], 'receipt.png', { type: 'image/png' })]);
+
+      expect(wrapper.text()).toContain('receipt.png');
+    });
+
+    it('appends to the existing selection when picking again', async () => {
+      const wrapper = mount(TransactionForm, { global: { stubs } });
+
+      await setFiles(wrapper, [new File(['x'], 'first.png', { type: 'image/png' })]);
+      await setFiles(wrapper, [new File(['x'], 'second.pdf', { type: 'application/pdf' })]);
+
+      const text = wrapper.text();
+      expect(text).toContain('first.png');
+      expect(text).toContain('second.pdf');
+    });
+
+    it('removes a picked attachment when its remove button is clicked', async () => {
+      const wrapper = mount(TransactionForm, { global: { stubs } });
+
+      await setFiles(wrapper, [new File(['x'], 'remove-me.png', { type: 'image/png' })]);
+      expect(wrapper.text()).toContain('remove-me.png');
+
+      await wrapper.find('.attachment-card .remove').trigger('click');
+
+      expect(wrapper.text()).not.toContain('remove-me.png');
+    });
+
+    it('emits the picked File objects in the submit payload', async () => {
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: true },
+        global: { stubs }
+      });
+
+      await wrapper.find('input[type="number"]').setValue('100');
+      await setFiles(wrapper, [new File(['x'], 'photo.jpg', { type: 'image/jpeg' })]);
+
+      const buttons = wrapper.findAll('button');
+      await buttons[buttons.length - 1].trigger('click');
+
+      const payload = wrapper.emitted('submit')?.[0]?.[0];
+      expect(payload.filesToUpload).toHaveLength(1);
+      expect(payload.filesToUpload[0]).toBeInstanceOf(File);
+      expect(payload.filesToUpload[0].name).toBe('photo.jpg');
+    });
+
+    it('caps selections at five total attachments across new and saved files', async () => {
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: true },
+        global: { stubs }
+      });
+
+      await wrapper.find('input[type="number"]').setValue('100');
+      const eight = Array.from(
+        { length: 8 },
+        (_, i) => new File(['x'], `f${i}.png`, { type: 'image/png' })
+      );
+      await setFiles(wrapper, eight);
+
+      const buttons = wrapper.findAll('button');
+      await buttons[buttons.length - 1].trigger('click');
+
+      const payload = wrapper.emitted('submit')?.[0]?.[0];
+      expect(payload.filesToUpload).toHaveLength(5);
+    });
+
+    it('renders saved attachments from editingItem.files when editing', async () => {
+      const wrapper = mount(TransactionForm, {
+        props: {
+          editingItem: {
+            id: 1,
+            amount: '100 USD',
+            files: [{ id: 10, path: 'transactions/receipt.pdf', type: 'pdf' }]
+          }
+        },
+        global: { stubs }
+      });
+
+      await flushPromises();
+
+      // Non-image attachments render an extension-derived label tile.
+      expect(wrapper.text()).toContain('PDF');
     });
   });
 

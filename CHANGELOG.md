@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-05-03
+
+### Added
+
+- Image thumbnails for picked transaction attachments, with saved attachments rendered as cards on the edit form and a per-file remove control that deletes them server-side
+- Transactions list now refetches on tab focus so records synced from other clients (mobile, web) show up without forcing a re-login
+
+### Fixed
+
+- Transaction attachments are uploaded as multipart binary files instead of base64 JSON, so the backend file validator accepts them again
+- Files picked during a transaction edit are now actually uploaded (the update flow used to silently drop them)
+- The attachment picker appends to the existing selection instead of replacing it, and silently caps the total at five attachments to match the visible hint
+- Imports confirm step resolves targets by id and updates names reactively
+
 ## [1.1.0] - 2026-04-19
 
 ### Added

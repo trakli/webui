@@ -110,16 +110,65 @@
 
       <div class="transaction-files">
         <span>{{ t('Attachments') }}</span>
+
+        <div v-if="existingAttachments.length" class="attachment-grid">
+          <div
+            v-for="file in existingAttachments"
+            :key="`existing-${file.id}`"
+            class="attachment-card"
+            :class="{ removing: removingFileIds.has(file.id) }"
+          >
+            <div v-if="isImageAttachment(file)" class="thumb">
+              <img
+                v-if="existingPreviews[file.id]"
+                :src="existingPreviews[file.id]"
+                :alt="t('Attachment')"
+              />
+              <div v-else class="thumb-placeholder">…</div>
+            </div>
+            <div v-else class="thumb thumb-doc">
+              <span>{{ extensionLabel(file.path) }}</span>
+            </div>
+            <button
+              type="button"
+              class="remove"
+              :disabled="removingFileIds.has(file.id)"
+              :title="t('Remove')"
+              @click="removeExistingAttachment(file)"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+
         <div class="upload-box">
           <input id="file-input" type="file" multiple @change="onFilesSelected" />
           <label for="file-input" class="upload-button">{{ t('Browse files') }}</label>
           <span class="hint">{{ t('Images, PDFs or docs. Max 5 files.') }}</span>
         </div>
-        <div v-if="selectedFileNames.length" class="file-list">
-          <span v-for="(f, i) in selectedFileNames" :key="f.name + i" class="chip">
-            {{ f.name }}
-            <button type="button" class="remove" @click="removeFile(i)">×</button>
-          </span>
+
+        <div v-if="newAttachments.length" class="attachment-grid">
+          <div
+            v-for="(att, i) in newAttachments"
+            :key="`new-${att.name}-${i}`"
+            class="attachment-card"
+          >
+            <div v-if="att.isImage && att.previewUrl" class="thumb">
+              <img :src="att.previewUrl" :alt="att.name" />
+            </div>
+            <div v-else class="thumb thumb-doc">
+              <span>{{ extensionLabel(att.name) }}</span>
+            </div>
+            <span class="filename">{{ att.name }}</span>
+            <button
+              type="button"
+              class="remove"
+              :title="t('Remove')"
+              @click="removeNewAttachment(i)"
+            >
+              ×
+            </button>
+          </div>
         </div>
       </div>
 
@@ -205,12 +254,14 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs, ref, computed, watch, onMounted } from 'vue';
+import { toRefs, ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '~/composables/useSharedData';
 import { fetchAllPages } from '~/services/api/apiHelpers';
+import { api } from '@/services/api';
+import type { TransactionFile } from '~/types/transaction';
 
 const { t } = useI18n();
 
@@ -245,7 +296,21 @@ const selectedPartyId = ref<number | null>(null);
 const selectedWalletId = ref<number | null>(null);
 const selectedGroupId = ref(null);
 const selectedAdditionalCategoryIds = ref([]);
-const filesBase64 = ref([]);
+type NewAttachment = {
+  file: File;
+  name: string;
+  size: number;
+  isImage: boolean;
+  previewUrl: string | null;
+};
+
+const MAX_ATTACHMENTS = 5;
+
+const newAttachments = ref<NewAttachment[]>([]);
+const existingAttachments = ref<TransactionFile[]>([]);
+const existingPreviews = ref<Record<number, string>>({});
+const loadingPreviewIds = ref<Set<number>>(new Set());
+const removingFileIds = ref<Set<number>>(new Set());
 const formIsRecurring = ref(false);
 const formRecurrencePeriod = ref('monthly');
 const formRecurrenceInterval = ref(1);
@@ -314,7 +379,7 @@ function onSubmit() {
     groupId: selectedGroupId.value ?? undefined,
     walletId: selectedWalletId.value,
     description: formDescription.value.trim(),
-    filesToUpload: filesBase64.value,
+    filesToUpload: newAttachments.value.map((att) => att.file),
     isRecurring: formIsRecurring.value,
     recurrencePeriod: formIsRecurring.value ? formRecurrencePeriod.value : undefined,
     recurrenceInterval: formIsRecurring.value ? formRecurrenceInterval.value : undefined,
@@ -513,42 +578,99 @@ onMounted(async () => {
   }
 });
 
-const selectedFileNames = ref([]);
+function isImageMime(file: File): boolean {
+  return typeof file.type === 'string' && file.type.startsWith('image/');
+}
 
-function onFilesSelected(event) {
-  const input = event.target;
+function isImageAttachment(file: TransactionFile): boolean {
+  return file.type === 'image';
+}
+
+function extensionLabel(name: string): string {
+  const cleaned = (name || '').split('?')[0].split('#')[0];
+  const ext = cleaned.split('.').pop();
+  return (ext && ext !== cleaned ? ext : 'FILE').toUpperCase().slice(0, 4);
+}
+
+function revokeNewPreviews() {
+  for (const att of newAttachments.value) {
+    if (att.previewUrl) URL.revokeObjectURL(att.previewUrl);
+  }
+}
+
+function revokeExistingPreviews() {
+  for (const url of Object.values(existingPreviews.value)) {
+    URL.revokeObjectURL(url);
+  }
+  existingPreviews.value = {};
+}
+
+function onFilesSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
   const files = input.files;
   if (!files) return;
-  filesBase64.value = [];
-  selectedFileNames.value = [];
-  const tasks = [];
-  for (const file of Array.from(files)) {
-    tasks.push(
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result;
-          const base64 = result.includes(',') ? result.split(',')[1] : result;
-          filesBase64.value.push(base64);
-          selectedFileNames.value.push({ name: file.name, size: file.size });
-          resolve();
-        };
-        reader.onerror = (e) => reject(e);
-        reader.readAsDataURL(file);
-      })
-    );
+  const remaining =
+    MAX_ATTACHMENTS - (newAttachments.value.length + existingAttachments.value.length);
+  for (const file of Array.from(files).slice(0, Math.max(0, remaining))) {
+    newAttachments.value.push({
+      file,
+      name: file.name,
+      size: file.size,
+      isImage: isImageMime(file),
+      previewUrl: isImageMime(file) ? URL.createObjectURL(file) : null
+    });
   }
-  Promise.all(tasks)
-    .then(() => {
-      console.log('Files processed successfully');
-    })
-    .catch((err) => console.error('Failed to read files', err));
+  // Reset the input so picking the same file again still emits a change event.
+  input.value = '';
 }
 
-function removeFile(index) {
-  filesBase64.value.splice(index, 1);
-  selectedFileNames.value.splice(index, 1);
+function removeNewAttachment(index: number) {
+  const att = newAttachments.value[index];
+  if (att?.previewUrl) URL.revokeObjectURL(att.previewUrl);
+  newAttachments.value.splice(index, 1);
 }
+
+async function loadExistingPreview(file: TransactionFile) {
+  if (file.type !== 'image') return;
+  if (existingPreviews.value[file.id]) return;
+  if (loadingPreviewIds.value.has(file.id)) return;
+  loadingPreviewIds.value.add(file.id);
+  try {
+    const blob = await api.transactions.fetchFileBlob(file.id);
+    existingPreviews.value[file.id] = URL.createObjectURL(blob);
+  } catch (err) {
+    console.error('[TransactionForm] Failed to load attachment preview', err);
+  } finally {
+    loadingPreviewIds.value.delete(file.id);
+  }
+}
+
+async function removeExistingAttachment(file: TransactionFile) {
+  const transactionId = props.editingItem?.id;
+  if (!transactionId) return;
+  if (removingFileIds.value.has(file.id)) return;
+  removingFileIds.value.add(file.id);
+  try {
+    await api.transactions.deleteFile(Number(transactionId), file.id);
+    existingAttachments.value = existingAttachments.value.filter((f) => f.id !== file.id);
+    const url = existingPreviews.value[file.id];
+    if (url) {
+      URL.revokeObjectURL(url);
+      const { [file.id]: _removed, ...rest } = existingPreviews.value;
+      existingPreviews.value = rest;
+    }
+  } catch (err) {
+    console.error('[TransactionForm] Failed to remove attachment', err);
+    emit('error', err);
+  } finally {
+    removingFileIds.value.delete(file.id);
+  }
+}
+
+onUnmounted(() => {
+  revokeNewPreviews();
+  revokeExistingPreviews();
+});
 
 watch(
   () => props.editingItem,
@@ -622,6 +744,12 @@ watch(
         );
         if (match) refundPickerQuery.value = formatExpenseOption(match);
       }
+    }
+
+    revokeExistingPreviews();
+    existingAttachments.value = Array.isArray(item.files) ? [...item.files] : [];
+    for (const file of existingAttachments.value) {
+      loadExistingPreview(file);
     }
   },
   { immediate: true }

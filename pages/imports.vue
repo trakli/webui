@@ -45,22 +45,17 @@
             </button>
             <button
               class="btn btn--primary"
-              :disabled="
-                acceptedCount === 0 ||
-                currentSession.status === 'confirmed' ||
-                missingWalletCount > 0
-              "
-              :title="
-                missingWalletCount > 0
-                  ? t('Some accepted transactions have no wallet assigned')
-                  : ''
-              "
+              :disabled="acceptedCount === 0 || currentSession.status === 'confirmed'"
               @click="showConfirmDialog = true"
             >
               {{ t('Import {count} transactions', { count: acceptedCount }) }}
             </button>
             <span v-if="missingWalletCount > 0" class="validation-warning">
-              {{ t('{count} accepted transactions need a wallet', { count: missingWalletCount }) }}
+              {{
+                t('{count} accepted rows need a wallet (or auto-create)', {
+                  count: missingWalletCount
+                })
+              }}
             </span>
           </div>
         </div>
@@ -100,6 +95,7 @@
           :new-wallet-count="newWalletCount"
           :new-party-count="newPartyCount"
           :new-category-count="newCategoryCount"
+          :missing-wallet-count="missingWalletCount"
           @confirm="handleConfirm"
           @cancel="showConfirmDialog = false"
         />
@@ -147,12 +143,20 @@ const {
 const showConfirmDialog = ref(false);
 const uploadedFileName = ref('');
 
+// The review table needs wallets/parties/categories to pre-link suggestions to
+// existing records by name match. Make sure the caches are warm before upload.
+onMounted(() => {
+  loadWallets();
+  loadCategories();
+  loadParties();
+});
+
 const duplicatesInAccepted = computed(
   () => suggestions.value.filter((s) => s.status === 'accepted' && s.duplicate !== null).length
 );
 
 const missingWalletCount = computed(
-  () => suggestions.value.filter((s) => s.status === 'accepted' && !s.wallet).length
+  () => suggestions.value.filter((s) => s.status === 'accepted' && !s.wallet_id).length
 );
 
 const walletNames = computed(() => new Set(wallets.value.map((w) => w.name)));
@@ -163,10 +167,13 @@ const acceptedSuggestions = computed(() =>
   suggestions.value.filter((s) => s.status === 'accepted')
 );
 
+// Count unique suggestion names that would need to be created if the user enables
+// the matching auto-create flag. "New" = the suggestion has a name that doesn't
+// match any existing record, and no ID has been picked in the review table.
 const newWalletCount = computed(() => {
   const names = new Set<string>();
   for (const s of acceptedSuggestions.value) {
-    if (s.wallet && !walletNames.value.has(s.wallet)) names.add(s.wallet);
+    if (!s.wallet_id && s.wallet && !walletNames.value.has(s.wallet)) names.add(s.wallet);
   }
   return names.size;
 });
@@ -174,7 +181,7 @@ const newWalletCount = computed(() => {
 const newPartyCount = computed(() => {
   const names = new Set<string>();
   for (const s of acceptedSuggestions.value) {
-    if (s.party && !partyNames.value.has(s.party)) names.add(s.party);
+    if (!s.party_id && s.party && !partyNames.value.has(s.party)) names.add(s.party);
   }
   return names.size;
 });
@@ -182,7 +189,7 @@ const newPartyCount = computed(() => {
 const newCategoryCount = computed(() => {
   const names = new Set<string>();
   for (const s of acceptedSuggestions.value) {
-    if (s.category && !categoryNames.value.has(s.category)) names.add(s.category);
+    if (!s.category_id && s.category && !categoryNames.value.has(s.category)) names.add(s.category);
   }
   return names.size;
 });
@@ -198,12 +205,37 @@ const handleUpload = (file: File, documentType?: string) => {
   analyzeFile(file, documentType);
 };
 
+// Suggestions arrive with null IDs. Whenever the wallets/parties/categories
+// caches update OR new suggestions land, fill in any null ID by exact name
+// match. A snapshot at upload time would miss late cache loads.
+watch(
+  [suggestions, wallets, parties, categories],
+  () => {
+    for (const s of suggestions.value) {
+      if (!s.wallet_id && s.wallet) {
+        const match = wallets.value.find((w) => w.name === s.wallet);
+        if (match) s.wallet_id = match.id;
+      }
+      if (!s.party_id && s.party) {
+        const match = parties.value.find((p) => p.name === s.party);
+        if (match) s.party_id = match.id;
+      }
+      if (!s.category_id && s.category) {
+        const match = categories.value.find((c) => c.name === s.category);
+        if (match) s.category_id = match.id;
+      }
+    }
+  },
+  { deep: true }
+);
+
 const handleConfirm = async (autoCreate: AutoCreateOptions) => {
   const result = await confirmImport(autoCreate);
   showConfirmDialog.value = false;
 
   if (result) {
-    // Refresh shared data so newly created entities are available immediately
+    // Keep wallet/party/category caches fresh after a successful import so the
+    // dashboard sees the just-linked entities (transaction counts, etc.).
     if (result.created_count > 0) {
       loadWallets(true);
       loadCategories(true);

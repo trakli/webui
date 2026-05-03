@@ -58,7 +58,7 @@ export interface FrontendTransaction {
   isTransfer?: boolean; // True if this transaction is part of a transfer
   transferId?: number; // ID of the associated transfer
   files?: TransactionFile[];
-  filesToUpload?: string[];
+  filesToUpload?: File[];
   isRefund?: boolean; // User explicitly flagged this income as refunding an expense
   refundOfTransactionId?: number | null; // Optional link to the refunded expense
 }
@@ -79,7 +79,6 @@ export interface TransactionCreatePayload {
   recurrence_interval?: number;
   recurrence_ends_at?: string; // ISO 8601 format
   categories?: number[]; // Additional category IDs (optional array)
-  files?: string[]; // File paths/URLs for attachments
 }
 
 export type TransactionUpdatePayload = Partial<TransactionCreatePayload>;

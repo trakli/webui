@@ -25,33 +25,27 @@
 
           <label v-if="newWalletCount > 0" class="dialog__toggle">
             <input v-model="autoCreateWallets" type="checkbox" />
-            <span>
-              {{ t('Create {count} new wallets', { count: newWalletCount }) }}
-            </span>
+            <span>{{ t('Create {count} new wallets', { count: newWalletCount }) }}</span>
           </label>
 
           <label v-if="newPartyCount > 0" class="dialog__toggle">
             <input v-model="autoCreateParties" type="checkbox" />
-            <span>
-              {{ t('Create {count} new parties', { count: newPartyCount }) }}
-            </span>
+            <span>{{ t('Create {count} new parties', { count: newPartyCount }) }}</span>
           </label>
 
           <label v-if="newCategoryCount > 0" class="dialog__toggle">
             <input v-model="autoCreateCategories" type="checkbox" />
-            <span>
-              {{ t('Create {count} new categories', { count: newCategoryCount }) }}
-            </span>
+            <span>{{ t('Create {count} new categories', { count: newCategoryCount }) }}</span>
           </label>
 
           <p class="dialog__auto-create-hint">
             {{ t('Unchecked items will be skipped and not linked to the transaction.') }}
           </p>
 
-          <p v-if="walletRequired" class="dialog__auto-create-warning">
+          <p v-if="walletGapUncovered" class="dialog__auto-create-warning">
             {{
               t(
-                'Wallets are required. Check "Create new wallets" or go back and assign existing ones.'
+                'Some accepted rows have no wallet selected. Either choose one or enable "Create new wallets".'
               )
             }}
           </p>
@@ -64,7 +58,7 @@
         </button>
         <button
           class="btn btn--primary"
-          :disabled="isConfirming || walletRequired"
+          :disabled="isConfirming || walletGapUncovered"
           @click="handleConfirm"
         >
           {{ isConfirming ? t('Importing...') : t('Confirm import') }}
@@ -88,6 +82,7 @@ const props = defineProps<{
   newWalletCount: number;
   newPartyCount: number;
   newCategoryCount: number;
+  missingWalletCount: number;
 }>();
 
 const emit = defineEmits<{
@@ -103,7 +98,14 @@ const hasNewEntities = computed(
   () => props.newWalletCount > 0 || props.newPartyCount > 0 || props.newCategoryCount > 0
 );
 
-const walletRequired = computed(() => props.newWalletCount > 0 && !autoCreateWallets.value);
+// A row with no wallet_id is fine iff its suggestion wallet will be auto-created.
+// If the count of rows missing a wallet_id exceeds the count that auto-create
+// would cover, the user has to intervene before we can submit.
+const walletGapUncovered = computed(() => {
+  if (props.missingWalletCount === 0) return false;
+  if (props.newWalletCount > 0 && autoCreateWallets.value) return false;
+  return true;
+});
 
 const handleConfirm = () => {
   emit('confirm', {
