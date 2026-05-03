@@ -304,6 +304,8 @@ type NewAttachment = {
   previewUrl: string | null;
 };
 
+const MAX_ATTACHMENTS = 5;
+
 const newAttachments = ref<NewAttachment[]>([]);
 const existingAttachments = ref<TransactionFile[]>([]);
 const existingPreviews = ref<Record<number, string>>({});
@@ -607,7 +609,9 @@ function onFilesSelected(event: Event) {
   const input = event.target as HTMLInputElement;
   const files = input.files;
   if (!files) return;
-  for (const file of Array.from(files)) {
+  const remaining =
+    MAX_ATTACHMENTS - (newAttachments.value.length + existingAttachments.value.length);
+  for (const file of Array.from(files).slice(0, Math.max(0, remaining))) {
     newAttachments.value.push({
       file,
       name: file.name,

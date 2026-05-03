@@ -331,6 +331,26 @@ describe('TransactionForm', () => {
       expect(payload.filesToUpload[0].name).toBe('photo.jpg');
     });
 
+    it('caps selections at five total attachments across new and saved files', async () => {
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: true },
+        global: { stubs }
+      });
+
+      await wrapper.find('input[type="number"]').setValue('100');
+      const eight = Array.from(
+        { length: 8 },
+        (_, i) => new File(['x'], `f${i}.png`, { type: 'image/png' })
+      );
+      await setFiles(wrapper, eight);
+
+      const buttons = wrapper.findAll('button');
+      await buttons[buttons.length - 1].trigger('click');
+
+      const payload = wrapper.emitted('submit')?.[0]?.[0];
+      expect(payload.filesToUpload).toHaveLength(5);
+    });
+
     it('renders saved attachments from editingItem.files when editing', async () => {
       const wrapper = mount(TransactionForm, {
         props: {
