@@ -98,6 +98,35 @@ const transactionApi = {
   },
 
   /**
+   * Remove a single attachment from a transaction.
+   * DELETE /transactions/{id}/files/{fileId}
+   * Returns the refreshed transaction.
+   */
+  async deleteFile(id: number, fileId: number): Promise<ApiTransaction | null> {
+    const api = useApi();
+    try {
+      const response = await api<ApiResponse<ApiTransaction>>(
+        `/transactions/${id}/files/${fileId}`,
+        { method: 'DELETE' }
+      );
+      return response?.data || null;
+    } catch (error) {
+      console.error('Error deleting transaction file:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch a single file's binary content as a Blob via the auth-gated
+   * /files/{id} endpoint, so the browser can render previews without
+   * losing the bearer token.
+   */
+  async fetchFileBlob(fileId: number): Promise<Blob> {
+    const api = useApi();
+    return api<Blob>(`/files/${fileId}`, { responseType: 'blob' });
+  },
+
+  /**
    * Fetch a single transaction by ID
    * GET /transactions/{id}
    */
