@@ -283,9 +283,20 @@ export const useTransactions = () => {
       const updated = await api.transactions.update(numericId, payload);
 
       if (updated) {
+        let updatedOrWithFiles = updated;
+        const filesToUpload = Array.isArray(updates.filesToUpload) ? updates.filesToUpload : [];
+        if (filesToUpload.length > 0) {
+          try {
+            const updatedWithFiles = await api.transactions.addFilesBulk(numericId, filesToUpload);
+            if (updatedWithFiles) updatedOrWithFiles = updatedWithFiles;
+          } catch (e) {
+            console.error('[updateTransaction] Error uploading files:', e);
+          }
+        }
+
         // Sync refund flag. Only meaningful on income; a change from
         // income to expense (or type absent) unmarks any prior refund.
-        if (updated.type === 'income') {
+        if (updatedOrWithFiles.type === 'income') {
           try {
             if (updates.isRefund) {
               await api.transactions.markRefund(numericId, updates.refundOfTransactionId ?? null);
@@ -295,7 +306,7 @@ export const useTransactions = () => {
           } catch (e) {
             console.error('[updateTransaction] Failed to sync refund flag:', e);
           }
-        } else if (updated.type === 'expense') {
+        } else if (updatedOrWithFiles.type === 'expense') {
           try {
             await api.transactions.unmarkRefund(numericId);
           } catch {
@@ -305,8 +316,10 @@ export const useTransactions = () => {
 
         // Refetch to pick up refund fields in serialized response
         const fresh =
-          updated.type === 'income' ? await api.transactions.fetchById(numericId) : updated;
-        const finalApiTxn = fresh ?? updated;
+          updatedOrWithFiles.type === 'income'
+            ? await api.transactions.fetchById(numericId)
+            : updatedOrWithFiles;
+        const finalApiTxn = fresh ?? updatedOrWithFiles;
 
         // Update local state instead of full API refetch for better performance
         const frontendTransaction = transactionMapper.toFrontend(
