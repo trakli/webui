@@ -37,21 +37,21 @@
         <div class="tab-buttons">
           <button
             class="tab-button"
-            :class="{ active: activeTab === 'income' }"
+            :class="{ 'tab-button--active-income': activeTab === 'income' }"
             @click="activeTab = 'income'"
           >
-            <span class="tab-icon">💰</span>
+            <ArrowDownLeft :size="14" class="tab-icon" />
             {{ $t('Income Categories') }}
-            <span class="tab-count">({{ incomeCategories.length }})</span>
+            <span class="tab-count">{{ incomeCategories.length }}</span>
           </button>
           <button
             class="tab-button"
-            :class="{ active: activeTab === 'expense' }"
+            :class="{ 'tab-button--active-expense': activeTab === 'expense' }"
             @click="activeTab = 'expense'"
           >
-            <span class="tab-icon">💸</span>
+            <ArrowUpRight :size="14" class="tab-icon" />
             {{ $t('Expense Categories') }}
-            <span class="tab-count">({{ expenseCategories.length }})</span>
+            <span class="tab-count">{{ expenseCategories.length }}</span>
           </button>
         </div>
 
@@ -79,6 +79,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-vue-next';
 import { useCategories } from '@/composables/useCategories';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
@@ -352,99 +353,96 @@ definePageMeta({
 }
 
 .tab-buttons {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid $border-color;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  margin-bottom: 1.25rem;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (max-width: $breakpoint-sm) {
-    gap: 0.25rem;
+    gap: 2px;
     margin-bottom: 1rem;
   }
 }
 
 .tab-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
-  color: $text-secondary;
-  font-weight: 500;
-  font-size: 1rem;
+  color: $text-muted;
+  font-weight: $font-semibold;
+  font-size: $font-size-sm;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 8px 8px 0 0;
-
-  @media (max-width: $breakpoint-md) {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.95rem;
-  }
+  border-radius: 8px;
+  transition:
+    background-color $duration-fast $easing-standard,
+    color $duration-fast $easing-standard;
 
   @media (max-width: $breakpoint-sm) {
-    padding: 0.5rem 0.875rem;
-    font-size: 0.875rem;
-    flex-direction: column;
-    gap: 0.25rem;
-    text-align: center;
+    height: 32px;
+    padding: 0 10px;
+    font-size: $font-size-xs;
+    gap: 6px;
   }
 
   &:hover {
-    background: $bg-slate;
-    color: $primary;
+    color: $text-primary;
   }
 
-  // Hover state for expense categories button (second child)
-  &:nth-child(2):hover {
-    color: $error-color;
+  &--active-income {
+    background: rgba(var(--color-income-rgb), 0.14);
+    color: var(--color-income);
   }
 
-  &.active {
-    color: $primary;
-    background: $primary-light;
-    border-bottom-color: $primary;
-  }
-
-  // Active state for expense categories button (second child)
-  &:nth-child(2).active {
-    color: $error-color;
-    background: rgba(var(--color-error-rgb), 0.1);
-    border-bottom-color: $error-color;
+  &--active-expense {
+    background: rgba(var(--color-expense-rgb), 0.14);
+    color: var(--color-expense);
   }
 }
 
 .tab-icon {
-  font-size: 1.2rem;
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: 1rem;
-  }
+  color: currentColor;
+  flex-shrink: 0;
 }
 
 .tab-count {
-  background: $border-color;
-  color: $text-secondary;
-  padding: 0.125rem 0.375rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: $bg-light;
+  color: $text-muted;
+  font-size: 11px;
+  font-weight: $font-bold;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1.4;
+  transition:
+    background-color $duration-fast $easing-standard,
+    color $duration-fast $easing-standard;
 
-  @media (max-width: $breakpoint-sm) {
-    font-size: 0.7rem;
-    padding: 0.0625rem 0.25rem;
+  .tab-button--active-income & {
+    background: rgba(var(--color-income-rgb), 0.22);
+    color: var(--color-income);
   }
-
-  .tab-button.active & {
-    background: $primary-light;
-    color: $primary;
-  }
-
-  // Count styling for expense categories tab
-  .tab-button:nth-child(2).active & {
-    background: rgba(var(--color-error-rgb), 0.1);
-    color: $error-color;
+  .tab-button--active-expense & {
+    background: rgba(var(--color-expense-rgb), 0.22);
+    color: var(--color-expense);
   }
 }
 

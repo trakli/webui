@@ -17,32 +17,38 @@
 
 .t-card {
   background-color: $bg-white;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-md;
+  border: 1px solid $border-color;
+  border-radius: 16px;
+  box-shadow: $elevation-1;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: $transition-base;
+  transition:
+    box-shadow $duration-base $easing-standard,
+    border-color $duration-base $easing-standard;
 
   &:hover {
-    transform: translateY(-2px);
+    box-shadow: $elevation-2;
+    border-color: $border-medium;
   }
 }
 
 .t-card-header {
-  padding: 1rem 1.5rem;
+  padding: $spacing-4 $spacing-6;
   border-bottom: 1px solid $border-color;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: $font-size-lg;
+  font-weight: $font-semibold;
+  letter-spacing: -0.01em;
+  color: $text-primary;
 }
 
 .t-card-body {
-  padding: 1.5rem;
+  padding: $spacing-6;
   flex-grow: 1;
 }
 
 .t-card-footer {
-  padding: 1rem 1.5rem;
+  padding: $spacing-4 $spacing-6;
   background-color: $bg-light;
   border-top: 1px solid $border-color;
 }

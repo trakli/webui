@@ -1,4 +1,6 @@
 {
+  "Allow Negative Balances": "Consenti Saldi Negativi",
+  "Permit wallet balances to go below zero when spending or transferring.": "Consente ai saldi dei portafogli di scendere sotto zero durante spese o trasferimenti.",
   "App Settings": "Impostazioni App",
   "Account Information": "Informazioni Account",
   "General Settings": "Impostazioni Generali",

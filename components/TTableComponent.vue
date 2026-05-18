@@ -372,10 +372,11 @@ const formatTimeAgo = (txn) => {
 .table-wrapper {
   width: 100%;
   max-height: calc(100vh - 220px);
-  border-radius: $radius-lg;
+  border-radius: 14px;
   overflow: auto;
-  background-color: $bg-gray;
-  box-shadow: $shadow-sm;
+  background-color: $bg-white;
+  border: 1px solid $border-light;
+  box-shadow: $elevation-1;
   -webkit-overflow-scrolling: touch;
 
   @media (max-width: $breakpoint-md) {
@@ -420,23 +421,56 @@ const formatTimeAgo = (txn) => {
   }
 
   th {
-    background-color: $table-header-bg;
-    color: #ffffff;
+    background-color: $primary-light;
+    color: $primary-dark;
     text-align: left;
-    padding: $table-header-padding;
-    font-size: $font-size-sm;
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: $font-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid $border-light;
+
+    &:first-child {
+      padding-left: 20px;
+    }
+    &:last-child {
+      padding-right: 20px;
+    }
   }
 
   &.expense-table th {
-    background-color: $error-color;
+    background-color: rgba(var(--color-expense-rgb), 0.12);
+    color: var(--color-expense);
   }
 
   td {
-    padding: $table-cell-padding;
-    background-color: $bg-light;
+    padding: 6px 16px;
+    background-color: $bg-white;
     border-bottom: 1px solid $border-light;
     vertical-align: middle;
     font-size: $font-size-sm;
+    line-height: 1.4;
+    color: $text-primary;
+
+    &:first-child {
+      padding-left: 20px;
+    }
+    &:last-child {
+      padding-right: 20px;
+    }
+  }
+
+  tbody tr {
+    transition: background-color $duration-fast $easing-standard;
+  }
+
+  tbody tr:hover td {
+    background-color: rgba(var(--color-primary-rgb), 0.04);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
   }
 
   .date {
@@ -585,85 +619,93 @@ const formatTimeAgo = (txn) => {
 .totals-row {
   .totals-cell {
     padding: 0 !important;
-    background-color: transparent !important;
-    border-top: 2px solid $primary;
+    background-color: $bg-white !important;
+    border-top: 1px solid $border-light;
   }
 
   .totals-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: auto repeat(3, 1fr);
+    align-items: stretch;
     width: 100%;
   }
 
   .total-section {
-    display: flex;
-    flex-direction: row;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 10px;
-    text-align: center;
+    gap: 12px;
+    padding: 12px 18px;
     line-height: 1.2;
+    border-right: 1px solid $border-light;
+
+    &:last-child {
+      border-right: none;
+    }
 
     .total-label {
-      font-size: $font-size-xs;
-      font-weight: $font-medium;
+      font-size: 11px;
+      font-weight: $font-bold;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 0;
+      letter-spacing: 0.08em;
+      color: $text-secondary;
+      margin: 0;
+      white-space: nowrap;
     }
 
     .total-value {
-      font-size: $font-size-sm;
+      font-size: $font-size-base;
       font-weight: $font-bold;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+      color: $text-primary;
+      white-space: nowrap;
     }
 
     &.totals-label {
-      background-color: $table-header-bg;
+      background: $primary-light;
       .total-label {
-        color: white;
-        font-size: $font-size-xs;
-        font-weight: $font-bold;
+        color: $primary-dark;
+        font-size: 12px;
       }
     }
 
     &.income {
-      background-color: rgba(var(--color-success-rgb), 0.2);
+      background: rgba(var(--color-income-rgb), 0.06);
       .total-label {
-        color: $success;
+        color: var(--color-income);
       }
       .total-value {
-        color: $success;
+        color: var(--color-income);
       }
     }
 
     &.expense {
-      background-color: rgba(var(--color-error-rgb), 0.15);
+      background: rgba(var(--color-expense-rgb), 0.06);
       .total-label {
-        color: $error-color;
+        color: var(--color-expense);
       }
       .total-value {
-        color: $error-color;
+        color: var(--color-expense);
       }
     }
 
     &.net {
       &.positive {
-        background-color: rgba(var(--color-primary-rgb), 0.15);
+        background: rgba(var(--color-income-rgb), 0.06);
         .total-label {
-          color: $primary;
+          color: var(--color-income);
         }
         .total-value {
-          color: $primary;
+          color: var(--color-income);
         }
       }
       &.negative {
-        background-color: $warning-bg;
+        background: rgba(var(--color-expense-rgb), 0.06);
         .total-label {
-          color: $warning-text;
+          color: var(--color-expense);
         }
         .total-value {
-          color: $warning-text;
+          color: var(--color-expense);
         }
       }
     }

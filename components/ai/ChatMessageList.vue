@@ -14,6 +14,9 @@
         <div v-else-if="message.status === 'failed'" class="error-text">
           {{ message.error || t('Something went wrong.') }}
         </div>
+        <div v-else-if="isStuckAssistant(message)" class="error-text">
+          {{ t('This response did not finish. Try sending the question again.') }}
+        </div>
         <ChatResultRenderer :result="message.result" />
       </div>
 
@@ -42,12 +45,30 @@ defineProps<{
 const rowClass = (message: ChatMessage) => (message.role === 'user' ? 'user' : 'ai');
 const bubbleClass = (message: ChatMessage) => {
   if (message.role === 'user') return 'user';
-  if (message.status === 'failed') return 'ai error';
+  if (message.status === 'failed' || isStuckAssistant(message)) return 'ai error';
   if (isPendingAssistant(message)) return 'ai loading';
   return 'ai';
 };
-const isPendingAssistant = (m: ChatMessage) =>
+
+// Assistant responses that never settled get stuck in 'pending' / 'processing'
+// indefinitely (a worker crash, a backend timeout, etc.). Treat anything older
+// than this window as stuck instead of showing the typing dots forever.
+const STUCK_THRESHOLD_MS = 90_000;
+
+const isAssistantAwaiting = (m: ChatMessage) =>
   m.role === 'assistant' && (m.status === 'pending' || m.status === 'processing');
+
+const messageAgeMs = (m: ChatMessage): number => {
+  const created = new Date(m.created_at).getTime();
+  if (!Number.isFinite(created)) return 0;
+  return Date.now() - created;
+};
+
+const isPendingAssistant = (m: ChatMessage) =>
+  isAssistantAwaiting(m) && messageAgeMs(m) <= STUCK_THRESHOLD_MS;
+
+const isStuckAssistant = (m: ChatMessage) =>
+  isAssistantAwaiting(m) && messageAgeMs(m) > STUCK_THRESHOLD_MS;
 
 const sourceLabel = (message: ChatMessage): string | null => {
   if (message.role !== 'assistant' || message.status !== 'completed') return null;

@@ -1,116 +1,202 @@
 <template>
-  <div>
+  <div class="page">
     <ContentTopCard
       v-if="!showForm"
       page-name="Wallet"
       page-name-plural="Wallets"
       @add="handleOpenFormForCreation"
-    />
-    <div class="content-area">
-      <div v-if="showForm" class="form-section">
-        <div class="form-wrapper">
-          <WalletForm
-            :editing-item="editingItem"
-            :api-error="submitError"
-            :is-submitting="isSubmitting"
-            @created="handleCreate"
-            @updated="handleUpdate"
-            @close="handleFormClose"
-          />
-        </div>
-        <TipsSection v-if="!isTabletOrBelow" page-name="Wallet" />
+    >
+      <template v-if="wallets.length > 0" #bottom>
+        <WalletsStatsStrip
+          :wallets="wallets"
+          :default-wallet-id="defaultWalletId"
+          :default-currency="defaultCurrency"
+          :formatter="format"
+        />
+      </template>
+    </ContentTopCard>
+
+    <div v-if="showForm" class="form-section">
+      <div class="form-wrapper">
+        <WalletForm
+          :editing-item="editingItem"
+          :api-error="submitError"
+          :is-submitting="isSubmitting"
+          @created="handleCreate"
+          @updated="handleUpdate"
+          @close="handleFormClose"
+        />
       </div>
+      <TipsSection v-if="!isTabletOrBelow" page-name="Wallet" />
+    </div>
 
-      <OnboardingEmptyState
-        v-if="!showForm && !isLoading && !error && wallets.length === 0"
-        page-type="wallets"
-        @create="handleOpenFormForCreation"
-      />
+    <OnboardingEmptyState
+      v-else-if="!isLoading && !error && wallets.length === 0"
+      page-type="wallets"
+      @create="handleOpenFormForCreation"
+    />
 
-      <ContentListView
-        v-if="!showForm && (isLoading || error || wallets.length > 0)"
-        page-name="Wallet"
-        page-name-plural="Wallets"
-        :entities="wallets"
-        :columns="tableColumns"
-        :card-fields="cardFields"
-        :is-loading="isLoading"
-        :error="error"
-        :default-item-id="defaultWalletId"
-        :grid-columns="4"
-        @edit="handleEdit"
-        @delete="handleDelete"
-      >
-        <template #card="{ entity, isDefault }">
-          <WalletListCard
-            :wallet="entity"
-            :is-default="isDefault"
+    <template v-else-if="isLoading || error || wallets.length > 0">
+      <div class="split" :class="{ 'split--detail-open': isMobileDetailOpen }">
+        <aside class="split-list">
+          <header class="list-head">
+            <div class="list-search">
+              <Search :size="14" class="list-search-icon" />
+              <input
+                v-model="query"
+                type="search"
+                class="list-search-input"
+                :placeholder="t('Search wallets')"
+              />
+            </div>
+          </header>
+          <ul v-if="filteredWallets.length" class="list">
+            <li
+              v-for="wallet in filteredWallets"
+              :key="wallet.id"
+              class="row"
+              :class="{ 'row--active': selectedId === wallet.id }"
+              @click="handleSelect(wallet)"
+            >
+              <span class="row-avatar">
+                <component :is="iconFor(wallet)" :size="16" />
+              </span>
+              <div class="row-meta">
+                <span class="row-name">
+                  {{ wallet.name }}
+                  <Star
+                    v-if="String(wallet.id) === defaultWalletId"
+                    :size="11"
+                    class="row-default-icon"
+                  />
+                </span>
+                <span class="row-sub">{{ wallet.currency }}</span>
+              </div>
+              <span class="row-net" :class="balanceToneClass(wallet)">
+                {{ formatBalanceShort(wallet) }}
+              </span>
+            </li>
+          </ul>
+          <div v-else class="list-empty">{{ t('No wallets match your search.') }}</div>
+        </aside>
+
+        <section class="split-detail">
+          <WalletDetailPanel
+            :wallet="selectedWallet"
+            :is-default="selectedWallet && String(selectedWallet.id) === defaultWalletId"
+            :transactions="transactions"
+            :formatter="format"
+            :show-back="isTabletOrBelow"
+            @back="isMobileDetailOpen = false"
             @edit="handleEdit"
             @delete="handleDelete"
           />
-        </template>
-      </ContentListView>
-    </div>
+        </section>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import * as LucideIcons from 'lucide-vue-next';
+import { Search, Star } from 'lucide-vue-next';
 import { useWallets } from '@/composables/useWallets';
+import { useTransactions } from '@/composables/useTransactions';
 import { useSharedData } from '@/composables/useSharedData';
 import { useSidebar } from '@/composables/useSidebar';
 import { useNotifications } from '@/composables/useNotifications';
-import { getCurrencySymbol } from '@/utils/currency';
+import { formatShortAmount } from '@/utils/currency';
 import { extractApiErrors } from '@/utils/apiErrors';
 import ContentTopCard from '@/components/TTopCard.vue';
 import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import WalletForm from '@/components/WalletForm.vue';
-import ContentListView from '@/components/ContentListView.vue';
-import WalletListCard from '@/components/WalletListCard.vue';
+import WalletsStatsStrip from '@/components/wallets/WalletsStatsStrip.vue';
+import WalletDetailPanel from '@/components/wallets/WalletDetailPanel.vue';
 import TipsSection from '@/components/TipsSection.vue';
 
 const { t } = useI18n();
-
-const formatBalance = (balance, wallet) => {
-  if (balance == null) return '—';
-  const symbol = getCurrencySymbol(wallet.currency);
-  const formatted = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(balance);
-  return `${formatted} ${symbol}`;
-};
-
-const tableColumns = [
-  { key: 'name', label: 'Wallet Name' },
-  { key: 'balance', label: 'Balance', align: 'right', render: formatBalance },
-  { key: 'currency', label: 'Currency' },
-  { key: 'description', label: 'Description' }
-];
-
-const cardFields = [
-  { key: 'balance', label: 'Balance', render: formatBalance },
-  { key: 'currency', label: 'Currency' }
-];
 
 const showForm = ref(false);
 const editingItem = ref(null);
 const isSubmitting = ref(false);
 const submitError = ref('');
+const query = ref('');
+const selectedId = ref(null);
+const isMobileDetailOpen = ref(false);
 const { isTabletOrBelow } = useSidebar();
 const sharedData = useSharedData();
 
 const { wallets, isLoading, error, fetchWallets, createWallet, updateWallet, deleteWallet } =
   useWallets();
 
+const { transactions } = useTransactions();
 const { confirmDelete, showSuccess, showError } = useNotifications();
+
+const defaultCurrency = computed(() => sharedData.getDefaultCurrency.value || 'USD');
+
+const defaultWalletId = computed(() => {
+  const defaultWallet = sharedData.getDefaultWallet?.value;
+  return defaultWallet?.id ? String(defaultWallet.id) : null;
+});
+
+const format = (n, cur) =>
+  formatShortAmount(`${Math.round((n || 0) * 100) / 100} ${cur || defaultCurrency.value}`);
+
+const filteredWallets = computed(() => {
+  const q = query.value.trim().toLowerCase();
+  if (!q) return wallets.value;
+  return wallets.value.filter(
+    (w) =>
+      w.name?.toLowerCase().includes(q) ||
+      w.currency?.toLowerCase().includes(q) ||
+      w.type?.toLowerCase().includes(q) ||
+      w.description?.toLowerCase().includes(q)
+  );
+});
+
+const selectedWallet = computed(() => wallets.value.find((w) => w.id === selectedId.value) || null);
+
+watch(
+  wallets,
+  (list) => {
+    if (selectedId.value && list.some((w) => w.id === selectedId.value)) return;
+    if (isTabletOrBelow.value) return;
+    if (!list.length) return;
+    const defaultId = defaultWalletId.value;
+    const defaultWallet = defaultId ? list.find((w) => String(w.id) === defaultId) : null;
+    selectedId.value = defaultWallet?.id || list[0].id;
+  },
+  { immediate: true }
+);
+
+const iconFor = (wallet) => {
+  const v = wallet.icon?.path || wallet.icon?.content || wallet.icon;
+  if (typeof v === 'string' && LucideIcons[v]) return LucideIcons[v];
+  return LucideIcons.Wallet;
+};
+
+const balanceToneClass = (wallet) => {
+  const b = Number(wallet.balance || 0);
+  if (b > 0) return 'row-net--income';
+  if (b < 0) return 'row-net--expense';
+  return 'row-net--neutral';
+};
+
+const formatBalanceShort = (wallet) => {
+  return format(Number(wallet.balance || 0), wallet.currency);
+};
+
+const handleSelect = (wallet) => {
+  selectedId.value = wallet.id;
+  if (isTabletOrBelow.value) isMobileDetailOpen.value = true;
+};
 
 const normalizeWalletName = (value) => `${value || ''}`.trim().toLowerCase();
 
 const isDuplicateWallet = (name, ignoreId = null) => {
   const normalized = normalizeWalletName(name);
   if (!normalized) return false;
-
   return wallets.value.some((wallet) => {
     if (ignoreId && wallet.id === ignoreId) return false;
     return normalizeWalletName(wallet.name) === normalized;
@@ -122,19 +208,12 @@ const isDuplicateWalletMessage = (message) => {
   return normalized.includes('already exists') || normalized.includes('existe déjà');
 };
 
-const defaultWalletId = computed(() => {
-  const defaultWallet = sharedData.getDefaultWallet?.value;
-  return defaultWallet?.id ? String(defaultWallet.id) : null;
-});
-
 async function loadWallets() {
   try {
-    // Load wallets and configurations
     await fetchWallets();
     await sharedData.loadConfigurations();
   } catch (err) {
     console.error('Failed to load wallets:', err);
-    // Don't throw the error to prevent page from breaking
   }
 }
 
@@ -152,12 +231,10 @@ function handleFormClose() {
 
 async function handleCreate(data) {
   if (isSubmitting.value) return;
-
   if (isDuplicateWallet(data?.name)) {
     submitError.value = t('Wallet already exists');
     return;
   }
-
   isSubmitting.value = true;
   submitError.value = '';
   try {
@@ -178,12 +255,10 @@ async function handleCreate(data) {
 
 async function handleUpdate(data) {
   if (isSubmitting.value || !data.id) return;
-
   if (isDuplicateWallet(data?.name, data.id)) {
     submitError.value = t('Wallet already exists');
     return;
   }
-
   isSubmitting.value = true;
   submitError.value = '';
   try {
@@ -215,6 +290,7 @@ async function handleDelete(item) {
 
   try {
     await deleteWallet(item.id);
+    if (selectedId.value === item.id) selectedId.value = null;
     showSuccess(
       t('Wallet deleted'),
       t('{name} has been deleted successfully', { name: item.name })
@@ -238,11 +314,10 @@ definePageMeta({
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables' as *;
 
-.content-area {
-  margin-top: 1rem;
+.page {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: $spacing-3;
   width: 100%;
 }
 
@@ -257,9 +332,250 @@ definePageMeta({
   min-width: 0;
 }
 
-.error-state {
+.split {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  width: 100%;
+  align-items: stretch;
+  background: $bg-white;
+  border: 1px solid $border-light;
+  border-radius: 14px;
+  box-shadow: $elevation-1;
+  overflow: hidden;
+  max-height: calc(100vh - 240px);
+  min-height: 460px;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+    position: relative;
+    max-height: none;
+    min-height: 0;
+  }
+}
+
+.split-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid $border-light;
+
+  @media (max-width: $breakpoint-md) {
+    border-right: none;
+    border-bottom: 1px solid $border-light;
+  }
+}
+
+.list-head {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: 10px 14px;
+  min-height: 52px;
+  border-bottom: 1px solid $border-light;
+}
+
+.list-search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.list-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-muted;
+  pointer-events: none;
+}
+
+.list-search-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px 0 30px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: $bg-light;
+  color: $text-primary;
+  font-size: $font-size-sm;
+  outline: none;
+  transition:
+    background-color $duration-fast $easing-standard,
+    border-color $duration-fast $easing-standard,
+    box-shadow $duration-fast $easing-standard;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  &:hover {
+    background: $bg-gray;
+  }
+
+  &:focus {
+    background: $bg-white;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.18);
+  }
+}
+
+.list {
+  list-style: none;
+  padding: $spacing-2;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: 8px 10px 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color $duration-fast $easing-standard;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    height: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: $primary;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition:
+      height $duration-base $easing-emphasized,
+      opacity $duration-fast $easing-standard;
+  }
+
+  &:hover:not(&--active) {
+    background: $bg-light;
+  }
+
+  &--active {
+    background: $primary-light;
+
+    &::before {
+      height: 60%;
+      opacity: 1;
+    }
+
+    .row-name {
+      color: $primary-dark;
+    }
+    .row-sub {
+      color: $primary;
+      opacity: 0.85;
+    }
+  }
+}
+
+.row-avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: $bg-light;
+  color: $text-secondary;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color $duration-fast $easing-standard,
+    color $duration-fast $easing-standard;
+
+  .row--active & {
+    background: $bg-white;
+    color: $primary;
+    box-shadow: 0 1px 2px rgba(var(--color-primary-rgb), 0.18);
+  }
+}
+
+.row-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.row-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-sm;
+  font-weight: $font-semibold;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.005em;
+}
+
+.row-default-icon {
+  color: $primary;
+  flex-shrink: 0;
+}
+
+.row-sub {
+  font-size: 11px;
+  color: $text-muted;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.row-net {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: $font-bold;
+  font-variant-numeric: tabular-nums;
+
+  &--income {
+    color: var(--color-income);
+  }
+  &--expense {
+    color: var(--color-expense);
+  }
+  &--neutral {
+    color: $text-muted;
+  }
+}
+
+.list-empty {
+  padding: $spacing-6 $spacing-4;
   text-align: center;
-  padding: 2rem;
-  color: $error-color;
+  font-size: $font-size-sm;
+  color: $text-muted;
+}
+
+.split-detail {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+@media (max-width: $breakpoint-md) {
+  .split-detail {
+    display: none;
+  }
+  .split--detail-open {
+    .split-list {
+      display: none;
+    }
+    .split-detail {
+      display: flex;
+      position: relative;
+    }
+  }
 }
 </style>

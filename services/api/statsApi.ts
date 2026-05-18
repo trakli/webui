@@ -59,9 +59,11 @@ export interface StatsResponse {
     };
     charts: {
       party_spending: PartyData[];
+      party_income?: PartyData[];
       category_spending: CategoryData[];
       income_sources: CategoryData[];
       monthly_cash_flow: MonthlyCashFlow[];
+      expense_by_wallet?: PartyData[];
     };
   };
 }

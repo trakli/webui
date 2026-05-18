@@ -48,23 +48,27 @@ onUnmounted(() => {
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 0.5rem;
+  margin-top: 6px;
   background-color: $bg-white;
   border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-md;
+  border-radius: 12px;
+  box-shadow: $elevation-2;
   z-index: $z-index-dropdown;
   min-width: 12rem;
-  padding: 0.5rem 0;
+  padding: $spacing-2;
+  transform-origin: top right;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition:
+    opacity $duration-fast $easing-standard,
+    transform $duration-fast $easing-emphasized;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+  transform: scale(0.96) translateY(-4px);
 }
 </style>

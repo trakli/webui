@@ -1,18 +1,67 @@
 <template>
-  <div class="onboarding-empty-state">
-    <div class="onboarding-content">
-      <div class="onboarding-icon">
-        <component :is="iconComponent" class="main-icon" />
+  <section class="onboarding-empty-state surface surface--brand-soft">
+    <svg
+      class="oe-backdrop"
+      viewBox="0 0 1200 600"
+      preserveAspectRatio="xMaxYMid slice"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="oe-backdrop-bloom" cx="100%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="var(--surface-accent)" stop-opacity="0.4" />
+          <stop offset="100%" stop-color="var(--surface-accent)" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx="1100" cy="100" r="280" fill="url(#oe-backdrop-bloom)" />
+    </svg>
+
+    <div class="oe-grid">
+      <div class="oe-art">
+        <div class="illustration-wrap">
+          <svg class="illustration" viewBox="0 0 220 220" aria-hidden="true">
+            <defs>
+              <radialGradient id="oe-glow" cx="50%" cy="50%" r="55%">
+                <stop offset="0%" stop-color="var(--surface-accent)" stop-opacity="0.4" />
+                <stop offset="100%" stop-color="var(--surface-accent)" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+            <circle cx="110" cy="110" r="100" fill="url(#oe-glow)" />
+            <circle
+              cx="110"
+              cy="110"
+              r="82"
+              fill="none"
+              stroke="var(--surface-accent)"
+              stroke-opacity="0.5"
+              stroke-width="1"
+              stroke-dasharray="3 4"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="58"
+              fill="none"
+              stroke="var(--surface-accent)"
+              stroke-opacity="0.65"
+              stroke-width="1"
+            />
+            <circle cx="110" cy="110" r="42" fill="var(--surface-accent)" />
+            <circle cx="195" cy="58" r="6" fill="var(--surface-accent)" opacity="0.9" />
+            <circle cx="36" cy="170" r="4" fill="var(--surface-accent)" opacity="0.75" />
+            <circle cx="172" cy="180" r="5" fill="var(--surface-accent)" opacity="0.65" />
+          </svg>
+          <div class="illustration-icon">
+            <component :is="iconComponent" class="main-icon" />
+          </div>
+        </div>
       </div>
 
-      <div class="onboarding-text">
+      <div class="oe-content">
+        <span class="oe-eyebrow">{{ t('Getting started') }}</span>
         <h2 class="onboarding-title">{{ t(config.title) }}</h2>
         <p class="onboarding-subtitle">{{ t(config.subtitle) }}</p>
 
         <div v-if="config.steps" class="onboarding-steps">
-          <div class="steps-header">
-            <span class="steps-label">{{ t('Quick Start:') }}</span>
-          </div>
           <ol class="steps-list">
             <li v-for="(step, index) in config.steps" :key="index" class="step-item">
               <span class="step-number">{{ index + 1 }}</span>
@@ -20,23 +69,22 @@
             </li>
           </ol>
         </div>
-      </div>
 
-      <div class="onboarding-actions">
-        <button class="primary-action-btn" @click="$emit('create')">
-          <PlusIcon class="button-icon" />
-          {{ t(config.primaryAction) }}
-        </button>
-      </div>
-
-      <div v-if="config.tip" class="onboarding-tip">
-        <div class="tip-icon">
-          <LightBulbIcon />
+        <div class="onboarding-actions">
+          <button class="primary-action-btn" @click="$emit('create')">
+            <PlusIcon class="button-icon" />
+            {{ t(config.primaryAction) }}
+          </button>
+          <div v-if="config.tip" class="onboarding-tip">
+            <div class="tip-icon">
+              <LightBulbIcon />
+            </div>
+            <span class="tip-text">{{ t(config.tip) }}</span>
+          </div>
         </div>
-        <span class="tip-text">{{ t(config.tip) }}</span>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -49,7 +97,8 @@ import {
   ArrowsRightLeftIcon,
   UsersIcon,
   FolderIcon,
-  ChartPieIcon
+  ChartPieIcon,
+  BellAlertIcon
 } from '@heroicons/vue/24/outline';
 
 const { t } = useI18n();
@@ -59,7 +108,15 @@ const props = defineProps({
     type: String,
     required: true,
     validator: (value) =>
-      ['wallets', 'categories', 'transactions', 'parties', 'groups', 'budgets'].includes(value)
+      [
+        'wallets',
+        'categories',
+        'transactions',
+        'parties',
+        'groups',
+        'budgets',
+        'reminders'
+      ].includes(value)
   }
 });
 
@@ -71,7 +128,8 @@ const iconComponents = {
   transactions: ArrowsRightLeftIcon,
   parties: UsersIcon,
   groups: FolderIcon,
-  budgets: ChartPieIcon
+  budgets: ChartPieIcon,
+  reminders: BellAlertIcon
 };
 
 const onboardingConfigs = {
@@ -85,7 +143,7 @@ const onboardingConfigs = {
       'Start tracking transactions'
     ],
     primaryAction: 'Add First Wallet',
-    tip: '💡 Start with your main bank account - you can add more wallets later!'
+    tip: 'Start with your main bank account - you can add more wallets later!'
   },
   categories: {
     title: 'Organize Your Money with Categories',
@@ -97,7 +155,7 @@ const onboardingConfigs = {
       'Use them when adding transactions'
     ],
     primaryAction: 'Add First Category',
-    tip: "💡 Don't worry about getting it perfect - you can always add more categories later!"
+    tip: "Don't worry about getting it perfect - you can always add more categories later!"
   },
   transactions: {
     title: 'Ready to Track Your First Transaction?',
@@ -110,7 +168,7 @@ const onboardingConfigs = {
       'Add amount and description'
     ],
     primaryAction: 'Add First Transaction',
-    tip: '💡 Pro tip: Start by adding your most recent transactions to get into the habit!'
+    tip: 'Pro tip: Start by adding your most recent transactions to get into the habit!'
   },
   parties: {
     title: 'Track Who You Deal With',
@@ -122,7 +180,7 @@ const onboardingConfigs = {
       'Use them in transactions for better insights'
     ],
     primaryAction: 'Add First Party',
-    tip: '💡 Start with your most frequent payees - your employer, grocery store, or landlord!'
+    tip: 'Start with your most frequent payees - your employer, grocery store, or landlord!'
   },
   groups: {
     title: 'Organize with Smart Groups',
@@ -134,7 +192,7 @@ const onboardingConfigs = {
       'Track group budgets and spending'
     ],
     primaryAction: 'Add First Group',
-    tip: '💡 Think of groups as project folders for your money - perfect for tracking specific goals!'
+    tip: 'Think of groups as project folders for your money - perfect for tracking specific goals!'
   },
   budgets: {
     title: 'Take Control of Your Spending',
@@ -147,6 +205,17 @@ const onboardingConfigs = {
       "Get alerts as you approach the limit, and forecast warnings when you're on pace to breach"
     ],
     primaryAction: 'Create First Budget'
+  },
+  reminders: {
+    title: 'Never miss a money moment',
+    subtitle:
+      'Reminders nudge you when bills are due, paydays land, or recurring transactions need attention. Nothing slips through the cracks.',
+    steps: [
+      'Pick a title and date (or set up a repeating rule)',
+      'Choose how you want to be notified',
+      'Mark reminders done or pause them as life changes'
+    ],
+    primaryAction: 'Create your first reminder'
   }
 };
 
@@ -158,139 +227,175 @@ const config = computed(() => onboardingConfigs[props.pageType]);
 @use '~/assets/scss/_variables' as *;
 
 .onboarding-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0.75rem 2rem;
-  max-width: 800px;
-  margin: 0 auto;
+  position: relative;
+  width: 100%;
+  border: 1px solid $border-light;
+  border-radius: 18px;
+  box-shadow: $elevation-1;
+  overflow: hidden;
+  padding: 2rem 2.25rem;
 
   @media (max-width: $breakpoint-md) {
-    padding: 0.5rem 1.5rem;
+    padding: 1.5rem 1.5rem;
   }
 
   @media (max-width: $breakpoint-sm) {
-    padding: 0.5rem 1rem;
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
   }
 }
 
-.onboarding-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
+.oe-backdrop {
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.onboarding-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, $primary-light 0%, rgba(var(--color-primary-rgb), 0.1) 100%);
-  border-radius: 50%;
+.oe-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-5;
+  align-items: center;
+
+  @media (min-width: $breakpoint-md) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+    gap: $spacing-8;
+  }
+}
+
+.oe-art {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
-  position: relative;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -6px;
-    background: linear-gradient(135deg, $primary 0%, rgba(var(--color-primary-rgb), 0.6) 100%);
-    border-radius: 50%;
-    opacity: 0.1;
-    z-index: -1;
+.oe-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  gap: 8px;
+
+  @media (max-width: $breakpoint-md) {
+    align-items: center;
+    text-align: center;
   }
+}
+
+.oe-eyebrow {
+  font-size: 11px;
+  font-weight: $font-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--surface-deep);
+  opacity: 0.85;
+  margin-bottom: 2px;
+}
+
+.illustration-wrap {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: $breakpoint-md) {
+    width: 180px;
+    height: 180px;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+.illustration {
+  width: 100%;
+  height: 100%;
+  animation: oe-float 6s $easing-standard infinite;
+}
+
+@keyframes oe-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.illustration-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   .main-icon {
-    width: 32px;
-    height: 32px;
-    color: $primary;
-    stroke-width: 1.5;
-  }
+    width: 36px;
+    height: 36px;
+    color: var(--color-text-inverse);
+    stroke-width: 1.8;
 
-  @media (max-width: $breakpoint-md) {
-    width: 70px;
-    height: 70px;
-
-    .main-icon {
-      width: 28px;
-      height: 28px;
+    @media (max-width: $breakpoint-md) {
+      width: 30px;
+      height: 30px;
     }
   }
-
-  @media (max-width: $breakpoint-sm) {
-    width: 60px;
-    height: 60px;
-
-    .main-icon {
-      width: 24px;
-      height: 24px;
-    }
-  }
-}
-
-.onboarding-text {
-  max-width: 600px;
 }
 
 .onboarding-title {
-  color: $text-primary;
-  font-size: 2.25rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  line-height: 1.2;
+  color: var(--surface-ink);
+  font-size: 1.75rem;
+  font-weight: $font-bold;
+  letter-spacing: -0.025em;
+  margin: 0 0 0.375rem 0;
+  line-height: 1.1;
 
   @media (max-width: $breakpoint-md) {
-    font-size: 1.875rem;
+    font-size: 1.4rem;
   }
 
   @media (max-width: $breakpoint-sm) {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 }
 
 .onboarding-subtitle {
-  color: $text-secondary;
-  font-size: 1.125rem;
-  margin: 0 0 1.5rem 0;
+  color: var(--surface-ink);
+  opacity: 0.75;
+  font-size: $font-size-base;
+  margin: 0 0 1rem 0;
   line-height: 1.5;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 1rem;
-  }
+  max-width: 48ch;
 
   @media (max-width: $breakpoint-sm) {
-    font-size: 0.9rem;
+    font-size: $font-size-sm;
   }
 }
 
 .onboarding-steps {
-  background: $bg-light;
+  background: var(--glass-bg);
   border: 1px solid $border-light;
-  border-radius: $radius-xl;
-  padding: 1.5rem;
-  margin: 1rem 0;
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  margin: 0.25rem 0 1rem;
   text-align: left;
+  width: 100%;
+  max-width: 520px;
+  backdrop-filter: blur(6px);
 
   @media (max-width: $breakpoint-sm) {
-    padding: 1rem;
+    padding: 0.75rem 0.875rem;
   }
-}
-
-.steps-header {
-  margin-bottom: 1rem;
-}
-
-.steps-label {
-  font-weight: 600;
-  color: $primary;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .steps-list {
@@ -299,125 +404,121 @@ const config = computed(() => onboardingConfigs[props.pageType]);
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .step-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  font-size: 0.9rem;
+  gap: 0.625rem;
+  font-size: $font-size-sm;
   color: $text-primary;
   line-height: 1.4;
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: 0.85rem;
-  }
 }
 
 .step-number {
-  background: $primary;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  background: var(--surface-deep);
+  color: var(--surface-bg);
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: $font-bold;
   flex-shrink: 0;
   margin-top: 1px;
+  font-variant-numeric: tabular-nums;
 }
 
 .step-text {
   flex: 1;
-  padding-top: 2px;
 }
 
 .onboarding-actions {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  width: 100%;
+  gap: $spacing-3;
+  flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-md) {
+    justify-content: center;
+  }
 }
 
 .primary-action-btn {
   background: $primary;
   color: $bg-white;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: $font-size-sm;
+  font-weight: $font-semibold;
+  letter-spacing: -0.005em;
   border: none;
-  border-radius: $radius-xl;
-  padding: 1rem 2rem;
+  border-radius: 10px;
+  padding: 10px 18px;
   cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
+  transition:
+    background-color $duration-fast $easing-standard,
+    box-shadow $duration-fast $easing-standard,
+    transform $duration-fast $easing-standard;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-width: 200px;
-  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+  min-height: 40px;
+  box-shadow: $elevation-1;
 
   .button-icon {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 16px;
+    height: 16px;
     stroke-width: 2;
   }
 
   &:hover {
     background: $primary-hover;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.4);
+    box-shadow: $elevation-2;
   }
 
-  @media (max-width: $breakpoint-sm) {
-    font-size: 1rem;
-    padding: 0.875rem 1.5rem;
-    min-width: 180px;
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
   }
 }
 
 .onboarding-tip {
-  background: rgba(var(--color-warning-rgb), 0.15);
-  border: 1px solid $warning;
-  border-radius: $radius-lg;
-  padding: 1rem 1.25rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  max-width: 500px;
-  text-align: left;
-
-  @media (max-width: $breakpoint-sm) {
-    padding: 0.875rem 1rem;
-    text-align: center;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  background: var(--glass-bg);
+  border: 1px solid $border-light;
+  border-radius: 999px;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  backdrop-filter: blur(6px);
 }
 
 .tip-icon {
-  color: $warning;
+  color: var(--surface-deep);
   flex-shrink: 0;
-  margin-top: 1px;
+  display: inline-flex;
 
   svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 12px;
+    height: 12px;
   }
 }
 
 .tip-text {
-  color: $warning;
-  font-size: 0.875rem;
+  color: var(--surface-ink);
+  opacity: 0.8;
+  font-size: 11px;
+  font-weight: $font-medium;
   line-height: 1.4;
   margin: 0;
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: 0.8rem;
-  }
+  text-align: left;
 }
 </style>
