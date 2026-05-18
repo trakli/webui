@@ -41,50 +41,64 @@ defineEmits(['update:activeTab']);
 }
 
 .tabs-header {
-  display: flex;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  background: $bg-gray;
-  border-radius: $radius-xl;
-  margin-bottom: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: $bg-white;
+  border: 1px solid $border-color;
+  border-radius: 999px;
+  margin-bottom: $spacing-6;
   overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (max-width: $breakpoint-md) {
-    gap: 0.125rem;
-    padding: 0.25rem;
+    gap: 2px;
   }
 }
 
 .tab-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  gap: $spacing-2;
+  height: 36px;
+  padding: 0 $spacing-4;
   border: none;
   background: transparent;
-  border-radius: $radius-lg;
+  border-radius: 999px;
   cursor: pointer;
-  color: $text-secondary;
+  color: $text-muted;
   font-size: $font-size-sm;
   font-weight: $font-medium;
-  transition: all 0.2s;
+  letter-spacing: -0.005em;
+  transition:
+    background-color $duration-fast $easing-standard,
+    color $duration-fast $easing-standard;
   white-space: nowrap;
 
   @media (max-width: $breakpoint-md) {
-    padding: 0.5rem 0.75rem;
+    height: 32px;
+    padding: 0 $spacing-3;
     font-size: $font-size-xs;
-    gap: 0.25rem;
   }
 
   &:hover {
     color: $text-primary;
-    background: rgba(255, 255, 255, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
   }
 
   &.active {
-    background: $bg-white;
+    background: $primary-light;
     color: $primary;
-    box-shadow: $shadow-sm;
   }
 }
 

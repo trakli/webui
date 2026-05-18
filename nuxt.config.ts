@@ -43,6 +43,7 @@ export default defineNuxtConfig({
   css: [
     '@/assets/scss/_variables.scss',
     '@/assets/scss/base.scss',
+    '@/assets/scss/_surfaces.scss',
     '@/assets/scss/_form-styles.scss',
     '@/assets/scss/_transaction-form.scss'
   ],

@@ -31,15 +31,11 @@
         <p>{{ error }}</p>
       </div>
 
-      <div v-else-if="!showForm && reminders.length === 0" class="empty-state">
-        <Clock class="empty-icon" />
-        <h3>{{ t('No reminders yet') }}</h3>
-        <p>{{ t('Create reminders to stay on top of your finances') }}</p>
-        <button class="add-btn" @click="handleOpenFormForCreation">
-          <Plus />
-          <span>{{ t('Create your first reminder') }}</span>
-        </button>
-      </div>
+      <OnboardingEmptyState
+        v-else-if="!showForm && reminders.length === 0"
+        page-type="reminders"
+        @create="handleOpenFormForCreation"
+      />
 
       <div v-else-if="!showForm" class="reminders-list">
         <div
@@ -128,13 +124,13 @@ import {
   TrendingUp,
   Receipt,
   PiggyBank,
-  Star,
-  Plus
+  Star
 } from 'lucide-vue-next';
 import { useReminders } from '@/composables/useReminders';
 import { useNotifications } from '@/composables/useNotifications';
 import { extractApiErrors } from '@/utils/apiErrors';
 import ContentTopCard from '@/components/TTopCard.vue';
+import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.vue';
 import ReminderForm from '@/components/reminders/ReminderForm.vue';
 
 const { t } = useI18n();
@@ -360,8 +356,7 @@ onMounted(() => {
 }
 
 .loading-state,
-.error-state,
-.empty-state {
+.error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -387,24 +382,6 @@ onMounted(() => {
   }
 }
 
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  color: $border-color;
-  margin-bottom: 1rem;
-}
-
-.empty-state h3 {
-  font-size: $font-size-lg;
-  font-weight: $font-semibold;
-  color: $text-primary;
-  margin: 0 0 0.5rem;
-}
-
-.empty-state p {
-  margin: 0 0 1.5rem;
-}
-
 .reminders-list {
   display: flex;
   flex-direction: column;
@@ -415,15 +392,18 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
   background: $bg-white;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-sm;
-  border: 1px solid $border-color;
-  transition: box-shadow 0.2s;
+  border-radius: 14px;
+  box-shadow: $elevation-1;
+  border: 1px solid $border-light;
+  transition:
+    box-shadow $duration-base $easing-standard,
+    border-color $duration-base $easing-standard;
 
   &:hover {
-    box-shadow: $shadow-md;
+    box-shadow: $elevation-2;
+    border-color: $border-medium;
   }
 
   &.is-paused {

@@ -127,34 +127,45 @@
   }
 }
 
-// Icon Button - Reusable icon-only button
+// Icon Button - Reusable icon-only button. Pill-friendly proportions, mode-aware.
 .icon-button {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  padding: 8px;
+  padding: 0;
   width: 36px;
   height: $navbar-icon-button-height;
-  border-radius: $radius-lg;
-  background-color: $bg-light;
-  border: 1px solid $border-light;
+  border-radius: 10px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: $text-secondary;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color $duration-fast $easing-standard,
+    color $duration-fast $easing-standard;
 
   @media (max-width: $breakpoint-sm) {
     width: 32px;
     height: 32px;
-    padding: 6px;
   }
 
   &:hover {
-    background-color: $bg-white;
-    border-color: $border-medium;
+    background-color: var(--hover-overlay);
+    color: $text-primary;
+  }
+
+  &:active {
+    background-color: var(--press-overlay);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
   }
 
   .icon {
-    width: 20px;
-    height: 20px;
-    color: $text-primary;
+    width: 18px;
+    height: 18px;
+    color: currentColor;
   }
 }
