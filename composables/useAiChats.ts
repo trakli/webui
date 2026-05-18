@@ -11,12 +11,23 @@ export function useAiChats() {
   const error = ref<string | null>(null);
 
   let pollTimer: ReturnType<typeof setInterval> | null = null;
+  // Sequence token to ignore stale openSession responses when the user
+  // rapidly switches between chats.
+  let openToken = 0;
+
+  // Stop polling after 90s; anything still pending after that is stuck
+  // server-side (worker crash, timeout, etc.), not actively in progress.
+  const POLL_STUCK_THRESHOLD_MS = 90_000;
 
   const isPolling = computed(() => {
     if (!currentSession.value?.messages) return false;
-    return currentSession.value.messages.some(
-      (m) => m.role === 'assistant' && (m.status === 'pending' || m.status === 'processing')
-    );
+    return currentSession.value.messages.some((m) => {
+      if (m.role !== 'assistant') return false;
+      if (m.status !== 'pending' && m.status !== 'processing') return false;
+      const created = new Date(m.created_at).getTime();
+      if (!Number.isFinite(created)) return true;
+      return Date.now() - created <= POLL_STUCK_THRESHOLD_MS;
+    });
   });
 
   async function loadSessions() {
@@ -30,13 +41,17 @@ export function useAiChats() {
   }
 
   async function openSession(id: number) {
+    const token = ++openToken;
     stopPolling();
     const session = await aiApi.getSession(id);
+    // A newer open / new-chat call has superseded us; drop this response.
+    if (token !== openToken) return;
     currentSession.value = session;
     maybeStartPolling();
   }
 
   function newSession() {
+    openToken += 1;
     stopPolling();
     currentSession.value = null;
   }
@@ -80,9 +95,12 @@ export function useAiChats() {
   }
 
   async function refreshCurrent() {
-    if (!currentSession.value) return;
-    const fresh = await aiApi.getSession(currentSession.value.id);
+    const requestedId = currentSession.value?.id;
+    if (!requestedId) return;
+    const fresh = await aiApi.getSession(requestedId);
     if (!fresh) return;
+    // User switched chats or started a new one while this poll was in flight.
+    if (currentSession.value?.id !== requestedId) return;
     currentSession.value = fresh;
 
     const idx = sessions.value.findIndex((s) => s.id === fresh.id);
