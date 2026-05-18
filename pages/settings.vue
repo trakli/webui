@@ -106,9 +106,10 @@ const tabs = [
 
 .settings-card {
   background: $bg-white;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-md;
-  padding: 1.5rem;
+  border: 1px solid $border-light;
+  border-radius: 14px;
+  box-shadow: $elevation-1;
+  padding: 1.25rem 1.5rem;
 
   @media (max-width: $breakpoint-md) {
     padding: 1rem;
