@@ -16,5 +16,6 @@ export const CONFIGURATION_KEYS = {
   BUDGET_DEFAULT_PERIOD: 'budget-default-period-type',
   BUDGET_FORECAST_DEFAULT: 'budget-forecast-alerts-default',
   BUDGET_LIST_SORT: 'budget-list-sort',
-  BUDGET_DIGEST_ENABLED: 'budget-weekly-digest-enabled'
+  BUDGET_DIGEST_ENABLED: 'budget-weekly-digest-enabled',
+  WALLETS_ALLOW_NEGATIVE_BALANCE: 'wallets-allow-negative-balance'
 } as const;
