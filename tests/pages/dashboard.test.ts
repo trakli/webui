@@ -93,7 +93,7 @@ describe('DashboardKPIs', () => {
 
       expect(wrapper.text()).toContain('Income');
       expect(wrapper.text()).toContain('8,000');
-      expect(wrapper.find('.kpi-value.is-positive').exists()).toBe(true);
+      expect(wrapper.find('.kpi-card.surface--income').exists()).toBe(true);
     });
 
     it('displays Expenses KPI with negative styling', () => {
@@ -103,7 +103,7 @@ describe('DashboardKPIs', () => {
 
       expect(wrapper.text()).toContain('Expenses');
       expect(wrapper.text()).toContain('3,000');
-      expect(wrapper.find('.kpi-value.is-negative').exists()).toBe(true);
+      expect(wrapper.find('.kpi-card.surface--expense').exists()).toBe(true);
     });
 
     it('displays Net value (income - expenses)', () => {
@@ -171,7 +171,7 @@ describe('DashboardKPIs', () => {
   });
 
   describe('net value styling', () => {
-    it('applies positive class when net is positive', () => {
+    it('applies positive surface when net is positive', () => {
       mockUseStatistics.currentStatistics.value = {
         ...mockStatistics,
         total_income: 5000,
@@ -183,10 +183,10 @@ describe('DashboardKPIs', () => {
       });
 
       const netCard = wrapper.findAll('.kpi-card')[3];
-      expect(netCard.find('.is-positive').exists()).toBe(true);
+      expect(netCard.classes()).toContain('surface--brand-soft');
     });
 
-    it('applies negative class when net is negative', () => {
+    it('applies negative surface when net is negative', () => {
       mockUseStatistics.currentStatistics.value = {
         ...mockStatistics,
         total_income: 2000,
@@ -198,7 +198,7 @@ describe('DashboardKPIs', () => {
       });
 
       const netCard = wrapper.findAll('.kpi-card')[3];
-      expect(netCard.find('.is-negative').exists()).toBe(true);
+      expect(netCard.classes()).toContain('surface--expense');
     });
   });
 

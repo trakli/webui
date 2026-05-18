@@ -138,8 +138,8 @@ describe('RemindersPage', () => {
         global: { stubs }
       });
 
-      expect(wrapper.find('.empty-state').exists()).toBe(true);
-      expect(wrapper.text()).toContain('No reminders yet');
+      expect(wrapper.find('.onboarding-empty-state').exists()).toBe(true);
+      expect(wrapper.text()).toContain('Never miss a money moment');
     });
 
     it('shows create first reminder button in empty state', () => {
