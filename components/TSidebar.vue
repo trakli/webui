@@ -106,7 +106,6 @@
 import {
   ArrowUpTrayIcon,
   BellIcon,
-  BuildingLibraryIcon,
   ChartBarIcon,
   ChartPieIcon,
   ChatBubbleLeftRightIcon,
@@ -115,6 +114,7 @@ import {
   Cog8ToothIcon,
   HomeIcon,
   RectangleGroupIcon,
+  TagIcon,
   UserGroupIcon,
   UsersIcon,
   WalletIcon,
@@ -152,7 +152,7 @@ const primary = [
     to: '/categories',
     label: 'Categories',
     hint: 'Organize transactions by type',
-    icon: BuildingLibraryIcon
+    icon: TagIcon
   },
   {
     to: '/groups',
