@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-05-18
+
+### Changed
+
+- Visual language refreshed with tonal surfaces and split layouts across the app
+- Transactions table polished with a totals footer row
+- Settings card tightened with a visible border around the panel
+- Categories now use a tag icon in the sidebar
+
+### Fixed
+
+- AI chat no longer hangs in an indefinite pending state when poll responses arrive out of order
+- Imports walkthrough now shows its document illustration on every slide
+- Settings toggle for allowing negative balances saves reliably and surfaces toast feedback
+
 ## [1.1.1] - 2026-05-03
 
 ### Added
