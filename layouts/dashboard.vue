@@ -82,18 +82,10 @@ onMounted(() => {
   margin-top: $navbar-height;
   height: calc(100vh - #{$navbar-height});
   box-sizing: border-box;
-  padding: 0.25rem 1.25rem 0.5rem;
+  padding: 0.25rem 0.5rem 0.5rem;
   overflow: hidden;
 
-  @media (max-width: $breakpoint-lg) {
-    padding: 0.25rem 1rem 0.5rem;
-  }
-
   @media (max-width: $breakpoint-md) {
-    padding: 0.25rem 0.5rem 0.5rem;
-  }
-
-  @media (max-width: $breakpoint-sm) {
     padding: 0.25rem;
   }
 }
