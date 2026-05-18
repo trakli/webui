@@ -27,20 +27,35 @@
       </div>
     </div>
 
+    <div class="toggle-item">
+      <div class="toggle-info">
+        <div>
+          <p class="toggle-label">{{ t('Allow Negative Balances') }}</p>
+          <p class="toggle-desc">
+            {{ t('Permit wallet balances to go below zero when spending or transferring.') }}
+          </p>
+        </div>
+      </div>
+      <label class="toggle-switch">
+        <input v-model="allowNegativeBalance" type="checkbox" :disabled="!isEditMode" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
     <div v-if="isEditMode" class="actions">
       <button type="button" class="submit-btn" @click="handleSave">
         <Save class="inline-icon" />
         <span>{{ t('Update Wallets & Groups') }}</span>
       </button>
-      <p v-if="message" class="success-text">{{ message }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Save } from 'lucide-vue-next';
 import { useSharedData } from '@/composables/useSharedData';
+import { useNotifications } from '@/composables/useNotifications';
 import configurationsApi from '@/services/api/configurationsApi';
 import walletsApi from '@/services/api/walletsApi';
 import groupsApi from '@/services/api/groupsApi';
@@ -54,24 +69,18 @@ function generateClientId(): string {
 
 const { t } = useI18n();
 
-const props = defineProps({
+defineProps({
   isEditMode: { type: Boolean, default: false }
 });
 
 const sharedData = useSharedData();
+const { showSuccess, showError } = useNotifications();
 const wallets = computed(() => sharedData.wallets.value);
 const groups = computed(() => sharedData.groups.value);
 
 const walletId = ref(null);
 const groupId = ref(null);
-const message = ref('');
-
-watch(
-  () => props.isEditMode,
-  () => {
-    message.value = '';
-  }
-);
+const allowNegativeBalance = ref(false);
 
 const walletLabel = computed(() => {
   if (!walletId.value) return '';
@@ -100,14 +109,31 @@ onMounted(async () => {
     if (defGroup?.id != null) {
       groupId.value = defGroup.id;
     }
+
+    const map = sharedData.configurationsMap.value || {};
+    const rawNegative = map[CONFIGURATION_KEYS.WALLETS_ALLOW_NEGATIVE_BALANCE];
+    allowNegativeBalance.value =
+      rawNegative === true || rawNegative === 'true' || rawNegative === 1 || rawNegative === '1';
   } catch (e) {
     console.error('Failed to load wallets/groups/configurations for settings', e);
   }
 });
 
 const handleSave = async () => {
+  const failures: string[] = [];
+
   try {
-    if (walletId.value) {
+    await configurationsApi.update(CONFIGURATION_KEYS.WALLETS_ALLOW_NEGATIVE_BALANCE, {
+      value: allowNegativeBalance.value,
+      type: 'bool'
+    });
+  } catch (e) {
+    console.error('Failed to update negative-balance setting', e);
+    failures.push(t('Allow Negative Balances'));
+  }
+
+  if (walletId.value) {
+    try {
       const wallet = wallets.value.find((w) => w.id === walletId.value);
       let walletClientId = wallet?.client_generated_id;
 
@@ -121,9 +147,14 @@ const handleSave = async () => {
         value: walletClientId || walletId.value,
         type: 'string'
       });
+    } catch (e) {
+      console.error('Failed to update default wallet', e);
+      failures.push(t('Default Wallet'));
     }
+  }
 
-    if (groupId.value) {
+  if (groupId.value) {
+    try {
       const group = groups.value.find((g) => g.id === groupId.value);
       let groupClientId = group?.client_generated_id;
 
@@ -137,21 +168,38 @@ const handleSave = async () => {
         value: groupClientId || groupId.value,
         type: 'string'
       });
-    } else {
-      await configurationsApi.update(CONFIGURATION_KEYS.GROUP, {
-        value: null,
-        type: 'string'
-      });
+    } catch (e) {
+      console.error('Failed to update default group', e);
+      failures.push(t('Default Group'));
     }
+  } else {
+    // Clearing the default group requires removing the config, since the
+    // backend rejects an empty value on update.
+    try {
+      await configurationsApi.delete(CONFIGURATION_KEYS.GROUP);
+    } catch (e: any) {
+      // 404 just means there was no config to clear.
+      const status = e?.statusCode ?? e?.status;
+      if (status !== 404) {
+        console.error('Failed to clear default group', e);
+        failures.push(t('Default Group'));
+      }
+    }
+  }
 
+  try {
     await sharedData.loadConfigurations(true);
-    message.value = t('Wallet and group settings updated successfully!');
   } catch (e) {
-    console.error('Failed to update wallet/group configuration', e);
-  } finally {
-    setTimeout(() => {
-      message.value = '';
-    }, 2000);
+    console.error('Failed to reload configurations', e);
+  }
+
+  if (failures.length === 0) {
+    showSuccess(t('Settings updated'), t('Wallet and group settings saved successfully.'));
+  } else {
+    showError(
+      t('Some settings did not save'),
+      t('Could not update: {fields}.', { fields: failures.join(', ') })
+    );
   }
 };
 </script>
@@ -215,9 +263,83 @@ const handleSave = async () => {
   align-items: center;
 }
 
-.success-text {
-  margin-top: 0.75rem;
-  color: $primary;
-  font-weight: $font-semibold;
+.toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  background: $bg-gray;
+  border-radius: $radius-lg;
+}
+
+.toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toggle-label {
+  font-weight: $font-medium;
+  color: $text-primary;
+  margin: 0;
+}
+
+.toggle-desc {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background-color: $primary;
+    }
+
+    &:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    &:disabled + .slider {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $border-color;
+    transition: 0.3s;
+    border-radius: 24px;
+
+    &:before {
+      position: absolute;
+      content: '';
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+  }
 }
 </style>
