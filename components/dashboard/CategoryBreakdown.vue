@@ -246,9 +246,9 @@ const allDataPoints = computed(() => {
 
 .category-breakdown {
   background: $bg-white;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-sm;
-  border: 1px solid $border-color;
+  border-radius: 16px;
+  box-shadow: $elevation-1;
+  border: 1px solid $border-light;
   padding: $spacing-4;
   height: 320px;
   display: flex;

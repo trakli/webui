@@ -65,23 +65,26 @@
   width: 100%;
   box-sizing: border-box;
   padding: 0.75rem 1rem;
-  border: 1px solid $border-light;
-  border-radius: 8px;
+  border: 1px solid $border-medium;
+  border-radius: 12px;
   font-size: 1rem;
   background: $bg-white;
   color: $text-primary;
-  transition: border-color 0.2s;
+  transition:
+    border-color $duration-fast $easing-standard,
+    box-shadow $duration-fast $easing-standard,
+    background-color $duration-fast $easing-standard;
 
   @media (max-width: $breakpoint-md) {
     padding: 0.625rem 0.875rem;
     font-size: 0.95rem;
-    border-radius: 6px;
+    border-radius: 10px;
   }
 
   @media (max-width: $breakpoint-sm) {
     padding: 0.5rem 0.75rem;
     font-size: 0.9rem;
-    border-radius: 6px;
+    border-radius: 10px;
   }
 
   @media (max-width: 480px) {
@@ -89,13 +92,32 @@
     font-size: 0.875rem;
   }
 
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: $text-muted;
+  }
+
   &:focus {
     border-color: $primary;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.18);
+  }
+
+  &:disabled {
+    background: $bg-light;
+    color: $text-muted;
+    cursor: not-allowed;
   }
 
   &.error {
     border-color: $error-color;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(var(--color-error-rgb, 220, 38, 38), 0.18);
+    }
   }
 }
 

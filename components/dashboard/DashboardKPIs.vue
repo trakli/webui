@@ -32,31 +32,44 @@
     </div>
 
     <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label">{{ t('Balance') }}</div>
-        <div class="kpi-value">{{ formatCurrency(statistics?.total_balance || 0) }}</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">{{ t('Income') }}</div>
-        <div class="kpi-value is-positive">{{ formatCurrency(statistics?.total_income || 0) }}</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">{{ t('Expenses') }}</div>
-        <div class="kpi-value is-negative">
-          {{ formatCurrency(statistics?.total_expenses || 0) }}
+      <article
+        v-for="card in kpiCards"
+        :key="card.key"
+        class="kpi-card tone-card surface"
+        :class="`surface--${card.tone}`"
+      >
+        <svg
+          class="kpi-decor"
+          viewBox="0 0 280 160"
+          preserveAspectRatio="xMaxYMid slice"
+          aria-hidden="true"
+        >
+          <circle cx="240" cy="40" r="60" fill="var(--surface-accent)" opacity="0.35" />
+          <circle cx="270" cy="120" r="36" fill="var(--surface-deep)" opacity="0.35" />
+          <circle cx="200" cy="130" r="10" fill="var(--surface-deep)" opacity="0.5" />
+        </svg>
+        <div class="kpi-icon">
+          <component :is="card.icon" :size="18" />
         </div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">{{ t('Net') }}</div>
-        <div class="kpi-value" :class="netClass">{{ formatCurrency(netValue) }}</div>
-      </div>
+        <div class="kpi-meta">
+          <span class="eyebrow">{{ card.label }}</span>
+          <p class="kpi-value">{{ formatCurrency(card.value) }}</p>
+        </div>
+      </article>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { ChevronDown, X as XIcon } from 'lucide-vue-next';
+import {
+  ChevronDown,
+  X as XIcon,
+  Wallet,
+  ArrowDownLeft,
+  ArrowUpRight,
+  PiggyBank
+} from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
 import { useWallets } from '@/composables/useWallets';
 import { useSharedData } from '@/composables/useSharedData';
@@ -92,9 +105,36 @@ const netValue = computed(() => {
   return income - expenses;
 });
 
-const netClass = computed(() => {
-  return netValue.value >= 0 ? 'is-positive' : 'is-negative';
-});
+const kpiCards = computed(() => [
+  {
+    key: 'balance',
+    label: t('Balance'),
+    value: statistics.value?.total_balance || 0,
+    icon: Wallet,
+    tone: 'brand'
+  },
+  {
+    key: 'income',
+    label: t('Income'),
+    value: statistics.value?.total_income || 0,
+    icon: ArrowDownLeft,
+    tone: 'income'
+  },
+  {
+    key: 'expenses',
+    label: t('Expenses'),
+    value: statistics.value?.total_expenses || 0,
+    icon: ArrowUpRight,
+    tone: 'expense'
+  },
+  {
+    key: 'net',
+    label: t('Net'),
+    value: netValue.value,
+    icon: PiggyBank,
+    tone: netValue.value >= 0 ? 'brand-soft' : 'expense'
+  }
+]);
 
 const formatCurrency = (value) => {
   return formatCompactCurrency(value, getDefaultCurrency.value || 'USD');
@@ -285,43 +325,75 @@ onUnmounted(() => {
 }
 
 .kpi-card {
-  background: $bg-white;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-sm;
-  border: 1px solid $border-color;
+  position: relative;
   padding: $spacing-4;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: $spacing-3;
+  overflow: hidden;
+  border-radius: 14px;
 
   @media (max-width: $breakpoint-sm) {
     padding: $spacing-3;
+    gap: $spacing-2;
   }
 }
 
-.kpi-label {
-  font-size: $font-size-xs;
-  font-weight: $font-medium;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: $text-muted;
-  margin-bottom: $spacing-1;
+.kpi-decor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.kpi-icon {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--glass-bg);
+  border: 1px solid $border-light;
+  color: var(--surface-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+
+  @media (max-width: $breakpoint-sm) {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+}
+
+.kpi-meta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
 }
 
 .kpi-value {
-  font-size: $font-size-xl;
+  color: var(--surface-ink);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  font-size: $font-size-lg;
   font-weight: $font-bold;
-  color: $text-primary;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-lg;
-  }
-
-  &.is-positive {
-    color: $primary;
-  }
-
-  &.is-negative {
-    color: $error-color;
+    font-size: $font-size-base;
   }
 }
 

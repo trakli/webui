@@ -179,35 +179,30 @@ const formatPeriod = (b: Budget) => {
   background: $bg-white;
   color: $text-primary;
   text-decoration: none;
-  border: 1px solid $border-color;
-  border-radius: $radius-xl;
+  border: 1px solid $border-light;
+  border-radius: 14px;
   padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
   cursor: pointer;
+  box-shadow: $elevation-1;
 
   @media (max-width: $breakpoint-sm) {
     padding: 0.875rem 1rem;
   }
   transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.1s ease;
+    border-color $duration-fast $easing-standard,
+    box-shadow $duration-base $easing-standard;
 
   &:hover {
-    border-color: $primary-muted;
-    box-shadow: var(--shadow-md);
+    border-color: $border-medium;
+    box-shadow: $elevation-2;
   }
 
   &:focus-visible {
-    outline: none;
-    border-color: $primary;
-    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
-  }
-
-  &:active {
-    transform: translateY(1px);
+    outline: 2px solid $primary;
+    outline-offset: 2px;
   }
 
   &__head {

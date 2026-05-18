@@ -385,41 +385,47 @@ definePageMeta({
 }
 
 .view-tabs {
-  display: flex;
-  gap: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   padding: 4px;
-  background: $bg-slate;
+  background: $bg-white;
   border: 1px solid $border-color;
-  border-radius: $radius-xl;
+  border-radius: 12px;
   width: fit-content;
   margin-bottom: 1rem;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
 
-  @media (max-width: $breakpoint-sm) {
-    width: 100%;
-    overflow-x: auto;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 .view-tab {
   background: transparent;
   border: none;
-  padding: 6px 14px;
-  border-radius: $radius-lg;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
   font-size: $font-size-sm;
-  font-weight: $font-medium;
-  color: $text-secondary;
+  font-weight: $font-semibold;
+  color: $text-muted;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  letter-spacing: -0.005em;
+  transition:
+    background-color $duration-fast $easing-standard,
+    color $duration-fast $easing-standard;
 
   &:hover:not(.view-tab--active) {
-    color: $primary;
+    color: $text-primary;
   }
 
   &--active {
-    background: $bg-white;
+    background: $primary-light;
     color: $primary;
-    box-shadow: var(--shadow-sm);
   }
 }
 

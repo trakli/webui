@@ -144,20 +144,15 @@ const statusStyle = computed(() => {
   const received = Number(props.party.receivedAmount || 0);
   const spent = Number(props.party.spentAmount || 0);
 
-  // Use $primary and $error-color from _variables.scss directly as hex values
-  const primary = '#047844'; // $primary
-  const errorColor = '#dc2626'; // $error-color
-  const neutral = '#b0b8b4';
-
-  let stripColor = neutral;
-  let accentBg = neutral;
+  let stripColor = 'var(--color-border-medium)';
+  let accentBg = 'var(--color-border-medium)';
 
   if (received > spent) {
-    stripColor = primary;
-    accentBg = primary;
+    stripColor = 'var(--color-income)';
+    accentBg = 'var(--color-income)';
   } else if (spent > received) {
-    stripColor = errorColor;
-    accentBg = errorColor;
+    stripColor = 'var(--color-expense)';
+    accentBg = 'var(--color-expense)';
   }
 
   return {
@@ -230,10 +225,12 @@ const formatLastUpdated = (timestamp) => {
 
 .party-card {
   background: $bg-white;
-  border-radius: $radius-xl;
+  border-radius: 16px;
   padding: $spacing-4;
-  box-shadow: $shadow-sm;
-  transition: $transition-base;
+  box-shadow: $elevation-1;
+  transition:
+    box-shadow $duration-base $easing-standard,
+    border-color $duration-base $easing-standard;
   border: 1px solid $border-light;
   position: relative;
   display: flex;
@@ -243,8 +240,7 @@ const formatLastUpdated = (timestamp) => {
   min-height: 280px;
 
   &:hover {
-    box-shadow: $shadow-md;
-    transform: translateY(-2px);
+    box-shadow: $elevation-2;
     border-color: $border-medium;
   }
 }

@@ -4,15 +4,15 @@
       <template #summary>
         <div v-if="hasTotals" class="totals-summary">
           <span class="total-item">
-            <span class="total-label">{{ t('Income') }}:</span>
+            <span class="total-label">{{ t('Income') }}</span>
             <span class="total-value income">{{ formatCurrency(totals.income) }}</span>
           </span>
           <span class="total-item">
-            <span class="total-label">{{ t('Expenses') }}:</span>
+            <span class="total-label">{{ t('Expenses') }}</span>
             <span class="total-value expense">{{ formatCurrency(totals.expenses) }}</span>
           </span>
           <span class="total-item">
-            <span class="total-label">{{ t('Net') }}:</span>
+            <span class="total-label">{{ t('Net') }}</span>
             <span class="total-value" :class="totals.net >= 0 ? 'income' : 'expense'">{{
               formatCurrency(totals.net)
             }}</span>
@@ -347,12 +347,15 @@ async function handleDelete(txn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: $bg-white;
-  border: 1px solid $border-color;
-  border-radius: $radius-md;
-  color: $text-muted;
+  background: var(--glass-bg);
+  border: 1px solid $border-light;
+  border-radius: 10px;
+  color: var(--surface-deep);
   cursor: pointer;
-  transition: all 0.15s ease;
+  backdrop-filter: blur(6px);
+  transition:
+    background-color $duration-fast $easing-standard,
+    color $duration-fast $easing-standard;
 
   .icon {
     width: 16px;
@@ -360,47 +363,49 @@ async function handleDelete(txn) {
   }
 
   &:hover {
-    color: $primary;
-    border-color: $primary-muted;
-    background: rgba(var(--color-primary-rgb), 0.05);
+    background: var(--glass-bg-strong);
   }
 }
 
 .totals-summary {
-  display: flex;
-  gap: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
   flex-wrap: wrap;
-  margin-top: 0.25rem;
-
-  @media (max-width: $breakpoint-sm) {
-    gap: 0.5rem;
-  }
 }
 
 .total-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: $font-size-sm;
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: $font-size-xs;
-  }
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  border: 1px solid $border-light;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  backdrop-filter: blur(6px);
 
   .total-label {
-    color: $text-muted;
-    font-weight: $font-medium;
+    color: var(--surface-ink);
+    opacity: 0.7;
+    font-weight: $font-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 10px;
   }
 
   .total-value {
     font-weight: $font-bold;
+    color: var(--surface-ink);
 
     &.income {
-      color: #059669;
+      color: var(--color-income);
     }
 
     &.expense {
-      color: #dc2626;
+      color: var(--color-expense);
     }
   }
 }

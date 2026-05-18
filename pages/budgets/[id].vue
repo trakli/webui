@@ -454,8 +454,9 @@ definePageMeta({
 
 .summary-card {
   background: $bg-white;
-  border: 1px solid $border-color;
-  border-radius: $radius-xl;
+  border: 1px solid $border-light;
+  border-radius: 14px;
+  box-shadow: $elevation-1;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;

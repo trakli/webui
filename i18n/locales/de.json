@@ -1,4 +1,6 @@
 {
+  "Allow Negative Balances": "Negative Salden zulassen",
+  "Permit wallet balances to go below zero when spending or transferring.": "Erlaubt, dass Geldbörsen-Salden bei Ausgaben oder Überweisungen unter null fallen.",
   "App Settings": "App-Einstellungen",
   "Account Information": "Kontoinformationen",
   "General Settings": "Allgemeine Einstellungen",

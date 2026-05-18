@@ -1,4 +1,6 @@
 {
+  "Allow Negative Balances": "Permitir saldos negativos",
+  "Permit wallet balances to go below zero when spending or transferring.": "Permitir que os saldos das carteiras fiquem abaixo de zero ao gastar ou transferir.",
   "App Settings": "Configurações do App",
   "Account Information": "Informações da Conta",
   "General Settings": "Configurações Gerais",
