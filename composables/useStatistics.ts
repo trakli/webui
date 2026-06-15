@@ -178,6 +178,66 @@ export interface CustomFilters {
 
 const customFilters = ref<CustomFilters | null>(null);
 
+const currentStatistics = ref<WalletStatistics | null>(null);
+
+// Client-side cache + in-flight dedup for the /stats endpoint, keyed by resolved
+// request params. Collapses the many identical requests that fire when several
+// components mount useStatistics() at once. Backend caches /stats for 5 min.
+const STATS_CACHE_DURATION = 60 * 1000;
+
+interface StatsCacheEntry {
+  data: WalletStatistics;
+  fetchedAt: number;
+}
+
+const statsCache = new Map<string, StatsCacheEntry>();
+const statsInFlight = new Map<string, Promise<WalletStatistics>>();
+
+const clearStatsCache = () => {
+  statsCache.clear();
+  statsInFlight.clear();
+};
+
+const presetMap: Record<string, string> = {
+  all_time: 'all_time',
+  current_week: 'current_week',
+  current_month: 'current_month',
+  '90d': 'last_3_months'
+};
+
+const buildStatsParams = (walletId: number | null, period: string): Record<string, string> => {
+  const params: Record<string, string> = {};
+
+  if (period === 'custom' && customFilters.value) {
+    if (customFilters.value.startDate) {
+      params.start_date = customFilters.value.startDate;
+    }
+    if (customFilters.value.endDate) {
+      params.end_date = customFilters.value.endDate;
+    }
+    if (customFilters.value.walletIds.length > 0) {
+      params.wallet_ids = customFilters.value.walletIds.join(',');
+    }
+  } else {
+    if (presetMap[period]) {
+      params.preset = presetMap[period];
+    }
+    if (walletId) {
+      params.wallet_ids = String(walletId);
+    }
+  }
+
+  return params;
+};
+
+const statsCacheKey = (params: Record<string, string>): string =>
+  Object.keys(params)
+    .sort()
+    .map((k) => `${k}=${params[k]}`)
+    .join('&');
+
+let statsWatcherRegistered = false;
+
 export const useStatistics = () => {
   const { transactions } = useTransactions();
   const { wallets } = useWallets();
@@ -670,41 +730,40 @@ export const useStatistics = () => {
     walletId: number | null,
     period: string
   ): Promise<WalletStatistics> => {
-    const { api } = await import('~/services/api');
+    const params = buildStatsParams(walletId, period);
+    const key = statsCacheKey(params);
 
-    // Map period to preset
-    const presetMap: Record<string, string> = {
-      all_time: 'all_time',
-      current_week: 'current_week',
-      current_month: 'current_month',
-      '90d': 'last_3_months'
-    };
-
-    const params: Record<string, string> = {};
-
-    // Use custom filters if set, otherwise use preset
-    if (period === 'custom' && customFilters.value) {
-      if (customFilters.value.startDate) {
-        params.start_date = customFilters.value.startDate;
-      }
-      if (customFilters.value.endDate) {
-        params.end_date = customFilters.value.endDate;
-      }
-      if (customFilters.value.walletIds.length > 0) {
-        params.wallet_ids = customFilters.value.walletIds.join(',');
-      }
-    } else {
-      if (presetMap[period]) {
-        params.preset = presetMap[period];
-      }
-      if (walletId) {
-        params.wallet_ids = String(walletId);
-      }
+    const cached = statsCache.get(key);
+    if (cached && Date.now() - cached.fetchedAt < STATS_CACHE_DURATION) {
+      return cached.data;
     }
 
-    const response = await api.stats.fetch(params);
-    const data = response.data;
+    const inFlight = statsInFlight.get(key);
+    if (inFlight) {
+      return inFlight;
+    }
 
+    const request = (async (): Promise<WalletStatistics> => {
+      const { api } = await import('~/services/api');
+      const response = await api.stats.fetch(params);
+      const result = transformStatsResponse(response.data, walletId, period);
+      statsCache.set(key, { data: result, fetchedAt: Date.now() });
+      return result;
+    })();
+
+    statsInFlight.set(key, request);
+    try {
+      return await request;
+    } finally {
+      statsInFlight.delete(key);
+    }
+  };
+
+  const transformStatsResponse = (
+    data: any,
+    walletId: number | null,
+    period: string
+  ): WalletStatistics => {
     const activity = data.activity || {};
     const frequency = activity.frequency || {};
     const incomeGrowth = data.comparisons?.previous_period?.income_change_percent || 0;
@@ -908,8 +967,6 @@ export const useStatistics = () => {
     }
   };
 
-  const currentStatistics = ref<WalletStatistics | null>(null);
-
   const updateCurrentStatistics = async () => {
     try {
       isLoading.value = true;
@@ -924,15 +981,21 @@ export const useStatistics = () => {
     }
   };
 
-  // Watch for changes in selected wallet, period, custom filters, AND when the underlying data becomes available
-  watch(
-    [selectedWalletId, currentPeriod, customFilters, transactions, wallets],
-    updateCurrentStatistics,
-    {
+  const refreshStatistics = async () => {
+    clearStatsCache();
+    await updateCurrentStatistics();
+  };
+
+  // Statistics come from the /stats endpoint, so the values only change when the
+  // filters change. Watching the transactions/wallets arrays would refire on every
+  // mutation for no benefit. Register a single watcher for the whole app.
+  if (!statsWatcherRegistered) {
+    statsWatcherRegistered = true;
+    watch([selectedWalletId, currentPeriod, customFilters], updateCurrentStatistics, {
       immediate: true,
-      deep: true
-    }
-  );
+      deep: false
+    });
+  }
 
   const formatCurrency = (amount: number, currency: string = 'USD'): string => {
     const rounded = Math.round(amount * 100) / 100;
@@ -987,6 +1050,7 @@ export const useStatistics = () => {
     availablePeriods: AVAILABLE_PERIODS,
 
     getStatistics,
+    refreshStatistics,
     setSelectedWallet,
     setPeriod,
     setCustomFilters,

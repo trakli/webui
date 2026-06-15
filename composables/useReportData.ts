@@ -115,7 +115,6 @@ const compareEnabled = ref(true);
 const apiStats = ref<StatsResponse['data'] | null>(null);
 const apiStatsPrev = ref<StatsResponse['data'] | null>(null);
 const periodTransactions = ref<FrontendTransaction[]>([]);
-const prevPeriodTransactions = ref<FrontendTransaction[]>([]);
 const trailing12Transactions = ref<FrontendTransaction[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
@@ -226,7 +225,14 @@ async function fetchAllTransactionsInRange(
       )
     );
     out.push(...mapped);
-    if (!resp.data || resp.data.length < limit || page >= resp.last_page || page >= maxPages) break;
+    if (!resp.data || resp.data.length < limit || page >= resp.last_page || page >= maxPages) {
+      if (page >= maxPages && resp.last_page && page < resp.last_page) {
+        console.warn(
+          `[reports] transaction sweep truncated at ${maxPages} pages (${out.length} rows); some data omitted`
+        );
+      }
+      break;
+    }
     page += 1;
   }
   return out;
@@ -259,33 +265,45 @@ async function reload(lookups: {
   isLoading.value = true;
   error.value = null;
 
+  const cur = getRange(selectedPeriod.value, customRange.value);
+  const prev = previousRange(cur);
+  const trailingStart = startOfDay(new Date(cur.end.getFullYear(), cur.end.getMonth() - 5, 1));
+
+  // Load stats first so the stats-driven tabs render without waiting for the
+  // transaction sweeps below.
   try {
-    const cur = getRange(selectedPeriod.value, customRange.value);
-    const prev = previousRange(cur);
-    const trailingStart = startOfDay(new Date(cur.end.getFullYear(), cur.end.getMonth() - 5, 1));
-
-    const [statsResp, prevStatsResp, periodTxs, prevTxs, trailingTxs] = await Promise.all([
+    const [statsResp, prevStatsResp] = await Promise.all([
       fetchStatsForRange(cur.start, cur.end),
-      fetchStatsForRange(prev.start, prev.end),
-      fetchAllTransactionsInRange(cur.start, cur.end, lookups),
-      fetchAllTransactionsInRange(prev.start, prev.end, lookups),
-      fetchAllTransactionsInRange(trailingStart, cur.end, lookups)
+      fetchStatsForRange(prev.start, prev.end)
     ]);
-
-    // Discard if a newer reload superseded this one
     if (id !== lastReloadId) return;
-
     apiStats.value = statsResp;
     apiStatsPrev.value = prevStatsResp;
-    periodTransactions.value = periodTxs;
-    prevPeriodTransactions.value = prevTxs;
-    trailing12Transactions.value = trailingTxs;
   } catch (e) {
     if (id !== lastReloadId) return;
-    console.error('[reports] reload failed', e);
+    console.error('[reports] stats reload failed', e);
     error.value = e instanceof Error ? e.message : 'Failed to load reports';
   } finally {
     if (id === lastReloadId) isLoading.value = false;
+  }
+
+  // Raw transactions only feed daily granularity (calendar, trends, month
+  // review, CSV). When the period already spans the trailing six months, reuse
+  // that fetch as the trailing data instead of running a second sweep.
+  try {
+    const periodCoversTrailing = cur.start.getTime() <= trailingStart.getTime();
+    const [periodTxs, trailingTxs] = await Promise.all([
+      fetchAllTransactionsInRange(cur.start, cur.end, lookups),
+      periodCoversTrailing
+        ? Promise.resolve(null)
+        : fetchAllTransactionsInRange(trailingStart, cur.end, lookups)
+    ]);
+    if (id !== lastReloadId) return;
+    periodTransactions.value = periodTxs;
+    trailing12Transactions.value = trailingTxs ?? periodTxs;
+  } catch (e) {
+    if (id !== lastReloadId) return;
+    console.error('[reports] transaction detail reload failed', e);
   }
 }
 
@@ -574,8 +592,12 @@ export const useReportData = () => {
       }
     });
 
-    // First-time payees: compare period payees vs prior period payees
-    const prevPayees = new Set(prevPeriodTransactions.value.map((t) => t.party));
+    // First-time payees: compare period payees vs prior-period payees from the
+    // previous-period stats (party charts), avoiding a second raw-transaction fetch.
+    const prevPayees = new Set([
+      ...(apiStatsPrev.value?.charts?.party_spending || []).map((p) => p.name),
+      ...(apiStatsPrev.value?.charts?.party_income || []).map((p) => p.name)
+    ]);
     const firstTimers = Array.from(
       new Set(periodTransactions.value.filter((t) => !prevPayees.has(t.party)).map((t) => t.party))
     );

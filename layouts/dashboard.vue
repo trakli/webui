@@ -25,7 +25,7 @@ import LearningModal from '@/components/modals/LearningModal.vue';
 import { useAuth } from '@/composables/useAuth';
 import { useSidebar } from '@/composables/useSidebar';
 
-const { fetchUser } = useAuth();
+const { user, fetchUser } = useAuth();
 const { sidebarCollapsed } = useSidebar();
 
 const showLearningModal = ref(false);
@@ -39,7 +39,9 @@ provide('learningModal', {
 });
 
 onMounted(() => {
-  fetchUser();
+  if (!user.value) {
+    fetchUser();
+  }
 });
 </script>
 

@@ -56,6 +56,18 @@ async function loadDependencies() {
   }
 }
 
+// Drop cached statistics and refetch after a mutation so the dashboard reflects
+// the change. Dynamic import avoids a circular dependency with useStatistics.
+async function refreshStatsAfterMutation() {
+  if (typeof window === 'undefined') return;
+  try {
+    const { useStatistics } = await import('~/composables/useStatistics');
+    await useStatistics().refreshStatistics();
+  } catch (err) {
+    console.error('Error refreshing statistics after mutation:', err);
+  }
+}
+
 // Monotonic counter used to ensure only the latest fetch's response is
 // applied to state. Prevents race conditions when a user types quickly
 // or changes filters rapidly and older in-flight requests resolve after
@@ -237,6 +249,7 @@ export const useTransactions = () => {
         transactions.value = [frontendTransaction, ...transactions.value];
         totalItems.value += 1;
         console.log('Transaction created and added to local state');
+        void refreshStatsAfterMutation();
       }
     } catch (err: unknown) {
       console.error('Error adding transaction:', err);
@@ -334,6 +347,7 @@ export const useTransactions = () => {
           transactions.value[index] = frontendTransaction;
         }
         console.log('Transaction updated in local state');
+        void refreshStatsAfterMutation();
       }
     } catch (err) {
       console.error('Error updating transaction:', err);
@@ -357,6 +371,7 @@ export const useTransactions = () => {
       // Remove from local state
       transactions.value = transactions.value.filter((t) => t.id !== id);
       totalItems.value = Math.max(0, totalItems.value - 1);
+      void refreshStatsAfterMutation();
     } catch (err) {
       console.error('Error deleting transaction:', err);
       error.value = extractApiErrors(err);
