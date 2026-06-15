@@ -29,15 +29,12 @@ export const useDataManager = () => {
     error.value = null;
 
     try {
-      // Clear existing data to ensure loading state shows properly
-      const { clearAllData, loadAllData } = useSharedData();
-      const { clearTransactions, refreshTransactions } = useTransactions();
-      clearAllData();
-      clearTransactions();
+      const { loadAllData } = useSharedData();
+      const { refreshTransactions } = useTransactions();
 
-      // Force reload all data (bypass cache)
-      await loadAllData(true);
-      await refreshTransactions();
+      // Honor the shared-data cache; logout already clears it for a fresh session.
+      // Shared data and transactions load concurrently instead of in series.
+      await Promise.all([loadAllData(false), refreshTransactions()]);
 
       // Apply saved language preference via cookie (avoids useI18n context issues)
       const { configurationsMap } = useSharedData();
