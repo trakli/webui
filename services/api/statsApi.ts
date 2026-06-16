@@ -1,8 +1,17 @@
+export type StatsSection =
+  | 'overview'
+  | 'activity'
+  | 'comparisons'
+  | 'categories'
+  | 'parties'
+  | 'cashflow';
+
 export interface StatsParams {
   preset?: 'all_time' | 'current_week' | 'current_month' | 'last_3_months';
   start_date?: string;
   end_date?: string;
   wallet_ids?: string;
+  section?: StatsSection;
 }
 
 export interface StatsOverview {
@@ -84,6 +93,9 @@ const statsApi = {
     }
     if (params.wallet_ids) {
       queryParams.append('wallet_ids', params.wallet_ids);
+    }
+    if (params.section) {
+      queryParams.append('section', params.section);
     }
 
     const queryString = queryParams.toString();
