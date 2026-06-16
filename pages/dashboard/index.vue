@@ -11,7 +11,7 @@
 
     <template v-if="!shouldShowWizard">
       <ComponentLoader
-        :is-loading="isLoadingOrNotReady"
+        :is-loading="kpiLoading"
         :has-data="hasData"
         :show-empty="false"
         skeleton-variant="card"
@@ -21,7 +21,7 @@
 
       <div class="middle-section">
         <ComponentLoader
-          :is-loading="isLoadingOrNotReady"
+          :is-loading="categoryLoading"
           :has-data="hasData"
           :show-empty="false"
           skeleton-variant="card"
@@ -40,7 +40,7 @@
       </div>
 
       <ComponentLoader
-        :is-loading="isLoadingOrNotReady"
+        :is-loading="insightsLoading"
         :has-data="hasData"
         :show-empty="false"
         skeleton-variant="card"
@@ -65,9 +65,11 @@ import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';
 import QuickInsights from '@/components/dashboard/QuickInsights.vue';
 import OnboardingWizard from '@/components/onboarding/OnboardingWizard.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
+import { useStatistics } from '@/composables/useStatistics';
 
 const router = useRouter();
 
+const { isSectionLoaded } = useStatistics();
 const { transactions } = useTransactions();
 const { configurationsMap } = useSharedData();
 const { setComplete: setOnboardingComplete } = useOnboardingStatus();
@@ -93,6 +95,11 @@ watch(
 );
 
 const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
+const kpiLoading = computed(() => isLoadingOrNotReady.value || !isSectionLoaded('overview'));
+const categoryLoading = computed(() => isLoadingOrNotReady.value || !isSectionLoaded('categories'));
+const insightsLoading = computed(
+  () => isLoadingOrNotReady.value || !isSectionLoaded('overview') || !isSectionLoaded('parties')
+);
 const hasDataLoaded = computed(() => isInitialized.value && !isLoading.value);
 const hasTransactions = computed(() => hasDataLoaded.value && transactions.value.length > 0);
 const hasData = computed(() => hasDataLoaded.value);

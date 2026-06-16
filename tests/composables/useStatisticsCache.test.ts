@@ -58,53 +58,52 @@ vi.mock('~/services/api', () => ({
   }
 }));
 
-const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+const ALL_SECTIONS = ['overview', 'activity', 'comparisons', 'categories', 'parties', 'cashflow'];
 
-describe('useStatistics - request dedup & cache', () => {
+const requestedSections = () =>
+  new Set(fetchMock.mock.calls.map((c) => c[0]?.section).filter(Boolean));
+
+describe('useStatistics - progressive sections, dedup & cache', () => {
   beforeEach(() => {
     fetchMock.mockReset();
     fetchMock.mockResolvedValue({ data: statsData });
   });
 
-  it('issues a single /stats request when multiple components mount it with the same params', async () => {
-    // Three components each call useStatistics(); only the first registers the watcher.
+  it('fetches each section once across components and marks them loaded', async () => {
+    const stats = useStatistics();
     useStatistics();
     useStatistics();
-    useStatistics();
-    await flush();
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(stats.loadedSections.value.size).toBe(ALL_SECTIONS.length));
+
+    expect(stats.isSectionLoaded('overview')).toBe(true);
+    expect(requestedSections()).toEqual(new Set(ALL_SECTIONS));
+    expect(fetchMock).toHaveBeenCalledTimes(ALL_SECTIONS.length);
   });
 
-  it('deduplicates concurrent identical requests and serves repeats from cache', async () => {
+  it('deduplicates concurrent getStatistics calls and serves repeats from cache', async () => {
     const stats = useStatistics();
-    await flush();
+    await vi.waitFor(() => expect(stats.loadedSections.value.size).toBe(ALL_SECTIONS.length));
     fetchMock.mockClear();
 
     await Promise.all([
-      stats.getStatistics(null, 'all_time'),
-      stats.getStatistics(null, 'all_time'),
-      stats.getStatistics(null, 'all_time')
+      stats.getStatistics(99, 'current_week'),
+      stats.getStatistics(99, 'current_week'),
+      stats.getStatistics(99, 'current_week')
     ]);
-    // Same params as the watcher already fetched: served from cache, no new request.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    fetchMock.mockClear();
+    await stats.getStatistics(99, 'current_week');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('fetches again for a different param set', async () => {
+  it('refreshStatistics clears the cache and refetches every section', async () => {
     const stats = useStatistics();
-    await flush();
-    fetchMock.mockClear();
-
-    await stats.getStatistics(7, 'current_month');
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('refreshStatistics clears the cache and refetches', async () => {
-    const stats = useStatistics();
-    await flush();
+    await vi.waitFor(() => expect(stats.loadedSections.value.size).toBe(ALL_SECTIONS.length));
     fetchMock.mockClear();
 
     await stats.refreshStatistics();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(requestedSections()).toEqual(new Set(ALL_SECTIONS)));
   });
 });
