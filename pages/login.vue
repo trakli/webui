@@ -64,7 +64,14 @@ const handleSubmit = async () => {
     console.warn('Failed to load onboarding config', e);
   }
 
-  router.push(isOnboardingComplete ? '/dashboard' : '/onboarding');
+  if (!isOnboardingComplete) {
+    router.push('/onboarding');
+  } else {
+    // Chat-first (the centered chat at /home) is the default landing; the user
+    // can switch to the dashboard in settings.
+    const landingMode = configs?.[CONFIGURATION_KEYS.LANDING_MODE];
+    router.push(landingMode === 'dashboard' ? '/dashboard' : '/home');
+  }
   loading.value = false;
 };
 

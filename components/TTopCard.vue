@@ -25,9 +25,7 @@
           </div>
           <div class="title-text">
             <span class="breadcrumb-current">
-              <span class="breadcrumb-home" @click="$router.push('/dashboard')">{{
-                t('Home')
-              }}</span>
+              <span class="breadcrumb-home" @click="$router.push('/home')">{{ t('Home') }}</span>
               <ChevronRight :size="11" class="breadcrumb-arrow" />
               <span>{{ t(pageNamePlural) }}</span>
             </span>
