@@ -20,7 +20,11 @@ vi.mock('@/services/api/aiApi', () => ({
   }
 }));
 
-const mountChat = () => mount(ChatExperience, { props: { mode: 'full' } });
+const mountChat = () =>
+  mount(ChatExperience, {
+    props: { mode: 'full' },
+    global: { stubs: { ChatLandingInsights: true } }
+  });
 
 const emptyPage = { data: [], current_page: 1, last_page: 1, total: 0 };
 
