@@ -9,15 +9,65 @@
         <span class="toggle-circle" />
       </button>
     </div>
+
+    <div class="toggle-row" style="margin-top: 0.75rem">
+      <div class="toggle-label">
+        <MessageSquare class="inline-icon" />
+        <span>{{ t('Chat-first landing') }}</span>
+      </div>
+      <button
+        type="button"
+        class="toggle"
+        :class="{ 'toggle--on': chatFirst }"
+        :disabled="savingLanding"
+        @click="toggleLanding"
+      >
+        <span class="toggle-circle" />
+      </button>
+    </div>
+    <p class="hint">{{ t('Open the AI chat as your home screen instead of the dashboard.') }}</p>
   </div>
 </template>
 
 <script setup>
-import { Sun, Moon } from 'lucide-vue-next';
+import { ref, onMounted } from 'vue';
+import { Sun, Moon, MessageSquare } from 'lucide-vue-next';
 import { useTheme } from '~/composables/useTheme';
+import configurationsApi from '@/services/api/configurationsApi';
+import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 
 const { t } = useI18n();
 const { isDark, toggleTheme } = useTheme();
+
+const chatFirst = ref(true);
+const savingLanding = ref(false);
+
+onMounted(async () => {
+  try {
+    const res = await configurationsApi.fetchAll();
+    const items = res?.data || res || [];
+    const item = (Array.isArray(items) ? items : []).find(
+      (i) => i.key === CONFIGURATION_KEYS.LANDING_MODE
+    );
+    // Default to chat-first when unset.
+    chatFirst.value = item ? item.value !== 'dashboard' : true;
+  } catch {
+    chatFirst.value = true;
+  }
+});
+
+const toggleLanding = async () => {
+  savingLanding.value = true;
+  const next = !chatFirst.value;
+  try {
+    await configurationsApi.update(CONFIGURATION_KEYS.LANDING_MODE, {
+      value: next ? 'chat' : 'dashboard'
+    });
+    chatFirst.value = next;
+  } finally {
+    savingLanding.value = false;
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -74,6 +124,18 @@ const { isDark, toggleTheme } = useTheme();
 .inline-icon {
   width: 18px;
   height: 18px;
+}
+
+.hint {
+  margin: 0.5rem 0 0;
+  padding: 0 1rem;
+  font-size: $font-size-xs;
+  color: $text-muted;
+}
+
+.toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .actions {
