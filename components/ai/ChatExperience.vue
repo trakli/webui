@@ -36,15 +36,22 @@
             @attach="handleAttach"
           />
         </div>
+        <ChatLandingInsights @pick="handleSuggestion" />
         <div class="hero-suggestions">
           <button
-            v-for="prompt in suggestions"
-            :key="prompt"
+            v-for="s in sessionSuggestions"
+            :key="s.text"
             type="button"
             class="suggestion"
-            @click="handleSuggestion(prompt)"
+            @click="handleSuggestion(s.text)"
           >
-            {{ t(prompt) }}
+            <component
+              :is="iconFor(s.icon)"
+              v-if="iconFor(s.icon)"
+              class="suggestion-icon"
+              :size="15"
+            />
+            <span>{{ s.text }}</span>
           </button>
         </div>
       </div>
@@ -52,6 +59,14 @@
       <!-- Work area: conversation, optionally split with the canvas. -->
       <div v-else class="work" :class="{ 'with-canvas': !!openCanvas }">
         <section class="conversation">
+          <div class="chat-ambient" aria-hidden="true">
+            <Wallet class="amb a1" :size="150" :stroke-width="1" />
+            <PieChart class="amb a2" :size="120" :stroke-width="1" />
+            <Coins class="amb a3" :size="104" :stroke-width="1" />
+            <Receipt class="amb a4" :size="132" :stroke-width="1" />
+            <PiggyBank class="amb a5" :size="116" :stroke-width="1" />
+            <TrendingUp class="amb a6" :size="110" :stroke-width="1" />
+          </div>
           <header class="chat-header">
             <div class="header-left">
               <button
@@ -131,15 +146,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { Bot, Plus, Maximize2, Minimize2, PanelLeft, PanelLeftClose } from 'lucide-vue-next';
+import { ref, computed, onMounted, type Component } from 'vue';
+import {
+  Bot,
+  Plus,
+  Maximize2,
+  Minimize2,
+  PanelLeft,
+  PanelLeftClose,
+  Wallet,
+  PieChart,
+  Coins,
+  Receipt,
+  PiggyBank,
+  TrendingUp
+} from 'lucide-vue-next';
+import * as lucideIcons from 'lucide-vue-next';
 import { useChatSurface } from '@/composables/useChatSurface';
+import { pickSuggestions, type Suggestion } from '@/utils/landingSuggestions';
 import ChatSidebar from '@/components/ai/ChatSidebar.vue';
 import ChatComposer from '@/components/ai/ChatComposer.vue';
 import ChatMessageList from '@/components/ai/ChatMessageList.vue';
 import ChatEmptyState from '@/components/ai/ChatEmptyState.vue';
 import CanvasPanel from '@/components/ai/CanvasPanel.vue';
 import DiscussionDropdown from '@/components/ai/DiscussionDropdown.vue';
+import ChatLandingInsights from '@/components/ai/ChatLandingInsights.vue';
 
 withDefaults(defineProps<{ mode?: 'landing' | 'full' }>(), { mode: 'landing' });
 
@@ -173,14 +204,14 @@ const sidebarCollapsed = ref(false);
 
 const hasConversation = computed(() => (currentSession.value?.messages?.length ?? 0) > 0);
 
-const suggestions = [
-  'How much did I spend last month?',
-  'Log 20 for coffee from Cash',
-  "What's my biggest spending category?",
-  'Import my bank statement'
-];
+const sessionSuggestions = ref<Suggestion[]>([]);
+const lucideMap = lucideIcons as unknown as Record<string, Component>;
+const iconFor = (name: string): Component | null => lucideMap[name] ?? null;
 
-onMounted(() => loadSessions());
+onMounted(() => {
+  loadSessions();
+  sessionSuggestions.value = pickSuggestions(8);
+});
 
 const handleSuggestion = async (prompt: string) => {
   input.value = prompt;
@@ -230,11 +261,10 @@ const handleNew = () => {
   }
 }
 
-/* Bounded like full mode so the chat header/composer and the canvas stay put
-   while only the chat-window and canvas-body scroll (not the whole page). */
 .mode-landing {
-  height: calc(100vh - 110px);
-  min-height: 560px;
+  height: 100%;
+  min-height: 0;
+  border-radius: inherit;
   overflow: hidden;
 }
 
@@ -256,19 +286,30 @@ const handleNew = () => {
   padding: $spacing-2 $spacing-4;
 }
 
+.chat-main:has(.hero) {
+  background:
+    radial-gradient(62% 56% at 50% 44%, $bg-white, transparent 72%),
+    radial-gradient(46% 42% at 3% 2%, rgba(var(--color-primary-rgb), 0.24), transparent 56%),
+    radial-gradient(44% 40% at 98% 2%, rgba(var(--color-info-rgb), 0.22), transparent 56%),
+    radial-gradient(44% 40% at 98% 99%, rgba(var(--color-warning-rgb), 0.22), transparent 56%),
+    radial-gradient(46% 42% at 2% 99%, rgba(var(--color-error-rgb), 0.18), transparent 56%),
+    $bg-light;
+}
+
 /* Hero (landing, empty) */
 .hero {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
   gap: $spacing-3;
-  padding: $spacing-6 $spacing-4;
+  padding: $spacing-5 $spacing-4 $spacing-4;
   max-width: 720px;
   margin: 0 auto;
   width: 100%;
+  overflow-y: auto;
 }
 
 .hero-mark {
@@ -294,12 +335,43 @@ const handleNew = () => {
   margin: 0;
 }
 
+.hero-composer,
+.composer-dock {
+  border: 1px solid $border-light;
+  border-radius: 16px;
+  overflow: hidden;
+  background: $bg-white;
+  box-shadow: $elevation-2;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: $primary;
+    box-shadow:
+      0 0 0 3px rgba(var(--color-primary-rgb), 0.1),
+      $elevation-2;
+  }
+
+  :deep(.composer-shell) {
+    border-top: none;
+    background: transparent;
+  }
+
+  :deep(.chat-input) {
+    border: none;
+    background: transparent;
+    min-height: 46px;
+
+    &:focus {
+      background: transparent;
+      box-shadow: none;
+    }
+  }
+}
+
 .hero-composer {
   width: 100%;
-  border: 1px solid $border-light;
-  border-radius: $radius-xl;
-  overflow: hidden;
-  box-shadow: $elevation-2;
   margin-top: $spacing-2;
 }
 
@@ -311,7 +383,10 @@ const handleNew = () => {
 }
 
 .suggestion {
-  border: 1px solid $primary-muted;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid $border-light;
   background: $bg-white;
   color: $text-secondary;
   border-radius: 9999px;
@@ -320,10 +395,16 @@ const handleNew = () => {
   cursor: pointer;
   transition: $transition-base;
 
+  .suggestion-icon {
+    color: $primary;
+    flex-shrink: 0;
+  }
+
   &:hover {
     background: $primary-light;
     color: $primary;
-    border-color: $primary;
+    border-color: $primary-muted;
+    transform: translateY(-1px);
   }
 }
 
@@ -336,11 +417,70 @@ const handleNew = () => {
 }
 
 .conversation {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   width: 100%;
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(var(--color-primary-rgb), 0.04), transparent 60%),
+    $bg-light;
+
+  > .chat-header,
+  > .chat-window,
+  > .composer-dock {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.chat-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+
+  .amb {
+    position: absolute;
+    color: $primary;
+    opacity: 0.05;
+  }
+  .a1 {
+    top: 8%;
+    left: 4%;
+    transform: rotate(-12deg);
+  }
+  .a2 {
+    top: 22%;
+    right: 6%;
+    color: $info;
+    transform: rotate(10deg);
+  }
+  .a3 {
+    top: 52%;
+    left: 8%;
+    color: $warning;
+    transform: rotate(8deg);
+  }
+  .a4 {
+    bottom: 16%;
+    right: 9%;
+    transform: rotate(-8deg);
+  }
+  .a5 {
+    bottom: 6%;
+    left: 14%;
+    color: $warning;
+    transform: rotate(6deg);
+  }
+  .a6 {
+    top: 40%;
+    left: 46%;
+    color: $info;
+    transform: rotate(-6deg);
+  }
 }
 
 .work.with-canvas {
@@ -432,10 +572,6 @@ const handleNew = () => {
 }
 
 .composer-dock {
-  border: 1px solid $border-light;
-  border-radius: $radius-xl;
-  overflow: hidden;
-  background: $bg-white;
   width: min(768px, calc(100% - #{$spacing-3} * 2));
   margin: 0 auto $spacing-3;
 }

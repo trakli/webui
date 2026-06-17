@@ -19,7 +19,9 @@ describe('ChatExperience (landing mode)', () => {
   it('renders the centered chat hero with no history sidebar', async () => {
     const w = mount(ChatExperience, {
       props: { mode: 'landing' },
-      global: { stubs: { Teleport: true, ClientOnly: true, NuxtLink: true } }
+      global: {
+        stubs: { Teleport: true, ClientOnly: true, NuxtLink: true, ChatLandingInsights: true }
+      }
     });
     await flushPromises();
 
@@ -33,7 +35,9 @@ describe('ChatExperience (landing mode)', () => {
   it('shows the centered hero in full mode too until the first message', async () => {
     const w = mount(ChatExperience, {
       props: { mode: 'full' },
-      global: { stubs: { Teleport: true, ClientOnly: true, NuxtLink: true } }
+      global: {
+        stubs: { Teleport: true, ClientOnly: true, NuxtLink: true, ChatLandingInsights: true }
+      }
     });
     await flushPromises();
 
