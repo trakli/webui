@@ -10,7 +10,7 @@
     }"
   >
     <div class="sidebar-header">
-      <NuxtLink to="/dashboard" class="sidebar-brand" :aria-label="t('Home')">
+      <NuxtLink to="/home" class="sidebar-brand" :aria-label="t('Home')">
         <img v-if="isCompact" src="/logo-mark.svg" alt="Trakli" class="sidebar-brand__mark" />
         <Logo v-else size="small" alt="Trakli Logo" />
       </NuxtLink>
@@ -81,7 +81,7 @@
           >
             <component :is="item.icon" class="icon" />
             <span v-if="!isCompact" class="text">{{ t(item.label) }}</span>
-            <span v-else class="compact-label">{{ t(item.shortLabel ?? item.label) }}</span>
+            <span v-else class="compact-label">{{ t(item.label) }}</span>
           </button>
         </li>
       </ul>
@@ -108,18 +108,18 @@ import {
   BellIcon,
   ChartBarIcon,
   ChartPieIcon,
-  ChatBubbleLeftRightIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   Cog8ToothIcon,
-  HomeIcon,
   RectangleGroupIcon,
+  Squares2X2Icon,
   TagIcon,
   UserGroupIcon,
   UsersIcon,
   WalletIcon,
   XMarkIcon
 } from '@heroicons/vue/24/outline';
+import { Bot, Sparkles } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Logo from './Logo.vue';
 import { useSidebar } from '@/composables/useSidebar';
@@ -141,7 +141,13 @@ const route = useRoute();
 const isCompact = computed(() => desktopCollapsed.value && !isMobile.value);
 
 const primary = [
-  { to: '/dashboard', label: 'Home', icon: HomeIcon },
+  { to: '/home', label: 'Ask', hint: 'Your AI chat home', icon: Bot },
+  {
+    to: '/dashboard',
+    label: 'Dashboard',
+    hint: 'Overview of your finances',
+    icon: Squares2X2Icon
+  },
   {
     to: '/transactions',
     label: 'Transactions',
@@ -198,8 +204,8 @@ const primary = [
 ];
 
 const footer = [
-  { to: '/reports', label: 'Reports & Stats', shortLabel: 'Reports', icon: ChartBarIcon },
-  { to: '/ai-insights', label: 'AI Insights', shortLabel: 'AI', icon: ChatBubbleLeftRightIcon },
+  { to: '/assistant', label: 'Assistant', icon: Sparkles },
+  { to: '/reports', label: 'Reports', icon: ChartBarIcon },
   { to: '/settings', label: 'Settings', icon: Cog8ToothIcon }
 ];
 
@@ -451,8 +457,8 @@ const handleButtonNavClick = (path) => {
 
   .nav-footer {
     display: flex;
-    width: calc(100% - 16px);
-    padding: 8px;
+    width: 100%;
+    padding: 8px 0;
     gap: 8px;
     flex-direction: column;
     flex-shrink: 0;
@@ -468,9 +474,9 @@ const handleButtonNavClick = (path) => {
     display: flex;
     align-items: center;
     width: calc(100% - 20px);
-    min-height: 40px;
+    min-height: 44px;
     border-radius: $radius-xl;
-    padding: 8px 14px;
+    padding: 8px 10px;
     gap: 12px;
     background-color: transparent;
     border: none;

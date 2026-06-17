@@ -5,6 +5,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
   ssr: true,
+  routeRules: {
+    '/ai-insights': { redirect: '/assistant' }
+  },
   modules: ['@nuxtjs/i18n'],
   i18n: {
     locales: [

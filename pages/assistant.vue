@@ -1,11 +1,11 @@
 <template>
-  <div class="ai-insights-page">
-    <AIChat />
+  <div class="assistant-page">
+    <ChatExperience mode="full" />
   </div>
 </template>
 
 <script setup>
-import AIChat from '@/components/ai/AIChat.vue';
+import ChatExperience from '@/components/ai/ChatExperience.vue';
 
 definePageMeta({
   layout: 'dashboard',
@@ -14,7 +14,7 @@ definePageMeta({
 </script>
 
 <style lang="scss" scoped>
-.ai-insights-page {
+.assistant-page {
   width: 100%;
 }
 </style>
