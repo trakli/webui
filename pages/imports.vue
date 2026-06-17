@@ -24,6 +24,13 @@
             {{ t('extraction_help_text') }}
           </p>
         </div>
+
+        <ImportSessionsList
+          v-if="!isAnalyzing && !currentSession && sessions.length"
+          :sessions="sessions"
+          @open="openSession"
+          @delete="handleDeleteSession"
+        />
       </div>
 
       <!-- Review state -->
@@ -71,6 +78,25 @@
           {{ t('Import completed successfully.') }}
         </div>
 
+        <table v-if="currentSession.status === 'confirmed'" class="readonly-table">
+          <thead>
+            <tr>
+              <th>{{ t('Date') }}</th>
+              <th>{{ t('Description') }}</th>
+              <th class="num">{{ t('Amount') }}</th>
+              <th>{{ t('Type') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="s in suggestions" :key="s.index">
+              <td>{{ s.date }}</td>
+              <td>{{ s.description }}</td>
+              <td class="num">{{ s.amount }}</td>
+              <td>{{ s.type ? t(s.type === 'income' ? 'Income' : 'Expense') : '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
         <SuggestionReviewTable
           v-if="currentSession.status !== 'confirmed'"
           :suggestions="suggestions"
@@ -108,6 +134,7 @@
 import ContentTopCard from '@/components/TTopCard.vue';
 import ImportUpload from '~/components/imports/ImportUpload.vue';
 import ImportAnalyzing from '~/components/imports/ImportAnalyzing.vue';
+import ImportSessionsList from '~/components/imports/ImportSessionsList.vue';
 import SuggestionReviewTable from '~/components/imports/SuggestionReviewTable.vue';
 import ImportConfirmDialog from '~/components/imports/ImportConfirmDialog.vue';
 import type { AutoCreateOptions } from '~/types/import';
@@ -118,11 +145,15 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-const { showSuccess, showError, showWarning } = useNotifications();
+const { showSuccess, showError, showWarning, confirmDelete } = useNotifications();
 const { wallets, categories, parties, loadWallets, loadCategories, loadParties } = useSharedData();
+
+const route = useRoute();
+const router = useRouter();
 
 const {
   currentSession,
+  sessions,
   suggestions,
   isAnalyzing,
   isConfirming,
@@ -137,6 +168,9 @@ const {
   rejectAll,
   editSuggestion,
   confirmImport,
+  loadSessions,
+  openSession,
+  removeSession,
   reset
 } = useImports();
 
@@ -149,6 +183,16 @@ onMounted(() => {
   loadWallets();
   loadCategories();
   loadParties();
+  loadSessions();
+
+  // Deep-link from the chat's import-review card: open that session directly
+  // (showing live progress if it's still analyzing). Drop the query param after
+  // so a manual refresh lands back on the list instead of re-opening.
+  const sessionId = Number(route.query.session);
+  if (sessionId) {
+    openSession(sessionId);
+    router.replace({ query: {} });
+  }
 });
 
 const duplicatesInAccepted = computed(
@@ -271,6 +315,20 @@ const handleConfirm = async (autoCreate: AutoCreateOptions) => {
 
 const handleReset = () => {
   reset();
+  loadSessions();
+};
+
+const handleDeleteSession = async (id: number) => {
+  const session = sessions.value.find((s) => s.id === id);
+  const confirmed = await confirmDelete(session?.file_name || t('this import'));
+  if (!confirmed) return;
+
+  try {
+    await removeSession(id);
+    showSuccess(t('Import deleted.'));
+  } catch {
+    showError(t('Could not delete the import.'));
+  }
 };
 </script>
 
@@ -415,5 +473,34 @@ const handleReset = () => {
   color: $success;
   border-radius: $radius-lg;
   font-size: $font-size-sm;
+}
+
+.readonly-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th,
+  td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid $border-light;
+  }
+
+  th {
+    font-size: $font-size-xs;
+    font-weight: $font-semibold;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  td {
+    color: $text-secondary;
+  }
+
+  .num {
+    text-align: right;
+  }
 }
 </style>

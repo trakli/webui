@@ -10,14 +10,18 @@ import { extractApiErrors } from '~/utils/apiErrors';
 
 const POLL_INTERVAL = 3000;
 
+const IN_PROGRESS_STATUSES = ['analyzing', 'extracting', 'enriching', 'checking'];
+
 export const useImports = () => {
   const currentSession = ref<ImportSession | null>(null);
+  const sessions = ref<ImportSession[]>([]);
   const suggestions = ref<SuggestionWithDuplicate[]>([]);
   const isAnalyzing = ref(false);
   const isConfirming = ref(false);
   const error = ref<string | null>(null);
 
   let pollTimer: ReturnType<typeof setInterval> | null = null;
+  let listTimer: ReturnType<typeof setInterval> | null = null;
 
   const acceptedCount = computed(
     () => suggestions.value.filter((s) => s.status === 'accepted').length
@@ -107,6 +111,66 @@ export const useImports = () => {
       currentSession.value = null;
       suggestions.value = [];
       isAnalyzing.value = false;
+    }
+  };
+
+  const stopListPolling = () => {
+    if (listTimer) {
+      clearInterval(listTimer);
+      listTimer = null;
+    }
+  };
+
+  const loadSessions = async () => {
+    try {
+      sessions.value = await api.imports.getSessions();
+    } catch {
+      // Non-fatal: leave the list as-is and let the user retry.
+      return;
+    }
+
+    // Keep badges fresh while any import is still analyzing.
+    const anyInProgress = () => sessions.value.some((s) => IN_PROGRESS_STATUSES.includes(s.status));
+    if (anyInProgress() && !listTimer) {
+      listTimer = setInterval(async () => {
+        try {
+          sessions.value = await api.imports.getSessions();
+        } catch {
+          stopListPolling();
+          return;
+        }
+        if (!anyInProgress()) stopListPolling();
+      }, POLL_INTERVAL);
+    } else if (!anyInProgress()) {
+      stopListPolling();
+    }
+  };
+
+  const removeSession = async (id: number) => {
+    await api.imports.deleteSession(id);
+    sessions.value = sessions.value.filter((s) => s.id !== id);
+  };
+
+  const openSession = async (id: number) => {
+    error.value = null;
+    isAnalyzing.value = false;
+
+    try {
+      const session = await api.imports.getSession(id);
+      currentSession.value = session;
+
+      if (session.status === 'ready' || session.status === 'confirmed') {
+        populateSuggestions(session);
+      } else if (session.status === 'failed') {
+        error.value = session.metadata?.error || 'Analysis failed';
+        currentSession.value = null;
+      } else if (IN_PROGRESS_STATUSES.includes(session.status)) {
+        isAnalyzing.value = true;
+        pollSession(id);
+      }
+    } catch (err: unknown) {
+      error.value = extractApiErrors(err);
+      currentSession.value = null;
     }
   };
 
@@ -201,11 +265,15 @@ export const useImports = () => {
   };
 
   if (import.meta.client) {
-    onUnmounted(() => stopPolling());
+    onUnmounted(() => {
+      stopPolling();
+      stopListPolling();
+    });
   }
 
   return {
     currentSession,
+    sessions,
     suggestions,
     isAnalyzing,
     isConfirming,
@@ -222,6 +290,9 @@ export const useImports = () => {
     rejectAll,
     editSuggestion,
     confirmImport,
+    loadSessions,
+    openSession,
+    removeSession,
     reset
   };
 };
