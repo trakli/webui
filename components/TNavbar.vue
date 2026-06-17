@@ -5,18 +5,14 @@
     </div>
     <div class="navbar-right">
       <div class="navbar-actions">
-        <TButton
-          class="add-transaction-btn"
-          size="small"
-          variant="outline"
-          :full-width="false"
-          :text="t('Add transaction')"
+        <NuxtLink
+          class="icon-button add-transaction-btn"
           to="/transactions/new"
+          :aria-label="t('Add transaction')"
+          :title="t('Add transaction')"
         >
-          <template #left-icon>
-            <PlusIcon />
-          </template>
-        </TButton>
+          <Plus class="icon" />
+        </NuxtLink>
         <LanguageSelector />
         <ThemeSelector />
         <NotificationBell />
@@ -28,7 +24,7 @@
           @keydown.enter="openLearningModal"
           @keydown.space.prevent="openLearningModal"
         >
-          <InformationCircleIcon class="icon" />
+          <Info class="icon" />
         </button>
       </div>
       <div class="avatar-container">
@@ -40,12 +36,11 @@
 
 <script setup>
 import TAvatar from './TAvatar.vue';
-import TButton from './TButton.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import ThemeSelector from './ThemeSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
 import NotificationBell from './NotificationBell.vue';
-import { PlusIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
+import { Plus, Info } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useAvatar } from '@/composables/useAvatar';
 import { useSidebar } from '@/composables/useSidebar';
@@ -127,12 +122,6 @@ const openLearningModal = () => {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-
-    @media (max-width: $breakpoint-sm) {
-      .add-transaction-btn {
-        display: none;
-      }
-    }
   }
 
   .avatar-container {
@@ -142,6 +131,7 @@ const openLearningModal = () => {
     flex-shrink: 0;
   }
 
+  // All top-right glyphs are neutral and share the base `.icon-button` hover.
   .add-transaction-btn {
     text-decoration: none !important;
 
@@ -163,12 +153,6 @@ const openLearningModal = () => {
       background: $primary;
       border-radius: 50%;
       border: 2px solid $bg-gray;
-    }
-
-    &:hover {
-      .icon {
-        color: $primary;
-      }
     }
   }
 }

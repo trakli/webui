@@ -133,9 +133,9 @@
   justify-content: center;
   align-items: center;
   padding: 0;
-  width: 36px;
-  height: $navbar-icon-button-height;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background-color: transparent;
   border: 1px solid transparent;
   color: $text-secondary;
@@ -164,8 +164,8 @@
   }
 
   .icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     color: currentColor;
   }
 }

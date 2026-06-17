@@ -65,9 +65,9 @@ const selectTheme = (value: ThemeMode) => {
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
-  color: $text-primary;
+  width: 16px;
+  height: 16px;
+  color: currentColor;
 }
 
 .theme-dropdown {
