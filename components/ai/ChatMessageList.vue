@@ -8,16 +8,27 @@
     <div class="bubble-wrap">
       <div class="bubble" :class="bubbleClass(message)">
         <TypingDots v-if="isPendingAssistant(message)" />
-        <div v-else-if="message.content" class="message-text">
-          {{ message.content }}
-        </div>
-        <div v-else-if="message.status === 'failed'" class="error-text">
-          {{ message.error || t('Something went wrong.') }}
-        </div>
-        <div v-else-if="isStuckAssistant(message)" class="error-text">
-          {{ t('This response did not finish. Try sending the question again.') }}
-        </div>
-        <ChatResultRenderer :result="message.result" />
+        <template v-else>
+          <!-- When the message has rendered blocks, they own the output (the
+               narration is the first block); otherwise show the text as markdown. -->
+          <ChatMarkdownBlock
+            v-if="message.content && !hasBlocks(message)"
+            :text="message.content"
+          />
+          <div v-else-if="!message.content && message.status === 'failed'" class="error-text">
+            {{ message.error || t('Something went wrong.') }}
+          </div>
+          <div v-else-if="!message.content && isStuckAssistant(message)" class="error-text">
+            {{ t('This response did not finish. Try sending the question again.') }}
+          </div>
+          <ChatResultRenderer
+            v-if="showResult(message)"
+            :result="message.result"
+            :session-id="sessionId"
+            @changed="$emit('reload')"
+            @open-canvas="$emit('open-canvas', { canvas: $event, messageId: message.id })"
+          />
+        </template>
       </div>
 
       <div class="bubble-meta">
@@ -34,13 +45,33 @@
 import { Bot, User } from 'lucide-vue-next';
 import TypingDots from '@/components/ai/TypingDots.vue';
 import ChatResultRenderer from '@/components/ai/ChatResultRenderer.vue';
-import type { ChatMessage } from '@/services/api/aiApi';
+import ChatMarkdownBlock from '@/components/ai/blocks/ChatMarkdownBlock.vue';
+import type { ChatBlock, ChatMessage } from '@/services/api/aiApi';
 
 const { t } = useI18n();
 
 defineProps<{
   messages: ChatMessage[];
+  sessionId?: number;
 }>();
+
+defineEmits<{
+  (e: 'reload'): void;
+  (e: 'open-canvas', payload: { canvas: ChatBlock; messageId: number }): void;
+}>();
+
+const hasBlocks = (message: ChatMessage): boolean => (message.result?.blocks?.length ?? 0) > 0;
+
+// Structured legacy (SmartQL) results worth showing alongside the prose answer.
+// A scalar/pair just restates the prose, so we suppress it to avoid the
+// "$500" + "500" duplicate; a table/list/record carries real content.
+const STRUCTURED_FORMATS = ['table', 'list', 'pair_list', 'record'];
+
+const showResult = (message: ChatMessage): boolean => {
+  if (hasBlocks(message)) return true;
+  if (!message.content) return true;
+  return STRUCTURED_FORMATS.includes(message.result?.format_type ?? '');
+};
 
 const rowClass = (message: ChatMessage) => (message.role === 'user' ? 'user' : 'ai');
 const bubbleClass = (message: ChatMessage) => {
@@ -117,13 +148,13 @@ const formatTime = (iso: string): string => {
   flex-shrink: 0;
 
   &.ai {
-    background: $primary-light;
-    color: $primary;
+    background: $bg-gray;
+    color: $text-secondary;
   }
 
   &.user {
-    background: $bg-gray;
-    color: $text-primary;
+    background: $primary-light;
+    color: $primary;
   }
 }
 
@@ -132,34 +163,36 @@ const formatTime = (iso: string): string => {
   flex-direction: column;
   gap: 4px;
   min-width: 0;
-  max-width: min(80%, 560px);
+  max-width: min(82%, 600px);
 }
 
 .bubble {
-  padding: $spacing-2 $spacing-3;
-  border-radius: $radius-lg;
+  padding: $spacing-3 $spacing-4;
+  border-radius: 18px;
   font-size: $font-size-base;
-  line-height: 1.5;
+  line-height: 1.55;
   word-break: break-word;
 }
 
 .bubble.ai {
-  background: $primary-light;
+  background: $bg-white;
   color: $text-primary;
-  border: 1px solid $primary-muted;
-  border-top-left-radius: 4px;
+  border: 1px solid $border-light;
+  box-shadow: $elevation-1;
+  border-top-left-radius: 6px;
 
   &.error {
-    background: $bg-gray;
+    background: $bg-white;
     color: $error-color;
     border-color: $error-color;
   }
 }
 
 .bubble.user {
-  background: $primary;
-  color: $bg-white;
-  border-top-right-radius: 4px;
+  background: $primary-light;
+  color: $text-primary;
+  border: 1px solid $primary-muted;
+  border-top-right-radius: 6px;
 }
 
 .bubble-meta {

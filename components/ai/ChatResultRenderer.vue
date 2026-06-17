@@ -1,5 +1,45 @@
 <template>
-  <div v-if="result?.rows?.length && result.format_type" class="results-container">
+  <!-- New agent path: an ordered stream of widget blocks. -->
+  <div v-if="blocks.length" class="blocks-container">
+    <template v-for="(block, i) in blocks" :key="i">
+      <ChatMarkdownBlock v-if="block.type === 'markdown'" :text="block.text as string" />
+      <ChatTableBlock
+        v-else-if="block.type === 'table'"
+        :title="block.title as string"
+        :columns="block.columns as string[]"
+        :rows="block.rows as Record<string, unknown>[]"
+      />
+      <ChatKpiBlock
+        v-else-if="block.type === 'kpi'"
+        :title="block.title as string"
+        :items="block.items as any[]"
+      />
+      <ChatChartBlock
+        v-else-if="block.type === 'chart'"
+        :title="block.title as string"
+        :chart_hint="block.chart_hint as string"
+        :dataset_ref="block.dataset_ref as string"
+        :data="block.data"
+      />
+      <ChatProposedActionBlock
+        v-else-if="block.type === 'proposed_action'"
+        :block="block as any"
+        :session-id="sessionId"
+        @changed="$emit('changed')"
+      />
+      <ChatImportReviewBlock v-else-if="block.type === 'import_review'" :block="block as any" />
+      <ChatCanvasBlock
+        v-else-if="block.type === 'canvas'"
+        :block="block as any"
+        @open="$emit('open-canvas', block)"
+      />
+      <!-- Unknown/newer block type: degrade to its text or a compact dump. -->
+      <ChatMarkdownBlock v-else :text="(block.text as string) || (block.summary as string) || ''" />
+    </template>
+  </div>
+
+  <!-- Legacy SmartQL path: a single format_type result. -->
+  <div v-else-if="result?.rows?.length && result.format_type" class="results-container">
     <div v-if="result.format_type === 'scalar' && result.rows?.[0]" class="result-scalar">
       {{ formatValue(Object.values(result.rows[0])[0]) }}
     </div>
@@ -56,11 +96,25 @@
 </template>
 
 <script setup lang="ts">
-import type { ChatMessageResult } from '@/services/api/aiApi';
+import { computed } from 'vue';
+import type { ChatBlock, ChatMessageResult } from '@/services/api/aiApi';
+import ChatMarkdownBlock from '@/components/ai/blocks/ChatMarkdownBlock.vue';
+import ChatTableBlock from '@/components/ai/blocks/ChatTableBlock.vue';
+import ChatKpiBlock from '@/components/ai/blocks/ChatKpiBlock.vue';
+import ChatChartBlock from '@/components/ai/blocks/ChatChartBlock.vue';
+import ChatProposedActionBlock from '@/components/ai/blocks/ChatProposedActionBlock.vue';
+import ChatImportReviewBlock from '@/components/ai/blocks/ChatImportReviewBlock.vue';
+import ChatCanvasBlock from '@/components/ai/blocks/ChatCanvasBlock.vue';
 
-defineProps<{
+const props = defineProps<{
   result: ChatMessageResult | null;
+  sessionId?: number;
 }>();
+
+defineEmits<{ (e: 'changed'): void; (e: 'open-canvas', block: ChatBlock): void }>();
+
+const blocks = computed<ChatBlock[]>(() => props.result?.blocks ?? []);
+const sessionId = computed(() => props.sessionId ?? 0);
 
 const formatKey = (key: string | number): string =>
   String(key)
@@ -83,6 +137,12 @@ const formatValue = (value: unknown): string => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+
+.blocks-container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
 
 .results-container {
   margin-top: $spacing-2;

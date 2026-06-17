@@ -2,8 +2,47 @@ export type FormatType = 'scalar' | 'pair' | 'record' | 'list' | 'pair_list' | '
 export type ChatRole = 'user' | 'assistant' | 'system';
 export type ChatStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
+export type BlockType =
+  | 'markdown'
+  | 'table'
+  | 'kpi'
+  | 'chart'
+  | 'comparison'
+  | 'list'
+  | 'quick_actions'
+  | 'proposed_action'
+  | 'import_review'
+  | 'canvas';
+
+/**
+ * One rendered widget in an assistant message. The shape is authored by the
+ * backend BlockBuilder; the renderer dispatches on `type` and each component
+ * adapts to its payload. Extra keys per type are intentionally loose.
+ */
+export interface ChatBlock {
+  type: BlockType | string;
+  [key: string]: unknown;
+}
+
+export interface ProposedActionBlock extends ChatBlock {
+  type: 'proposed_action';
+  id: number;
+  action_type: string;
+  summary: string;
+  risk: 'low' | 'medium' | 'high';
+  status: string;
+  confirm_url: string;
+  reject_url: string;
+  payload?: Record<string, unknown>;
+  fields?: { label: string; value: string }[];
+}
+
 export interface ChatMessageResult {
-  source?: 'smartql' | 'prism' | 'prism_fallback';
+  source?: 'smartql' | 'prism' | 'prism_fallback' | 'agent';
+  blocks?: ChatBlock[];
+  tool_calls?: { name: string; arguments: Record<string, unknown> }[];
+  usage?: Record<string, number>;
+  // Legacy SmartQL fields, still emitted by the data route.
   format_type?: FormatType | null;
   rows?: Record<string, unknown>[];
   human_response?: string;
@@ -55,6 +94,9 @@ interface SendPayload {
   message: string;
   format_hint?: FormatType;
   title?: string;
+  // Hold the agent until attachments finish uploading; the file-upload call
+  // releases the turn so the agent sees the file.
+  defer_processing?: boolean;
 }
 
 const aiApi = {
@@ -94,6 +136,47 @@ const aiApi = {
   async deleteSession(id: number): Promise<void> {
     const api = useApi();
     await api(`/ai/chats/${id}`, { method: 'DELETE' });
+  },
+
+  async confirmAction(
+    sessionId: number,
+    actionId: number,
+    overrides?: Record<string, unknown>
+  ): Promise<{ action: Record<string, unknown>; resource: Record<string, unknown> } | null> {
+    const api = useApi();
+    const response = await api<
+      ApiEnvelope<{ action: Record<string, unknown>; resource: Record<string, unknown> }>
+    >(`/ai/chats/${sessionId}/actions/${actionId}/confirm`, {
+      method: 'POST',
+      body: overrides && Object.keys(overrides).length ? { overrides } : {}
+    });
+    return response?.data || null;
+  },
+
+  exportCanvasUrl(sessionId: number, messageId: number, format = 'md'): string {
+    return `/ai/chats/${sessionId}/messages/${messageId}/export?format=${format}`;
+  },
+
+  async rejectAction(sessionId: number, actionId: number): Promise<void> {
+    const api = useApi();
+    await api(`/ai/chats/${sessionId}/actions/${actionId}/reject`, { method: 'POST' });
+  },
+
+  async uploadFiles(
+    sessionId: number,
+    messageId: number,
+    files: File[],
+    documentType?: string | null
+  ): Promise<ChatMessage | null> {
+    const api = useApi();
+    const form = new FormData();
+    files.forEach((file) => form.append('files[]', file));
+    if (documentType) form.append('document_type', documentType);
+    const response = await api<ApiEnvelope<ChatMessage>>(
+      `/ai/chats/${sessionId}/messages/${messageId}/files`,
+      { method: 'POST', body: form }
+    );
+    return response?.data || null;
   },
 
   async checkHealth(): Promise<HealthResponse> {
