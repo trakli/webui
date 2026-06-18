@@ -1,5 +1,6 @@
 <template>
   <div class="quick-insights">
+    <Lightbulb class="card-glyph" :size="128" :stroke-width="1" aria-hidden="true" />
     <div class="insights-header">
       <h3 class="title">{{ t('Insights') }}</h3>
       <span class="period">{{ t('This Period') }}</span>
@@ -63,7 +64,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { TrendingUp, TrendingDown, Percent, Shield } from 'lucide-vue-next';
+import { TrendingUp, TrendingDown, Percent, Shield, Lightbulb } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
 import { useSharedData } from '@/composables/useSharedData';
 
@@ -142,11 +143,28 @@ const formatAmount = (value) => {
 @use '@/assets/scss/_variables.scss' as *;
 
 .quick-insights {
-  background: $bg-white;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(var(--color-warning-rgb), 0.06), transparent 58%),
+    $bg-white;
   border-radius: 16px;
   box-shadow: $elevation-1;
   border: 1px solid $border-light;
   padding: $spacing-4;
+
+  > *:not(.card-glyph) {
+    position: relative;
+  }
+}
+
+.card-glyph {
+  position: absolute;
+  right: -18px;
+  bottom: -18px;
+  color: $warning;
+  opacity: 0.06;
+  pointer-events: none;
 }
 
 .insights-header {

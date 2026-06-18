@@ -1,5 +1,6 @@
 <template>
   <div class="recent-transactions">
+    <Receipt class="card-glyph" :size="128" :stroke-width="1" aria-hidden="true" />
     <div class="header">
       <h3 class="title">{{ t('Recent Transactions') }}</h3>
       <NuxtLink to="/transactions" class="view-all">{{ t('View All') }}</NuxtLink>
@@ -38,7 +39,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { ArrowDownLeft, ArrowUpRight } from 'lucide-vue-next';
+import { ArrowDownLeft, ArrowUpRight, Receipt } from 'lucide-vue-next';
 import { useTransactions } from '@/composables/useTransactions';
 
 const { t } = useI18n();
@@ -75,7 +76,11 @@ const formatRelativeTime = (dateStr) => {
 @use '@/assets/scss/_variables.scss' as *;
 
 .recent-transactions {
-  background: $bg-white;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 100% at 100% 0%, rgba(var(--color-info-rgb), 0.05), transparent 58%),
+    $bg-white;
   border-radius: $radius-xl;
   box-shadow: $shadow-sm;
   border: 1px solid $border-color;
@@ -83,6 +88,19 @@ const formatRelativeTime = (dateStr) => {
   height: 320px;
   display: flex;
   flex-direction: column;
+
+  > *:not(.card-glyph) {
+    position: relative;
+  }
+}
+
+.card-glyph {
+  position: absolute;
+  right: -18px;
+  bottom: -18px;
+  color: $info;
+  opacity: 0.05;
+  pointer-events: none;
 }
 
 .header {

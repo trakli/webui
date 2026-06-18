@@ -27,6 +27,44 @@
         :session-id="sessionId"
         @changed="$emit('changed')"
       />
+      <ChatComparisonBlock
+        v-else-if="block.type === 'comparison'"
+        :title="block.title as string"
+        :series="block.series as Record<string, unknown>[]"
+      />
+      <ChatListBlock
+        v-else-if="block.type === 'list'"
+        :title="block.title as string"
+        :items="block.items as Record<string, unknown>[]"
+        :variant="block.variant as string"
+      />
+      <ChatCalloutBlock
+        v-else-if="block.type === 'callout'"
+        :text="block.text as string"
+        :title="block.title as string"
+        :variant="block.variant as string"
+      />
+      <ChatTimelineBlock
+        v-else-if="block.type === 'timeline'"
+        :title="block.title as string"
+        :items="block.items as any[]"
+      />
+      <ChatProgressBlock
+        v-else-if="block.type === 'progress'"
+        :title="block.title as string"
+        :items="block.items as any[]"
+      />
+      <ChatQuestionBlock
+        v-else-if="block.type === 'question'"
+        :prompt="block.prompt as string"
+        :options="block.options as any[]"
+        @select="$emit('send-message', $event)"
+      />
+      <ChatQuickActionsBlock
+        v-else-if="block.type === 'quick_actions'"
+        :actions="block.actions as any[]"
+        @select="$emit('send-message', $event)"
+      />
       <ChatImportReviewBlock v-else-if="block.type === 'import_review'" :block="block as any" />
       <ChatCanvasBlock
         v-else-if="block.type === 'canvas'"
@@ -105,13 +143,24 @@ import ChatChartBlock from '@/components/ai/blocks/ChatChartBlock.vue';
 import ChatProposedActionBlock from '@/components/ai/blocks/ChatProposedActionBlock.vue';
 import ChatImportReviewBlock from '@/components/ai/blocks/ChatImportReviewBlock.vue';
 import ChatCanvasBlock from '@/components/ai/blocks/ChatCanvasBlock.vue';
+import ChatComparisonBlock from '@/components/ai/blocks/ChatComparisonBlock.vue';
+import ChatListBlock from '@/components/ai/blocks/ChatListBlock.vue';
+import ChatCalloutBlock from '@/components/ai/blocks/ChatCalloutBlock.vue';
+import ChatTimelineBlock from '@/components/ai/blocks/ChatTimelineBlock.vue';
+import ChatProgressBlock from '@/components/ai/blocks/ChatProgressBlock.vue';
+import ChatQuestionBlock from '@/components/ai/blocks/ChatQuestionBlock.vue';
+import ChatQuickActionsBlock from '@/components/ai/blocks/ChatQuickActionsBlock.vue';
 
 const props = defineProps<{
   result: ChatMessageResult | null;
   sessionId?: number;
 }>();
 
-defineEmits<{ (e: 'changed'): void; (e: 'open-canvas', block: ChatBlock): void }>();
+defineEmits<{
+  (e: 'changed'): void;
+  (e: 'open-canvas', block: ChatBlock): void;
+  (e: 'send-message', message: string): void;
+}>();
 
 const blocks = computed<ChatBlock[]>(() => props.result?.blocks ?? []);
 const sessionId = computed(() => props.sessionId ?? 0);

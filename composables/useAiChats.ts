@@ -15,9 +15,10 @@ export function useAiChats() {
   // rapidly switches between chats.
   let openToken = 0;
 
-  // Stop polling after 90s; anything still pending after that is stuck
-  // server-side (worker crash, timeout, etc.), not actively in progress.
-  const POLL_STUCK_THRESHOLD_MS = 90_000;
+  // Keep polling well past the backend's worst case (agent runs can take a
+  // couple of minutes: multi-step LLM + SmartQL). Only past this is a message
+  // genuinely stuck server-side (worker crash) rather than still in progress.
+  const POLL_STUCK_THRESHOLD_MS = 240_000;
 
   const isPolling = computed(() => {
     if (!currentSession.value?.messages) return false;

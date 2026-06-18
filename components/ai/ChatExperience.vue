@@ -117,6 +117,7 @@
               :session-id="currentSession.id"
               @reload="reloadCurrent"
               @open-canvas="onOpenCanvas"
+              @send-message="handleSuggestion"
             />
             <ChatEmptyState v-else @pick="handleSuggestion" />
           </div>
@@ -163,6 +164,7 @@ import {
 } from 'lucide-vue-next';
 import * as lucideIcons from 'lucide-vue-next';
 import { useChatSurface } from '@/composables/useChatSurface';
+import { usePendingAsk } from '@/composables/usePendingAsk';
 import { pickSuggestions, type Suggestion } from '@/utils/landingSuggestions';
 import ChatSidebar from '@/components/ai/ChatSidebar.vue';
 import ChatComposer from '@/components/ai/ChatComposer.vue';
@@ -208,9 +210,30 @@ const sessionSuggestions = ref<Suggestion[]>([]);
 const lucideMap = lucideIcons as unknown as Record<string, Component>;
 const iconFor = (name: string): Component | null => lucideMap[name] ?? null;
 
+const route = useRoute();
+const router = useRouter();
+const { consumePendingAsk } = usePendingAsk();
+
 onMounted(() => {
   loadSessions();
   sessionSuggestions.value = pickSuggestions(8);
+
+  // A dashboard quick action can hand off a fully-formed prompt (and files) to
+  // run immediately, instead of an empty round-trip.
+  const pending = consumePendingAsk();
+  if (pending && (pending.text?.trim() || pending.files?.length)) {
+    if (pending.files?.length) handleAttach(pending.files);
+    input.value = pending.text ?? '';
+    handleSubmit();
+    return;
+  }
+
+  // A plain deep link (?ask=) can also carry a prompt.
+  const ask = route.query.ask;
+  if (typeof ask === 'string' && ask.trim()) {
+    handleSuggestion(ask);
+    router.replace({ query: {} });
+  }
 });
 
 const handleSuggestion = async (prompt: string) => {

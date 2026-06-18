@@ -27,6 +27,7 @@
             :session-id="sessionId"
             @changed="$emit('reload')"
             @open-canvas="$emit('open-canvas', { canvas: $event, messageId: message.id })"
+            @send-message="$emit('send-message', $event)"
           />
         </template>
       </div>
@@ -58,6 +59,7 @@ defineProps<{
 defineEmits<{
   (e: 'reload'): void;
   (e: 'open-canvas', payload: { canvas: ChatBlock; messageId: number }): void;
+  (e: 'send-message', message: string): void;
 }>();
 
 const hasBlocks = (message: ChatMessage): boolean => (message.result?.blocks?.length ?? 0) > 0;
@@ -82,9 +84,10 @@ const bubbleClass = (message: ChatMessage) => {
 };
 
 // Assistant responses that never settled get stuck in 'pending' / 'processing'
-// indefinitely (a worker crash, a backend timeout, etc.). Treat anything older
-// than this window as stuck instead of showing the typing dots forever.
-const STUCK_THRESHOLD_MS = 90_000;
+// indefinitely (a worker crash, a backend timeout, etc.). Keep this in step with
+// the polling window in useAiChats: agent runs legitimately take a couple of
+// minutes, so only treat a message older than this as stuck.
+const STUCK_THRESHOLD_MS = 240_000;
 
 const isAssistantAwaiting = (m: ChatMessage) =>
   m.role === 'assistant' && (m.status === 'pending' || m.status === 'processing');

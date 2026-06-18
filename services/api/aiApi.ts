@@ -10,6 +10,10 @@ export type BlockType =
   | 'comparison'
   | 'list'
   | 'quick_actions'
+  | 'callout'
+  | 'timeline'
+  | 'progress'
+  | 'question'
   | 'proposed_action'
   | 'import_review'
   | 'canvas';

@@ -1146,5 +1146,7 @@
   "of spend": "of spend",
   "this month": "this month",
   "per transaction": "per transaction",
-  "top destination": "top destination"
+  "top destination": "top destination",
+  "Hey {name}": "Hey {name}",
+  "Showing {period}.": "Showing {period}."
 }

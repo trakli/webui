@@ -76,7 +76,7 @@ describe('ChatProposedActionBlock (editable review form)', () => {
     expect(overrides.wallet_id).toBe(4);
   });
 
-  it('omits an untouched blank datetime from overrides', async () => {
+  it('prefills a blank datetime with now and sends it', async () => {
     const b = block();
     b.fields.push({
       key: 'datetime',
@@ -91,9 +91,27 @@ describe('ChatProposedActionBlock (editable review form)', () => {
     await flushPromises();
 
     const overrides = mockConfirm.mock.calls[0][2];
-    // A blank "When" must not be sent (it would record as 01/01/1970); other
-    // fields still go through.
-    expect('datetime' in overrides).toBe(false);
+    // A blank "When" is prefilled with the current local time (datetime-local
+    // format) so it's visible and editable, not left to the Unix epoch.
+    expect(overrides.datetime).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
     expect(overrides.amount).toBe(20);
+  });
+
+  it('keeps a provided datetime value', async () => {
+    const b = block();
+    b.fields.push({
+      key: 'datetime',
+      label: 'When',
+      type: 'datetime',
+      value: '2026-01-15T09:30:00',
+      display: '2026-01-15T09:30:00'
+    });
+    const w = mount(ChatProposedActionBlock, { props: { block: b, sessionId: 1 } });
+
+    await w.find('.pa-confirm').trigger('click');
+    await flushPromises();
+
+    const overrides = mockConfirm.mock.calls[0][2];
+    expect(overrides.datetime).toBe('2026-01-15T09:30');
   });
 });
