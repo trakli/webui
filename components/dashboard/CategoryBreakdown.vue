@@ -1,5 +1,6 @@
 <template>
   <div class="category-breakdown">
+    <PieChart class="card-glyph" :size="128" :stroke-width="1" aria-hidden="true" />
     <div class="header">
       <h3 class="title">{{ t('Spending Overview') }}</h3>
       <div class="chart-tabs">
@@ -245,7 +246,11 @@ const allDataPoints = computed(() => {
 @use '@/assets/scss/_variables.scss' as *;
 
 .category-breakdown {
-  background: $bg-white;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 100% at 100% 0%, rgba(var(--color-primary-rgb), 0.05), transparent 58%),
+    $bg-white;
   border-radius: 16px;
   box-shadow: $elevation-1;
   border: 1px solid $border-light;
@@ -253,6 +258,19 @@ const allDataPoints = computed(() => {
   height: 320px;
   display: flex;
   flex-direction: column;
+
+  > *:not(.card-glyph) {
+    position: relative;
+  }
+}
+
+.card-glyph {
+  position: absolute;
+  right: -18px;
+  bottom: -18px;
+  color: $primary;
+  opacity: 0.05;
+  pointer-events: none;
 }
 
 .header {

@@ -116,60 +116,6 @@ describe('DashboardKPIs', () => {
     });
   });
 
-  describe('wallet selector', () => {
-    it('renders wallet selector', () => {
-      const wrapper = mount(DashboardKPIs, {
-        global: { stubs }
-      });
-
-      expect(wrapper.find('.wallet-selector').exists()).toBe(true);
-    });
-
-    it('shows "All Wallets" by default', () => {
-      const wrapper = mount(DashboardKPIs, {
-        global: { stubs }
-      });
-
-      expect(wrapper.find('.wallet-name').text()).toBe('All Wallets');
-    });
-
-    it('toggles dropdown on click', async () => {
-      const wrapper = mount(DashboardKPIs, {
-        global: { stubs }
-      });
-
-      expect(wrapper.find('.wallet-dropdown').exists()).toBe(false);
-
-      await wrapper.find('.wallet-selector').trigger('click');
-
-      expect(wrapper.find('.wallet-dropdown').exists()).toBe(true);
-    });
-
-    it('shows wallet options in dropdown', async () => {
-      const wrapper = mount(DashboardKPIs, {
-        global: { stubs }
-      });
-
-      await wrapper.find('.wallet-selector').trigger('click');
-
-      const options = wrapper.findAll('.wallet-option');
-      expect(options.length).toBe(2);
-      expect(options[0].text()).toBe('All Wallets');
-      expect(options[1].text()).toBe('Main Wallet');
-    });
-
-    it('calls setSelectedWallet when option is clicked', async () => {
-      const wrapper = mount(DashboardKPIs, {
-        global: { stubs }
-      });
-
-      await wrapper.find('.wallet-selector').trigger('click');
-      await wrapper.findAll('.wallet-option')[1].trigger('click');
-
-      expect(mockUseStatistics.setSelectedWallet).toHaveBeenCalledWith(1);
-    });
-  });
-
   describe('net value styling', () => {
     it('applies positive surface when net is positive', () => {
       mockUseStatistics.currentStatistics.value = {

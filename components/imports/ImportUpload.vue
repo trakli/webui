@@ -149,7 +149,11 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowUpTrayIcon, DocumentIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import {
+  Upload as ArrowUpTrayIcon,
+  FileText as DocumentIcon,
+  X as XMarkIcon
+} from 'lucide-vue-next';
 
 const { t } = useI18n();
 

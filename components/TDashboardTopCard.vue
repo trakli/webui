@@ -1,57 +1,42 @@
 <template>
   <section class="hero surface surface--brand">
-    <svg
-      class="hero-decor"
-      viewBox="0 0 1200 360"
-      preserveAspectRatio="xMaxYMid slice"
-      aria-hidden="true"
-    >
-      <defs>
-        <radialGradient id="hero-glow" cx="80%" cy="40%" r="55%">
-          <stop offset="0%" stop-color="var(--surface-accent)" stop-opacity="0.55" />
-          <stop offset="100%" stop-color="var(--surface-accent)" stop-opacity="0" />
-        </radialGradient>
-        <pattern id="hero-dots" width="22" height="22" patternUnits="userSpaceOnUse">
-          <circle cx="2" cy="2" r="1.2" fill="var(--surface-deep)" opacity="0.12" />
-        </pattern>
-      </defs>
-      <rect x="0" y="0" width="1200" height="360" fill="url(#hero-dots)" />
-      <circle cx="1020" cy="160" r="220" fill="url(#hero-glow)" />
-      <circle cx="980" cy="60" r="44" fill="var(--surface-accent)" opacity="0.55" />
-      <circle cx="1100" cy="280" r="28" fill="var(--surface-deep)" opacity="0.55" />
-      <circle cx="880" cy="300" r="14" fill="var(--surface-deep)" opacity="0.4" />
-      <circle cx="1150" cy="120" r="10" fill="var(--surface-accent)" opacity="0.8" />
-    </svg>
+    <div class="hero-ambient" aria-hidden="true">
+      <BarChart3 class="amb a1" :size="72" :stroke-width="1" />
+      <Wallet class="amb a2" :size="64" :stroke-width="1" />
+      <Coins class="amb a3" :size="56" :stroke-width="1" />
+      <TrendingUp class="amb a4" :size="60" :stroke-width="1" />
+      <PieChart class="amb a5" :size="52" :stroke-width="1" />
+    </div>
 
     <div class="hero-body">
       <div class="hero-greeting">
-        <h1 v-if="user" class="hero-title">
-          {{ t('Welcome,') }}
-          <span class="hero-name">{{ user.first_name }} {{ user.last_name }}</span>
-        </h1>
+        <h2 class="hero-title">{{ t('Overview') }}</h2>
         <p class="hero-sub">
-          {{ t("Here's your financial overview for {period}.", { period: currentPeriodLabel }) }}
+          {{ t('Showing {period}.', { period: currentPeriodLabel }) }}
         </p>
       </div>
 
-      <div v-if="showFilters" class="hero-chips">
-        <button
-          v-for="period in availablePeriods.slice(0, 3)"
-          :key="period.value"
-          class="chip"
-          :class="{ 'chip--active': currentPeriod === period.value && !isCustomActive }"
-          @click="handlePresetClick(period.value)"
-        >
-          {{ t(period.label) }}
-        </button>
-        <button
-          class="chip chip--custom"
-          :class="{ 'chip--active': isCustomActive }"
-          @click="toggleCustomPeriod"
-        >
-          <span>{{ t('Custom') }}</span>
-          <ChevronDown class="chip-icon" :class="{ 'chip-icon--rotated': showFilterModal }" />
-        </button>
+      <div v-if="showFilters" class="hero-controls">
+        <DashboardWalletSelector />
+        <div class="hero-chips">
+          <button
+            v-for="period in availablePeriods.slice(0, 3)"
+            :key="period.value"
+            class="chip"
+            :class="{ 'chip--active': currentPeriod === period.value && !isCustomActive }"
+            @click="handlePresetClick(period.value)"
+          >
+            {{ t(period.label) }}
+          </button>
+          <button
+            class="chip chip--custom"
+            :class="{ 'chip--active': isCustomActive }"
+            @click="toggleCustomPeriod"
+          >
+            <span>{{ t('Custom') }}</span>
+            <ChevronDown class="chip-icon" :class="{ 'chip-icon--rotated': showFilterModal }" />
+          </button>
+        </div>
       </div>
     </div>
 
@@ -66,10 +51,10 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { ChevronDown } from 'lucide-vue-next';
-import { useAuth } from '@/composables/useAuth';
+import { ChevronDown, BarChart3, Wallet, Coins, TrendingUp, PieChart } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
 import StatsFilterModal from '@/components/StatsFilterModal.vue';
+import DashboardWalletSelector from '@/components/dashboard/DashboardWalletSelector.vue';
 
 const { t, locale } = useI18n();
 
@@ -80,7 +65,6 @@ const _props = defineProps({
   }
 });
 
-const { user } = useAuth();
 const {
   currentPeriod,
   customFilters,
@@ -156,13 +140,43 @@ const handleFiltersApply = (filters) => {
   box-shadow: $elevation-1;
 }
 
-.hero-decor {
+.hero-ambient {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+
+  .amb {
+    position: absolute;
+    color: var(--surface-deep);
+    opacity: 0.07;
+  }
+  .a1 {
+    top: -10px;
+    right: 6%;
+    transform: rotate(-10deg);
+  }
+  .a2 {
+    bottom: -14px;
+    right: 22%;
+    transform: rotate(8deg);
+  }
+  .a3 {
+    top: 20%;
+    right: 38%;
+    transform: rotate(10deg);
+  }
+  .a4 {
+    bottom: -8px;
+    left: 6%;
+    transform: rotate(-8deg);
+  }
+  .a5 {
+    top: -8px;
+    left: 30%;
+    transform: rotate(12deg);
+  }
 }
 
 .hero-body {
@@ -200,10 +214,6 @@ const handleFiltersApply = (filters) => {
   }
 }
 
-.hero-name {
-  color: var(--surface-deep);
-}
-
 .hero-sub {
   margin: 0;
   color: var(--surface-ink);
@@ -212,6 +222,17 @@ const handleFiltersApply = (filters) => {
 
   @media (max-width: $breakpoint-sm) {
     font-size: $font-size-xs;
+  }
+}
+
+.hero-controls {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  flex-wrap: wrap;
+
+  @media (min-width: $breakpoint-sm) {
+    justify-content: flex-end;
   }
 }
 

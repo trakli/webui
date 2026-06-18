@@ -1,24 +1,7 @@
 <template>
   <div class="kpi-section">
-    <div class="kpi-header">
-      <div class="wallet-selector" @click="toggleDropdown">
-        <span class="wallet-name">{{ selectedWalletName }}</span>
-        <ChevronDown class="chevron" :class="{ rotated: showDropdown }" />
-
-        <div v-if="showDropdown" class="wallet-dropdown">
-          <div
-            v-for="wallet in availableWallets"
-            :key="wallet.id || 'all'"
-            class="wallet-option"
-            :class="{ selected: selectedWalletId === wallet.id }"
-            @click.stop="selectWallet(wallet.id)"
-          >
-            {{ wallet.name }}
-          </div>
-        </div>
-      </div>
-
-      <div v-if="isCustomActive && activeFilterChips.length > 0" class="active-filters">
+    <div v-if="isCustomActive && activeFilterChips.length > 0" class="kpi-header">
+      <div class="active-filters">
         <span v-for="chip in activeFilterChips" :key="chip.key" class="filter-chip">
           <span class="filter-chip__label">{{ chip.label }}</span>
           <button class="filter-chip__remove" @click="removeFilter(chip.key)">
@@ -61,15 +44,8 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
-import {
-  ChevronDown,
-  X as XIcon,
-  Wallet,
-  ArrowDownLeft,
-  ArrowUpRight,
-  PiggyBank
-} from 'lucide-vue-next';
+import { computed } from 'vue';
+import { X as XIcon, Wallet, ArrowDownLeft, ArrowUpRight, PiggyBank } from 'lucide-vue-next';
 import { useStatistics } from '@/composables/useStatistics';
 import { useWallets } from '@/composables/useWallets';
 import { useSharedData } from '@/composables/useSharedData';
@@ -83,21 +59,11 @@ const {
   currentPeriod,
   customFilters,
   formatCompactCurrency,
-  selectedWalletId,
-  availableWallets,
-  setSelectedWallet,
   setCustomFilters,
   clearCustomFilters
 } = useStatistics();
 
 const statistics = currentStatistics;
-const showDropdown = ref(false);
-
-const selectedWalletName = computed(() => {
-  if (selectedWalletId.value === null) return t('All Wallets');
-  const wallet = availableWallets.value.find((w) => w.id === selectedWalletId.value);
-  return wallet ? wallet.name : t('All Wallets');
-});
 
 const netValue = computed(() => {
   const income = statistics.value?.total_income || 0;
@@ -138,21 +104,6 @@ const kpiCards = computed(() => [
 
 const formatCurrency = (value) => {
   return formatCompactCurrency(value, getDefaultCurrency.value || 'USD');
-};
-
-const toggleDropdown = () => {
-  showDropdown.value = !showDropdown.value;
-};
-
-const selectWallet = (walletId) => {
-  setSelectedWallet(walletId);
-  showDropdown.value = false;
-};
-
-const handleClickOutside = (event) => {
-  if (!event.target.closest('.wallet-selector')) {
-    showDropdown.value = false;
-  }
 };
 
 const isCustomActive = computed(() => {
@@ -216,14 +167,6 @@ const removeFilter = (key) => {
 const clearAllFilters = () => {
   clearCustomFilters();
 };
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-});
 </script>
 
 <style lang="scss" scoped>
@@ -240,73 +183,6 @@ onUnmounted(() => {
   align-items: center;
   gap: $spacing-3;
   flex-wrap: wrap;
-}
-
-.wallet-selector {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-2;
-  padding: $spacing-2 $spacing-3;
-  background: $bg-white;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-  border: 1px solid $border-color;
-  cursor: pointer;
-  user-select: none;
-  width: fit-content;
-
-  &:hover {
-    background: $bg-light;
-  }
-}
-
-.wallet-name {
-  font-size: $font-size-sm;
-  font-weight: $font-semibold;
-  color: $text-primary;
-}
-
-.chevron {
-  width: 16px;
-  height: 16px;
-  color: $text-muted;
-  transition: transform 0.2s;
-
-  &.rotated {
-    transform: rotate(180deg);
-  }
-}
-
-.wallet-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: $spacing-1;
-  min-width: 180px;
-  background: $bg-white;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-md;
-  z-index: 100;
-  overflow: hidden;
-}
-
-.wallet-option {
-  padding: $spacing-2 $spacing-3;
-  font-size: $font-size-sm;
-  color: $text-primary;
-  cursor: pointer;
-  transition: background-color 0.15s;
-
-  &:hover {
-    background: $bg-light;
-  }
-
-  &.selected {
-    background: rgba(var(--color-primary-rgb), 0.1);
-    color: $primary;
-    font-weight: $font-medium;
-  }
 }
 
 .kpi-grid {

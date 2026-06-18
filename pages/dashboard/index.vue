@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <TDashboardTopCard :show-filters="hasData" />
+    <DashboardAgentHero />
 
     <OnboardingWizard
       v-if="shouldShowWizard"
@@ -10,6 +10,8 @@
     />
 
     <template v-if="!shouldShowWizard">
+      <TDashboardTopCard :show-filters="hasData" />
+
       <ComponentLoader
         :is-loading="kpiLoading"
         :has-data="hasData"
@@ -59,6 +61,7 @@ import { useNotifications } from '@/composables/useNotifications';
 import { checkAuth } from '~/utils/auth';
 import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
 import TDashboardTopCard from '@/components/TDashboardTopCard.vue';
+import DashboardAgentHero from '@/components/dashboard/DashboardAgentHero.vue';
 import DashboardKPIs from '@/components/dashboard/DashboardKPIs.vue';
 import CategoryBreakdown from '@/components/dashboard/CategoryBreakdown.vue';
 import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';

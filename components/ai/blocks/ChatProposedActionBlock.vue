@@ -18,6 +18,11 @@
           <option v-for="w in wallets" :key="w.id" :value="w.id">{{ w.name }}</option>
         </select>
 
+        <select v-else-if="f.type === 'party'" v-model="edited[f.key]" class="pa-input">
+          <option :value="null">{{ t('None') }}</option>
+          <option v-for="p in parties" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
+
         <select
           v-else-if="f.type === 'categories'"
           v-model="edited[f.key]"
@@ -90,6 +95,13 @@ const { showError } = useNotifications();
 const sharedData = useSharedData();
 const wallets = sharedData.wallets;
 const categories = sharedData.categories;
+const parties = sharedData.parties;
+
+const nowLocal = () => {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+};
 
 const fields = computed<EditableField[]>(() => (props.block.fields as EditableField[]) ?? []);
 
@@ -97,11 +109,15 @@ const edited = reactive<Record<string, unknown>>({});
 
 onMounted(() => {
   fields.value.forEach((f) => {
-    edited[f.key] =
-      f.type === 'datetime' && typeof f.value === 'string' ? f.value.slice(0, 16) : f.value;
+    if (f.type === 'datetime') {
+      edited[f.key] = typeof f.value === 'string' && f.value ? f.value.slice(0, 16) : nowLocal();
+      return;
+    }
+    edited[f.key] = f.value;
   });
   if (fields.value.some((f) => f.type === 'wallet')) sharedData.loadWallets?.();
   if (fields.value.some((f) => f.type === 'categories')) sharedData.loadCategories?.();
+  if (fields.value.some((f) => f.type === 'party')) sharedData.loadParties?.();
 });
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
