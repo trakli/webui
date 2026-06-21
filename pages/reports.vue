@@ -15,7 +15,32 @@
       @open-review="reviewOpen = true"
     />
 
-    <ReportsEmpty v-if="!hasData" />
+    <p v-if="statsPartial" class="reports-truncated" role="status">
+      {{
+        t(
+          'Some amounts could not be converted to your default currency and were left out, so figures may be understated. Affected: {currencies}.',
+          { currencies: unconvertedCurrencies.join(', ') }
+        )
+      }}
+    </p>
+
+    <p v-if="sweepTruncated" class="reports-truncated" role="status">
+      {{
+        t(
+          'This period has more transactions than we chart at once. Daily and trend figures show the most recent {count} and may be partial.',
+          { count: '6,000' }
+        )
+      }}
+    </p>
+
+    <LoadingSkeleton
+      v-if="isLoading && !hasData"
+      variant="card"
+      :count="3"
+      class="reports-loading"
+    />
+
+    <ReportsEmpty v-else-if="!hasData" />
 
     <Transition v-else name="tab" mode="out-in">
       <div :key="activeTab" class="tab-stage">
@@ -118,6 +143,10 @@ const {
   compareEnabled,
   periods,
   range,
+  isLoading,
+  sweepTruncated,
+  statsPartial,
+  unconvertedCurrencies,
   totals,
   dailyBuckets,
   monthlyBuckets,
@@ -156,7 +185,18 @@ const currency = computed(() => primaryCurrency.value);
 const format = (n, cur) =>
   formatShortAmount(`${Math.round((n || 0) * 100) / 100} ${cur || currency.value}`);
 
-const hasData = computed(() => totals.value.income > 0 || totals.value.expense > 0);
+// "Has data" must not hinge on the overview totals alone: charts read their own
+// buckets/category series, which can be present even when totals derive to zero
+// (e.g. amounts dropped for a missing exchange rate). Gate the empty state on any
+// real signal so charts aren't hidden while data exists. dailyBuckets is scaffolded
+// one-per-day, so check txCount rather than its length.
+const hasData = computed(() => {
+  if (totals.value.income > 0 || totals.value.expense > 0) return true;
+  if (expenseCategories.value.length > 0 || incomeCategories.value.length > 0) return true;
+  if (monthlyBuckets.value.some((m) => m.income || m.expense || m.net)) return true;
+  if (dailyBuckets.value.some((d) => d.txCount > 0)) return true;
+  return false;
+});
 
 const applyCustom = ({ start, end }) => {
   setCustomRange(start, end);
@@ -203,6 +243,15 @@ const reviewData = computed(() => reviewSnapshot.value || prevReviewSnapshot.val
   display: flex;
   align-items: center;
   justify-content: flex-start;
+}
+
+.reports-truncated {
+  margin: 0;
+  padding: $spacing-3 $spacing-4;
+  border-radius: $radius-lg;
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+  font-size: $font-size-sm;
 }
 
 .tab-stage {

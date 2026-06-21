@@ -74,6 +74,10 @@ export interface StatsResponse {
       monthly_cash_flow: MonthlyCashFlow[];
       expense_by_wallet?: PartyData[];
     };
+    // Set when amounts in a currency with no available exchange rate were
+    // excluded from the totals, so figures are understated for those currencies.
+    partial?: boolean;
+    unconverted_currencies?: string[];
   };
 }
 
