@@ -23,6 +23,12 @@ const transactionApi = {
     if (params?.type) {
       queryParams.append('type', params.type);
     }
+    if (params?.intent) {
+      queryParams.append('intent', params.intent);
+    }
+    if (params?.exclude_transfers) {
+      queryParams.append('exclude_transfers', '1');
+    }
     if (params?.limit) {
       queryParams.append('limit', params.limit.toString());
     }

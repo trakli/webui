@@ -1,7 +1,11 @@
 import { defineNuxtConfig } from 'nuxt/config';
+import Icons from 'unplugin-icons/vite';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  vite: {
+    plugins: [Icons({ compiler: 'vue3', autoInstall: false })]
+  },
   compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
   ssr: true,

@@ -92,6 +92,10 @@
             @drill="openDrill"
           />
         </template>
+
+        <template v-else-if="activeTab === 'position'">
+          <FinancialPositionView :params="positionParams" />
+        </template>
       </div>
     </Transition>
 
@@ -117,7 +121,15 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { LayoutDashboard, Calendar as CalIcon, Workflow, Layers, BarChart3 } from 'lucide-vue-next';
+import {
+  LayoutDashboard,
+  Calendar as CalIcon,
+  Workflow,
+  Layers,
+  BarChart3,
+  Scale
+} from 'lucide-vue-next';
+import FinancialPositionView from '@/components/financial-position/FinancialPositionView.vue';
 import ReportsTabs from '@/components/reports/ReportsTabs.vue';
 import PeriodControl from '@/components/reports/PeriodControl.vue';
 import CashflowHero from '@/components/reports/CashflowHero.vue';
@@ -177,10 +189,16 @@ const tabs = computed(() => [
     label: t('Categories'),
     icon: Layers,
     count: expenseCategories.value.length + incomeCategories.value.length
-  }
+  },
+  { value: 'position', label: t('Position'), icon: Scale }
 ]);
 
 const currency = computed(() => primaryCurrency.value);
+
+const positionParams = computed(() => ({
+  start_date: range.value.start.toISOString().slice(0, 10),
+  end_date: range.value.end.toISOString().slice(0, 10)
+}));
 
 const format = (n, cur) =>
   formatShortAmount(`${Math.round((n || 0) * 100) / 100} ${cur || currency.value}`);

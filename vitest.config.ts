@@ -1,9 +1,10 @@
 import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
+import Icons from 'unplugin-icons/vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [Icons({ compiler: 'vue3', autoInstall: false }), vue()],
   test: {
     globals: true,
     environment: 'happy-dom',

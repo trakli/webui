@@ -170,7 +170,7 @@ describe('TransactionForm', () => {
         global: { stubs }
       });
 
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.text()).toContain('Enter a valid amount greater than 0');
     });
@@ -181,7 +181,7 @@ describe('TransactionForm', () => {
       });
 
       await wrapper.find('input[type="number"]').setValue('0');
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.text()).toContain('Enter a valid amount greater than 0');
     });
@@ -192,7 +192,7 @@ describe('TransactionForm', () => {
       });
 
       await wrapper.find('input[type="number"]').setValue('-50');
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.text()).toContain('Enter a valid amount greater than 0');
     });
@@ -202,7 +202,7 @@ describe('TransactionForm', () => {
         global: { stubs }
       });
 
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.emitted('submit')).toBeFalsy();
     });
@@ -217,7 +217,7 @@ describe('TransactionForm', () => {
 
       await wrapper.find('input[type="number"]').setValue('100');
       await wrapper.find('textarea').setValue('Test expense');
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.emitted('submit')).toBeTruthy();
       const payload = wrapper.emitted('submit')?.[0]?.[0];
@@ -233,12 +233,45 @@ describe('TransactionForm', () => {
 
       await wrapper.find('input[type="number"]').setValue('500');
       await wrapper.find('textarea').setValue('Test income');
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.emitted('submit')).toBeTruthy();
       const payload = wrapper.emitted('submit')?.[0]?.[0];
       expect(payload.type).toBe('INCOME');
       expect(payload.amount).toContain('500');
+    });
+
+    it('defaults intent to regular and submits the chosen intent', async () => {
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: false },
+        global: { stubs }
+      });
+
+      await wrapper.find('input[type="number"]').setValue('5000');
+
+      const pills = wrapper.findAll('.intent-pill');
+      expect(pills.length).toBeGreaterThan(1);
+
+      // Pick the "Loan received" intent (income side).
+      const loanPill = pills.find((p) => p.text().includes('Loan received'));
+      expect(loanPill).toBeTruthy();
+      await loanPill!.trigger('click');
+
+      await wrapper.find('.submit-button').trigger('click');
+
+      const payload = wrapper.emitted('submit')?.[0]?.[0];
+      expect(payload.intent).toBe('loan_received');
+    });
+
+    it('only offers income-side intents when recording income', () => {
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: false },
+        global: { stubs }
+      });
+
+      const labels = wrapper.findAll('.intent-pill').map((p) => p.text());
+      expect(labels).toContain('Loan received');
+      expect(labels).not.toContain('Loan repayment');
     });
 
     it('includes id in payload when editing', async () => {
@@ -251,7 +284,7 @@ describe('TransactionForm', () => {
       });
 
       await wrapper.find('input[type="number"]').setValue('150');
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       const payload = wrapper.emitted('submit')?.[0]?.[0];
       expect(payload.id).toBe(123);
@@ -433,7 +466,7 @@ describe('TransactionForm', () => {
         capturedSelectHandler([1, 2]);
       }
 
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.emitted('submit')).toBeTruthy();
       const payload = wrapper.emitted('submit')?.[0]?.[0];
@@ -447,7 +480,7 @@ describe('TransactionForm', () => {
       });
 
       await wrapper.find('input[type="number"]').setValue('100');
-      await wrapper.find('button').trigger('click');
+      await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.emitted('submit')).toBeTruthy();
       const payload = wrapper.emitted('submit')?.[0]?.[0];

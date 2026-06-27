@@ -4,7 +4,25 @@ export type StatsSection =
   | 'comparisons'
   | 'categories'
   | 'parties'
-  | 'cashflow';
+  | 'cashflow'
+  | 'position';
+
+export interface PositionData {
+  earned_income: number;
+  discretionary_spend: number;
+  cash_balance: number;
+  holdings_value: number;
+  total_net_worth: number;
+  loan_received: number;
+  loan_repayment: number;
+  debt_owed: number;
+  debt_settled: number;
+  loans_debt_net: number;
+  investment_principal: number;
+  investment_returns: number;
+  gifts_received: number;
+  net_worth_delta: number;
+}
 
 export interface StatsParams {
   preset?: 'all_time' | 'current_week' | 'current_month' | 'last_3_months';
@@ -74,6 +92,7 @@ export interface StatsResponse {
       monthly_cash_flow: MonthlyCashFlow[];
       expense_by_wallet?: PartyData[];
     };
+    position?: PositionData;
     // Set when amounts in a currency with no available exchange rate were
     // excluded from the totals, so figures are understated for those currencies.
     partial?: boolean;

@@ -675,6 +675,50 @@
   font-size: $font-size-sm;
 }
 
+.intent-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.intent-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid $border-color;
+  border-radius: 999px;
+  background: $bg-white;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-medium;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    border-color: $primary;
+    color: $text-primary;
+  }
+
+  .intent-pill-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.intent-pill--active {
+  background: $primary;
+  border-color: $primary;
+  color: white;
+
+  &:hover {
+    color: white;
+  }
+}
+
 .wallet-field-wrapper,
 .group-field-wrapper {
   position: relative;

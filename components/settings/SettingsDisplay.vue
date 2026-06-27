@@ -33,11 +33,13 @@
 import { ref, onMounted } from 'vue';
 import { Sun, Moon, MessageSquare } from 'lucide-vue-next';
 import { useTheme } from '~/composables/useTheme';
+import { useNotifications } from '~/composables/useNotifications';
 import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 
 const { t } = useI18n();
 const { isDark, toggleTheme } = useTheme();
+const { showError } = useNotifications();
 
 const chatFirst = ref(true);
 const savingLanding = ref(false);
@@ -49,10 +51,9 @@ onMounted(async () => {
     const item = (Array.isArray(items) ? items : []).find(
       (i) => i.key === CONFIGURATION_KEYS.LANDING_MODE
     );
-    // Default to chat-first when unset.
-    chatFirst.value = item ? item.value !== 'dashboard' : true;
+    chatFirst.value = item ? item.value === 'chat' : false;
   } catch {
-    chatFirst.value = true;
+    chatFirst.value = false;
   }
 });
 
@@ -61,9 +62,13 @@ const toggleLanding = async () => {
   const next = !chatFirst.value;
   try {
     await configurationsApi.update(CONFIGURATION_KEYS.LANDING_MODE, {
-      value: next ? 'chat' : 'dashboard'
+      value: next ? 'chat' : 'dashboard',
+      type: 'string'
     });
     chatFirst.value = next;
+  } catch {
+    // Leave the toggle on its previous value and tell the user it didn't save.
+    showError(t('Could not save that setting. Please try again.'));
   } finally {
     savingLanding.value = false;
   }

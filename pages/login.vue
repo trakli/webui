@@ -67,10 +67,8 @@ const handleSubmit = async () => {
   if (!isOnboardingComplete) {
     router.push('/onboarding');
   } else {
-    // Chat-first (the centered chat at /home) is the default landing; the user
-    // can switch to the dashboard in settings.
     const landingMode = configs?.[CONFIGURATION_KEYS.LANDING_MODE];
-    router.push(landingMode === 'dashboard' ? '/dashboard' : '/home');
+    router.push(landingMode === 'chat' ? '/home' : '/dashboard');
   }
   loading.value = false;
 };
