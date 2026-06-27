@@ -24,7 +24,10 @@ import ThemeToggleButton from '@/components/ThemeToggleButton.vue';
 
 .onboarding-layout {
   min-height: 100vh;
-  background: $bg-light;
+  background:
+    radial-gradient(72% 55% at 50% -8%, rgba(var(--color-primary-rgb), 0.13), transparent 72%),
+    radial-gradient(50% 40% at 100% 100%, rgba(var(--color-primary-rgb), 0.07), transparent 70%),
+    $bg-light;
   display: flex;
   align-items: center;
   justify-content: center;

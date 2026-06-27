@@ -52,10 +52,11 @@ const handleSubmit = async () => {
     return;
   }
 
-  // Login succeeded – now check onboarding status (errors here should not affect login error)
+  // Login succeeded; checking onboarding status must not affect the login error.
   let isOnboardingComplete = false;
+  let configs = null;
   try {
-    const configs = await sharedData.loadConfigurations();
+    configs = await sharedData.loadConfigurations();
     isOnboardingComplete = !!configs?.[CONFIGURATION_KEYS.ONBOARDING_COMPLETE];
     if (isOnboardingComplete) {
       setOnboardingComplete();

@@ -28,7 +28,7 @@
                 <h4 class="benefits-title">Why this matters:</h4>
                 <div class="benefits-grid">
                   <div v-for="benefit in step.benefits" :key="benefit.text" class="benefit-item">
-                    <span class="benefit-icon">{{ benefit.icon }}</span>
+                    <CheckCircleIcon class="benefit-icon" />
                     <span class="benefit-text">{{ benefit.text }}</span>
                   </div>
                 </div>
@@ -88,6 +88,7 @@ import {
   UsersIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CheckCircleIcon,
   PlusIcon
 } from '@heroicons/vue/24/outline';
 
@@ -104,9 +105,9 @@ const steps = [
     buttonText: 'Add transaction',
     action: 'add-transaction',
     benefits: [
-      { icon: '💰', text: 'See your balance change in real-time' },
-      { icon: '📊', text: 'Get instant insights into your spending' },
-      { icon: '🎯', text: 'Start building healthy money habits' }
+      { text: 'See your balance change in real-time' },
+      { text: 'Get instant insights into your spending' },
+      { text: 'Start building healthy money habits' }
     ]
   },
   {
@@ -117,9 +118,9 @@ const steps = [
     buttonText: 'Setup wallets',
     action: 'setup-wallets',
     benefits: [
-      { icon: '🏦', text: 'Track all your accounts in one place' },
-      { icon: '💳', text: 'See which payment method you use most' },
-      { icon: '📈', text: 'Monitor your total net worth' }
+      { text: 'Track all your accounts in one place' },
+      { text: 'See which payment method you use most' },
+      { text: 'Monitor your total net worth' }
     ]
   },
   {
@@ -130,9 +131,9 @@ const steps = [
     buttonText: 'Manage categories',
     action: 'manage-categories',
     benefits: [
-      { icon: '🏷️', text: 'Identify your biggest spending areas' },
-      { icon: '📋', text: 'Create budgets for specific categories' },
-      { icon: '🔍', text: 'Find transactions quickly with organized labels' }
+      { text: 'Identify your biggest spending areas' },
+      { text: 'Create budgets for specific categories' },
+      { text: 'Find transactions quickly with organized labels' }
     ]
   },
   {
@@ -143,9 +144,9 @@ const steps = [
     buttonText: 'Add parties',
     action: 'add-parties',
     benefits: [
-      { icon: '🛒', text: 'See how much you spend at each store' },
-      { icon: '👥', text: 'Track money lent to friends and family' },
-      { icon: '📊', text: 'Analyze your vendor relationships' }
+      { text: 'See how much you spend at each store' },
+      { text: 'Track money lent to friends and family' },
+      { text: 'Analyze your vendor relationships' }
     ]
   },
   {
@@ -156,9 +157,9 @@ const steps = [
     buttonText: 'Get started',
     action: 'complete',
     benefits: [
-      { icon: '🎉', text: 'Access your personalized dashboard' },
-      { icon: '📱', text: 'Start tracking on the go' },
-      { icon: '💡', text: 'Discover new insights about your money' }
+      { text: 'Access your personalized dashboard' },
+      { text: 'Start tracking on the go' },
+      { text: 'Discover new insights about your money' }
     ]
   }
 ];
@@ -341,9 +342,9 @@ const previousStep = () => {
 
 .step-benefits {
   background: $bg-slate;
-  border-radius: $radius-lg;
+  border: 1px solid $border-gray;
+  border-radius: $radius-xl;
   padding: 1rem;
-  border-left: 4px solid $primary;
 }
 
 .benefits-title {
@@ -367,7 +368,9 @@ const previousStep = () => {
   gap: 0.75rem;
 
   .benefit-icon {
-    font-size: 1.125rem;
+    width: 18px;
+    height: 18px;
+    color: $primary;
     flex-shrink: 0;
   }
 
