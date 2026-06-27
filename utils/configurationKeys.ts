@@ -6,6 +6,7 @@
 
 export const CONFIGURATION_KEYS = {
   LANGUAGE: 'default-lang',
+  COUNTRY: 'default-country',
   CURRENCY: 'default-currency',
   WALLET: 'default-wallet',
   GROUP: 'default-group',

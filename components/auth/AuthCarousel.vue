@@ -2,8 +2,25 @@
   <div class="login-sidebar">
     <div class="sidebar-content">
       <div class="carousel-slide">
-        <div class="slide-image-wrapper">
-          <div class="carousel-image" />
+        <div
+          class="slide-image-wrapper"
+          :class="{ 'slide-image-wrapper--art': slides[currentSlide].image }"
+        >
+          <transition name="fade" mode="out-in">
+            <img
+              v-if="slides[currentSlide].image"
+              :key="`art-${currentSlide}`"
+              :src="slides[currentSlide].image"
+              class="slide-art"
+              alt=""
+            />
+            <component
+              v-else
+              :is="slides[currentSlide].icon"
+              :key="currentSlide"
+              class="slide-icon"
+            />
+          </transition>
         </div>
         <div class="sidebar-text">
           <transition name="fade" mode="out-in">
@@ -28,22 +45,33 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import IconAI from '~icons/solar/magic-stick-3-bold-duotone';
+import IconIntegrations from '~icons/solar/card-transfer-bold-duotone';
+import IconImport from '~icons/solar/import-bold-duotone';
 
 const { t } = useI18n();
 const currentSlide = ref(0);
 
 const slides = computed(() => [
   {
-    title: t('carousel.simple.title'),
-    text: t('carousel.simple.text')
+    title: t('carousel.ai.title'),
+    text: t('carousel.ai.text'),
+    icon: IconAI
   },
   {
-    title: t('carousel.automated.title'),
-    text: t('carousel.automated.text')
+    title: t('carousel.integrations.title'),
+    text: t('carousel.integrations.text'),
+    icon: IconIntegrations
   },
   {
-    title: t('carousel.opensource.title'),
-    text: t('carousel.opensource.text')
+    title: t('carousel.import.title'),
+    text: t('carousel.import.text'),
+    icon: IconImport
+  },
+  {
+    title: t('carousel.welcome.title'),
+    text: t('carousel.welcome.text'),
+    image: '/floating-docs-man.svg'
   }
 ]);
 
@@ -91,39 +119,83 @@ onBeforeUnmount(() => clearInterval(slideInterval));
 }
 
 .slide-image-wrapper {
-  width: 65%;
-  max-width: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 220px;
   margin: 0 auto;
-  aspect-ratio: 16/15;
+  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.4);
 
-  .carousel-image {
-    width: 100%;
-    height: 100%;
-    background: url('/floating-docs-man.svg') no-repeat center;
-    background-size: contain;
-    opacity: 0.9;
+  &--art {
+    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.16), transparent 65%);
+    border: none;
+    box-shadow: none;
+    width: 280px;
+    height: 240px;
+  }
+}
+
+.slide-icon {
+  width: 120px;
+  height: 120px;
+  color: #fff;
+}
+
+.slide-art {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: 50% 90%;
+  animation: funky-bob 3.6s ease-in-out infinite;
+}
+
+@keyframes funky-bob {
+  0% {
+    transform: translateY(0) rotate(-4deg) scale(1);
+  }
+  30% {
+    transform: translateY(-16px) rotate(3deg) scale(1.03);
+  }
+  55% {
+    transform: translateY(-6px) rotate(-2deg) scale(1);
+  }
+  80% {
+    transform: translateY(-12px) rotate(4deg) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) rotate(-4deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-art {
+    animation: none;
   }
 }
 
 .sidebar-text {
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 180px;
-  overflow: hidden;
+  align-items: flex-start;
+  min-height: 200px;
   text-align: center;
 
   .text-content {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    max-width: 80%;
+    max-width: 90%;
 
     h2 {
-      font-size: 3.5rem;
+      font-size: 2.75rem;
       font-weight: 700;
       color: $accent-color;
       margin: 0;
+      line-height: 1.1;
     }
 
     p {

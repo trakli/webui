@@ -1,6 +1,8 @@
 <template>
   <div class="empty-state">
-    <img class="empty-icon" src="/box.svg" :alt="t('Empty Icon')" />
+    <div class="empty-art">
+      <component :is="resolvedIcon" class="empty-illustration" />
+    </div>
     <h2 class="empty-title">
       {{
         t("You don't have any {item} at the moment.", {
@@ -23,18 +25,27 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { PlusIcon } from '@heroicons/vue/24/outline';
+import IconBox from '~icons/solar/box-minimalistic-bold-duotone';
 
 const { t } = useI18n();
 
-defineProps({
+const props = defineProps({
   pageName: {
     type: String,
     required: true
+  },
+  // A Solar (or any) icon component to theme the empty state for its content.
+  icon: {
+    type: [Object, Function],
+    default: null
   }
 });
 
 defineEmits(['create']);
+
+const resolvedIcon = computed(() => props.icon || IconBox);
 </script>
 
 <style scoped lang="scss">
@@ -46,131 +57,89 @@ defineEmits(['create']);
   align-items: center;
   justify-content: center;
   text-align: center;
-  margin-top: 3rem;
-  margin-bottom: 0;
-  padding: 2rem 1rem;
+  padding: 3rem 1rem;
   min-height: 50vh;
 
-  @media (max-width: $breakpoint-md) {
-    margin-top: 2rem;
-    padding: 1.5rem 1rem;
-    min-height: 40vh;
-  }
-
   @media (max-width: $breakpoint-sm) {
-    margin-top: 1rem;
-    padding: 1rem 0.5rem;
-    min-height: 35vh;
+    padding: 2rem 0.5rem;
+    min-height: 40vh;
   }
 }
 
-.empty-icon {
-  width: 220px;
-  height: 220px;
-  margin-bottom: 1rem;
-
-  @media (max-width: $breakpoint-md) {
-    width: 180px;
-    height: 180px;
-    margin-bottom: 0.75rem;
-  }
+.empty-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  margin-bottom: 1.5rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, $primary-light, $bg-light 70%);
 
   @media (max-width: $breakpoint-sm) {
-    width: 140px;
-    height: 140px;
-    margin-bottom: 0.5rem;
+    width: 112px;
+    height: 112px;
+    margin-bottom: 1rem;
+  }
+}
+
+.empty-illustration {
+  width: 72px;
+  height: 72px;
+  color: $primary;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 58px;
+    height: 58px;
   }
 }
 
 .empty-title {
   color: $text-primary;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 1rem 2rem;
-  line-height: 1.2;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 1.8rem;
-    margin: 0.75rem 1.5rem;
-  }
+  font-size: 1.6rem;
+  font-weight: $font-bold;
+  margin: 0 1rem 0.5rem;
+  line-height: 1.25;
+  max-width: 28ch;
 
   @media (max-width: $breakpoint-sm) {
-    font-size: 1.4rem;
-    margin: 0.5rem 1rem;
-    line-height: 1.3;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 1.2rem;
-    margin: 0.5rem 0.5rem;
+    font-size: 1.3rem;
   }
 }
 
 .empty-subtitle {
-  color: $text-secondary;
-  font-size: 1.2rem;
-  margin-bottom: 2.5rem;
-  line-height: 1.4;
-  max-width: 90%;
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-  }
+  color: $text-muted;
+  font-size: 1rem;
+  margin: 0 0 2rem;
+  line-height: 1.5;
+  max-width: 42ch;
 
   @media (max-width: $breakpoint-sm) {
-    font-size: 1rem;
+    font-size: 0.95rem;
     margin-bottom: 1.5rem;
-    max-width: 95%;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 0.9rem;
-    margin-bottom: 1.25rem;
   }
 }
 
 .add-entity-btn {
   background: $primary;
-  color: $bg-white;
-  font-size: 1.3rem;
-  font-weight: 600;
+  color: $text-inverse;
+  font-size: 1rem;
+  font-weight: $font-semibold;
   border: none;
   border-radius: $radius-xl;
-  padding: 1rem 2.5rem;
+  padding: 0.8rem 1.75rem;
   cursor: pointer;
-  transition: background 0.2s;
-  display: flex;
+  transition: background $duration-fast $easing-standard;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-width: 160px;
 
   .button-icon {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1.1rem;
+    height: 1.1rem;
     flex-shrink: 0;
     stroke-width: 2;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    font-size: 1.1rem;
-    padding: 0.875rem 2rem;
-    border-radius: $radius-lg;
-    min-width: 140px;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    font-size: 1rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: $radius-lg;
-    min-width: 120px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 0.9rem;
-    padding: 0.625rem 1.25rem;
-    min-width: 110px;
   }
 
   &:hover {

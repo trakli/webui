@@ -8,7 +8,10 @@
       @click.stop
     >
       <div class="modal-header">
-        <h2 id="modal-title" class="modal-title">💡 {{ t('Learn Trakli') }}</h2>
+        <div class="modal-title-wrap">
+          <span class="modal-title-badge"><IconLearn class="modal-title-icon" /></span>
+          <h2 id="modal-title" class="modal-title">{{ t('Learn Trakli') }}</h2>
+        </div>
         <button class="close-btn" :aria-label="t('Close modal')" @click="closeModal">
           <XMarkIcon class="close-icon" />
         </button>
@@ -39,7 +42,9 @@
                 </div>
                 <p class="concept-description">{{ concept.description }}</p>
                 <div class="concept-tips">
-                  <span class="tips-label">💡 {{ t('Tips') }}:</span>
+                  <span class="tips-label"
+                    ><LightBulbIcon class="tips-label-icon" />{{ t('Tips') }}:</span
+                  >
                   <ul class="tips-list">
                     <li v-for="tip in concept.tips" :key="tip">{{ tip }}</li>
                   </ul>
@@ -52,7 +57,7 @@
             <h3 class="section-title">{{ t('Quick Tips') }}</h3>
             <div class="tips-grid">
               <div v-for="tip in quickTips" :key="tip.title" class="tip-card">
-                <div class="tip-emoji">{{ tip.emoji }}</div>
+                <div class="tip-emoji"><component :is="tip.icon" class="tip-icon" /></div>
                 <h4 class="tip-title">{{ tip.title }}</h4>
                 <p class="tip-text">{{ tip.text }}</p>
               </div>
@@ -91,6 +96,16 @@
           </div>
         </div>
       </div>
+
+      <div class="modal-footer">
+        <p class="modal-footer__hint">
+          {{ t('Still stuck? Ask the assistant anything about Trakli.') }}
+        </p>
+        <button class="ask-assistant-btn" @click="askAssistant">
+          <IconSpark class="ask-icon" />
+          {{ t('Ask the assistant') }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -107,8 +122,15 @@ import {
   AcademicCapIcon,
   LightBulbIcon,
   CommandLineIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  BoltIcon,
+  ChartBarIcon,
+  MagnifyingGlassIcon,
+  DevicePhoneMobileIcon,
+  CheckCircleIcon
 } from '@heroicons/vue/24/outline';
+import IconLearn from '~icons/solar/notebook-bold-duotone';
+import IconSpark from '~icons/solar/magic-stick-3-bold-duotone';
 
 const { t } = useI18n();
 
@@ -160,32 +182,32 @@ const concepts = computed(() => [
 
 const quickTips = computed(() => [
   {
-    emoji: '⚡',
+    icon: BoltIcon,
     title: t('Quick Entry'),
     text: t('learn.quicktips.quickentry')
   },
   {
-    emoji: '📊',
+    icon: ChartBarIcon,
     title: t('Dashboard Overview'),
     text: t('learn.quicktips.dashboard')
   },
   {
-    emoji: '🔍',
+    icon: MagnifyingGlassIcon,
     title: t('Search & Filter'),
     text: t('learn.quicktips.search')
   },
   {
-    emoji: '📱',
+    icon: DevicePhoneMobileIcon,
     title: t('Mobile Friendly'),
     text: t('learn.quicktips.mobile')
   },
   {
-    emoji: '🎯',
+    icon: CheckCircleIcon,
     title: t('Be Consistent'),
     text: t('learn.quicktips.consistent')
   },
   {
-    emoji: '💡',
+    icon: LightBulbIcon,
     title: t('Start Simple'),
     text: t('learn.quicktips.simple')
   }
@@ -228,6 +250,11 @@ const faqs = computed(() => [
 
 const closeModal = () => {
   emit('close');
+};
+
+const askAssistant = () => {
+  emit('close');
+  navigateTo('/assistant');
 };
 
 const toggleFaq = (index) => {
@@ -275,6 +302,28 @@ const toggleFaq = (index) => {
   }
 }
 
+.modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.modal-title-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: $radius-lg;
+  background: $primary-light;
+}
+
+.modal-title-icon {
+  width: 22px;
+  height: 22px;
+  color: $primary;
+}
+
 .modal-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -283,6 +332,47 @@ const toggleFaq = (index) => {
 
   @media (max-width: $breakpoint-sm) {
     font-size: 1.25rem;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid $border-color;
+  background: $bg-light;
+}
+
+.modal-footer__hint {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: $text-muted;
+}
+
+.ask-assistant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border: none;
+  border-radius: $radius-lg;
+  background: $primary;
+  color: $text-inverse;
+  font-size: $font-size-sm;
+  font-weight: $font-semibold;
+  cursor: pointer;
+  transition: background $duration-fast $easing-standard;
+
+  &:hover {
+    background: $primary-hover;
+  }
+
+  .ask-icon {
+    width: 17px;
+    height: 17px;
   }
 }
 
@@ -384,7 +474,6 @@ const toggleFaq = (index) => {
   border: 1px solid $border-gray;
   border-radius: $radius-xl;
   padding: 1.5rem;
-  border-left: 4px solid $primary;
 }
 
 .concept-header {
@@ -415,9 +504,17 @@ const toggleFaq = (index) => {
 
 .concept-tips {
   .tips-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     font-weight: 600;
     color: $primary;
     font-size: 0.875rem;
+  }
+
+  .tips-label-icon {
+    width: 15px;
+    height: 15px;
   }
 }
 
@@ -466,8 +563,20 @@ const toggleFaq = (index) => {
 }
 
 .tip-emoji {
-  font-size: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: $primary-light;
   margin-bottom: 1rem;
+}
+
+.tip-icon {
+  width: 22px;
+  height: 22px;
+  color: $primary;
 }
 
 .tip-title {

@@ -21,17 +21,7 @@
         <!-- Step 1: Language Selection -->
         <div v-if="currentStep === 1" class="step-content">
           <div class="step-icon">
-            <svg
-              class="language-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"
-                fill="currentColor"
-              />
-            </svg>
+            <IconLanguage />
           </div>
           <div class="step-info">
             <h2 class="step-title">{{ $t('Choose your language') }}</h2>
@@ -58,6 +48,16 @@
                 </button>
               </div>
 
+              <div class="country-field">
+                <label class="country-label">{{ $t('Where are you based?') }}</label>
+                <select v-model="selectedCountry" class="country-select">
+                  <option value="">{{ $t('Select your country') }}</option>
+                  <option v-for="country in countries" :key="country.code" :value="country.name">
+                    {{ country.name }}
+                  </option>
+                </select>
+              </div>
+
               <div class="step-actions">
                 <button
                   class="primary-btn"
@@ -74,7 +74,7 @@
         <!-- Step 2: Wallet and Currency Setup -->
         <div v-if="currentStep === 2" class="step-content">
           <div class="step-icon">
-            <CreditCardIcon />
+            <IconWallet />
           </div>
           <div class="step-info">
             <h2 class="step-title">{{ $t('Set up your wallet') }}</h2>
@@ -206,7 +206,7 @@
         <!-- Step 3: Categories Setup -->
         <div v-if="currentStep === 3" class="step-content">
           <div class="step-icon">
-            <TagIcon />
+            <IconCategory />
           </div>
           <div class="step-info">
             <h2 class="step-title">{{ $t('Set up categories') }}</h2>
@@ -314,11 +314,15 @@ import {
   CheckCircleIcon,
   TagIcon
 } from '@heroicons/vue/24/outline';
+import IconLanguage from '~icons/solar/translation-bold-duotone';
+import IconWallet from '~icons/solar/wallet-money-bold-duotone';
+import IconCategory from '~icons/solar/widget-5-bold-duotone';
 import { useSharedData } from '@/composables/useSharedData';
 import { useNotifications } from '@/composables/useNotifications';
 import { useWallets } from '@/composables/useWallets';
 import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
+import { getCountries } from '@/utils/countries';
 import { CURRENCIES } from '@/utils/currencies';
 import { categoriesApi } from '@/services/api/categoriesApi';
 
@@ -353,6 +357,8 @@ const transactionCount = computed(() => 0);
 
 // Language setup
 const selectedLanguage = ref('en');
+const selectedCountry = ref('');
+const countries = getCountries();
 const availableLanguages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'es', name: 'Español', flag: '🇪🇸' },
@@ -471,6 +477,14 @@ const completeOnboarding = async () => {
       configurationsToSave.push({
         key: CONFIGURATION_KEYS.CURRENCY,
         value: selectedCurrency.value,
+        type: 'string'
+      });
+    }
+
+    if (selectedCountry.value) {
+      configurationsToSave.push({
+        key: CONFIGURATION_KEYS.COUNTRY,
+        value: selectedCountry.value,
         type: 'string'
       });
     }
@@ -624,4 +638,36 @@ onBeforeRouteLeave(() => {
 
 <style lang="scss" scoped>
 @use '~/assets/scss/_onboarding' as *;
+@use '~/assets/scss/_variables' as *;
+
+.country-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  text-align: left;
+}
+
+.country-label {
+  font-size: $font-size-sm;
+  font-weight: $font-semibold;
+  color: $text-secondary;
+}
+
+.country-select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: 0.7rem 0.85rem;
+  font-size: $font-size-base;
+  font-family: inherit;
+  color: $text-primary;
+  background: $bg-white;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
+}
 </style>
