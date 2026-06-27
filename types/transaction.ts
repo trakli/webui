@@ -1,6 +1,35 @@
+// Intent tag distinguishing real earnings/spend from loan, debt and investment movement
+export type TransactionIntent =
+  | 'regular'
+  | 'loan_received'
+  | 'loan_repayment'
+  | 'debt_owed'
+  | 'debt_settled'
+  | 'investment_buy'
+  | 'investment_return'
+  | 'gift';
+
+export interface IntentOption {
+  value: TransactionIntent;
+  label: string; // English text, also used as the i18n key
+  side: 'income' | 'expense' | 'both';
+}
+
+export const TRANSACTION_INTENT_OPTIONS: IntentOption[] = [
+  { value: 'regular', label: 'Regular', side: 'both' },
+  { value: 'loan_received', label: 'Loan received', side: 'income' },
+  { value: 'loan_repayment', label: 'Loan repayment', side: 'expense' },
+  { value: 'debt_owed', label: 'Debt owed', side: 'income' },
+  { value: 'debt_settled', label: 'Debt settled', side: 'expense' },
+  { value: 'investment_buy', label: 'Investment purchase', side: 'expense' },
+  { value: 'investment_return', label: 'Investment return', side: 'income' },
+  { value: 'gift', label: 'Gift', side: 'income' }
+];
+
 export interface ApiTransaction {
   id: number;
   type: 'income' | 'expense';
+  intent?: TransactionIntent;
   amount: number;
   description: string;
   datetime: string;
@@ -42,6 +71,7 @@ export interface FrontendTransaction {
   date: string; // YYYY-MM-DD
   time: string; // HH:mm
   type: 'INCOME' | 'EXPENSE'; // Uppercase for UI
+  intent?: TransactionIntent;
   party: string; // Display name
   partyId?: number; // Numeric ID
   amount: string; // Formatted with currency e.g., "5000 XAF"
@@ -68,6 +98,7 @@ export interface TransactionCreatePayload {
   client_id?: string; // Concatenated UUID pair (optional)
   amount: number;
   type: 'income' | 'expense';
+  intent?: TransactionIntent;
   description: string;
   datetime: string; // ISO 8601 format
   created_at?: string; // ISO 8601 format
@@ -109,6 +140,8 @@ export interface ApiResponse<T> {
 // Query parameters for GET /transactions
 export interface TransactionQueryParams {
   type?: 'income' | 'expense';
+  intent?: string; // single intent or comma-separated list
+  exclude_transfers?: boolean;
   limit?: number;
   page?: number;
   synced_since?: string;

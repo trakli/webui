@@ -34,6 +34,24 @@
     --surface-accent: var(--color-border-medium);
     --surface-deep: var(--color-text-secondary);
   }
+  &--investment {
+    --surface-bg: rgba(14, 165, 233, 0.12);
+    --surface-ink: var(--color-text-primary);
+    --surface-accent: rgba(14, 165, 233, 0.5);
+    --surface-deep: #0284c7;
+  }
+  &--loan {
+    --surface-bg: rgba(217, 119, 6, 0.12);
+    --surface-ink: var(--color-text-primary);
+    --surface-accent: rgba(217, 119, 6, 0.5);
+    --surface-deep: #b45309;
+  }
+  &--gift {
+    --surface-bg: rgba(124, 58, 237, 0.12);
+    --surface-ink: var(--color-text-primary);
+    --surface-accent: rgba(124, 58, 237, 0.5);
+    --surface-deep: #6d28d9;
+  }
 }
 
 // In dark mode the surface bg becomes a subtle tint so it sits on the page
@@ -64,6 +82,21 @@
     --surface-bg: rgba(255, 255, 255, 0.04);
     --surface-accent: var(--color-border-medium);
     --surface-deep: var(--color-text-secondary);
+  }
+  .surface--investment {
+    --surface-bg: rgba(14, 165, 233, 0.16);
+    --surface-accent: rgba(56, 189, 248, 0.5);
+    --surface-deep: #38bdf8;
+  }
+  .surface--loan {
+    --surface-bg: rgba(217, 119, 6, 0.16);
+    --surface-accent: rgba(251, 191, 36, 0.5);
+    --surface-deep: #fbbf24;
+  }
+  .surface--gift {
+    --surface-bg: rgba(124, 58, 237, 0.16);
+    --surface-accent: rgba(167, 139, 250, 0.5);
+    --surface-deep: #a78bfa;
   }
 }
 

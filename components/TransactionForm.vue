@@ -34,6 +34,27 @@
         <textarea v-model="formDescription" :placeholder="t('Type here...')" />
       </div>
 
+      <div class="transaction-date">
+        <span
+          >{{ t('Intent') }} <span class="optional-label">({{ t('optional') }})</span></span
+        >
+        <div class="intent-pills" role="radiogroup" :aria-label="t('Intent')">
+          <button
+            v-for="opt in intentOptions"
+            :key="opt.value"
+            type="button"
+            class="intent-pill"
+            :class="{ 'intent-pill--active': formIntent === opt.value }"
+            role="radio"
+            :aria-checked="formIntent === opt.value"
+            @click="formIntent = opt.value"
+          >
+            <component :is="intentIcons[opt.value]" class="intent-pill-icon" />
+            <span>{{ t(opt.label) }}</span>
+          </button>
+        </div>
+      </div>
+
       <div class="form-transaction">
         <div class="transaction-date">
           <span>{{ t('Transaction date') }}</span>
@@ -258,10 +279,21 @@ import { toRefs, ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 import { CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
+import {
+  Circle,
+  HandCoins,
+  Banknote,
+  Scale,
+  Handshake,
+  TrendingUp,
+  PiggyBank,
+  Gift
+} from 'lucide-vue-next';
 import { useSharedData } from '~/composables/useSharedData';
 import { fetchAllPages } from '~/services/api/apiHelpers';
 import { api } from '@/services/api';
-import type { TransactionFile } from '~/types/transaction';
+import type { TransactionFile, TransactionIntent } from '~/types/transaction';
+import { TRANSACTION_INTENT_OPTIONS } from '~/types/transaction';
 
 const { t } = useI18n();
 
@@ -291,6 +323,23 @@ const formAmount = ref('');
 const formParty = ref('');
 const formCategory = ref('');
 const formDescription = ref('');
+const formIntent = ref<TransactionIntent>('regular');
+
+const intentIcons: Record<TransactionIntent, unknown> = {
+  regular: Circle,
+  loan_received: HandCoins,
+  loan_repayment: Banknote,
+  debt_owed: Scale,
+  debt_settled: Handshake,
+  investment_buy: TrendingUp,
+  investment_return: PiggyBank,
+  gift: Gift
+};
+
+const intentOptions = computed(() => {
+  const side = isOutcomeSelected.value ? 'expense' : 'income';
+  return TRANSACTION_INTENT_OPTIONS.filter((o) => o.side === 'both' || o.side === side);
+});
 
 const selectedPartyId = ref<number | null>(null);
 const selectedWalletId = ref<number | null>(null);
@@ -371,6 +420,7 @@ function onSubmit() {
     date,
     time,
     type: isOutcomeSelected.value ? 'EXPENSE' : 'INCOME',
+    intent: formIntent.value,
     party: formParty.value,
     partyId: selectedPartyId.value,
     amount: `${amountNum} ${selectedCurrency.value}`,
@@ -550,6 +600,11 @@ watch(isOutcomeSelected, (isExpense) => {
     formIsRefund.value = false;
     formRefundOfTransactionId.value = null;
   }
+  // Drop an intent that no longer applies to the selected side (e.g. an
+  // income-only intent after switching to expense).
+  if (!intentOptions.value.some((o) => o.value === formIntent.value)) {
+    formIntent.value = 'regular';
+  }
 });
 
 onMounted(async () => {
@@ -721,6 +776,8 @@ watch(
     if (item.description) {
       formDescription.value = item.description;
     }
+
+    formIntent.value = item.intent || 'regular';
 
     if (item.amount) {
       const num = parseFloat(String(item.amount).replace(/[^\d.]/g, ''));

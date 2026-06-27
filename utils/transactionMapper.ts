@@ -75,6 +75,7 @@ export const transactionMapper = {
       date,
       time,
       type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
+      intent: api.intent || 'regular',
       party: party?.name || '',
       partyId: party?.id,
       amount: formattedAmount,
@@ -135,6 +136,7 @@ export const transactionMapper = {
       date,
       time,
       type: api.type.toUpperCase() as 'INCOME' | 'EXPENSE',
+      intent: api.intent || 'regular',
       party: party?.name || '',
       partyId: party?.id,
       amount: String(api.amount),
@@ -197,6 +199,7 @@ export const transactionMapper = {
     const payload: TransactionCreatePayload = {
       amount,
       type: (frontend.type?.toLowerCase() as 'income' | 'expense') || 'income',
+      intent: frontend.intent || 'regular',
       description: frontend.description || '',
       datetime,
       party_id: partyId ?? undefined,

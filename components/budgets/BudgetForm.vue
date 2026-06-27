@@ -149,6 +149,7 @@
 import { computed, reactive, ref, watch } from 'vue';
 import type { Budget, BudgetPeriodType, BudgetTargetType } from '~/types/budget';
 import { useSharedData } from '~/composables/useSharedData';
+import { CURRENCIES } from '@/utils/currencies';
 
 const props = defineProps<{
   editingItem?: Budget | null;
@@ -177,19 +178,30 @@ const defaultCurrency = computed(() => props.defaults?.currency ?? 'USD');
 // <input type="date"> needs a bare `YYYY-MM-DD` or it renders empty.
 const toDateInput = (value: string): string => (value ? value.slice(0, 10) : '');
 
-// Pull distinct currency codes from the user's wallets. If the user has
-// no wallets yet, fall back to the configured default so the dropdown
-// is never empty when there's a currency configured globally.
+// Budgets aren't limited to wallet currencies: offer every supported currency,
+// with the user's own wallet currencies (and configured default) surfaced first
+// so the most relevant options sit at the top of the list.
 const currencyOptions = computed<string[]>(() => {
-  const wallets = (shared.wallets?.value ?? []) as Array<{ currency?: string }>;
-  const codes = new Set<string>();
-  for (const w of wallets) {
-    if (w.currency) codes.add(w.currency.toUpperCase());
+  const ordered: string[] = [];
+  const seen = new Set<string>();
+  const add = (code?: string) => {
+    if (!code) return;
+    const upper = code.toUpperCase();
+    if (!seen.has(upper)) {
+      seen.add(upper);
+      ordered.push(upper);
+    }
+  };
+
+  for (const w of (shared.wallets?.value ?? []) as Array<{ currency?: string }>) {
+    add(w.currency);
   }
-  if (codes.size === 0 && defaultCurrency.value) {
-    codes.add(defaultCurrency.value.toUpperCase());
+  add(defaultCurrency.value);
+  for (const c of CURRENCIES) {
+    add(c.code);
   }
-  return Array.from(codes).sort();
+
+  return ordered;
 });
 
 const buildInitial = () => ({

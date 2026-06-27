@@ -43,9 +43,9 @@
       <section class="panel">
         <div class="stat-row">
           <article class="stat green" style="--i: 0">
-            <ArrowDownUp class="stat-art" :size="104" :stroke-width="1.25" />
+            <ArtNetFlow class="stat-art" />
             <header class="stat-head">
-              <span class="stat-coin"><ArrowDownUp :size="18" /></span>
+              <span class="stat-coin"><IconNetFlow /></span>
               <span class="stat-label">{{ t('Net flow') }}</span>
             </header>
             <span class="stat-value" :class="net >= 0 ? 'pos' : 'neg'">{{ money(net) }}</span>
@@ -64,9 +64,9 @@
           </article>
 
           <article class="stat amber" style="--i: 1">
-            <PiggyBank class="stat-art" :size="104" :stroke-width="1.25" />
+            <ArtSaved class="stat-art" />
             <header class="stat-head">
-              <span class="stat-coin"><PiggyBank :size="18" /></span>
+              <span class="stat-coin"><IconSaved /></span>
               <span class="stat-label">{{ t('Saved') }}</span>
             </header>
             <span class="stat-value">{{ savingsRate }}<i>%</i></span>
@@ -77,9 +77,9 @@
           </article>
 
           <article class="stat blue" style="--i: 2">
-            <PieChart class="stat-art" :size="104" :stroke-width="1.25" />
+            <ArtCategory class="stat-art" />
             <header class="stat-head">
-              <span class="stat-coin"><PieChart :size="18" /></span>
+              <span class="stat-coin"><IconCategory /></span>
               <span class="stat-label">{{ t('Top category') }}</span>
             </header>
             <span class="stat-value cat-name">{{ topCategory.name }}</span>
@@ -96,10 +96,10 @@
       <!-- Panel 2: same warm pattern, cashflow hero + three cards -->
       <section class="panel">
         <article class="stat green wide" style="--i: 0">
-          <ChartSpline class="stat-art" :size="116" :stroke-width="1.25" />
+          <ArtTrend class="stat-art stat-art--wide" />
           <header class="stat-head spread">
             <span class="stat-head-left">
-              <span class="stat-coin"><ChartSpline :size="18" /></span>
+              <span class="stat-coin"><IconTrend /></span>
               <span class="stat-label">{{ t('Cashflow trend') }}</span>
             </span>
             <span class="stat-value sm" :class="net >= 0 ? 'pos' : 'neg'">{{ money(net) }}</span>
@@ -118,9 +118,9 @@
 
         <div class="stat-row">
           <article class="stat blue" style="--i: 1">
-            <ReceiptText class="stat-art" :size="104" :stroke-width="1.25" />
+            <ArtTransactions class="stat-art" />
             <header class="stat-head">
-              <span class="stat-coin"><ReceiptText :size="18" /></span>
+              <span class="stat-coin"><IconTransactions /></span>
               <span class="stat-label">{{ t('Transactions') }}</span>
             </header>
             <span class="stat-value">{{ txCount }}</span>
@@ -128,9 +128,9 @@
           </article>
 
           <article class="stat amber" style="--i: 2">
-            <Coins class="stat-art" :size="104" :stroke-width="1.25" />
+            <ArtAvg class="stat-art" />
             <header class="stat-head">
-              <span class="stat-coin"><Coins :size="18" /></span>
+              <span class="stat-coin"><IconAvg /></span>
               <span class="stat-label">{{ t('Avg expense') }}</span>
             </header>
             <span class="stat-value">{{ money(avgExpense) }}</span>
@@ -138,9 +138,9 @@
           </article>
 
           <article class="stat rose" style="--i: 3">
-            <Store class="stat-art" :size="104" :stroke-width="1.25" />
+            <ArtBiggest class="stat-art" />
             <header class="stat-head">
-              <span class="stat-coin"><Store :size="18" /></span>
+              <span class="stat-coin"><IconBiggest /></span>
               <span class="stat-label">{{ t('Biggest expense') }}</span>
             </header>
             <span class="stat-value cat-name">{{ biggestExpense }}</span>
@@ -166,16 +166,23 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
-import {
-  Lightbulb,
-  ArrowDownUp,
-  PiggyBank,
-  PieChart,
-  ChartSpline,
-  ReceiptText,
-  Coins,
-  Store
-} from 'lucide-vue-next';
+import { Lightbulb } from 'lucide-vue-next';
+// Solid (-bold) glyphs for the small chips, duotone (-bold-duotone) for the
+// large watermarks.
+import IconNetFlow from '~icons/solar/transfer-vertical-bold';
+import IconSaved from '~icons/solar/safe-2-bold';
+import IconCategory from '~icons/solar/pie-chart-2-bold';
+import IconTrend from '~icons/solar/graph-new-bold';
+import IconTransactions from '~icons/solar/bill-list-bold';
+import IconAvg from '~icons/solar/wad-of-money-bold';
+import IconBiggest from '~icons/solar/shop-2-bold';
+import ArtNetFlow from '~icons/solar/transfer-vertical-bold-duotone';
+import ArtSaved from '~icons/solar/safe-2-bold-duotone';
+import ArtCategory from '~icons/solar/pie-chart-2-bold-duotone';
+import ArtTrend from '~icons/solar/graph-new-bold-duotone';
+import ArtTransactions from '~icons/solar/bill-list-bold-duotone';
+import ArtAvg from '~icons/solar/wad-of-money-bold-duotone';
+import ArtBiggest from '~icons/solar/shop-2-bold-duotone';
 import SparkLine from '@/components/reports/SparkLine.vue';
 import { useStatistics, type WalletStatistics } from '@/composables/useStatistics';
 import { useSharedData } from '@/composables/useSharedData';
@@ -514,12 +521,19 @@ onBeforeUnmount(() => {
 
 .stat-art {
   position: absolute;
-  right: -20px;
-  bottom: -22px;
+  right: -14px;
+  bottom: -16px;
+  width: 104px;
+  height: 104px;
   z-index: 0;
-  opacity: 0.08;
+  opacity: 0.16;
   pointer-events: none;
-  transform: rotate(-8deg);
+  transform: rotate(-6deg);
+
+  &--wide {
+    width: 120px;
+    height: 120px;
+  }
 
   .green & {
     color: $primary;
@@ -552,25 +566,27 @@ onBeforeUnmount(() => {
 }
 
 .stat-coin {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  color: #fff;
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
 
   .green & {
-    background: $primary;
+    color: $primary;
   }
   .amber & {
-    background: $warning;
+    color: $warning;
   }
   .blue & {
-    background: $info;
+    color: $info;
   }
   .rose & {
-    background: $error-color;
+    color: $error-color;
   }
 }
 
