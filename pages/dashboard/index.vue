@@ -49,6 +49,10 @@
       >
         <QuickInsights />
       </ComponentLoader>
+
+      <div class="dashboard-widgets">
+        <ExtensionSlot name="dashboard.widgets" />
+      </div>
     </template>
   </div>
 </template>
@@ -68,6 +72,7 @@ import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';
 import QuickInsights from '@/components/dashboard/QuickInsights.vue';
 import OnboardingWizard from '@/components/onboarding/OnboardingWizard.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
+import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
 import { useStatistics } from '@/composables/useStatistics';
 
 const router = useRouter();
@@ -157,5 +162,11 @@ definePageMeta({
   @media (max-width: $breakpoint-md) {
     grid-template-columns: 1fr;
   }
+}
+
+.dashboard-widgets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-4;
 }
 </style>

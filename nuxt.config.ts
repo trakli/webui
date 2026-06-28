@@ -9,6 +9,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
   ssr: true,
+  // Plugin client UI ships as Nuxt layers consumed the same way as the shared
+  // ui-kit, e.g. extends: ['github:trakli/ui-kit', 'github:trakli/<plugin>-ui'].
+  // A layer registers a component for a slot key via
+  // useExtensionSlots().registerComponent(); DescriptorRenderer resolves it
+  // when a descriptor sets `ui.component`. Host adoption of the layers is
+  // deferred, so the list is empty for now.
+  extends: [],
   routeRules: {
     '/ai-insights': { redirect: '/assistant' }
   },
