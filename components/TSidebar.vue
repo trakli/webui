@@ -67,6 +67,10 @@
           </ul>
         </li>
       </ul>
+
+      <div v-if="!isCompact" class="sidebar-ext">
+        <ExtensionSlot name="sidebar.nav" />
+      </div>
     </nav>
 
     <hr v-if="!isCompact" class="divider" />
@@ -126,6 +130,7 @@ import {
 import { Sparkles, Scale, Coins } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Logo from './Logo.vue';
+import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
 import { useSidebar } from '@/composables/useSidebar';
 import { useRoute, useRouter } from 'vue-router';
 

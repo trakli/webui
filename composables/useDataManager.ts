@@ -47,6 +47,12 @@ export const useDataManager = () => {
 
       isInitialized.value = true;
       lastInitTime.value = Date.now();
+
+      // Integrations are non-critical and additive. Load them after the token
+      // cookie has settled (fresh login writes it asynchronously) and never let
+      // a failure here disrupt the session.
+      const { load: loadIntegrations } = useIntegrations();
+      loadIntegrations().catch(() => []);
     } catch (err) {
       error.value = extractApiErrors(err);
       isInitialized.value = false;
@@ -66,9 +72,11 @@ export const useDataManager = () => {
     try {
       const { clearAllData } = useSharedData();
       const { clearTransactions } = useTransactions();
+      const { clear: clearIntegrations } = useIntegrations();
 
       clearAllData();
       clearTransactions();
+      clearIntegrations();
     } catch (err) {
       console.warn('[DataManager] Error clearing data:', err);
     }

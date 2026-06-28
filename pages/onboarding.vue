@@ -18,8 +18,8 @@
       </div>
 
       <div class="onboarding-content">
-        <!-- Step 1: Language Selection -->
-        <div v-if="currentStep === 1" class="step-content">
+        <!-- Step: Language Selection -->
+        <div v-if="currentStepId === 'language'" class="step-content">
           <div class="step-icon">
             <IconLanguage />
           </div>
@@ -71,8 +71,8 @@
           </div>
         </div>
 
-        <!-- Step 2: Wallet and Currency Setup -->
-        <div v-if="currentStep === 2" class="step-content">
+        <!-- Step: Wallet and Currency Setup -->
+        <div v-if="currentStepId === 'wallet'" class="step-content">
           <div class="step-icon">
             <IconWallet />
           </div>
@@ -203,8 +203,8 @@
           </div>
         </div>
 
-        <!-- Step 3: Categories Setup -->
-        <div v-if="currentStep === 3" class="step-content">
+        <!-- Step: Categories Setup -->
+        <div v-if="currentStepId === 'categories'" class="step-content">
           <div class="step-icon">
             <IconCategory />
           </div>
@@ -248,8 +248,13 @@
           </div>
         </div>
 
-        <!-- Step 4: All Set -->
-        <div v-if="currentStep === 4" class="step-content completion-step">
+        <!-- Step: plugin-contributed onboarding step (rendered from descriptor) -->
+        <div v-else-if="currentStepContribution" class="step-content">
+          <DescriptorRenderer :contribution="currentStepContribution" @next="nextStep" />
+        </div>
+
+        <!-- Step: All Set -->
+        <div v-if="currentStepId === 'complete'" class="step-content completion-step">
           <div class="completion-icon">
             <CheckCircleIcon />
           </div>
@@ -320,6 +325,8 @@ import IconCategory from '~icons/solar/widget-5-bold-duotone';
 import { useSharedData } from '@/composables/useSharedData';
 import { useNotifications } from '@/composables/useNotifications';
 import { useWallets } from '@/composables/useWallets';
+import { useExtensionSlots } from '@/composables/useExtensionSlots';
+import DescriptorRenderer from '@/components/extensions/DescriptorRenderer.vue';
 import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 import { getCountries } from '@/utils/countries';
@@ -341,9 +348,37 @@ const { setComplete: setOnboardingComplete } = useOnboardingStatus();
 const returnTo = computed(() => (route.query.returnTo as string) || '/dashboard');
 
 const currentStep = ref(1);
-const totalSteps = 4;
 
-const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100);
+// Onboarding is a data-driven list: built-in steps plus any plugin
+// contributions to the `onboarding.steps` slot, merged by order. The
+// completion step is pinned last.
+const { contributionsFor } = useExtensionSlots();
+const onboardingContributions = contributionsFor('onboarding.steps');
+
+const builtInSteps = [
+  { id: 'language', order: 10 },
+  { id: 'wallet', order: 20 },
+  { id: 'categories', order: 30 },
+  { id: 'complete', order: 1000 }
+];
+
+const steps = computed(() => {
+  const pluginSteps = onboardingContributions.value.map((contribution) => ({
+    id: contribution.key,
+    order: contribution.order,
+    contribution
+  }));
+
+  return [...builtInSteps, ...pluginSteps].sort((a, b) => a.order - b.order);
+});
+
+const totalSteps = computed(() => steps.value.length);
+const currentStepId = computed(() => steps.value[currentStep.value - 1]?.id);
+const currentStepContribution = computed(
+  () => steps.value[currentStep.value - 1]?.contribution ?? null
+);
+
+const progressPercentage = computed(() => (currentStep.value / totalSteps.value) * 100);
 
 // Data from shared state
 const incomeCategories = computed(() => sharedData.getIncomeCategories?.value || []);
@@ -393,7 +428,7 @@ const isWalletCurrencySetupValid = computed(() => {
 });
 
 const nextStep = () => {
-  if (currentStep.value < totalSteps) {
+  if (currentStep.value < totalSteps.value) {
     currentStep.value++;
   }
 };
