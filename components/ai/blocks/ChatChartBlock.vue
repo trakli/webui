@@ -44,9 +44,15 @@ const labelKey = computed<string | null>(() => {
 const numericKeys = computed<string[]>(() => {
   const first = rows.value[0];
   if (!first) return [];
-  return Object.keys(first).filter(
-    (k) => typeof first[k] === 'number' && !/_id$/.test(k) && k !== 'percentage'
+  const numeric = Object.keys(first).filter(
+    (k) => typeof first[k] === 'number' && k !== 'percentage' && !/(^|_)id$/i.test(k)
   );
+  // Count/metadata columns (transaction_count) sit alongside the real value
+  // (amount) in the built-in datasets. Keeping them made numericKeys > 1, which
+  // silently downgraded pie/donut to bar and could even plot the id. Drop them
+  // when a real value column remains; keep them if that is all there is.
+  const values = numeric.filter((k) => !/(^|_)count$/i.test(k));
+  return values.length > 0 ? values : numeric;
 });
 
 const normalized = computed(

@@ -64,6 +64,28 @@ describe('ChatChartBlock (chart-type mapping)', () => {
     expect(type).toBe('bar');
   });
 
+  it('keeps a donut for the built-in dataset shape (ignores id/count/percentage columns)', async () => {
+    const type = await renderedType({
+      chart_hint: 'donut',
+      data: [
+        { id: 1, name: 'Food', amount: 120, transaction_count: 8, percentage: 20 },
+        { id: 2, name: 'Rent', amount: 500, transaction_count: 1, percentage: 80 }
+      ]
+    });
+    expect(type).toBe('donut');
+  });
+
+  it('charts a count-only single-series dataset when no value column exists', async () => {
+    const type = await renderedType({
+      chart_hint: 'pie',
+      data: [
+        { category: 'Food', transaction_count: 8 },
+        { category: 'Rent', transaction_count: 1 }
+      ]
+    });
+    expect(type).toBe('pie');
+  });
+
   it('renders horizontal bar as an apex bar', async () => {
     const type = await renderedType({
       chart_hint: 'hbar',
