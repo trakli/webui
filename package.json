@@ -25,10 +25,12 @@
     "@nuxtjs/i18n": "^10.2.1",
     "apexcharts": "^5.3.3",
     "country-flag-icons": "^1.5.19",
+    "laravel-echo": "^2.3.7",
     "libphonenumber-js": "^1.12.9",
     "lucide-vue-next": "^0.525.0",
     "markdown-it": "^14.2.0",
     "nuxt": "^3.12.4",
+    "pusher-js": "^8.5.0",
     "radix-vue": "^1.9.17",
     "vue": "latest",
     "vue3-apexcharts": "^1.8.0"

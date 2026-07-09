@@ -41,7 +41,11 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1',
+      reverbKey: process.env.NUXT_PUBLIC_REVERB_KEY || '',
+      reverbHost: process.env.NUXT_PUBLIC_REVERB_HOST || 'localhost',
+      reverbPort: process.env.NUXT_PUBLIC_REVERB_PORT || '6001',
+      reverbScheme: process.env.NUXT_PUBLIC_REVERB_SCHEME || 'http'
     }
   },
   app: {
