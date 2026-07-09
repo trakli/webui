@@ -63,6 +63,7 @@ export interface ChatMessage {
   format_hint: string | null;
   language: string | null;
   result: ChatMessageResult | null;
+  progress: string[] | null;
   error: string | null;
   completed_at: string | null;
   created_at: string;

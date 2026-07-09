@@ -7,7 +7,11 @@
 
     <div class="bubble-wrap">
       <div class="bubble" :class="bubbleClass(message)">
-        <TypingDots v-if="isPendingAssistant(message)" />
+        <ChatProgressSteps
+          v-if="isPendingAssistant(message) && message.progress?.length"
+          :steps="message.progress"
+        />
+        <TypingDots v-else-if="isPendingAssistant(message)" />
         <template v-else>
           <!-- When the message has rendered blocks, they own the output (the
                narration is the first block); otherwise show the text as markdown. -->
@@ -45,6 +49,7 @@
 <script setup lang="ts">
 import { Bot, User } from 'lucide-vue-next';
 import TypingDots from '@/components/ai/TypingDots.vue';
+import ChatProgressSteps from '@/components/ai/ChatProgressSteps.vue';
 import ChatResultRenderer from '@/components/ai/ChatResultRenderer.vue';
 import ChatMarkdownBlock from '@/components/ai/blocks/ChatMarkdownBlock.vue';
 import type { ChatBlock, ChatMessage } from '@/services/api/aiApi';
