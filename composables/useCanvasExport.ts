@@ -16,23 +16,46 @@ export function useCanvasExport() {
   }
 
   function printCanvas(bodyEl: HTMLElement | null | undefined, title: string): void {
-    if (!bodyEl || typeof window === 'undefined') return;
-    const win = window.open('', '_blank', 'width=900,height=1000');
-    if (!win) return;
+    if (!bodyEl || typeof window === 'undefined' || typeof document === 'undefined') return;
 
-    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
-      <style>
-        body { font-family: Ubuntu, -apple-system, Segoe UI, Roboto, sans-serif; color: #222; padding: 32px; max-width: 760px; margin: 0 auto; }
-        h1, h2, h3, h4 { line-height: 1.25; }
-        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-        th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
-        th { background: #f3f5f4; }
-        svg { max-width: 100%; }
-      </style></head><body><h1>${title}</h1>${bodyEl.innerHTML}</body></html>`);
-    win.document.close();
-    win.focus();
-    // Let charts/images paint before printing.
-    setTimeout(() => win.print(), 300);
+    // Print the live, already-styled report in place rather than in a popup. A
+    // popup has to reload the app's styles asynchronously, so the auto-print
+    // kept snapshotting the page before they applied. Here a clone of the
+    // rendered report is appended as a top-level element (so no scrollable or
+    // positioned ancestor can clip it) and @media print shows only that, using
+    // the app's real styles that are already loaded and painted.
+    const portal = document.createElement('div');
+    portal.className = 'print-canvas-portal';
+
+    const heading = document.createElement('h1');
+    heading.textContent = title;
+    portal.appendChild(heading);
+    portal.appendChild(bodyEl.cloneNode(true));
+    document.body.appendChild(portal);
+
+    // A document should print light regardless of the on-screen theme.
+    const html = document.documentElement;
+    const wasDark = html.classList.contains('dark');
+    if (wasDark) html.classList.remove('dark');
+    document.body.classList.add('printing-canvas');
+
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      document.body.classList.remove('printing-canvas');
+      if (wasDark) html.classList.add('dark');
+      portal.remove();
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+
+    // A tick lets the print classes apply before the dialog opens; the trailing
+    // timeout is a safety net for browsers that do not fire afterprint.
+    window.setTimeout(() => {
+      window.print();
+      window.setTimeout(cleanup, 1000);
+    }, 50);
   }
 
   async function downloadExport(
