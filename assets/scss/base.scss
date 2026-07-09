@@ -160,8 +160,59 @@ button {
 }
 
 /* Print styles */
+// The canvas report is printed in place: a cloned copy is appended to <body>
+// and everything else is hidden, so the print uses the app's real, already
+// loaded styles. Hidden on screen; shown only when printing.
+.print-canvas-portal {
+  display: none;
+}
+
 @media print {
+  // Zero the page margin so the browser stops drawing its title/URL/date
+  // header and footer; the portal supplies its own inner padding instead.
+  @page {
+    margin: 0;
+  }
+
   body {
     background: none;
+  }
+
+  body.printing-canvas > *:not(.print-canvas-portal) {
+    display: none !important;
+  }
+
+  body.printing-canvas .print-canvas-portal {
+    display: block !important;
+    position: static;
+    padding: 16mm;
+    max-width: 100%;
+  }
+
+  body.printing-canvas .print-canvas-portal * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  // The report is cloned from an on-screen scroll container with a fixed
+  // height; reset that so it flows to its content instead of reserving a whole
+  // empty page.
+  body.printing-canvas .print-canvas-portal,
+  body.printing-canvas .print-canvas-portal > * {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body.printing-canvas .print-canvas-portal * {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body.printing-canvas .print-canvas-portal svg,
+  body.printing-canvas .print-canvas-portal .apexcharts-canvas {
+    max-width: 100% !important;
+    height: auto !important;
   }
 }
