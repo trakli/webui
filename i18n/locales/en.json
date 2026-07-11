@@ -1323,5 +1323,19 @@
   "Delete \"{name}\"?": "Delete \"{name}\"?",
   "Discussions": "Discussions",
   "Chat and ask about your finances": "Chat and ask about your finances",
-  "Could not save that setting. Please try again.": "Could not save that setting. Please try again."
+  "Could not save that setting. Please try again.": "Could not save that setting. Please try again.",
+  "Connected AI clients": "Connected AI clients",
+  "Connect an AI client like Claude Desktop or Cursor to your Trakli data over the Model Context Protocol.": "Connect an AI client like Claude Desktop or Cursor to your Trakli data over the Model Context Protocol.",
+  "MCP endpoint": "MCP endpoint",
+  "Copy": "Copy",
+  "Add this URL to your AI client and authenticate with one of the tokens below.": "Add this URL to your AI client and authenticate with one of the tokens below.",
+  "Access tokens": "Access tokens",
+  "Token name, e.g. Claude Desktop": "Token name, e.g. Claude Desktop",
+  "Generate token": "Generate token",
+  "Last used": "Last used",
+  "Never used": "Never used",
+  "Revoke": "Revoke",
+  "No tokens yet.": "No tokens yet.",
+  "Copy your token now": "Copy your token now",
+  "This token is shown only once. Store it somewhere safe before closing.": "This token is shown only once. Store it somewhere safe before closing."
 }
