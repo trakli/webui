@@ -27,6 +27,9 @@
             <ExtensionSlot name="settings.integrations" />
           </div>
         </template>
+        <template #connections>
+          <SettingsConnections />
+        </template>
         <template v-for="contribution in pluginTabs" :key="contribution.key" #[contribution.key]>
           <DescriptorRenderer :contribution="contribution" />
         </template>
@@ -39,9 +42,10 @@
 
 <script setup>
 import { ref, computed, markRaw } from 'vue';
-import { Settings, Globe, Wallet, Sun, User, Bell, Puzzle } from 'lucide-vue-next';
+import { Settings, Globe, Wallet, Sun, User, Bell, Puzzle, Bot } from 'lucide-vue-next';
 import TTabs from '@/components/TTabs.vue';
 import SettingsAccount from '@/components/settings/SettingsAccount.vue';
+import SettingsConnections from '@/components/settings/SettingsConnections.vue';
 import SettingsGeneral from '@/components/settings/SettingsGeneral.vue';
 import SettingsWallets from '@/components/settings/SettingsWallets.vue';
 import SettingsDisplay from '@/components/settings/SettingsDisplay.vue';
@@ -70,6 +74,7 @@ const tabs = computed(() => [
   { id: 'wallets', label: t('Wallets'), icon: markRaw(Wallet) },
   { id: 'display', label: t('Display'), icon: markRaw(Sun) },
   { id: 'notifications', label: t('Notifications'), icon: markRaw(Bell) },
+  { id: 'connections', label: t('Connected AI clients'), icon: markRaw(Bot) },
   { id: 'integrations', label: t('Integrations'), icon: markRaw(Puzzle) },
   ...pluginTabs.value.map((contribution) => ({
     id: contribution.key,
