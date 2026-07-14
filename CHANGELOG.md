@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.1] - 2026-07-11
+
+### Added
+
+- Unified AI chat experience with a side canvas; chat can be the landing surface via a landing-mode setting, backed by a dashboard assistant hub
+- Live assistant progress streamed over websockets with a polling fallback, and an enriched chat landing with live insights and suggested prompts
+- Settings panel to connect AI clients over MCP
+- Financial position, holdings, and intent-tagging UI
+- Admin console UI with outreach and onboarding
+- Plugin-described UI rendered through extension slots
+- Recent-imports list with delete and a live link into chat
+- Section-by-section progressive dashboard stats and a streamed transactions spreadsheet with faster reports
+- Navigation and top-bar icons unified; the assistant moved to `/assistant`
+
+### Changed
+
+- Renamed the country preference configuration key to `country`
+- Removed duplicate dashboard stats requests and cache bypass
+- Added assistant, import, and canvas translation strings
+
+### Fixed
+
+- Canvas report now prints with correct styling and margins
+- Pie and donut charts render as intended instead of downgrading to bar
+
 ## [1.1.2] - 2026-05-18
 
 ### Changed
