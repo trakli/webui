@@ -29,15 +29,12 @@ export const useDataManager = () => {
     error.value = null;
 
     try {
-      // Clear existing data to ensure loading state shows properly
-      const { clearAllData, loadAllData } = useSharedData();
-      const { clearTransactions, refreshTransactions } = useTransactions();
-      clearAllData();
-      clearTransactions();
+      const { loadAllData } = useSharedData();
+      const { refreshTransactions } = useTransactions();
 
-      // Force reload all data (bypass cache)
-      await loadAllData(true);
-      await refreshTransactions();
+      // Honor the shared-data cache; logout already clears it for a fresh session.
+      // Shared data and transactions load concurrently instead of in series.
+      await Promise.all([loadAllData(false), refreshTransactions()]);
 
       // Apply saved language preference via cookie (avoids useI18n context issues)
       const { configurationsMap } = useSharedData();
@@ -50,6 +47,12 @@ export const useDataManager = () => {
 
       isInitialized.value = true;
       lastInitTime.value = Date.now();
+
+      // Integrations are non-critical and additive. Load them after the token
+      // cookie has settled (fresh login writes it asynchronously) and never let
+      // a failure here disrupt the session.
+      const { load: loadIntegrations } = useIntegrations();
+      loadIntegrations().catch(() => []);
     } catch (err) {
       error.value = extractApiErrors(err);
       isInitialized.value = false;
@@ -69,9 +72,11 @@ export const useDataManager = () => {
     try {
       const { clearAllData } = useSharedData();
       const { clearTransactions } = useTransactions();
+      const { clear: clearIntegrations } = useIntegrations();
 
       clearAllData();
       clearTransactions();
+      clearIntegrations();
     } catch (err) {
       console.warn('[DataManager] Error clearing data:', err);
     }

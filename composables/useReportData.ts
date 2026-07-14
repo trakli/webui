@@ -115,10 +115,12 @@ const compareEnabled = ref(true);
 const apiStats = ref<StatsResponse['data'] | null>(null);
 const apiStatsPrev = ref<StatsResponse['data'] | null>(null);
 const periodTransactions = ref<FrontendTransaction[]>([]);
-const prevPeriodTransactions = ref<FrontendTransaction[]>([]);
 const trailing12Transactions = ref<FrontendTransaction[]>([]);
-const isLoading = ref(false);
+// Starts true: the immediate watcher always kicks off a reload, so the first
+// paint should show loading rather than briefly flashing the empty state.
+const isLoading = ref(true);
 const error = ref<string | null>(null);
+const sweepTruncated = ref(false);
 
 const PALETTE_EXPENSE = [
   '#e11d48',
@@ -204,31 +206,68 @@ async function fetchAllTransactionsInRange(
     groups: readonly any[];
   }
 ): Promise<FrontendTransaction[]> {
-  const out: FrontendTransaction[] = [];
-  let page = 1;
   const limit = 200;
-  // Hard cap so we never spin forever; reports break degrade-gracefully past this.
+  // Hard cap so we never spin forever; reports degrade gracefully past this.
   const maxPages = 30;
-  while (true) {
-    const resp = await api.transactions.fetchAll({
+  // Fetch a bounded number of pages at once so a heavy account doesn't pay one
+  // serial round-trip per page before the report can render.
+  const concurrency = 6;
+
+  const fetchPage = (page: number) =>
+    api.transactions.fetchAll({
       page,
       limit,
       date_from: toISODate(start),
       date_to: toISODate(end)
     });
-    const mapped = (resp.data || []).map((t) =>
-      transactionMapper.toFrontend(
-        t,
-        lookups.parties as any[],
-        lookups.categories as any[],
-        lookups.wallets as any[],
-        lookups.groups as any[]
-      )
-    );
-    out.push(...mapped);
-    if (!resp.data || resp.data.length < limit || page >= resp.last_page || page >= maxPages) break;
-    page += 1;
+
+  const first = await fetchPage(1);
+  const lastPage = Math.max(1, first.last_page || 1);
+  const targetPages = Math.min(lastPage, maxPages);
+
+  // Index pages by (page - 1) so the final concat preserves server order
+  // regardless of which request resolves first.
+  const pages: any[][] = new Array(targetPages);
+  pages[0] = first.data || [];
+
+  if (targetPages > 1) {
+    const queue: number[] = [];
+    for (let p = 2; p <= targetPages; p++) queue.push(p);
+
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < queue.length) {
+        const p = queue[cursor++];
+        const resp = await fetchPage(p);
+        pages[p - 1] = resp.data || [];
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, () => worker()));
   }
+
+  const out: FrontendTransaction[] = [];
+  for (const data of pages) {
+    if (!data) continue;
+    for (const t of data) {
+      out.push(
+        transactionMapper.toFrontend(
+          t,
+          lookups.parties as any[],
+          lookups.categories as any[],
+          lookups.wallets as any[],
+          lookups.groups as any[]
+        )
+      );
+    }
+  }
+
+  if (lastPage > maxPages) {
+    sweepTruncated.value = true;
+    console.warn(
+      `[reports] transaction sweep truncated at ${maxPages} pages (${out.length} rows); some data omitted`
+    );
+  }
+
   return out;
 }
 
@@ -258,34 +297,47 @@ async function reload(lookups: {
   const id = ++lastReloadId;
   isLoading.value = true;
   error.value = null;
+  sweepTruncated.value = false;
 
+  const cur = getRange(selectedPeriod.value, customRange.value);
+  const prev = previousRange(cur);
+  const trailingStart = startOfDay(new Date(cur.end.getFullYear(), cur.end.getMonth() - 5, 1));
+
+  // Load stats first so the stats-driven tabs render without waiting for the
+  // transaction sweeps below.
   try {
-    const cur = getRange(selectedPeriod.value, customRange.value);
-    const prev = previousRange(cur);
-    const trailingStart = startOfDay(new Date(cur.end.getFullYear(), cur.end.getMonth() - 5, 1));
-
-    const [statsResp, prevStatsResp, periodTxs, prevTxs, trailingTxs] = await Promise.all([
+    const [statsResp, prevStatsResp] = await Promise.all([
       fetchStatsForRange(cur.start, cur.end),
-      fetchStatsForRange(prev.start, prev.end),
-      fetchAllTransactionsInRange(cur.start, cur.end, lookups),
-      fetchAllTransactionsInRange(prev.start, prev.end, lookups),
-      fetchAllTransactionsInRange(trailingStart, cur.end, lookups)
+      fetchStatsForRange(prev.start, prev.end)
     ]);
-
-    // Discard if a newer reload superseded this one
     if (id !== lastReloadId) return;
-
     apiStats.value = statsResp;
     apiStatsPrev.value = prevStatsResp;
-    periodTransactions.value = periodTxs;
-    prevPeriodTransactions.value = prevTxs;
-    trailing12Transactions.value = trailingTxs;
   } catch (e) {
     if (id !== lastReloadId) return;
-    console.error('[reports] reload failed', e);
+    console.error('[reports] stats reload failed', e);
     error.value = e instanceof Error ? e.message : 'Failed to load reports';
   } finally {
     if (id === lastReloadId) isLoading.value = false;
+  }
+
+  // Raw transactions only feed daily granularity (calendar, trends, month
+  // review, CSV). When the period already spans the trailing six months, reuse
+  // that fetch as the trailing data instead of running a second sweep.
+  try {
+    const periodCoversTrailing = cur.start.getTime() <= trailingStart.getTime();
+    const [periodTxs, trailingTxs] = await Promise.all([
+      fetchAllTransactionsInRange(cur.start, cur.end, lookups),
+      periodCoversTrailing
+        ? Promise.resolve(null)
+        : fetchAllTransactionsInRange(trailingStart, cur.end, lookups)
+    ]);
+    if (id !== lastReloadId) return;
+    periodTransactions.value = periodTxs;
+    trailing12Transactions.value = trailingTxs ?? periodTxs;
+  } catch (e) {
+    if (id !== lastReloadId) return;
+    console.error('[reports] transaction detail reload failed', e);
   }
 }
 
@@ -428,17 +480,35 @@ export const useReportData = () => {
     return Array.from(map.values());
   });
 
-  // Per-category 6-month trend computed from trailing transactions (API doesn't provide per-cat history)
-  const trendFor = (categoryName: string, type: 'INCOME' | 'EXPENSE'): number[] => {
+  // Per-category 6-month trend (API doesn't provide per-cat history). Built in a
+  // single pass over the trailing transactions and indexed by category, so the
+  // per-category lookups below stay O(1) instead of rescanning every transaction.
+  const trendIndex = computed(() => {
     const months = trailing6MonthBuckets.value.map((m) => m.month);
-    const acc = new Map(months.map((m) => [m, 0]));
+    const monthIdx = new Map(months.map((m, i) => [m, i]));
+    const income = new Map<string, number[]>();
+    const expense = new Map<string, number[]>();
     trailing12Transactions.value.forEach((t) => {
-      if (t.isTransfer || t.type !== type) return;
-      if ((t.category || 'Uncategorized') !== categoryName) return;
-      const key = t.date.slice(0, 7);
-      if (acc.has(key)) acc.set(key, (acc.get(key) || 0) + parseAmount(t.amount).value);
+      if (t.isTransfer) return;
+      const mi = monthIdx.get(t.date.slice(0, 7));
+      if (mi === undefined) return;
+      const bucket = t.type === 'INCOME' ? income : t.type === 'EXPENSE' ? expense : null;
+      if (!bucket) return;
+      const name = t.category || 'Uncategorized';
+      let series = bucket.get(name);
+      if (!series) {
+        series = new Array(months.length).fill(0);
+        bucket.set(name, series);
+      }
+      series[mi] += parseAmount(t.amount).value;
     });
-    return months.map((m) => acc.get(m) || 0);
+    return { months, income, expense };
+  });
+
+  const trendFor = (categoryName: string, type: 'INCOME' | 'EXPENSE'): number[] => {
+    const idx = trendIndex.value;
+    const series = (type === 'INCOME' ? idx.income : idx.expense).get(categoryName);
+    return series ? series.slice() : idx.months.map(() => 0);
   };
 
   const expenseCategories = computed<CategoryBucket[]>(() => {
@@ -574,8 +644,12 @@ export const useReportData = () => {
       }
     });
 
-    // First-time payees: compare period payees vs prior period payees
-    const prevPayees = new Set(prevPeriodTransactions.value.map((t) => t.party));
+    // First-time payees: compare period payees vs prior-period payees from the
+    // previous-period stats (party charts), avoiding a second raw-transaction fetch.
+    const prevPayees = new Set([
+      ...(apiStatsPrev.value?.charts?.party_spending || []).map((p) => p.name),
+      ...(apiStatsPrev.value?.charts?.party_income || []).map((p) => p.name)
+    ]);
     const firstTimers = Array.from(
       new Set(periodTransactions.value.filter((t) => !prevPayees.has(t.party)).map((t) => t.party))
     );
@@ -681,6 +755,12 @@ export const useReportData = () => {
 
   const primaryCurrency = computed(() => getDefaultCurrency.value || 'USD');
 
+  // The backend excludes amounts it can't convert (no exchange rate for that
+  // currency) and flags the response partial. Surface it so party/category
+  // figures aren't silently understated.
+  const statsPartial = computed(() => apiStats.value?.partial === true);
+  const unconvertedCurrencies = computed(() => apiStats.value?.unconverted_currencies || []);
+
   const setPeriod = (p: ReportPeriodValue) => {
     selectedPeriod.value = p;
     if (p !== 'custom') customRange.value = null;
@@ -714,6 +794,9 @@ export const useReportData = () => {
     compareEnabled,
     isLoading,
     error,
+    sweepTruncated,
+    statsPartial,
+    unconvertedCurrencies,
     periods: REPORT_PERIODS,
     range,
     prevRange,

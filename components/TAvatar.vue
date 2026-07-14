@@ -21,6 +21,10 @@
             <Settings class="menu-icon" />
             <span>{{ t('Settings') }}</span>
           </button>
+          <button v-if="user?.is_admin" class="menu-item" @click="goToAdmin">
+            <ShieldCheck class="menu-icon" />
+            <span>{{ t('Admin') }}</span>
+          </button>
           <button class="menu-item menu-item--danger" @click="handleLogout">
             <LogOut class="menu-icon" />
             <span>{{ t('Logout') }}</span>
@@ -33,7 +37,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { Settings, LogOut } from 'lucide-vue-next';
+import { Settings, LogOut, ShieldCheck } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useDropdown } from '@/composables/useDropdown';
 
@@ -67,6 +71,11 @@ const goToSettings = () => {
   router.push('/settings');
 };
 
+const goToAdmin = () => {
+  close();
+  router.push('/admin');
+};
+
 const handleLogout = async () => {
   close();
   await logout();
@@ -97,8 +106,8 @@ const handleLogout = async () => {
   }
 
   .avatar-image {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid $border-medium;

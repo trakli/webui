@@ -44,6 +44,12 @@ const importsApi = {
     const response = await api<{ data: ImportSession }>(`/import/sessions/${id}`);
 
     return extractResponseData(response, {} as ImportSession);
+  },
+
+  async deleteSession(id: number): Promise<void> {
+    const api = useApi();
+
+    await api(`/import/sessions/${id}`, { method: 'DELETE' });
   }
 };
 

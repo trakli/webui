@@ -1,4 +1,5 @@
 import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
+import { resolveLandingPath } from '~/composables/useLanding';
 
 export default defineNuxtRouteMiddleware(async (to, _from) => {
   const { isAuthenticated } = useAuth();
@@ -15,7 +16,7 @@ export default defineNuxtRouteMiddleware(async (to, _from) => {
     // Fast path: cookie says complete
     if (isComplete.value) {
       const returnTo = to.query.returnTo as string;
-      return navigateTo(returnTo || '/dashboard');
+      return navigateTo(returnTo || (await resolveLandingPath()));
     }
 
     // Check API to confirm
@@ -27,7 +28,7 @@ export default defineNuxtRouteMiddleware(async (to, _from) => {
       if (isOnboardingComplete) {
         setComplete();
         const returnTo = to.query.returnTo as string;
-        return navigateTo(returnTo || '/dashboard');
+        return navigateTo(returnTo || (await resolveLandingPath()));
       }
     } catch (error) {
       console.error('Failed to check onboarding status:', error);

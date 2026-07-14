@@ -95,6 +95,9 @@ const groupedSessions = computed(() => {
   gap: $spacing-3;
   min-height: 0;
   overflow: hidden;
+  background:
+    radial-gradient(120% 40% at 0% 0%, rgba(var(--color-primary-rgb), 0.06), transparent 60%),
+    $bg-light;
 
   @media (max-width: $breakpoint-md) {
     display: none;

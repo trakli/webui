@@ -15,9 +15,54 @@ export function useAiChats() {
   // rapidly switches between chats.
   let openToken = 0;
 
-  // Stop polling after 90s; anything still pending after that is stuck
-  // server-side (worker crash, timeout, etc.), not actively in progress.
-  const POLL_STUCK_THRESHOLD_MS = 90_000;
+  // Real-time transport. When Reverb is configured, chat turns push their
+  // progress and completion over a private channel; polling stays on as the
+  // reconnect fallback.
+  let nuxtApp: ReturnType<typeof useNuxtApp> | null = null;
+  try {
+    nuxtApp = useNuxtApp();
+  } catch {
+    // Outside a Nuxt runtime (e.g. unit tests) sockets are simply unavailable;
+    // the app falls back to polling.
+  }
+  let subscribedId: number | null = null;
+
+  interface TurnEvent {
+    message_id: number;
+    kind: string;
+    label: string | null;
+  }
+
+  function onTurnEvent(e: TurnEvent) {
+    const msg = currentSession.value?.messages?.find((m) => m.id === e.message_id);
+    if (!msg) return;
+    if (e.kind === 'progress' && e.label) {
+      msg.progress = [...(msg.progress ?? []), e.label];
+    } else if (e.kind === 'settled') {
+      refreshCurrent();
+    }
+  }
+
+  function subscribeToSession(id: number) {
+    const echo = nuxtApp?.$echo;
+    if (!echo || subscribedId === id) return;
+    unsubscribe();
+    subscribedId = id;
+    echo.private(`chat-session.${id}`).listen('.turn', onTurnEvent);
+  }
+
+  function unsubscribe() {
+    const echo = nuxtApp?.$echo;
+    if (echo && subscribedId !== null) {
+      echo.leave(`chat-session.${subscribedId}`);
+    }
+    subscribedId = null;
+  }
+
+  // Keep polling well past the backend's worst case (agent runs can take a
+  // couple of minutes: multi-step LLM + SmartQL). Only past this is a message
+  // genuinely stuck server-side (worker crash) rather than still in progress.
+  const POLL_STUCK_THRESHOLD_MS = 240_000;
 
   const isPolling = computed(() => {
     if (!currentSession.value?.messages) return false;
@@ -47,36 +92,64 @@ export function useAiChats() {
     // A newer open / new-chat call has superseded us; drop this response.
     if (token !== openToken) return;
     currentSession.value = session;
+    if (session) subscribeToSession(session.id);
     maybeStartPolling();
   }
 
   function newSession() {
     openToken += 1;
     stopPolling();
+    unsubscribe();
     currentSession.value = null;
   }
 
-  async function send(message: string, formatHint?: FormatType) {
-    if (!message.trim() || isSending.value) return;
+  async function send(
+    message: string,
+    formatHint?: FormatType,
+    files?: File[],
+    documentType?: string | null
+  ) {
+    const hasFiles = !!(files && files.length);
+    if ((!message.trim() && !hasFiles) || isSending.value) return;
     isSending.value = true;
     error.value = null;
 
+    // A file with no caption still needs a non-empty message (the server requires
+    // one). Name what was sent; the agent gets the file context separately.
+    const text = message.trim() || `Attached ${files!.map((f) => f.name).join(', ')}`;
+
     try {
+      let userMessageId: number | null = null;
+
       if (!currentSession.value) {
-        const created = await aiApi.createSession({ message, format_hint: formatHint });
+        const created = await aiApi.createSession({
+          message: text,
+          format_hint: formatHint,
+          defer_processing: hasFiles
+        });
         if (created) {
           currentSession.value = created;
           sessions.value = [created, ...sessions.value];
+          subscribeToSession(created.id);
+          userMessageId = created.messages?.find((m) => m.role === 'user')?.id ?? null;
         }
       } else {
         const pair = await aiApi.addMessage(currentSession.value.id, {
-          message,
-          format_hint: formatHint
+          message: text,
+          format_hint: formatHint,
+          defer_processing: hasFiles
         });
         if (pair && currentSession.value.messages) {
           currentSession.value.messages.push(pair.user, pair.assistant);
+          userMessageId = pair.user.id;
         }
       }
+
+      if (files && files.length && currentSession.value && userMessageId) {
+        await aiApi.uploadFiles(currentSession.value.id, userMessageId, files, documentType);
+        await refreshCurrent();
+      }
+
       maybeStartPolling();
     } catch (e) {
       error.value = (e as Error).message || 'Failed to send message';
@@ -91,6 +164,7 @@ export function useAiChats() {
     if (currentSession.value?.id === id) {
       currentSession.value = null;
       stopPolling();
+      unsubscribe();
     }
   }
 
@@ -142,6 +216,7 @@ export function useAiChats() {
 
   onUnmounted(() => {
     stopPolling();
+    unsubscribe();
     if (typeof document !== 'undefined') {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     }

@@ -1,8 +1,35 @@
+export type StatsSection =
+  | 'overview'
+  | 'activity'
+  | 'comparisons'
+  | 'categories'
+  | 'parties'
+  | 'cashflow'
+  | 'position';
+
+export interface PositionData {
+  earned_income: number;
+  discretionary_spend: number;
+  cash_balance: number;
+  holdings_value: number;
+  total_net_worth: number;
+  loan_received: number;
+  loan_repayment: number;
+  debt_owed: number;
+  debt_settled: number;
+  loans_debt_net: number;
+  investment_principal: number;
+  investment_returns: number;
+  gifts_received: number;
+  net_worth_delta: number;
+}
+
 export interface StatsParams {
   preset?: 'all_time' | 'current_week' | 'current_month' | 'last_3_months';
   start_date?: string;
   end_date?: string;
   wallet_ids?: string;
+  section?: StatsSection;
 }
 
 export interface StatsOverview {
@@ -65,6 +92,11 @@ export interface StatsResponse {
       monthly_cash_flow: MonthlyCashFlow[];
       expense_by_wallet?: PartyData[];
     };
+    position?: PositionData;
+    // Set when amounts in a currency with no available exchange rate were
+    // excluded from the totals, so figures are understated for those currencies.
+    partial?: boolean;
+    unconverted_currencies?: string[];
   };
 }
 
@@ -84,6 +116,9 @@ const statsApi = {
     }
     if (params.wallet_ids) {
       queryParams.append('wallet_ids', params.wallet_ids);
+    }
+    if (params.section) {
+      queryParams.append('section', params.section);
     }
 
     const queryString = queryParams.toString();

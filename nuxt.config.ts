@@ -1,10 +1,24 @@
 import { defineNuxtConfig } from 'nuxt/config';
+import Icons from 'unplugin-icons/vite';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  vite: {
+    plugins: [Icons({ compiler: 'vue3', autoInstall: false })]
+  },
   compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
   ssr: true,
+  // Plugin client UI ships as Nuxt layers consumed the same way as the shared
+  // ui-kit, e.g. extends: ['github:trakli/ui-kit', 'github:trakli/<plugin>-ui'].
+  // A layer registers a component for a slot key via
+  // useExtensionSlots().registerComponent(); DescriptorRenderer resolves it
+  // when a descriptor sets `ui.component`. Host adoption of the layers is
+  // deferred, so the list is empty for now.
+  extends: [],
+  routeRules: {
+    '/ai-insights': { redirect: '/assistant' }
+  },
   modules: ['@nuxtjs/i18n'],
   i18n: {
     locales: [
@@ -27,7 +41,11 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1',
+      reverbKey: process.env.NUXT_PUBLIC_REVERB_KEY || '',
+      reverbHost: process.env.NUXT_PUBLIC_REVERB_HOST || 'localhost',
+      reverbPort: process.env.NUXT_PUBLIC_REVERB_PORT || '6001',
+      reverbScheme: process.env.NUXT_PUBLIC_REVERB_SCHEME || 'http'
     }
   },
   app: {

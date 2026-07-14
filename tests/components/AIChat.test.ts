@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
-import AIChat from '@/components/ai/AIChat.vue';
+import ChatExperience from '@/components/ai/ChatExperience.vue';
 import type { ChatSession } from '@/services/api/aiApi';
 
 const mockListSessions = vi.fn();
@@ -10,6 +10,7 @@ const mockAddMessage = vi.fn();
 const mockDeleteSession = vi.fn();
 
 vi.mock('@/services/api/aiApi', () => ({
+  default: { exportCanvasUrl: vi.fn() },
   aiApi: {
     listSessions: (...args: unknown[]) => mockListSessions(...args),
     getSession: (...args: unknown[]) => mockGetSession(...args),
@@ -18,6 +19,12 @@ vi.mock('@/services/api/aiApi', () => ({
     deleteSession: (...args: unknown[]) => mockDeleteSession(...args)
   }
 }));
+
+const mountChat = () =>
+  mount(ChatExperience, {
+    props: { mode: 'full' },
+    global: { stubs: { ChatLandingInsights: true } }
+  });
 
 const emptyPage = { data: [], current_page: 1, last_page: 1, total: 0 };
 
@@ -30,17 +37,18 @@ const session = (overrides: Partial<ChatSession> = {}): ChatSession => ({
   ...overrides
 });
 
-describe('AIChat', () => {
+describe('ChatExperience (full mode)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockListSessions.mockResolvedValue(emptyPage);
   });
 
-  it('renders the empty-state prompt when no session is active', async () => {
-    const wrapper = mount(AIChat);
+  it('renders the centered hero when no session is active', async () => {
+    const wrapper = mountChat();
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Ask about your finances');
+    expect(wrapper.find('.hero').exists()).toBe(true);
+    expect(wrapper.text()).toContain('What can I help with?');
   });
 
   it('creates a new session on first send', async () => {
@@ -78,7 +86,7 @@ describe('AIChat', () => {
     });
     mockCreateSession.mockResolvedValueOnce(created);
 
-    const wrapper = mount(AIChat);
+    const wrapper = mountChat();
     await flushPromises();
 
     await wrapper.find('.chat-input').setValue('How much on food?');
@@ -87,7 +95,8 @@ describe('AIChat', () => {
 
     expect(mockCreateSession).toHaveBeenCalledWith({
       message: 'How much on food?',
-      format_hint: undefined
+      format_hint: undefined,
+      defer_processing: false
     });
     expect(wrapper.text()).toContain('How much on food?');
     expect(wrapper.findComponent({ name: 'TypingDots' }).exists()).toBe(true);
@@ -139,14 +148,15 @@ describe('AIChat', () => {
     });
     mockGetSession.mockResolvedValueOnce(existing);
 
-    const wrapper = mount(AIChat);
+    const wrapper = mountChat();
     await flushPromises();
 
     await wrapper.findAll('.session-item')[0].trigger('click');
     await flushPromises();
 
-    expect(wrapper.find('.result-scalar').exists()).toBe(true);
-    expect(wrapper.text()).toContain('500');
+    // The prose answer is shown; the scalar echo is suppressed to avoid the
+    // "$500" + "500" duplicate.
+    expect(wrapper.find('.result-scalar').exists()).toBe(false);
     expect(wrapper.text()).toContain('You spent $500.');
   });
 
@@ -191,7 +201,7 @@ describe('AIChat', () => {
     });
     mockGetSession.mockResolvedValueOnce(existing);
 
-    const wrapper = mount(AIChat);
+    const wrapper = mountChat();
     await flushPromises();
     await wrapper.findAll('.session-item')[0].trigger('click');
     await flushPromises();
@@ -210,7 +220,7 @@ describe('AIChat', () => {
       total: 2
     });
 
-    const wrapper = mount(AIChat);
+    const wrapper = mountChat();
     await flushPromises();
 
     expect(wrapper.findAll('.session-item').length).toBe(2);
@@ -219,7 +229,7 @@ describe('AIChat', () => {
   });
 
   it('does not send empty messages', async () => {
-    const wrapper = mount(AIChat);
+    const wrapper = mountChat();
     await flushPromises();
 
     await wrapper.find('form').trigger('submit');
@@ -238,7 +248,7 @@ describe('AIChat', () => {
     });
     mockDeleteSession.mockResolvedValueOnce(true);
 
-    const wrapper = mount(AIChat);
+    const wrapper = mountChat();
     await flushPromises();
     await wrapper.find('.remove-btn').trigger('click');
     await flushPromises();

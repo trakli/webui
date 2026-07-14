@@ -1,5 +1,83 @@
 <template>
-  <div v-if="result?.rows?.length && result.format_type" class="results-container">
+  <!-- New agent path: an ordered stream of widget blocks. -->
+  <div v-if="blocks.length" class="blocks-container">
+    <template v-for="(block, i) in blocks" :key="i">
+      <ChatMarkdownBlock v-if="block.type === 'markdown'" :text="block.text as string" />
+      <ChatTableBlock
+        v-else-if="block.type === 'table'"
+        :title="block.title as string"
+        :columns="block.columns as string[]"
+        :rows="block.rows as Record<string, unknown>[]"
+      />
+      <ChatKpiBlock
+        v-else-if="block.type === 'kpi'"
+        :title="block.title as string"
+        :items="block.items as any[]"
+      />
+      <ChatChartBlock
+        v-else-if="block.type === 'chart'"
+        :title="block.title as string"
+        :chart_hint="block.chart_hint as string"
+        :dataset_ref="block.dataset_ref as string"
+        :data="block.data"
+      />
+      <ChatProposedActionBlock
+        v-else-if="block.type === 'proposed_action'"
+        :block="block as any"
+        :session-id="sessionId"
+        @changed="$emit('changed')"
+      />
+      <ChatComparisonBlock
+        v-else-if="block.type === 'comparison'"
+        :title="block.title as string"
+        :series="block.series as Record<string, unknown>[]"
+      />
+      <ChatListBlock
+        v-else-if="block.type === 'list'"
+        :title="block.title as string"
+        :items="block.items as Record<string, unknown>[]"
+        :variant="block.variant as string"
+      />
+      <ChatCalloutBlock
+        v-else-if="block.type === 'callout'"
+        :text="block.text as string"
+        :title="block.title as string"
+        :variant="block.variant as string"
+      />
+      <ChatTimelineBlock
+        v-else-if="block.type === 'timeline'"
+        :title="block.title as string"
+        :items="block.items as any[]"
+      />
+      <ChatProgressBlock
+        v-else-if="block.type === 'progress'"
+        :title="block.title as string"
+        :items="block.items as any[]"
+      />
+      <ChatQuestionBlock
+        v-else-if="block.type === 'question'"
+        :prompt="block.prompt as string"
+        :options="block.options as any[]"
+        @select="$emit('send-message', $event)"
+      />
+      <ChatQuickActionsBlock
+        v-else-if="block.type === 'quick_actions'"
+        :actions="block.actions as any[]"
+        @select="$emit('send-message', $event)"
+      />
+      <ChatImportReviewBlock v-else-if="block.type === 'import_review'" :block="block as any" />
+      <ChatCanvasBlock
+        v-else-if="block.type === 'canvas'"
+        :block="block as any"
+        @open="$emit('open-canvas', block)"
+      />
+      <!-- Unknown/newer block type: degrade to its text or a compact dump. -->
+      <ChatMarkdownBlock v-else :text="(block.text as string) || (block.summary as string) || ''" />
+    </template>
+  </div>
+
+  <!-- Legacy SmartQL path: a single format_type result. -->
+  <div v-else-if="result?.rows?.length && result.format_type" class="results-container">
     <div v-if="result.format_type === 'scalar' && result.rows?.[0]" class="result-scalar">
       {{ formatValue(Object.values(result.rows[0])[0]) }}
     </div>
@@ -56,11 +134,36 @@
 </template>
 
 <script setup lang="ts">
-import type { ChatMessageResult } from '@/services/api/aiApi';
+import { computed } from 'vue';
+import type { ChatBlock, ChatMessageResult } from '@/services/api/aiApi';
+import ChatMarkdownBlock from '@/components/ai/blocks/ChatMarkdownBlock.vue';
+import ChatTableBlock from '@/components/ai/blocks/ChatTableBlock.vue';
+import ChatKpiBlock from '@/components/ai/blocks/ChatKpiBlock.vue';
+import ChatChartBlock from '@/components/ai/blocks/ChatChartBlock.vue';
+import ChatProposedActionBlock from '@/components/ai/blocks/ChatProposedActionBlock.vue';
+import ChatImportReviewBlock from '@/components/ai/blocks/ChatImportReviewBlock.vue';
+import ChatCanvasBlock from '@/components/ai/blocks/ChatCanvasBlock.vue';
+import ChatComparisonBlock from '@/components/ai/blocks/ChatComparisonBlock.vue';
+import ChatListBlock from '@/components/ai/blocks/ChatListBlock.vue';
+import ChatCalloutBlock from '@/components/ai/blocks/ChatCalloutBlock.vue';
+import ChatTimelineBlock from '@/components/ai/blocks/ChatTimelineBlock.vue';
+import ChatProgressBlock from '@/components/ai/blocks/ChatProgressBlock.vue';
+import ChatQuestionBlock from '@/components/ai/blocks/ChatQuestionBlock.vue';
+import ChatQuickActionsBlock from '@/components/ai/blocks/ChatQuickActionsBlock.vue';
 
-defineProps<{
+const props = defineProps<{
   result: ChatMessageResult | null;
+  sessionId?: number;
 }>();
+
+defineEmits<{
+  (e: 'changed'): void;
+  (e: 'open-canvas', block: ChatBlock): void;
+  (e: 'send-message', message: string): void;
+}>();
+
+const blocks = computed<ChatBlock[]>(() => props.result?.blocks ?? []);
+const sessionId = computed(() => props.sessionId ?? 0);
 
 const formatKey = (key: string | number): string =>
   String(key)
@@ -83,6 +186,12 @@ const formatValue = (value: unknown): string => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+
+.blocks-container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}
 
 .results-container {
   margin-top: $spacing-2;

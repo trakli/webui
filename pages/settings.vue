@@ -22,6 +22,17 @@
         <template #notifications>
           <SettingsNotifications :is-edit-mode="true" />
         </template>
+        <template #integrations>
+          <div class="integrations-grid">
+            <ExtensionSlot name="settings.integrations" />
+          </div>
+        </template>
+        <template #connections>
+          <SettingsConnections />
+        </template>
+        <template v-for="contribution in pluginTabs" :key="contribution.key" #[contribution.key]>
+          <DescriptorRenderer :contribution="contribution" />
+        </template>
       </TTabs>
     </div>
 
@@ -30,15 +41,19 @@
 </template>
 
 <script setup>
-import { ref, markRaw } from 'vue';
-import { Settings, Globe, Wallet, Sun, User, Bell } from 'lucide-vue-next';
+import { ref, computed, markRaw } from 'vue';
+import { Settings, Globe, Wallet, Sun, User, Bell, Puzzle, Bot } from 'lucide-vue-next';
 import TTabs from '@/components/TTabs.vue';
 import SettingsAccount from '@/components/settings/SettingsAccount.vue';
+import SettingsConnections from '@/components/settings/SettingsConnections.vue';
 import SettingsGeneral from '@/components/settings/SettingsGeneral.vue';
 import SettingsWallets from '@/components/settings/SettingsWallets.vue';
 import SettingsDisplay from '@/components/settings/SettingsDisplay.vue';
 import SettingsNotifications from '@/components/settings/SettingsNotifications.vue';
 import PasswordModal from '@/components/settings/PasswordModal.vue';
+import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
+import DescriptorRenderer from '@/components/extensions/DescriptorRenderer.vue';
+import { useExtensionSlots } from '@/composables/useExtensionSlots';
 
 const { t } = useI18n();
 
@@ -50,13 +65,23 @@ definePageMeta({
 const showPasswordModal = ref(false);
 const activeTab = ref('account');
 
-const tabs = [
+const { contributionsFor } = useExtensionSlots();
+const pluginTabs = contributionsFor('settings.tabs');
+
+const tabs = computed(() => [
   { id: 'account', label: t('Account'), icon: markRaw(User) },
   { id: 'general', label: t('General'), icon: markRaw(Globe) },
   { id: 'wallets', label: t('Wallets'), icon: markRaw(Wallet) },
   { id: 'display', label: t('Display'), icon: markRaw(Sun) },
-  { id: 'notifications', label: t('Notifications'), icon: markRaw(Bell) }
-];
+  { id: 'notifications', label: t('Notifications'), icon: markRaw(Bell) },
+  { id: 'connections', label: t('Connected AI clients'), icon: markRaw(Bot) },
+  { id: 'integrations', label: t('Integrations'), icon: markRaw(Puzzle) },
+  ...pluginTabs.value.map((contribution) => ({
+    id: contribution.key,
+    label: contribution.ui.card?.title || contribution.integration.name,
+    icon: markRaw(Puzzle)
+  }))
+]);
 </script>
 
 <style lang="scss" scoped>
@@ -114,5 +139,12 @@ const tabs = [
   @media (max-width: $breakpoint-md) {
     padding: 1rem;
   }
+}
+
+.integrations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-items: start;
+  gap: 1rem;
 }
 </style>

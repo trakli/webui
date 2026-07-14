@@ -1,16 +1,21 @@
 <script setup>
-// Redirect to login page
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
 import Logo from '@/components/Logo.vue';
+import { useAuth } from '@/composables/useAuth';
+import { resolveLandingPath } from '@/composables/useLanding';
 
 const router = useRouter();
+const { isAuthenticated } = useAuth();
 
-onMounted(() => {
-  // Add a small delay to show the loading state
-  setTimeout(() => {
-    router.push('/login');
-  }, 1000);
+onMounted(async () => {
+  // Authenticated users go to their chosen landing (chat-first by default);
+  // everyone else goes to login.
+  if (isAuthenticated.value) {
+    router.replace(await resolveLandingPath());
+  } else {
+    router.replace('/login');
+  }
 });
 </script>
 

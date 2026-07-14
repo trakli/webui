@@ -15,3 +15,10 @@ vi.stubGlobal('useI18n', () => ({
   locale: { value: 'en' },
   setLocale: vi.fn()
 }));
+
+// Nuxt auto-import used by checkAuth() at module load in some composables.
+vi.stubGlobal('useCookie', () => ({ value: null }));
+
+// Nuxt routing auto-imports used by components under test.
+vi.stubGlobal('useRoute', () => ({ query: {}, params: {}, path: '/' }));
+vi.stubGlobal('useRouter', () => ({ push: vi.fn(), replace: vi.fn() }));

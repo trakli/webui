@@ -96,18 +96,25 @@
 }
 
 .step-icon {
-  width: 60px;
-  height: 60px;
-  background: $primary-light;
-  border-radius: 50%;
+  width: 88px;
+  height: 88px;
+  border-radius: 26px;
+  background:
+    radial-gradient(120% 120% at 30% 18%, $primary-light, transparent 72%),
+    linear-gradient(
+      135deg,
+      rgba(var(--color-primary-rgb), 0.16),
+      rgba(var(--color-primary-rgb), 0.04)
+    );
+  box-shadow: $elevation-1;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
 
   svg {
-    width: 28px;
-    height: 28px;
+    width: 46px;
+    height: 46px;
     color: $primary;
   }
 }
@@ -178,10 +185,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  box-shadow: 0 6px 16px -6px rgba(var(--color-primary-rgb), 0.55);
 
   &:hover:not(:disabled) {
     background: $primary-hover;
     transform: translateY(-1px);
+    box-shadow: 0 10px 22px -8px rgba(var(--color-primary-rgb), 0.6);
   }
 
   &:disabled {
@@ -218,18 +227,21 @@
 }
 
 .completion-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, $success 0%, $primary-dark 100%);
-  border-radius: 50%;
+  width: 96px;
+  height: 96px;
+  background:
+    radial-gradient(120% 120% at 30% 18%, rgba(255, 255, 255, 0.28), transparent 60%),
+    linear-gradient(135deg, $success 0%, $primary-dark 100%);
+  border-radius: 30px;
+  box-shadow: $elevation-2;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem auto;
 
   svg {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     color: $text-inverse;
   }
 }

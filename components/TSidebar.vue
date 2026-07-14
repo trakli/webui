@@ -33,10 +33,11 @@
             class="nav-button"
             :class="{
               'nav-button--with-subtext': !isCompact && item.hint,
-              'nav-button--compact': isCompact
+              'nav-button--compact': isCompact,
+              selected: subPathActive(item)
             }"
             active-class="selected"
-            :title="isCompact ? `${t(item.label)} — ${t(item.hint ?? '')}` : undefined"
+            :title="isCompact ? `${t(item.label)}: ${t(item.hint ?? '')}` : undefined"
             @click="handleNavClick"
           >
             <component :is="item.icon" class="icon" />
@@ -48,10 +49,13 @@
             <span v-else class="compact-label">{{ t(item.label) }}</span>
           </NuxtLink>
 
-          <ul v-if="!isCompact && item.subItems && isActive(item.to)" class="sub-list">
+          <ul
+            v-if="!isCompact && item.subItems && (isActive(item.to) || subPathActive(item))"
+            class="sub-list"
+          >
             <li v-for="sub in item.subItems" :key="sub.label">
               <NuxtLink
-                :to="sub.query ? { path: item.to, query: sub.query } : item.to"
+                :to="sub.to ? sub.to : sub.query ? { path: item.to, query: sub.query } : item.to"
                 class="sub-link"
                 :class="{ selected: isSubActive(item.to, sub) }"
                 @click="handleNavClick"
@@ -63,6 +67,10 @@
           </ul>
         </li>
       </ul>
+
+      <div v-if="!isCompact" class="sidebar-ext">
+        <ExtensionSlot name="sidebar.nav" />
+      </div>
     </nav>
 
     <hr v-if="!isCompact" class="divider" />
@@ -81,7 +89,7 @@
           >
             <component :is="item.icon" class="icon" />
             <span v-if="!isCompact" class="text">{{ t(item.label) }}</span>
-            <span v-else class="compact-label">{{ t(item.shortLabel ?? item.label) }}</span>
+            <span v-else class="compact-label">{{ t(item.label) }}</span>
           </button>
         </li>
       </ul>
@@ -108,20 +116,21 @@ import {
   BellIcon,
   ChartBarIcon,
   ChartPieIcon,
-  ChatBubbleLeftRightIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   Cog8ToothIcon,
-  HomeIcon,
   RectangleGroupIcon,
+  Squares2X2Icon,
   TagIcon,
   UserGroupIcon,
   UsersIcon,
   WalletIcon,
   XMarkIcon
 } from '@heroicons/vue/24/outline';
+import { Sparkles, Scale, Coins } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Logo from './Logo.vue';
+import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
 import { useSidebar } from '@/composables/useSidebar';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -141,7 +150,19 @@ const route = useRoute();
 const isCompact = computed(() => desktopCollapsed.value && !isMobile.value);
 
 const primary = [
-  { to: '/dashboard', label: 'Home', icon: HomeIcon },
+  {
+    to: '/dashboard',
+    label: 'Dashboard',
+    hint: 'Overview of your finances',
+    icon: Squares2X2Icon
+  },
+  {
+    to: '/home',
+    label: 'Assistant',
+    hint: 'Chat and ask about your finances',
+    icon: Sparkles,
+    subItems: [{ label: 'Discussions', to: '/assistant', tone: 'info' }]
+  },
   {
     to: '/transactions',
     label: 'Transactions',
@@ -149,28 +170,28 @@ const primary = [
     icon: RectangleGroupIcon
   },
   {
-    to: '/categories',
-    label: 'Categories',
-    hint: 'Organize transactions by type',
-    icon: TagIcon
-  },
-  {
-    to: '/groups',
-    label: 'Groups',
-    hint: 'Bundle related transactions',
-    icon: UserGroupIcon
-  },
-  {
-    to: '/parties',
-    label: 'Parties',
-    hint: 'People and organizations you transact with',
-    icon: UsersIcon
-  },
-  {
     to: '/wallets',
     label: 'Wallets',
     hint: 'Accounts money moves through',
     icon: WalletIcon
+  },
+  {
+    to: '/financial-position',
+    label: 'Financial position',
+    hint: 'Net worth, grouped by intent',
+    icon: Scale
+  },
+  {
+    to: '/holdings',
+    label: 'Holdings',
+    hint: 'Assets you own: crypto, stocks, property',
+    icon: Coins
+  },
+  {
+    to: '/reports',
+    label: 'Reports',
+    hint: 'Charts and insights',
+    icon: ChartBarIcon
   },
   {
     to: '/budgets',
@@ -184,28 +205,40 @@ const primary = [
     ]
   },
   {
-    to: '/reminders',
-    label: 'Reminders',
-    hint: 'Track upcoming or expected transactions',
-    icon: BellIcon
+    to: '/categories',
+    label: 'Categories',
+    hint: 'Organize transactions by type',
+    icon: TagIcon
   },
   {
-    to: '/imports',
-    label: 'Import',
-    hint: 'Import transactions from documents',
-    icon: ArrowUpTrayIcon
+    to: '/parties',
+    label: 'Parties',
+    hint: 'People and organizations you transact with',
+    icon: UsersIcon
+  },
+  {
+    to: '/groups',
+    label: 'Groups',
+    hint: 'Bundle related transactions',
+    icon: UserGroupIcon
   }
 ];
 
 const footer = [
-  { to: '/reports', label: 'Reports & Stats', shortLabel: 'Reports', icon: ChartBarIcon },
-  { to: '/ai-insights', label: 'AI Insights', shortLabel: 'AI', icon: ChatBubbleLeftRightIcon },
+  { to: '/reminders', label: 'Reminders', icon: BellIcon },
+  { to: '/imports', label: 'Import', icon: ArrowUpTrayIcon },
   { to: '/settings', label: 'Settings', icon: Cog8ToothIcon }
 ];
 
 const isActive = (path) => route.path === path || route.path.startsWith(path + '/');
 
+// True when one of the item's sub-items navigates to its own route (e.g. the
+// Assistant "Discussions" sub points at /assistant), so the parent stays lit
+// and its sub-list stays open while on that route.
+const subPathActive = (item) => (item.subItems ?? []).some((sub) => sub.to && isActive(sub.to));
+
 const isSubActive = (parentTo, sub) => {
+  if (sub.to) return isActive(sub.to);
   if (route.path !== parentTo) return false;
   if (!sub.query) return !route.query.scope;
   const key = Object.keys(sub.query)[0];
@@ -451,8 +484,8 @@ const handleButtonNavClick = (path) => {
 
   .nav-footer {
     display: flex;
-    width: calc(100% - 16px);
-    padding: 8px;
+    width: 100%;
+    padding: 8px 0;
     gap: 8px;
     flex-direction: column;
     flex-shrink: 0;
@@ -468,9 +501,9 @@ const handleButtonNavClick = (path) => {
     display: flex;
     align-items: center;
     width: calc(100% - 20px);
-    min-height: 40px;
+    min-height: 44px;
     border-radius: $radius-xl;
-    padding: 8px 14px;
+    padding: 8px 10px;
     gap: 12px;
     background-color: transparent;
     border: none;

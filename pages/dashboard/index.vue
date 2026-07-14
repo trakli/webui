@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <TDashboardTopCard :show-filters="hasData" />
+    <DashboardAgentHero />
 
     <OnboardingWizard
       v-if="shouldShowWizard"
@@ -10,8 +10,10 @@
     />
 
     <template v-if="!shouldShowWizard">
+      <TDashboardTopCard :show-filters="hasData" />
+
       <ComponentLoader
-        :is-loading="isLoadingOrNotReady"
+        :is-loading="kpiLoading"
         :has-data="hasData"
         :show-empty="false"
         skeleton-variant="card"
@@ -21,7 +23,7 @@
 
       <div class="middle-section">
         <ComponentLoader
-          :is-loading="isLoadingOrNotReady"
+          :is-loading="categoryLoading"
           :has-data="hasData"
           :show-empty="false"
           skeleton-variant="card"
@@ -40,13 +42,17 @@
       </div>
 
       <ComponentLoader
-        :is-loading="isLoadingOrNotReady"
+        :is-loading="insightsLoading"
         :has-data="hasData"
         :show-empty="false"
         skeleton-variant="card"
       >
         <QuickInsights />
       </ComponentLoader>
+
+      <div class="dashboard-widgets">
+        <ExtensionSlot name="dashboard.widgets" />
+      </div>
     </template>
   </div>
 </template>
@@ -59,15 +65,19 @@ import { useNotifications } from '@/composables/useNotifications';
 import { checkAuth } from '~/utils/auth';
 import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
 import TDashboardTopCard from '@/components/TDashboardTopCard.vue';
+import DashboardAgentHero from '@/components/dashboard/DashboardAgentHero.vue';
 import DashboardKPIs from '@/components/dashboard/DashboardKPIs.vue';
 import CategoryBreakdown from '@/components/dashboard/CategoryBreakdown.vue';
 import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';
 import QuickInsights from '@/components/dashboard/QuickInsights.vue';
 import OnboardingWizard from '@/components/onboarding/OnboardingWizard.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
+import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
+import { useStatistics } from '@/composables/useStatistics';
 
 const router = useRouter();
 
+const { isSectionLoaded } = useStatistics();
 const { transactions } = useTransactions();
 const { configurationsMap } = useSharedData();
 const { setComplete: setOnboardingComplete } = useOnboardingStatus();
@@ -93,6 +103,11 @@ watch(
 );
 
 const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
+const kpiLoading = computed(() => isLoadingOrNotReady.value || !isSectionLoaded('overview'));
+const categoryLoading = computed(() => isLoadingOrNotReady.value || !isSectionLoaded('categories'));
+const insightsLoading = computed(
+  () => isLoadingOrNotReady.value || !isSectionLoaded('overview') || !isSectionLoaded('parties')
+);
 const hasDataLoaded = computed(() => isInitialized.value && !isLoading.value);
 const hasTransactions = computed(() => hasDataLoaded.value && transactions.value.length > 0);
 const hasData = computed(() => hasDataLoaded.value);
@@ -147,5 +162,11 @@ definePageMeta({
   @media (max-width: $breakpoint-md) {
     grid-template-columns: 1fr;
   }
+}
+
+.dashboard-widgets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-4;
 }
 </style>

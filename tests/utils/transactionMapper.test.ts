@@ -150,6 +150,33 @@ describe('transactionMapper - recurring fields', () => {
     });
   });
 
+  describe('intent', () => {
+    it('defaults intent to regular when absent from the API', () => {
+      expect(transactionMapper.toFrontend(baseApiTransaction).intent).toBe('regular');
+      expect(transactionMapper.toEditForm(baseApiTransaction).intent).toBe('regular');
+    });
+
+    it('preserves a non-regular intent from the API', () => {
+      const api = { ...baseApiTransaction, intent: 'loan_received' as const };
+      expect(transactionMapper.toFrontend(api).intent).toBe('loan_received');
+      expect(transactionMapper.toEditForm(api).intent).toBe('loan_received');
+    });
+
+    it('round-trips intent through toApi and defaults to regular', () => {
+      const base = {
+        type: 'INCOME' as const,
+        amount: '500 USD',
+        description: 'Salary',
+        date: '2025-06-15',
+        time: '10:30'
+      };
+      expect(transactionMapper.toApi(base).intent).toBe('regular');
+      expect(transactionMapper.toApi({ ...base, intent: 'investment_return' }).intent).toBe(
+        'investment_return'
+      );
+    });
+  });
+
   describe('toFrontendBatch', () => {
     it('maps recurring status for multiple transactions', () => {
       const apiTransactions = [

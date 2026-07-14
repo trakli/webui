@@ -6,10 +6,12 @@
 
 export const CONFIGURATION_KEYS = {
   LANGUAGE: 'default-lang',
+  COUNTRY: 'country',
   CURRENCY: 'default-currency',
   WALLET: 'default-wallet',
   GROUP: 'default-group',
   THEME: 'theme',
+  LANDING_MODE: 'landing-experience',
   ONBOARDING_COMPLETE: 'onboarding-complete',
   BUDGET_DEFAULT_THRESHOLD: 'budget-default-threshold-percent',
   BUDGET_DEFAULT_ROLLOVER: 'budget-default-rollover-enabled',

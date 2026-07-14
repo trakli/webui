@@ -205,9 +205,9 @@ onUnmounted(() => {
 }
 
 .bell-icon {
-  width: 20px;
-  height: 20px;
-  color: $text-secondary;
+  width: 16px;
+  height: 16px;
+  color: currentColor;
 }
 
 .badge {
