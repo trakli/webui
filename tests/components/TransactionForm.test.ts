@@ -427,53 +427,67 @@ describe('TransactionForm', () => {
   });
 
   describe('category selection', () => {
-    it('includes categoryIds in submit payload when categories selected', async () => {
-      let capturedSelectHandler: ((ids: number[]) => void) | null = null;
+    // A transaction holds one category, so the dropdown is single-select and
+    // hands back the chosen option rather than a list of ids.
+    const categoryDropdownStub = (onSetup: (props: any, emit: any) => void = () => {}) => ({
+      ...stubs,
+      SearchableDropdown: {
+        template: '<div class="searchable-dropdown"><input /></div>',
+        props: ['modelValue', 'label', 'options', 'placeholder', 'error', 'disabled'],
+        emits: ['update:modelValue', 'select'],
+        setup(props: any, { emit }: any) {
+          onSetup(props, emit);
+          return {};
+        }
+      }
+    });
+
+    it('includes the chosen category in the submit payload', async () => {
+      let selectCategory: (() => void) | null = null;
 
       const wrapper = mount(TransactionForm, {
         props: { isOutcomeSelected: true },
         global: {
-          stubs: {
-            ...stubs,
-            SearchableDropdown: {
-              template: '<div class="searchable-dropdown"><input /></div>',
-              props: [
-                'modelValue',
-                'label',
-                'options',
-                'placeholder',
-                'multiple',
-                'error',
-                'disabled',
-                'selected'
-              ],
-              emits: ['update:modelValue', 'select'],
-              setup(props: any, { emit }: any) {
-                if (props.multiple) {
-                  capturedSelectHandler = (ids: number[]) => emit('select', ids);
-                }
-                return {};
-              }
+          stubs: categoryDropdownStub((props, emit) => {
+            if (props.label === 'Category') {
+              selectCategory = () => emit('select', { id: 2, name: 'Gas', type: 'expense' });
             }
-          }
+          })
         }
       });
 
       await wrapper.find('input[type="number"]').setValue('100');
-
-      // Simulate category selection
-      if (capturedSelectHandler) {
-        capturedSelectHandler([1, 2]);
-      }
-
+      selectCategory?.();
       await wrapper.find('.submit-button').trigger('click');
 
-      expect(wrapper.emitted('submit')).toBeTruthy();
-      const payload = wrapper.emitted('submit')?.[0]?.[0];
-      expect(payload.categoryIds).toEqual([1, 2]);
+      const payload = wrapper.emitted('submit')?.[0]?.[0] as any;
+      expect(payload.categoryIds).toEqual([2]);
     });
 
-    it('includes empty categoryIds array when no categories selected', async () => {
+    it('replaces the category rather than accumulating them', async () => {
+      let emitSelect: ((option: unknown) => void) | null = null;
+
+      const wrapper = mount(TransactionForm, {
+        props: { isOutcomeSelected: true },
+        global: {
+          stubs: categoryDropdownStub((props, emit) => {
+            if (props.label === 'Category') {
+              emitSelect = (option: unknown) => emit('select', option);
+            }
+          })
+        }
+      });
+
+      await wrapper.find('input[type="number"]').setValue('100');
+      emitSelect?.({ id: 1, name: 'Groceries', type: 'expense' });
+      emitSelect?.({ id: 2, name: 'Gas', type: 'expense' });
+      await wrapper.find('.submit-button').trigger('click');
+
+      const payload = wrapper.emitted('submit')?.[0]?.[0] as any;
+      expect(payload.categoryIds).toEqual([2]);
+    });
+
+    it('includes empty categoryIds array when no category selected', async () => {
       const wrapper = mount(TransactionForm, {
         props: { isOutcomeSelected: true },
         global: { stubs }
@@ -483,52 +497,24 @@ describe('TransactionForm', () => {
       await wrapper.find('.submit-button').trigger('click');
 
       expect(wrapper.emitted('submit')).toBeTruthy();
-      const payload = wrapper.emitted('submit')?.[0]?.[0];
+      const payload = wrapper.emitted('submit')?.[0]?.[0] as any;
       expect(payload.categoryIds).toEqual([]);
     });
 
-    it('passes selected prop to category SearchableDropdown when editing', async () => {
-      let receivedSelectedProp: number[] | null = null;
-
+    it('keeps only the first category of a transaction saved before the limit', async () => {
       const wrapper = mount(TransactionForm, {
         props: {
           isOutcomeSelected: true,
-          editingItem: {
-            id: 1,
-            amount: '100 USD',
-            categoryIds: [1, 2]
-          }
+          editingItem: { id: 1, amount: '100 USD', categoryIds: [1, 2] }
         },
-        global: {
-          stubs: {
-            ...stubs,
-            SearchableDropdown: {
-              template: '<div class="searchable-dropdown"><input /></div>',
-              props: [
-                'modelValue',
-                'label',
-                'options',
-                'placeholder',
-                'multiple',
-                'error',
-                'disabled',
-                'selected'
-              ],
-              emits: ['update:modelValue', 'select'],
-              setup(props: any) {
-                if (props.multiple && props.selected) {
-                  receivedSelectedProp = props.selected;
-                }
-                return {};
-              }
-            }
-          }
-        }
+        global: { stubs }
       });
 
       await wrapper.vm.$nextTick();
+      await wrapper.find('.submit-button').trigger('click');
 
-      expect(receivedSelectedProp).toEqual([1, 2]);
+      const payload = wrapper.emitted('submit')?.[0]?.[0] as any;
+      expect(payload.categoryIds).toEqual([1]);
     });
   });
 });
