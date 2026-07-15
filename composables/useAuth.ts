@@ -138,7 +138,16 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error('Failed to fetch user:', error);
-      // Clear invalid auth state
+
+      // Only a 401 means the session is gone; a server error or a dropped
+      // connection must not sign a valid user out.
+      const err = error as { response?: { status?: number }; statusCode?: number; status?: number };
+      const status = err?.response?.status ?? err?.statusCode ?? err?.status;
+
+      if (status !== 401) {
+        return;
+      }
+
       user.value = null;
       token.value = null;
       userCookie.value = null;
