@@ -5,8 +5,10 @@ export default defineNuxtRouteMiddleware(async () => {
     return navigateTo('/login');
   }
 
-  if (user.value && !('is_admin' in user.value)) {
-    await fetchUser();
+  await fetchUser();
+
+  if (!isAuthenticated.value) {
+    return navigateTo('/login');
   }
 
   if (!user.value?.is_admin) {
