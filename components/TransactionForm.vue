@@ -290,6 +290,7 @@ import {
   Gift
 } from 'lucide-vue-next';
 import { useSharedData } from '~/composables/useSharedData';
+import { CURRENCIES } from '@/utils/currencies';
 import { fetchAllPages } from '~/services/api/apiHelpers';
 import { api } from '@/services/api';
 import type { TransactionFile, TransactionIntent } from '~/types/transaction';
@@ -461,7 +462,9 @@ const categories = computed(() => {
 });
 
 const availableCurrencies = computed(() => {
-  const currencies = new Set(['XAF', 'USD', 'EUR', 'GBP', 'NGN']);
+  const currencies = new Set(CURRENCIES.map((c) => c.code));
+  // A wallet may hold a currency the list does not carry; never hide it from
+  // the person whose money is already in it.
   sharedData.wallets.value.forEach((wallet) => {
     if (wallet.currency) {
       currencies.add(wallet.currency);
