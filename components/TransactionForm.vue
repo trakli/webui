@@ -120,11 +120,9 @@
 
         <SearchableDropdown
           v-model="categorySearchQuery"
-          :label="t('Categories')"
+          :label="t('Category')"
           :placeholder="t('Search categories...')"
           :options="categories"
-          :multiple="true"
-          :selected="selectedAdditionalCategoryIds"
           @select="handleCategorySelect"
         />
       </div>
@@ -345,7 +343,7 @@ const intentOptions = computed(() => {
 const selectedPartyId = ref<number | null>(null);
 const selectedWalletId = ref<number | null>(null);
 const selectedGroupId = ref(null);
-const selectedAdditionalCategoryIds = ref([]);
+const selectedCategoryId = ref<number | null>(null);
 type NewAttachment = {
   file: File;
   name: string;
@@ -426,7 +424,7 @@ function onSubmit() {
     partyId: selectedPartyId.value,
     amount: `${amountNum} ${selectedCurrency.value}`,
     category: formCategory.value,
-    categoryIds: selectedAdditionalCategoryIds.value,
+    categoryIds: selectedCategoryId.value ? [selectedCategoryId.value] : [],
     groupId: selectedGroupId.value ?? undefined,
     walletId: selectedWalletId.value,
     description: formDescription.value.trim(),
@@ -546,8 +544,10 @@ const groupSearchQuery = ref('');
 const categorySearchQuery = ref('');
 const walletSearchQuery = ref('');
 
-function handleCategorySelect(categoryIds) {
-  selectedAdditionalCategoryIds.value = categoryIds;
+// A transaction holds one category, so the dropdown is single-select and hands
+// back the chosen option rather than a list of ids.
+function handleCategorySelect(category) {
+  selectedCategoryId.value = category?.id ?? null;
 }
 
 async function loadRecentExpenses() {
@@ -761,8 +761,14 @@ watch(
       }
     }
 
+    // Transactions recorded before categories were limited to one may still
+    // carry several; the first is kept and the rest drop away on save.
     if (item.categoryIds && item.categoryIds.length > 0) {
-      selectedAdditionalCategoryIds.value = item.categoryIds;
+      selectedCategoryId.value = item.categoryIds[0];
+      const category = categories.value.find((c) => c.id === selectedCategoryId.value);
+      if (category) {
+        categorySearchQuery.value = category.name;
+      }
     }
 
     if (item.walletId) {
