@@ -720,5 +720,14 @@
   "of spend": "der Ausgaben",
   "this month": "diesen Monat",
   "per transaction": "pro Transaktion",
-  "top destination": "Top-Empfänger"
+  "top destination": "Top-Empfänger",
+  "Confirm all": "Alle bestätigen",
+  "Dismiss all": "Alle verwerfen",
+  "Done editing": "Bearbeitung abgeschlossen",
+  "Hide details": "Details ausblenden",
+  "Review each one": "Einzeln prüfen",
+  "Could not complete the actions": "Aktionen konnten nicht ausgeführt werden",
+  "Could not dismiss the actions": "Aktionen konnten nicht verworfen werden",
+  "{count} changes await your confirmation": "{count} Änderungen warten auf Ihre Bestätigung",
+  "{count} changes": "{count} Änderungen"
 }

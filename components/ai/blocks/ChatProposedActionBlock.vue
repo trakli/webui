@@ -1,157 +1,138 @@
 <template>
-  <div class="proposed-action" :class="`risk-${block.risk}`">
-    <div class="pa-head">
-      <component :is="icon" :size="18" class="pa-icon" />
-      <span class="pa-summary">{{ block.summary }}</span>
-    </div>
+  <div class="pa" :class="[`is-${state}`, { 'is-nested': nested }]">
+    <div class="pa-main">
+      <span class="pa-tile" :class="`tile-${tone}`" aria-hidden="true">
+        <component :is="icon" class="pa-tile-icon" />
+      </span>
 
-    <!-- Editable review form while pending: the exact fields that will be saved. -->
-    <div v-if="state === 'pending' && fields.length" class="pa-form">
-      <label v-for="f in fields" :key="f.key" class="pa-field-edit">
-        <span class="pa-field-label">{{ f.label }}</span>
-
-        <select v-if="f.type === 'enum'" v-model="edited[f.key]" class="pa-input">
-          <option v-for="opt in f.options || []" :key="opt" :value="opt">{{ cap(opt) }}</option>
-        </select>
-
-        <select v-else-if="f.type === 'wallet'" v-model="edited[f.key]" class="pa-input">
-          <option v-for="w in wallets" :key="w.id" :value="w.id">{{ w.name }}</option>
-        </select>
-
-        <select v-else-if="f.type === 'party'" v-model="edited[f.key]" class="pa-input">
-          <option :value="null">{{ t('None') }}</option>
-          <option v-for="p in parties" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </select>
-
-        <select
-          v-else-if="f.type === 'categories'"
-          v-model="edited[f.key]"
-          multiple
-          class="pa-input pa-input--multi"
-        >
-          <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
-
-        <input
-          v-else-if="f.type === 'number'"
-          v-model.number="edited[f.key]"
-          type="number"
-          step="0.01"
-          class="pa-input"
-        />
-        <input
-          v-else-if="f.type === 'datetime'"
-          v-model="edited[f.key]"
-          type="datetime-local"
-          class="pa-input"
-        />
-        <input v-else v-model="edited[f.key]" type="text" class="pa-input" />
-      </label>
-    </div>
-
-    <!-- Read-only summary once acted on. -->
-    <dl v-else-if="fields.length" class="pa-fields">
-      <div v-for="(f, i) in fields" :key="i" class="pa-field">
-        <dt class="pa-field-label">{{ f.label }}</dt>
-        <dd class="pa-field-value">{{ f.display || f.value }}</dd>
+      <div class="pa-body">
+        <p class="pa-summary">{{ block.summary }}</p>
+        <dl v-if="context.length" class="pa-context">
+          <div v-for="f in context" :key="f.key" class="pa-context-row">
+            <dt>{{ f.label }}</dt>
+            <dd>{{ f.display || f.value }}</dd>
+          </div>
+        </dl>
       </div>
-    </dl>
 
-    <div v-if="state === 'pending'" class="pa-actions">
-      <button class="pa-btn pa-confirm" :disabled="busy" @click="confirm">
-        {{ busy ? t('Working…') : t('Confirm') }}
-      </button>
-      <button class="pa-btn pa-reject" :disabled="busy" @click="reject">
-        {{ t('Dismiss') }}
-      </button>
+      <div v-if="state === 'pending'" class="pa-actions">
+        <button
+          v-if="hasEditable"
+          type="button"
+          class="pa-icon-btn"
+          :aria-expanded="open"
+          :title="open ? t('Done editing') : t('Edit')"
+          @click="open = !open"
+        >
+          <IconEdit class="pa-btn-icon" />
+        </button>
+        <button
+          type="button"
+          class="pa-btn pa-dismiss"
+          :disabled="busy"
+          :title="t('Dismiss')"
+          @click="reject"
+        >
+          {{ t('Dismiss') }}
+        </button>
+        <button type="button" class="pa-btn pa-confirm" :disabled="busy" @click="confirm">
+          <IconSpinner v-if="busy" class="pa-btn-icon pa-spin" />
+          <IconCheck v-else class="pa-btn-icon" />
+          <span>{{ t('Confirm') }}</span>
+        </button>
+      </div>
+
+      <span v-else class="pa-status" :class="`is-${state}`">
+        <component :is="statusIcon" class="pa-status-icon" />
+        <span>{{ statusLabel }}</span>
+      </span>
     </div>
-    <div v-else class="pa-status" :class="`is-${state}`">
-      <component :is="statusIcon" :size="15" />
-      {{ statusLabel }}
-    </div>
+
+    <Transition name="pa-expand">
+      <div v-if="open && state === 'pending'" class="pa-edit">
+        <ChatActionFields :fields="fields" @change="onFieldsChange" />
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, onMounted } from 'vue';
-import { Check, X, AlertTriangle, ShoppingCart } from 'lucide-vue-next';
-import { aiApi, type ProposedActionBlock } from '@/services/api/aiApi';
-import { useSharedData } from '@/composables/useSharedData';
+import { computed, ref } from 'vue';
+import { aiApi, type ProposedActionBlock, type ProposedActionField } from '@/services/api/aiApi';
+import ChatActionFields from './ChatActionFields.vue';
+import IconCheck from '~icons/solar/check-circle-bold';
+import IconClose from '~icons/solar/close-circle-bold';
+import IconEdit from '~icons/solar/pen-2-linear';
+import IconSpinner from '~icons/solar/refresh-linear';
+import IconTag from '~icons/solar/tag-horizontal-bold';
+import IconWallet from '~icons/solar/wallet-2-bold';
+import IconTransfer from '~icons/solar/transfer-horizontal-bold';
+import IconBill from '~icons/solar/bill-list-bold';
+import IconUser from '~icons/solar/user-rounded-bold';
+import IconPaperclip from '~icons/solar/paperclip-linear';
 
-interface EditableField {
-  key: string;
-  label: string;
-  type: string;
-  value: unknown;
-  display?: string;
-  options?: string[];
-}
-
-const props = defineProps<{ block: ProposedActionBlock; sessionId: number }>();
+const props = withDefaults(
+  defineProps<{ block: ProposedActionBlock; sessionId: number; nested?: boolean }>(),
+  { nested: false }
+);
 const emit = defineEmits<{ (e: 'changed'): void }>();
 
 const { t } = useI18n();
 const { showError } = useNotifications();
-const sharedData = useSharedData();
-const wallets = sharedData.wallets;
-const categories = sharedData.categories;
-const parties = sharedData.parties;
 
-const nowLocal = () => {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-};
+const fields = computed<ProposedActionField[]>(() => props.block.fields ?? []);
+// Readonly rows are what the card shows at rest: they name the record being
+// changed, which is the whole point of not putting raw ids in front of people.
+const context = computed(() => fields.value.filter((f) => f.type === 'readonly'));
+const hasEditable = computed(() => fields.value.some((f) => f.type !== 'readonly'));
 
-const fields = computed<EditableField[]>(() => (props.block.fields as EditableField[]) ?? []);
+const open = ref(false);
+const busy = ref(false);
+const overrides = ref<Record<string, unknown>>({});
 
-const edited = reactive<Record<string, unknown>>({});
-
-onMounted(() => {
-  fields.value.forEach((f) => {
-    if (f.type === 'datetime') {
-      edited[f.key] = typeof f.value === 'string' && f.value ? f.value.slice(0, 16) : nowLocal();
-      return;
-    }
-    edited[f.key] = f.value;
-  });
-  if (fields.value.some((f) => f.type === 'wallet')) sharedData.loadWallets?.();
-  if (fields.value.some((f) => f.type === 'categories')) sharedData.loadCategories?.();
-  if (fields.value.some((f) => f.type === 'party')) sharedData.loadParties?.();
-});
-
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-const state = ref<'pending' | 'executed' | 'rejected'>(
+const state = ref<'pending' | 'executed' | 'rejected' | 'failed'>(
   props.block.status === 'executed'
     ? 'executed'
     : props.block.status === 'rejected'
       ? 'rejected'
-      : 'pending'
+      : props.block.status === 'failed'
+        ? 'failed'
+        : 'pending'
 );
-const busy = ref(false);
 
-const icon = computed(() => (props.block.risk === 'high' ? AlertTriangle : ShoppingCart));
-const statusIcon = computed(() => (state.value === 'executed' ? Check : X));
-const statusLabel = computed(() => (state.value === 'executed' ? t('Done') : t('Dismissed')));
+const ICONS: Record<string, unknown> = {
+  'transaction.categorize': IconTag,
+  'transaction.create': IconBill,
+  'transaction.attach_file': IconPaperclip,
+  'transfer.create': IconTransfer,
+  'wallet.create': IconWallet,
+  'category.create': IconTag,
+  'party.create': IconUser
+};
 
-function overrides(): Record<string, unknown> {
-  const o: Record<string, unknown> = {};
-  fields.value.forEach((f) => {
-    const value = edited[f.key];
-    // Skip untouched/blank fields so an empty "When" isn't sent as "" (which the
-    // server would record as 01/01/1970); the backend defaults it to now.
-    if (value === '' || value === null || value === undefined) return;
-    o[f.key] = value;
-  });
-  return o;
+const icon = computed(() => ICONS[props.block.action_type] ?? IconBill);
+const tone = computed(() => {
+  if (state.value === 'executed') return 'done';
+  if (state.value === 'rejected') return 'muted';
+  if (state.value === 'failed') return 'danger';
+  return props.block.action_type.endsWith('.create') ? 'brand' : 'accent';
+});
+
+const statusIcon = computed(() => (state.value === 'executed' ? IconCheck : IconClose));
+const statusLabel = computed(() =>
+  state.value === 'executed' ? t('Done') : state.value === 'failed' ? t('Failed') : t('Dismissed')
+);
+
+function onFieldsChange(next: Record<string, unknown>) {
+  overrides.value = next;
 }
 
 async function confirm() {
   busy.value = true;
   try {
-    await aiApi.confirmAction(props.sessionId, props.block.id, overrides());
+    await aiApi.confirmAction(props.sessionId, props.block.id, overrides.value);
     state.value = 'executed';
+    open.value = false;
     emit('changed');
   } catch {
     showError(t('Could not complete the action'));
@@ -165,6 +146,7 @@ async function reject() {
   try {
     await aiApi.rejectAction(props.sessionId, props.block.id);
     state.value = 'rejected';
+    open.value = false;
     emit('changed');
   } catch {
     showError(t('Could not dismiss the action'));
@@ -177,154 +159,282 @@ async function reject() {
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
 
-.proposed-action {
-  border: 1px solid $primary-muted;
-  border-left: 3px solid $primary;
-  border-radius: $radius-lg;
-  padding: $spacing-3;
+.pa {
+  border: 1px solid $border-light;
+  border-radius: 14px;
   background: $bg-white;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-3;
+  box-shadow: var(--elevation-1);
+  padding: $spacing-3;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
 
-  &.risk-high {
-    border-left-color: $warning;
+  &:hover {
+    box-shadow: var(--elevation-2);
+  }
+
+  // Inside a batch card the row is already framed by its parent.
+  &.is-nested {
+    border: none;
+    border-radius: 10px;
+    box-shadow: none;
+    padding: $spacing-2;
+    background: transparent;
+
+    &:hover {
+      background: var(--hover-overlay);
+      box-shadow: none;
+    }
+  }
+
+  &.is-rejected {
+    opacity: 0.62;
   }
 }
 
-.pa-form {
+.pa-main {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-2;
+  align-items: flex-start;
+  gap: $spacing-3;
 }
 
-.pa-field-edit {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $spacing-3;
+.pa-tile {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  flex-shrink: 0;
 
-  .pa-field-label {
+  &.tile-brand {
+    background: $primary-light;
+    color: $primary;
+  }
+
+  &.tile-accent {
+    background: var(--color-neutral-soft);
+    color: $info;
+  }
+
+  &.tile-done {
+    background: var(--color-income-soft);
+    color: var(--color-income);
+  }
+
+  &.tile-danger {
+    background: var(--color-expense-soft);
+    color: var(--color-expense);
+  }
+
+  &.tile-muted {
+    background: $bg-gray;
     color: $text-muted;
-    font-size: $font-size-sm;
-    flex-shrink: 0;
   }
 }
 
-.pa-input {
+.pa-tile-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.pa-body {
   flex: 1;
   min-width: 0;
-  max-width: 60%;
-  padding: 6px 8px;
-  border: 1px solid $primary-muted;
-  border-radius: $radius-md;
-  background: $bg-white;
-  color: $text-primary;
-  font-size: $font-size-sm;
-  font-family: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
 }
 
-.pa-input--multi {
-  min-height: 64px;
-}
-
-.pa-fields {
+.pa-summary {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid $primary-muted;
-  border-radius: $radius-md;
-  overflow: hidden;
+  font-size: $font-size-sm;
+  font-weight: $font-medium;
+  color: $text-primary;
+  line-height: 1.4;
 }
 
-.pa-field {
+.pa-context {
+  margin: $spacing-1 0 0;
   display: flex;
-  justify-content: space-between;
-  gap: $spacing-3;
-  padding: $spacing-2 $spacing-3;
-  border-bottom: 1px solid $primary-muted;
+  flex-wrap: wrap;
+  gap: $spacing-1 $spacing-3;
+}
 
-  &:last-child {
-    border-bottom: none;
-  }
+.pa-context-row {
+  display: flex;
+  gap: $spacing-1;
+  font-size: $font-size-xs;
+  min-width: 0;
 
-  .pa-field-label {
-    margin: 0;
+  dt {
     color: $text-muted;
-    font-size: $font-size-sm;
+
+    &::after {
+      content: ':';
+    }
   }
 
-  .pa-field-value {
+  dd {
     margin: 0;
-    font-weight: $font-semibold;
-    text-align: right;
-    word-break: break-word;
-  }
-}
-
-.pa-head {
-  display: flex;
-  align-items: center;
-  gap: $spacing-2;
-
-  .pa-icon {
-    color: $primary;
-    flex-shrink: 0;
-  }
-
-  .pa-summary {
-    font-weight: $font-semibold;
-    font-size: $font-size-sm;
+    color: $text-secondary;
+    font-weight: $font-medium;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
 .pa-actions {
   display: flex;
-  gap: $spacing-2;
+  align-items: center;
+  gap: $spacing-1;
+  flex-shrink: 0;
 }
 
 .pa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   border: none;
-  border-radius: $radius-md;
-  padding: $spacing-2 $spacing-4;
-  font-size: $font-size-sm;
-  font-weight: $font-semibold;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: $font-size-xs;
+  font-weight: $font-medium;
+  font-family: inherit;
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
   }
 }
 
 .pa-confirm {
   background: $primary;
   color: $text-inverse;
+
+  &:hover:not(:disabled) {
+    background: $primary-hover;
+  }
 }
 
-.pa-reject {
-  background: $bg-gray;
-  color: $text-secondary;
+.pa-dismiss {
+  background: transparent;
+  color: $text-muted;
+
+  &:hover:not(:disabled) {
+    background: var(--hover-overlay);
+    color: $text-secondary;
+  }
+}
+
+.pa-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: $text-muted;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--hover-overlay);
+    color: $text-secondary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+  }
+}
+
+.pa-btn-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.pa-spin {
+  animation: pa-spin 0.9s linear infinite;
+}
+
+@keyframes pa-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pa-status {
   display: inline-flex;
   align-items: center;
-  gap: $spacing-1;
-  font-size: $font-size-sm;
-  font-weight: $font-semibold;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: $font-size-xs;
+  font-weight: $font-medium;
 
   &.is-executed {
-    color: $income;
+    background: var(--color-income-soft);
+    color: var(--color-income);
+  }
+
+  &.is-failed {
+    background: var(--color-expense-soft);
+    color: var(--color-expense);
   }
 
   &.is-rejected {
+    background: $bg-gray;
     color: $text-muted;
+  }
+}
+
+.pa-status-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.pa-edit {
+  margin-top: $spacing-3;
+  padding-top: $spacing-3;
+  border-top: 1px solid $border-light;
+  overflow: hidden;
+}
+
+.pa-expand-enter-active,
+.pa-expand-leave-active {
+  transition:
+    opacity 0.18s ease,
+    max-height 0.22s ease;
+  max-height: 320px;
+}
+
+.pa-expand-enter-from,
+.pa-expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pa,
+  .pa-btn,
+  .pa-icon-btn,
+  .pa-expand-enter-active,
+  .pa-expand-leave-active {
+    transition: none;
+  }
+
+  .pa-spin {
+    animation: none;
   }
 }
 </style>

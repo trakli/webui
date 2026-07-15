@@ -1,7 +1,7 @@
 <template>
   <!-- New agent path: an ordered stream of widget blocks. -->
   <div v-if="blocks.length" class="blocks-container">
-    <template v-for="(block, i) in blocks" :key="i">
+    <template v-for="(block, i) in blocks" :key="blockKey(block, i)">
       <ChatMarkdownBlock v-if="block.type === 'markdown'" :text="block.text as string" />
       <ChatTableBlock
         v-else-if="block.type === 'table'"
@@ -23,6 +23,12 @@
       />
       <ChatProposedActionBlock
         v-else-if="block.type === 'proposed_action'"
+        :block="block as any"
+        :session-id="sessionId"
+        @changed="$emit('changed')"
+      />
+      <ChatProposedActionBatchBlock
+        v-else-if="block.type === 'proposed_action_batch'"
         :block="block as any"
         :session-id="sessionId"
         @changed="$emit('changed')"
@@ -141,6 +147,7 @@ import ChatTableBlock from '@/components/ai/blocks/ChatTableBlock.vue';
 import ChatKpiBlock from '@/components/ai/blocks/ChatKpiBlock.vue';
 import ChatChartBlock from '@/components/ai/blocks/ChatChartBlock.vue';
 import ChatProposedActionBlock from '@/components/ai/blocks/ChatProposedActionBlock.vue';
+import ChatProposedActionBatchBlock from '@/components/ai/blocks/ChatProposedActionBatchBlock.vue';
 import ChatImportReviewBlock from '@/components/ai/blocks/ChatImportReviewBlock.vue';
 import ChatCanvasBlock from '@/components/ai/blocks/ChatCanvasBlock.vue';
 import ChatComparisonBlock from '@/components/ai/blocks/ChatComparisonBlock.vue';
@@ -164,6 +171,16 @@ defineEmits<{
 
 const blocks = computed<ChatBlock[]>(() => props.result?.blocks ?? []);
 const sessionId = computed(() => props.sessionId ?? 0);
+
+/**
+ * Key an action card by its own identity, not its position: a reload that
+ * reorders blocks would otherwise hand a card the wrong reactive state.
+ */
+const blockKey = (block: ChatBlock, index: number): string => {
+  if (block.type === 'proposed_action' && block.id) return `action-${block.id}`;
+  if (block.type === 'proposed_action_batch' && block.batch) return `batch-${block.batch}`;
+  return `${block.type}-${index}`;
+};
 
 const formatKey = (key: string | number): string =>
   String(key)

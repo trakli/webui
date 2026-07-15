@@ -720,5 +720,14 @@
   "of spend": "des dépenses",
   "this month": "ce mois-ci",
   "per transaction": "par transaction",
-  "top destination": "destination principale"
+  "top destination": "destination principale",
+  "Confirm all": "Tout confirmer",
+  "Dismiss all": "Tout ignorer",
+  "Done editing": "Modification terminée",
+  "Hide details": "Masquer les détails",
+  "Review each one": "Vérifier un par un",
+  "Could not complete the actions": "Impossible d'effectuer les actions",
+  "Could not dismiss the actions": "Impossible d'ignorer les actions",
+  "{count} changes await your confirmation": "{count} modifications attendent votre confirmation",
+  "{count} changes": "{count} modifications"
 }

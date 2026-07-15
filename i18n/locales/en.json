@@ -1337,5 +1337,14 @@
   "Revoke": "Revoke",
   "No tokens yet.": "No tokens yet.",
   "Copy your token now": "Copy your token now",
-  "This token is shown only once. Store it somewhere safe before closing.": "This token is shown only once. Store it somewhere safe before closing."
+  "This token is shown only once. Store it somewhere safe before closing.": "This token is shown only once. Store it somewhere safe before closing.",
+  "Confirm all": "Confirm all",
+  "Dismiss all": "Dismiss all",
+  "Done editing": "Done editing",
+  "Hide details": "Hide details",
+  "Review each one": "Review each one",
+  "Could not complete the actions": "Could not complete the actions",
+  "Could not dismiss the actions": "Could not dismiss the actions",
+  "{count} changes await your confirmation": "{count} changes await your confirmation",
+  "{count} changes": "{count} changes"
 }
