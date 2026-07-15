@@ -105,6 +105,7 @@ import TButton from './TButton.vue';
 import SearchableDropdown from './SearchableDropdown.vue';
 import { ArrowsRightLeftIcon } from '@heroicons/vue/24/outline';
 import { useSharedData } from '~/composables/useSharedData';
+import { CURRENCIES } from '@/utils/currencies';
 
 const { t } = useI18n();
 
@@ -138,7 +139,9 @@ const toWalletError = ref(false);
 const exchangeRateError = ref(false);
 
 const availableCurrencies = computed(() => {
-  const currencies = new Set(['XAF', 'USD', 'EUR', 'GBP', 'NGN']);
+  const currencies = new Set(CURRENCIES.map((c) => c.code));
+  // A wallet may hold a currency the list does not carry; never hide it from
+  // the person whose money is already in it.
   sharedData.wallets.value.forEach((wallet) => {
     if (wallet.currency) {
       currencies.add(wallet.currency);

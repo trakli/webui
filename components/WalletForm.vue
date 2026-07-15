@@ -75,15 +75,9 @@
           required
         >
           <option value="">{{ t('Select currency') }}</option>
-          <option value="XAF">XAF - {{ t('Central African Franc') }}</option>
-          <option value="USD">USD - {{ t('US Dollar') }}</option>
-          <option value="EUR">EUR - {{ t('Euro') }}</option>
-          <option value="GBP">GBP - {{ t('British Pound') }}</option>
-          <option value="JPY">JPY - {{ t('Japanese Yen') }}</option>
-          <option value="CAD">CAD - {{ t('Canadian Dollar') }}</option>
-          <option value="AUD">AUD - {{ t('Australian Dollar') }}</option>
-          <option value="CHF">CHF - {{ t('Swiss Franc') }}</option>
-          <option value="CNY">CNY - {{ t('Chinese Yuan') }}</option>
+          <option v-for="currency in CURRENCIES" :key="currency.code" :value="currency.code">
+            {{ currency.code }} - {{ currency.name }}
+          </option>
         </select>
         <div v-if="currencyError" class="error-text">{{ t('Please select a currency.') }}</div>
       </div>
@@ -134,6 +128,7 @@ import IconPicker from './IconPicker.vue';
 import * as lucideIcons from 'lucide-vue-next';
 import { ImagePlus, X } from 'lucide-vue-next';
 import { useSharedData } from '@/composables/useSharedData';
+import { CURRENCIES } from '@/utils/currencies';
 
 const { t } = useI18n();
 
