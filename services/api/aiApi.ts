@@ -15,6 +15,7 @@ export type BlockType =
   | 'progress'
   | 'question'
   | 'proposed_action'
+  | 'proposed_action_batch'
   | 'import_review'
   | 'canvas';
 
@@ -28,6 +29,20 @@ export interface ChatBlock {
   [key: string]: unknown;
 }
 
+/**
+ * One row of a proposed action's review form. `key` is the payload key an
+ * override is sent under; `type` picks the control. A readonly row is shown but
+ * never sent back.
+ */
+export interface ProposedActionField {
+  key: string;
+  label: string;
+  type: 'readonly' | 'text' | 'number' | 'datetime' | 'enum' | 'wallet' | 'party' | 'category';
+  value: unknown;
+  display?: string;
+  options?: string[];
+}
+
 export interface ProposedActionBlock extends ChatBlock {
   type: 'proposed_action';
   id: number;
@@ -38,7 +53,23 @@ export interface ProposedActionBlock extends ChatBlock {
   confirm_url: string;
   reject_url: string;
   payload?: Record<string, unknown>;
-  fields?: { label: string; value: string }[];
+  fields?: ProposedActionField[];
+}
+
+/**
+ * Actions proposed together and confirmed as one unit, so a sweep over many
+ * records costs one decision. Members keep their own urls for the odd one out.
+ */
+export interface ProposedActionBatchBlock extends ChatBlock {
+  type: 'proposed_action_batch';
+  batch: string;
+  action_type: string;
+  summary: string;
+  risk: 'low' | 'medium' | 'high';
+  status: string;
+  actions: ProposedActionBlock[];
+  confirm_url: string;
+  reject_url: string;
 }
 
 export interface ChatMessageResult {
@@ -165,6 +196,23 @@ const aiApi = {
   async rejectAction(sessionId: number, actionId: number): Promise<void> {
     const api = useApi();
     await api(`/ai/chats/${sessionId}/actions/${actionId}/reject`, { method: 'POST' });
+  },
+
+  async confirmActionBatch(
+    sessionId: number,
+    batch: string
+  ): Promise<{ executed: number; failed: number[] } | null> {
+    const api = useApi();
+    const response = await api<ApiEnvelope<{ executed: number; failed: number[] }>>(
+      `/ai/chats/${sessionId}/actions/batches/${batch}/confirm`,
+      { method: 'POST' }
+    );
+    return response?.data || null;
+  },
+
+  async rejectActionBatch(sessionId: number, batch: string): Promise<void> {
+    const api = useApi();
+    await api(`/ai/chats/${sessionId}/actions/batches/${batch}/reject`, { method: 'POST' });
   },
 
   async uploadFiles(
