@@ -248,6 +248,59 @@
           </div>
         </div>
 
+        <!-- Step: bring transactions in (file import + any connectors) -->
+        <div v-if="currentStepId === 'import'" class="step-content">
+          <div class="step-icon">
+            <IconImport />
+          </div>
+          <div class="step-info">
+            <h2 class="step-title">{{ $t('Bring your transactions in') }}</h2>
+            <p class="step-description">
+              {{
+                $t(
+                  'Start with what you already have instead of typing it all in. You can always add more by hand later.'
+                )
+              }}
+            </p>
+          </div>
+          <div class="step-form">
+            <div class="import-options">
+              <button class="import-option" @click="startFileImport">
+                <span class="import-option-icon"><IconFileUpload /></span>
+                <span class="import-option-text">
+                  <span class="import-option-title">{{ $t('Import from a file') }}</span>
+                  <span class="import-option-desc">{{
+                    $t('A statement, a spreadsheet, or a photo of a receipt.')
+                  }}</span>
+                </span>
+              </button>
+
+              <button
+                v-for="connector in connectors"
+                :key="connector.key"
+                class="import-option"
+                @click="startConnector(connector)"
+              >
+                <span class="import-option-icon"><IconConnect /></span>
+                <span class="import-option-text">
+                  <span class="import-option-title">{{
+                    connector.ui?.card?.cta || $t('Connect {name}', { name: connector.name })
+                  }}</span>
+                  <span class="import-option-desc">{{
+                    connector.ui?.card?.description || connector.description
+                  }}</span>
+                </span>
+              </button>
+            </div>
+
+            <div class="step-actions">
+              <button class="secondary-btn" @click="nextStep">
+                {{ $t("I'll add transactions myself") }}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Step: plugin-contributed onboarding step (rendered from descriptor) -->
         <div v-else-if="currentStepContribution" class="step-content">
           <DescriptorRenderer :contribution="currentStepContribution" @next="nextStep" />
@@ -322,10 +375,14 @@ import {
 import IconLanguage from '~icons/solar/translation-bold-duotone';
 import IconWallet from '~icons/solar/wallet-money-bold-duotone';
 import IconCategory from '~icons/solar/widget-5-bold-duotone';
+import IconImport from '~icons/solar/import-bold-duotone';
+import IconFileUpload from '~icons/solar/cloud-upload-bold-duotone';
+import IconConnect from '~icons/solar/link-bold-duotone';
 import { useSharedData } from '@/composables/useSharedData';
 import { useNotifications } from '@/composables/useNotifications';
 import { useWallets } from '@/composables/useWallets';
 import { useExtensionSlots } from '@/composables/useExtensionSlots';
+import { useIntegrations } from '@/composables/useIntegrations';
 import DescriptorRenderer from '@/components/extensions/DescriptorRenderer.vue';
 import configurationsApi from '@/services/api/configurationsApi';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
@@ -347,6 +404,36 @@ const { createWallet, updateWallet } = useWallets();
 const { setComplete: setOnboardingComplete } = useOnboardingStatus();
 const returnTo = computed(() => (route.query.returnTo as string) || '/dashboard');
 
+// Where onboarding lands when it finishes. Defaults to returnTo, but the import
+// step overrides it so "import a file" or "connect an account" drop the user
+// straight onto that surface instead of the dashboard.
+const pendingDestination = ref<string | null>(null);
+const finalDestination = computed(() => pendingDestination.value ?? returnTo.value);
+
+const { integrations, load: loadIntegrations } = useIntegrations();
+onMounted(() => {
+  loadIntegrations();
+});
+
+// Connectors that can pull transactions in from a linked account (a bank, etc).
+// Only ready-to-use ones: entitled, configured, and declaring a connect flow.
+// File import is offered separately as the always-present built-in option.
+const connectors = computed(() =>
+  integrations.value.filter(
+    (integration) => integration.entitled && integration.configured && integration.ui?.connect
+  )
+);
+
+const startFileImport = () => {
+  pendingDestination.value = '/imports';
+  completeOnboarding();
+};
+
+const startConnector = (integration: (typeof integrations.value)[number]) => {
+  pendingDestination.value = integration.ui?.onboarding?.href ?? '/settings';
+  completeOnboarding();
+};
+
 const currentStep = ref(1);
 
 // Onboarding is a data-driven list: built-in steps plus any plugin
@@ -359,6 +446,7 @@ const builtInSteps = [
   { id: 'language', order: 10 },
   { id: 'wallet', order: 20 },
   { id: 'categories', order: 30 },
+  { id: 'import', order: 40 },
   { id: 'complete', order: 1000 }
 ];
 
@@ -465,7 +553,7 @@ const ensureOnboardingComplete = async () => {
 const skipStep = async () => {
   try {
     await ensureOnboardingComplete();
-    await navigateTo(returnTo.value, { replace: true });
+    await navigateTo(finalDestination.value, { replace: true });
   } catch (e) {
     console.error('Error in skipStep:', e);
   }
@@ -641,7 +729,7 @@ const completeOnboarding = async () => {
       sharedData.loadConfigurations(true).catch(() => {}),
       sharedData.loadWallets(true).catch(() => {})
     ]);
-    await navigateTo(returnTo.value, { replace: true });
+    await navigateTo(finalDestination.value, { replace: true });
   } finally {
     isCompleting.value = false;
   }
