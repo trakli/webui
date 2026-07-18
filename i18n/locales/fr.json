@@ -729,5 +729,11 @@
   "Could not complete the actions": "Impossible d'effectuer les actions",
   "Could not dismiss the actions": "Impossible d'ignorer les actions",
   "{count} changes await your confirmation": "{count} modifications attendent votre confirmation",
-  "{count} changes": "{count} modifications"
+  "{count} changes": "{count} modifications",
+  "Bring your transactions in": "Importez vos transactions",
+  "Start with what you already have instead of typing it all in. You can always add more by hand later.": "Partez de ce que vous avez déjà au lieu de tout saisir. Vous pourrez en ajouter à la main plus tard.",
+  "Import from a file": "Importer depuis un fichier",
+  "A statement, a spreadsheet, or a photo of a receipt.": "Un relevé, un tableur ou une photo de reçu.",
+  "Connect {name}": "Connecter {name}",
+  "I'll add transactions myself": "J'ajouterai les transactions moi-même"
 }

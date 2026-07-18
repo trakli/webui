@@ -1346,5 +1346,11 @@
   "Could not complete the actions": "Could not complete the actions",
   "Could not dismiss the actions": "Could not dismiss the actions",
   "{count} changes await your confirmation": "{count} changes await your confirmation",
-  "{count} changes": "{count} changes"
+  "{count} changes": "{count} changes",
+  "Bring your transactions in": "Bring your transactions in",
+  "Start with what you already have instead of typing it all in. You can always add more by hand later.": "Start with what you already have instead of typing it all in. You can always add more by hand later.",
+  "Import from a file": "Import from a file",
+  "A statement, a spreadsheet, or a photo of a receipt.": "A statement, a spreadsheet, or a photo of a receipt.",
+  "Connect {name}": "Connect {name}",
+  "I'll add transactions myself": "I'll add transactions myself"
 }
