@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.2] - 2026-08-12
+
+Codename: Ailanthus, second beta.
+
+### Added
+
+- Onboarding offers to bring transactions in, by importing a file or connecting an
+  account, instead of ending on an empty dashboard. Connectors come from the
+  integrations the server advertises, so a new one appears here on its own
+
+### Changed
+
+- Assistant confirmation cards name what they will change and show the fields at
+  rest, opening a form only when someone chooses to edit; changes proposed
+  together arrive as one card confirmed in a single click
+- A transaction takes a single category rather than a growing list of chips; one
+  saved earlier keeps its first category when saved again
+- Every form offers the shared currency list, covering the rupee, real, rupiah,
+  peso, dong, lira, zloty, hryvnia and more, rather than three hardcoded lists
+
+### Fixed
+
+- Someone just granted admin sees the admin area immediately instead of waiting
+  for their session to expire
+- A hiccup while re-reading the signed-in user no longer signs them out; only an
+  actual rejection ends a session
+
 ## [2.0.0-beta.1] - 2026-07-11
 
 ### Added
