@@ -18,108 +18,46 @@
       </div>
 
       <div class="table-wrapper">
-        <div class="table-scroll">
-          <table class="content-table" :class="{ 'expense-table': headerType === 'expense' }">
-            <thead>
-              <tr>
-                <th
-                  v-for="col in computedColumns"
-                  :key="col.key"
-                  :style="col.width ? { width: col.width } : {}"
-                  :class="[`col-${col.key}`, col.align ? `text-${col.align}` : '']"
-                >
-                  {{ t(col.label) }}
-                </th>
-                <th class="col-action">{{ t('Action') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="entity in paginatedEntities"
-                :key="entity.id"
-                class="entity-row"
-                :class="{ 'is-default': String(entity.id) === defaultItemId }"
+        <TDataTable
+          :columns="tableColumns"
+          :rows="paginatedEntities"
+          :row-class="rowClass"
+          :header-type="headerType"
+        >
+          <template #cell-name="{ row: entity }">
+            <div class="name-cell">
+              <component :is="getIcon(entity)" v-if="getIcon(entity)" class="entity-icon" />
+              <span class="name-text">{{ entity.name }}</span>
+              <span v-if="String(entity.id) === defaultItemId" class="default-badge">
+                {{ t('Default') }}
+              </span>
+            </div>
+          </template>
+          <template #cell-actions="{ row: entity }">
+            <div class="entity-actions">
+              <button
+                class="action-button edit"
+                :title="t('Edit {item}', { item: t(pageName) })"
+                @click="$emit('edit', entity)"
               >
-                <td
-                  v-for="col in computedColumns"
-                  :key="col.key"
-                  :class="[`col-${col.key}`, col.align ? `text-${col.align}` : '']"
-                >
-                  <template v-if="col.key === 'name'">
-                    <div class="name-cell">
-                      <component :is="getIcon(entity)" v-if="getIcon(entity)" class="entity-icon" />
-                      <span class="name-text">{{ entity.name }}</span>
-                      <span v-if="String(entity.id) === defaultItemId" class="default-badge">
-                        {{ t('Default') }}
-                      </span>
-                    </div>
-                  </template>
-                  <template v-else-if="col.render">
-                    {{ col.render(entity[col.key], entity) }}
-                  </template>
-                  <template v-else>
-                    {{ getCellValue(entity, col.key) }}
-                  </template>
-                </td>
-                <td class="col-action">
-                  <div class="entity-actions">
-                    <button
-                      class="action-button edit"
-                      :title="t('Edit {item}', { item: t(pageName) })"
-                      @click="$emit('edit', entity)"
-                    >
-                      <LucideEdit />
-                    </button>
-                    <button
-                      class="action-button delete"
-                      :title="t('Delete {item}', { item: t(pageName) })"
-                      @click="$emit('delete', entity)"
-                    >
-                      <LucideTrash />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                <LucideEdit />
+              </button>
+              <button
+                class="action-button delete"
+                :title="t('Delete {item}', { item: t(pageName) })"
+                @click="$emit('delete', entity)"
+              >
+                <LucideTrash />
+              </button>
+            </div>
+          </template>
+        </TDataTable>
 
-        <div class="pagination-row">
-          <div class="pagination-controls">
-            <button
-              :disabled="currentPage === 1"
-              class="pagination-button pagination-button--nav"
-              :class="{ disabled: currentPage === 1 }"
-              :aria-label="t('Previous page')"
-              @click="currentPage--"
-            >
-              <ChevronLeft :size="16" />
-            </button>
-
-            <button
-              v-for="page in visiblePages"
-              :key="page"
-              class="pagination-button"
-              :class="{
-                active: page === currentPage,
-                ellipsis: page === '...'
-              }"
-              @click="currentPage = typeof page === 'number' ? page : currentPage"
-            >
-              {{ page }}
-            </button>
-
-            <button
-              :disabled="currentPage === totalPages"
-              class="pagination-button pagination-button--nav"
-              :class="{ disabled: currentPage === totalPages }"
-              :aria-label="t('Next page')"
-              @click="currentPage++"
-            >
-              <ChevronRight :size="16" />
-            </button>
-          </div>
-
+        <TPagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @page-change="currentPage = $event"
+        >
           <div class="page-info">
             <span>{{ t('Show') }}</span>
             <select v-model="perPage" class="per-page-select">
@@ -129,7 +67,7 @@
             </select>
             <span>{{ t('per page') }}</span>
           </div>
-        </div>
+        </TPagination>
       </div>
     </div>
   </ComponentLoader>
@@ -137,15 +75,12 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import {
-  Edit as LucideEdit,
-  Trash as LucideTrash,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-vue-next';
+import { Edit as LucideEdit, Trash as LucideTrash } from 'lucide-vue-next';
 import * as LucideIcons from 'lucide-vue-next';
 import ComponentLoader from './ComponentLoader.vue';
 import SearchInput from './SearchInput.vue';
+import TDataTable from './TDataTable.vue';
+import TPagination from './TPagination.vue';
 
 const { t } = useI18n();
 
@@ -201,17 +136,23 @@ const defaultColumns = computed(() => [
 
 const computedColumns = computed(() => props.columns || defaultColumns.value);
 
+const tableColumns = computed(() => [
+  ...computedColumns.value.map((column) => ({
+    ...column,
+    label: t(column.label),
+    format: column.render
+  })),
+  { key: 'actions', label: t('Action'), align: 'right', width: '96px' }
+]);
+
+const rowClass = (entity) => ({
+  'is-default': String(entity.id) === props.defaultItemId
+});
+
 const getIcon = (entity) => {
   const iconValue = entity.icon?.path || entity.icon?.content || entity.icon;
   if (!iconValue) return null;
   return LucideIcons[iconValue] || LucideIcons.Box;
-};
-
-const getCellValue = (entity, key) => {
-  if (key.includes('.')) {
-    return key.split('.').reduce((obj, k) => obj?.[k], entity) ?? '';
-  }
-  return entity[key] ?? '';
 };
 
 const internalSearchQuery = ref('');
@@ -252,43 +193,6 @@ watch(perPage, () => {
   if (currentPage.value > maxPage) {
     currentPage.value = maxPage;
   }
-});
-
-const visiblePages = computed(() => {
-  const total = totalPages.value;
-  const current = currentPage.value;
-  const pages = [];
-
-  if (total <= 7) {
-    // Show all pages if 7 or fewer
-    for (let i = 1; i <= total; i++) {
-      pages.push(i);
-    }
-  } else {
-    // Always show first page
-    pages.push(1);
-
-    if (current > 3) {
-      pages.push('...');
-    }
-
-    // Show pages around current page
-    const start = Math.max(2, current - 1);
-    const end = Math.min(start + 2, total - 1);
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (current < total - 2) {
-      pages.push('...');
-    }
-
-    // Always show last page
-    pages.push(total);
-  }
-
-  return pages;
 });
 </script>
 
@@ -339,100 +243,6 @@ const visiblePages = computed(() => {
   overflow: hidden;
 }
 
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.content-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 500px;
-
-  thead {
-    tr {
-      background: $primary-light;
-    }
-
-    th {
-      color: $primary-dark;
-      font-weight: $font-bold;
-      text-align: left;
-      padding: 8px 16px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      white-space: nowrap;
-      border-bottom: 1px solid $border-light;
-
-      &:first-child {
-        padding-left: 20px;
-      }
-
-      &.text-right {
-        text-align: right;
-      }
-
-      &.text-center {
-        text-align: center;
-      }
-    }
-  }
-
-  &.expense-table thead tr {
-    background: rgba(var(--color-expense-rgb), 0.12);
-
-    th {
-      color: var(--color-expense);
-    }
-  }
-
-  tbody {
-    background: $bg-white;
-
-    .entity-row {
-      background: $bg-white;
-      transition: background-color $duration-fast $easing-standard;
-
-      &:hover {
-        background: rgba(var(--color-primary-rgb), 0.04);
-      }
-
-      &.is-default {
-        background: rgba(var(--color-success-rgb), 0.08);
-
-        &:hover {
-          background: rgba(var(--color-success-rgb), 0.12);
-        }
-      }
-
-      &:last-child td {
-        border-bottom: none;
-      }
-
-      td {
-        padding: 6px 16px;
-        border-bottom: 1px solid $border-light;
-        font-size: $font-size-sm;
-        vertical-align: middle;
-        line-height: 1.4;
-
-        &:first-child {
-          padding-left: 20px;
-        }
-
-        &.text-right {
-          text-align: right;
-        }
-
-        &.text-center {
-          text-align: center;
-        }
-      }
-    }
-  }
-}
-
 .name-cell {
   display: flex;
   align-items: center;
@@ -469,11 +279,6 @@ const visiblePages = computed(() => {
   text-align: right;
   white-space: nowrap;
   width: 96px;
-}
-
-.content-table th.col-action,
-.content-table td.col-action {
-  padding-right: 20px;
 }
 
 .entity-actions {
@@ -519,110 +324,6 @@ const visiblePages = computed(() => {
     &:hover svg {
       color: $error-dark;
     }
-  }
-}
-
-.pagination-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-3 $spacing-4;
-  background-color: $bg-white;
-  border-top: 1px solid $border-light;
-  gap: $spacing-3;
-
-  @media (max-width: $breakpoint-md) {
-    flex-direction: column-reverse;
-    gap: $spacing-2;
-    padding: $spacing-3;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: $spacing-2;
-    gap: $spacing-2;
-    flex-wrap: wrap;
-  }
-}
-
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-
-  @media (max-width: $breakpoint-md) {
-    order: 2;
-    width: 100%;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    gap: 0.25rem;
-    order: unset;
-    width: auto;
-    flex: 1;
-    justify-content: center;
-  }
-}
-
-.pagination-button {
-  padding: 0 $spacing-3;
-  color: $text-secondary;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition:
-    background-color $duration-fast $easing-standard,
-    color $duration-fast $easing-standard;
-  font-size: $font-size-sm;
-  min-width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: $font-semibold;
-  font-variant-numeric: tabular-nums;
-
-  @media (max-width: $breakpoint-sm) {
-    min-width: 28px;
-    height: 28px;
-    font-size: $font-size-xs;
-  }
-
-  &:hover:not(.disabled):not(.ellipsis):not(.active) {
-    background: $bg-light;
-    color: $text-primary;
-  }
-
-  &:focus-visible {
-    outline: 2px solid $primary;
-    outline-offset: 2px;
-  }
-
-  &.active {
-    background: $primary-light;
-    color: $primary;
-  }
-
-  &--nav {
-    color: $text-muted;
-  }
-
-  &.disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  &.ellipsis {
-    background: transparent;
-    cursor: default;
-    pointer-events: none;
-    color: $text-muted;
-    padding: 0 4px;
-    min-width: auto;
   }
 }
 
@@ -689,13 +390,6 @@ const visiblePages = computed(() => {
     outline: none;
     border-color: $primary;
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
-  }
-
-  .expense-header ~ .entities-container ~ .pagination-row & {
-    &:focus {
-      border-color: $primary;
-      box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
-    }
   }
 
   &:hover {
