@@ -73,6 +73,7 @@
                   height="220"
                   :options="areaOptions(usersChart.categories, chartColors.primary)"
                   :series="[{ name: t('New users'), data: usersChart.data }]"
+                  @data-point-selection="showSignupsForPoint"
                 />
               </ClientOnly>
             </TCard>
@@ -138,47 +139,75 @@
         <UserDetail v-if="selectedUserId" :user-id="selectedUserId" @back="selectedUserId = null" />
         <template v-else>
           <header class="panel__head">
-            <h1 class="panel__title">{{ t('Users') }}</h1>
+            <div>
+              <h1 class="panel__title">{{ t('Users') }}</h1>
+              <button v-if="joinedOn" class="filter-chip" @click="clearJoinDate">
+                {{ t('Joined on {date}', { date: formatDate(joinedOn) }) }} ×
+              </button>
+            </div>
             <div class="search">
               <Search class="search__icon" />
               <input v-model="userQuery" class="search__input" :placeholder="t('Search users')" />
             </div>
           </header>
           <TCard>
-            <table v-if="filteredUsers.length" class="data-table data-table--clickable">
-              <thead>
-                <tr>
-                  <th>{{ t('Name') }}</th>
-                  <th>{{ t('Email') }}</th>
-                  <th>{{ t('Joined') }}</th>
-                  <th class="data-table__actions-col">{{ t('Actions') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="u in filteredUsers" :key="u.id" @click="selectedUserId = u.id">
-                  <td class="data-table__name">{{ u.first_name }} {{ u.last_name }}</td>
-                  <td class="data-table__muted">{{ u.email }}</td>
-                  <td class="data-table__muted">{{ formatDate(u.created_at) }}</td>
-                  <td class="data-table__actions" @click.stop>
-                    <TDropdown>
-                      <template #trigger>
-                        <button class="row-action" :aria-label="t('Actions')">
-                          <MoreHorizontal />
-                        </button>
-                      </template>
-                      <TDropdownItem @click="selectedUserId = u.id"
-                        ><Eye class="item-icon" />{{ t('View profile') }}</TDropdownItem
-                      >
-                      <TDropdownItem><Send class="item-icon" />{{ t('Reach out') }}</TDropdownItem>
-                      <TDropdownItem
-                        ><Gift class="item-icon" />{{ t('Grant discount') }}</TDropdownItem
-                      >
-                    </TDropdown>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p v-else class="state">{{ users.length ? t('No matches') : t('No users yet') }}</p>
+            <TDataTable
+              v-if="users.length"
+              :columns="userColumns"
+              :rows="users"
+              clickable
+              @row-click="selectedUserId = $event.id"
+            >
+              <template #cell-name="{ row: u }">
+                <strong>{{ u.first_name }} {{ u.last_name }}</strong>
+              </template>
+              <template #cell-created_at="{ row: u }">{{ formatDate(u.created_at) }}</template>
+              <template #cell-last_seen_at="{ row: u }">
+                {{ u.last_seen_at ? formatDateTime(u.last_seen_at) : t('Never') }}
+              </template>
+              <template #cell-last_transaction_at="{ row: u }">
+                {{ u.last_transaction_at ? formatDateTime(u.last_transaction_at) : t('Never') }}
+              </template>
+              <template #cell-tokens_used="{ row: u }">{{ fmt(u.tokens_used) }}</template>
+              <template #cell-actions="{ row: u }">
+                <div @click.stop>
+                  <TDropdown>
+                    <template #trigger>
+                      <button class="row-action" :aria-label="t('Actions')">
+                        <MoreHorizontal />
+                      </button>
+                    </template>
+                    <TDropdownItem @click="selectedUserId = u.id"
+                      ><Eye class="item-icon" />{{ t('View profile') }}</TDropdownItem
+                    >
+                    <TDropdownItem><Send class="item-icon" />{{ t('Reach out') }}</TDropdownItem>
+                    <TDropdownItem
+                      ><Gift class="item-icon" />{{ t('Grant discount') }}</TDropdownItem
+                    >
+                  </TDropdown>
+                </div>
+              </template>
+            </TDataTable>
+            <p v-else-if="!usersLoading" class="state">{{ t('No users found') }}</p>
+            <TPagination
+              v-if="userPagination.total"
+              :current-page="userPagination.current_page"
+              :total-pages="userPagination.last_page"
+              :disabled="usersLoading"
+              @page-change="changeUserPage"
+            >
+              <template #info>
+                <span class="pagination-info">
+                  {{
+                    t('Page {page} of {pages} · {total} users', {
+                      page: userPagination.current_page,
+                      pages: userPagination.last_page,
+                      total: userPagination.total
+                    })
+                  }}
+                </span>
+              </template>
+            </TPagination>
           </TCard>
         </template>
       </section>
@@ -206,24 +235,12 @@
           <OutreachComposer @sent="onOutreachSent" />
         </TCard>
         <TCard v-else>
-          <table v-if="outreaches.length" class="data-table">
-            <thead>
-              <tr>
-                <th>{{ t('Subject') }}</th>
-                <th>{{ t('Audience') }}</th>
-                <th>{{ t('Sent') }}</th>
-                <th>{{ t('Date') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="o in outreaches" :key="o.id">
-                <td class="data-table__name">{{ o.subject }}</td>
-                <td class="data-table__muted">{{ o.audience }}</td>
-                <td>{{ o.sent }}</td>
-                <td class="data-table__muted">{{ formatDate(o.created_at) }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <TDataTable v-if="outreaches.length" :columns="outreachColumns" :rows="outreaches">
+            <template #cell-subject="{ value }"
+              ><strong>{{ value }}</strong></template
+            >
+            <template #cell-created_at="{ row }">{{ formatDate(row.created_at) }}</template>
+          </TDataTable>
           <p v-else class="state">{{ t('No outreaches yet') }}</p>
         </TCard>
       </section>
@@ -240,23 +257,56 @@
         />
       </section>
 
-      <section v-else>
-        <SectionPlaceholder
-          :icon="IconUsage"
-          :title="t('AI usage')"
-          :body="
-            t(
-              'Track assistant token usage and cost per user once the assistant reports it. The metric plugs in as a provider, so no console change is needed when it lands.'
-            )
-          "
-        />
+      <section v-else-if="activeSection === 'usage'">
+        <header class="panel__head">
+          <div>
+            <h1 class="panel__title">{{ t('AI usage') }}</h1>
+            <p class="panel__sub">
+              {{ t('Assistant token consumption for the selected period.') }}
+            </p>
+          </div>
+        </header>
+        <div v-if="loading" class="state">{{ t('Loading...') }}</div>
+        <template v-else>
+          <div class="kpis kpis--single">
+            <div class="kpi tone-primary">
+              <span class="kpi__icon"><Cpu /></span>
+              <span class="kpi__value">{{ fmt(metricByKey('ai_tokens_used')?.value) }}</span>
+              <span class="kpi__label">{{ t('AI tokens used') }}</span>
+            </div>
+          </div>
+          <div class="grid-2">
+            <TCard>
+              <template #header>{{ t('Token usage') }}</template>
+              <ClientOnly>
+                <ApexChart
+                  type="area"
+                  height="240"
+                  :options="areaOptions(tokenChart.categories, chartColors.primary)"
+                  :series="[{ name: t('AI tokens'), data: tokenChart.data }]"
+                />
+              </ClientOnly>
+            </TCard>
+            <TCard>
+              <template #header>{{ t('Tokens by user') }}</template>
+              <ol v-if="tokenRanking.length" class="ranking">
+                <li v-for="(row, k) in tokenRanking" :key="k" class="ranking-row">
+                  <span class="ranking-rank">{{ k + 1 }}</span>
+                  <span class="ranking-label">{{ row.label }}</span>
+                  <span class="ranking-value">{{ fmt(row.value) }}</span>
+                </li>
+              </ol>
+              <p v-else class="state">{{ t('No token usage yet') }}</p>
+            </TCard>
+          </div>
+        </template>
       </section>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, h, defineAsyncComponent, type Component } from 'vue';
+import { ref, computed, onMounted, watch, h, defineAsyncComponent, type Component } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   LayoutDashboard,
@@ -276,12 +326,13 @@ import {
   Gift
 } from 'lucide-vue-next';
 import IconDiscount from '~icons/solar/tag-price-bold-duotone';
-import IconUsage from '~icons/solar/cpu-bold-duotone';
 import Logo from '@/components/Logo.vue';
 import TCard from '@/components/TCard.vue';
 import TButton from '@/components/TButton.vue';
 import TDropdown from '@/components/TDropdown.vue';
 import TDropdownItem from '@/components/TDropdownItem.vue';
+import TDataTable, { type DataTableColumn } from '@/components/TDataTable.vue';
+import TPagination from '@/components/TPagination.vue';
 import OutreachComposer from '@/components/admin/OutreachComposer.vue';
 import UserDetail from '@/components/admin/UserDetail.vue';
 import {
@@ -289,6 +340,7 @@ import {
   type EngagementReport,
   type Metric,
   type AdminUser,
+  type AdminUserPage,
   type OutreachSummary
 } from '@/services/api/adminApi';
 
@@ -330,7 +382,33 @@ const loading = ref(true);
 const metricsError = ref('');
 const report = ref<EngagementReport | null>(null);
 const users = ref<AdminUser[]>([]);
+const usersLoading = ref(false);
+const joinedOn = ref<string | null>(null);
+const userPagination = ref<AdminUserPage>({
+  data: [],
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0
+});
 const days = ref(30);
+
+const userColumns = computed<DataTableColumn[]>(() => [
+  { key: 'name', label: t('Name') },
+  { key: 'email', label: t('Email') },
+  { key: 'last_seen_at', label: t('Last seen') },
+  { key: 'last_transaction_at', label: t('Last transaction') },
+  { key: 'created_at', label: t('Joined') },
+  { key: 'tokens_used', label: t('AI tokens') },
+  { key: 'actions', label: t('Actions'), align: 'right', width: '1%' }
+]);
+
+const outreachColumns = computed<DataTableColumn[]>(() => [
+  { key: 'subject', label: t('Subject') },
+  { key: 'audience', label: t('Audience') },
+  { key: 'sent', label: t('Sent') },
+  { key: 'created_at', label: t('Date') }
+]);
 
 const rangeOptions = [
   { days: 7, label: '7 days' },
@@ -382,8 +460,7 @@ const kpis = computed(() => [
   {
     key: 'tokens',
     label: t('AI tokens used'),
-    value: '-',
-    sub: t('Coming soon'),
+    value: fmt(metricByKey('ai_tokens_used')?.value),
     icon: Cpu,
     tone: 'primary'
   }
@@ -395,6 +472,8 @@ const chartFor = (key: string) => {
 };
 const usersChart = computed(() => chartFor('new_users_series'));
 const txChart = computed(() => chartFor('transactions_series'));
+const tokenChart = computed(() => chartFor('ai_tokens_series'));
+const tokenRanking = computed(() => metricByKey('ai_tokens_by_user')?.rows ?? []);
 
 const rankings = computed(() =>
   ['most_active_users', 'most_used_features']
@@ -424,23 +503,59 @@ const areaOptions = (categories: string[], color: string) => ({
   tooltip: { x: { show: true } }
 });
 
-const filteredUsers = computed(() => {
-  const q = userQuery.value.trim().toLowerCase();
-  if (!q) return users.value;
-  return users.value.filter((u) =>
-    `${u.first_name} ${u.last_name} ${u.email}`.toLowerCase().includes(q)
-  );
-});
-
 const exit = () => router.push('/dashboard');
+
+const loadUsers = async (page = 1) => {
+  usersLoading.value = true;
+  try {
+    const result = await adminApi.users({
+      page,
+      perPage: userPagination.value.per_page,
+      search: userQuery.value.trim() || undefined,
+      joinedOn: joinedOn.value || undefined
+    });
+    userPagination.value = result;
+    users.value = result.data;
+  } catch {
+    users.value = [];
+    userPagination.value = {
+      ...userPagination.value,
+      data: [],
+      current_page: 1,
+      last_page: 1,
+      total: 0
+    };
+  } finally {
+    usersLoading.value = false;
+  }
+};
+
+const changeUserPage = (page: number) => loadUsers(page);
+
+const clearJoinDate = () => {
+  joinedOn.value = null;
+  loadUsers();
+};
+
+const showSignupsForPoint = (
+  _event: unknown,
+  _chart: unknown,
+  options: { dataPointIndex: number }
+) => {
+  const date = usersChart.value.categories[options.dataPointIndex];
+  if (!date) return;
+  joinedOn.value = date;
+  activeSection.value = 'users';
+  loadUsers();
+};
 
 const load = async () => {
   loading.value = true;
   metricsError.value = '';
 
-  const [metricsResult, usersResult] = await Promise.allSettled([
+  const [metricsResult] = await Promise.allSettled([
     adminApi.metrics({ days: days.value }),
-    adminApi.users()
+    loadUsers()
   ]);
 
   if (metricsResult.status === 'fulfilled') {
@@ -450,7 +565,6 @@ const load = async () => {
     metricsError.value = t('Metrics are not available yet.');
   }
 
-  users.value = usersResult.status === 'fulfilled' ? usersResult.value : [];
   loading.value = false;
 };
 
@@ -479,10 +593,18 @@ const rowWidth = (rows: { value: number }[], value: number): string => {
 };
 
 const formatDate = (iso: string): string => (iso ? new Date(iso).toLocaleDateString() : '');
+const formatDateTime = (iso: string): string =>
+  iso ? new Date(iso).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
 
 onMounted(() => {
   load();
   loadOutreaches();
+});
+
+let searchTimer: ReturnType<typeof setTimeout> | undefined;
+watch(userQuery, () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadUsers(), 300);
 });
 </script>
 
@@ -705,6 +827,10 @@ onMounted(() => {
   }
 }
 
+.pagination-info {
+  font-variant-numeric: tabular-nums;
+}
+
 .kpis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -863,52 +989,6 @@ onMounted(() => {
   max-width: 100%;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: $font-size-sm;
-
-  th {
-    text-align: left;
-    padding: $table-header-padding;
-    color: $text-muted;
-    font-size: $font-size-xs;
-    font-weight: $font-semibold;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border-bottom: 1px solid $border-color;
-  }
-
-  td {
-    padding: $table-cell-padding;
-    border-bottom: 1px solid $border-color;
-    color: $text-primary;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  tbody tr:hover {
-    background: $bg-light;
-  }
-}
-
-.data-table__name {
-  font-weight: $font-semibold;
-}
-
-.data-table__muted {
-  color: $text-muted;
-}
-
-.data-table__actions-col,
-.data-table__actions {
-  text-align: right;
-  width: 1%;
-  white-space: nowrap;
-}
-
 .row-action {
   display: inline-flex;
   align-items: center;
@@ -937,8 +1017,19 @@ onMounted(() => {
   height: 16px;
 }
 
-.data-table--clickable tbody tr {
+.filter-chip {
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  background: $primary-light;
+  color: $primary-dark;
+  font-size: $font-size-xs;
   cursor: pointer;
+}
+
+.kpis--single {
+  grid-template-columns: minmax(220px, 320px);
 }
 
 .link-back {

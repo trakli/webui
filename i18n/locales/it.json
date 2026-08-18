@@ -1,4 +1,9 @@
 {
+  "Joined on {date}": "Iscritto il {date}",
+  "Last seen": "Ultimo accesso",
+  "Last transaction": "Ultima transazione",
+  "Never": "Mai",
+  "Page {page} of {pages} · {total} users": "Pagina {page} di {pages} · {total} utenti",
   "Recent imports": "Importazioni recenti",
   "Needs review": "Da rivedere",
   "Analyzing": "Analisi in corso",

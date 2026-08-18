@@ -214,7 +214,7 @@ const filteredUsers = computed(() => {
 
 onMounted(async () => {
   try {
-    users.value = await adminApi.users();
+    users.value = (await adminApi.users({ perPage: 100 })).data;
   } catch {
     users.value = [];
   }
