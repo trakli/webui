@@ -306,7 +306,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, h, defineAsyncComponent, type Component } from 'vue';
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  h,
+  defineAsyncComponent,
+  type Component
+} from 'vue';
 import { useRouter } from 'vue-router';
 import {
   LayoutDashboard,
@@ -606,6 +615,8 @@ watch(userQuery, () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => loadUsers(), 300);
 });
+
+onBeforeUnmount(() => clearTimeout(searchTimer));
 </script>
 
 <style lang="scss" scoped>
