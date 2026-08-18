@@ -40,6 +40,10 @@
             <dt>{{ t('Last transaction') }}</dt>
             <dd>{{ detail.last_transaction_at ? fmtDate(detail.last_transaction_at) : '-' }}</dd>
           </div>
+          <div class="fact">
+            <dt>{{ t('AI tokens used') }}</dt>
+            <dd>{{ fmtNumber(detail.user.tokens_used) }}</dd>
+          </div>
         </dl>
       </TCard>
 
@@ -91,6 +95,7 @@ const initials = computed(() => {
 });
 
 const fmtDate = (iso: string): string => (iso ? new Date(iso).toLocaleDateString() : '');
+const fmtNumber = (value: number): string => new Intl.NumberFormat().format(value ?? 0);
 
 const load = async () => {
   loading.value = true;

@@ -37,7 +37,25 @@ export interface AdminUser {
   last_name: string;
   email: string;
   created_at: string;
+  last_seen_at: string | null;
+  last_transaction_at: string | null;
   is_admin?: boolean;
+  tokens_used: number;
+}
+
+export interface AdminUserPage {
+  data: AdminUser[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
+export interface AdminUsersParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  joinedOn?: string;
 }
 
 export interface OutreachSummary {
@@ -89,11 +107,16 @@ const adminApi = {
     return response.data;
   },
 
-  async users(): Promise<AdminUser[]> {
+  async users(params: AdminUsersParams = {}): Promise<AdminUserPage> {
     const api = useApi();
-    const response = await api<{ data: AdminUser[] | { data: AdminUser[] } }>('/admin/users');
-    const payload = response.data as AdminUser[] | { data: AdminUser[] };
-    return Array.isArray(payload) ? payload : (payload?.data ?? []);
+    const query = new URLSearchParams();
+    if (params.page) query.set('page', String(params.page));
+    if (params.perPage) query.set('per_page', String(params.perPage));
+    if (params.search) query.set('search', params.search);
+    if (params.joinedOn) query.set('joined_on', params.joinedOn);
+    const qs = query.toString();
+    const response = await api<{ data: AdminUserPage }>(`/admin/users${qs ? `?${qs}` : ''}`);
+    return response.data;
   },
 
   async outreachHistory(): Promise<OutreachSummary[]> {
