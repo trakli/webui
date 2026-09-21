@@ -1,30 +1,19 @@
 <template>
   <div class="composer">
     <form class="composer__form" @submit.prevent="onSend">
-      <label class="field">
-        <span class="field__label">{{ t('Subject') }}</span>
-        <input v-model="form.subject" class="field__input" :placeholder="t('Subject')" required />
-      </label>
+      <DsInput v-model="form.subject" :label="t('Subject')" :placeholder="t('Subject')" required />
 
       <div class="field">
         <span class="field__label">{{ t('Message') }}</span>
         <div class="md-toolbar">
-          <button
-            v-for="f in formats"
-            :key="f.label"
-            type="button"
-            class="md-btn"
-            :title="t(f.label)"
-            @click="f.action()"
-          >
+          <DsIconButton v-for="f in formats" :key="f.label" :title="t(f.label)" @click="f.action()">
             <component :is="f.icon" class="md-btn__icon" />
-          </button>
+          </DsIconButton>
         </div>
-        <textarea
+        <DsTextarea
           ref="bodyRef"
           v-model="form.body"
-          class="field__textarea"
-          rows="8"
+          :rows="8"
           :placeholder="t('Write your message. Markdown is supported.')"
           required
         />
@@ -47,44 +36,30 @@
 
       <div class="tokens">
         <span class="tokens__hint">{{ t('Personalize with:') }}</span>
-        <button
-          v-for="token in tokens"
-          :key="token"
-          type="button"
-          class="token"
-          @click="insertToken(token)"
-        >
+        <DsChip v-for="token in tokens" :key="token" clickable @click="insertToken(token)">
           {{ token }}
-        </button>
+        </DsChip>
       </div>
 
       <div class="cta-row">
-        <label class="field">
-          <span class="field__label">{{ t('Button label') }}</span>
-          <input
-            v-model="form.cta_label"
-            class="field__input"
-            :placeholder="t('e.g. Open Trakli')"
-          />
-        </label>
-        <label class="field">
-          <span class="field__label">{{ t('Button link') }}</span>
-          <input v-model="form.cta_url" class="field__input" placeholder="https://" />
-        </label>
+        <DsInput
+          v-model="form.cta_label"
+          :label="t('Button label')"
+          :placeholder="t('e.g. Open Trakli')"
+        />
+        <DsInput
+          v-model="form.cta_url"
+          :label="t('Button link')"
+          placeholder="https://"
+          type="url"
+        />
       </div>
 
-      <label class="field">
-        <span class="field__label">{{ t('Audience') }}</span>
-        <select v-model="form.audience" class="field__input">
-          <option v-for="opt in audiences" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </option>
-        </select>
-      </label>
+      <DsDropdown v-model="form.audience" :options="audiences" :label="t('Audience')" />
 
       <div v-if="form.audience === 'specific'" class="field">
         <span class="field__label">{{ t('Choose recipients') }}</span>
-        <input v-model="userQuery" class="field__input" :placeholder="t('Search users')" />
+        <DsInput v-model="userQuery" :placeholder="t('Search users')" />
         <div class="recipients">
           <label v-for="u in filteredUsers" :key="u.id" class="recipient">
             <input v-model="form.user_ids" type="checkbox" :value="u.id" />
@@ -114,29 +89,16 @@
       <div v-if="confirming" class="confirm">
         <p class="confirm__text">{{ confirmText }}</p>
         <div class="confirm__actions">
-          <TButton
-            :text="t('Cancel')"
-            variant="outline"
-            size="small"
-            :full-width="false"
-            @click="confirming = false"
-          />
-          <TButton
-            :text="t('Send now')"
-            size="small"
-            :full-width="false"
-            :loading="sending"
-            @click="send"
-          />
+          <DsButton variant="secondary" size="sm" @click="confirming = false">{{
+            t('Cancel')
+          }}</DsButton>
+          <DsButton size="sm" :loading="sending" @click="send">{{ t('Send now') }}</DsButton>
         </div>
       </div>
       <div v-else class="composer__actions">
-        <TButton
-          type="submit"
-          :text="form.audience === 'test' ? t('Send test to me') : t('Send')"
-          :full-width="false"
-          :loading="sending"
-        />
+        <DsButton type="submit" :loading="sending">{{
+          form.audience === 'test' ? t('Send test to me') : t('Send')
+        }}</DsButton>
       </div>
     </form>
 
@@ -168,7 +130,14 @@ import {
   ListOrdered as ListOrderedIcon,
   Link2 as LinkIcon
 } from 'lucide-vue-next';
-import TButton from '@/components/TButton.vue';
+import {
+  DsButton,
+  DsChip,
+  DsDropdown,
+  DsIconButton,
+  DsInput,
+  DsTextarea
+} from '@whilesmart/design';
 import { adminApi, type OutreachAudience, type AdminUser } from '@/services/api/adminApi';
 
 const { t } = useI18n();
@@ -285,10 +254,10 @@ const insertToken = (token: string) => {
   form.body = `${form.body}${form.body.endsWith(' ') || !form.body ? '' : ' '}${token} `;
 };
 
-const bodyRef = ref<HTMLTextAreaElement | null>(null);
+const bodyRef = ref<{ textarea: HTMLTextAreaElement | null } | null>(null);
 
 const surround = (before: string, after: string) => {
-  const el = bodyRef.value;
+  const el = bodyRef.value?.textarea;
   if (!el) return;
   const start = el.selectionStart;
   const end = el.selectionEnd;
@@ -302,7 +271,7 @@ const surround = (before: string, after: string) => {
 };
 
 const prefixLines = (prefix: string) => {
-  const el = bodyRef.value;
+  const el = bodyRef.value?.textarea;
   if (!el) return;
   const lineStart = form.body.lastIndexOf('\n', el.selectionStart - 1) + 1;
   const block = form.body.slice(lineStart, el.selectionEnd);
@@ -396,30 +365,6 @@ const send = async () => {
   color: $text-secondary;
 }
 
-.field__input,
-.field__textarea {
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  padding: 0.6rem 0.75rem;
-  font-size: $font-size-sm;
-  font-family: inherit;
-  color: $text-primary;
-  background: $bg-white;
-
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
-}
-
-.field__textarea {
-  resize: vertical;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
 .md-toolbar {
   display: flex;
   gap: 0.15rem;
@@ -428,24 +373,6 @@ const send = async () => {
   border-bottom: none;
   border-radius: $radius-lg $radius-lg 0 0;
   background: $bg-light;
-}
-
-.md-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: $radius-md;
-  background: transparent;
-  color: $text-secondary;
-  cursor: pointer;
-
-  &:hover {
-    background: $bg-white;
-    color: $primary;
-  }
 }
 
 .md-btn__icon {
@@ -463,21 +390,6 @@ const send = async () => {
 .tokens__hint {
   font-size: $font-size-xs;
   color: $text-muted;
-}
-
-.token {
-  border: 1px solid $border-color;
-  background: $bg-light;
-  border-radius: $radius-md;
-  padding: 0.2rem 0.5rem;
-  font-size: $font-size-xs;
-  font-family: monospace;
-  color: $primary-dark;
-  cursor: pointer;
-
-  &:hover {
-    border-color: $primary;
-  }
 }
 
 .cta-row {

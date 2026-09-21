@@ -2,7 +2,13 @@ import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
 import { resolveLandingPath } from '~/composables/useLanding';
 
 export default defineNuxtRouteMiddleware(async (to, _from) => {
-  const { isAuthenticated } = useAuth();
+  const { token, isAuthenticated, fetchUser, syncAuthState } = useAuth();
+
+  syncAuthState();
+
+  if (token.value && !isAuthenticated.value) {
+    await fetchUser();
+  }
 
   if (!isAuthenticated.value) {
     return navigateTo('/login');

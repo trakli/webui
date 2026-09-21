@@ -31,7 +31,7 @@
             <p>
               {{
                 t(
-                  'Leave targets empty and the budget tracks every transaction in the period — good for a total spending cap. Pick categories, groups, or wallets to limit the scope to those.'
+                  'Leave targets empty and the budget tracks every transaction in the period, which suits a total spending cap. Pick categories, groups, or wallets to limit the scope to those.'
                 )
               }}
             </p>
@@ -42,7 +42,7 @@
             <p>
               {{
                 t(
-                  'When you record income, check "This is a refund" to subtract it from any budget covering the same categories, groups, or wallets. Unmarked income — salary, gifts — never changes a budget.'
+                  'When you record income, check "This is a refund" to subtract it from any budget covering the same categories, groups, or wallets. Unmarked income (salary, gifts) never changes a budget.'
                 )
               }}
             </p>
@@ -286,9 +286,9 @@ async function handleDelete(budget: Budget) {
 }
 
 onMounted(async () => {
-  // Kick off the budgets fetch synchronously so `isLoading` flips before
-  // the first render — otherwise `loadRelated` suspends and the page
-  // briefly renders the empty state on a hard refresh.
+  // Kick off the budgets fetch synchronously so `isLoading` flips before the first
+  // render. Otherwise `loadRelated` suspends and a hard refresh briefly shows the
+  // empty state.
   const budgetsPromise = loadBudgets();
   await loadRelated();
   await budgetsPromise;

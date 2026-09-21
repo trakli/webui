@@ -26,7 +26,7 @@ const handleGoogleLogin = async () => {
       query: { state: newState }
     });
     if (response.data.url) {
-      window.location.href = response.data.url;
+      await navigateTo(response.data.url, { external: true });
     }
   } catch (error) {
     console.error('Failed to get Google redirect URL', error);

@@ -31,10 +31,7 @@ export const useAuth = () => {
     }
   };
 
-  // Auto-sync auth state on client-side
-  if (typeof window !== 'undefined') {
-    syncAuthState();
-  }
+  syncAuthState();
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
