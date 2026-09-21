@@ -25,6 +25,10 @@
             <ShieldCheck class="menu-icon" />
             <span>{{ t('Admin') }}</span>
           </button>
+          <button class="menu-item" @click="goToFeedback">
+            <MessageSquare class="menu-icon" />
+            <span>{{ t('Send feedback') }}</span>
+          </button>
           <button class="menu-item menu-item--danger" @click="handleLogout">
             <LogOut class="menu-icon" />
             <span>{{ t('Logout') }}</span>
@@ -37,7 +41,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { Settings, LogOut, ShieldCheck } from 'lucide-vue-next';
+import { Settings, LogOut, ShieldCheck, MessageSquare } from 'lucide-vue-next';
 import { useAuth } from '@/composables/useAuth';
 import { useDropdown } from '@/composables/useDropdown';
 
@@ -74,6 +78,11 @@ const goToSettings = () => {
 const goToAdmin = () => {
   close();
   router.push('/admin');
+};
+
+const goToFeedback = () => {
+  close();
+  router.push('/feedback');
 };
 
 const handleLogout = async () => {

@@ -9,13 +9,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
   ssr: true,
-  // Plugin client UI ships as Nuxt layers consumed the same way as the shared
-  // ui-kit, e.g. extends: ['github:trakli/ui-kit', 'github:trakli/<plugin>-ui'].
-  // A layer registers a component for a slot key via
-  // useExtensionSlots().registerComponent(); DescriptorRenderer resolves it
-  // when a descriptor sets `ui.component`. Host adoption of the layers is
-  // deferred, so the list is empty for now.
-  extends: [],
+  // A layer registers a component against a slot key with
+  // useExtensionSlots().registerComponent(), and DescriptorRenderer resolves it when a
+  // descriptor sets `ui.component`. That is how plugin UI reaches the app.
+  extends: ['@whilesmart/eloquent-admin-ui'],
   routeRules: {
     '/ai-insights': { redirect: '/assistant' }
   },
@@ -30,6 +27,7 @@ export default defineNuxtConfig({
       { code: 'it', name: 'Italiano', file: 'it.json' }
     ],
     defaultLocale: 'en',
+    vueI18n: './i18n/i18n.config.ts',
     lazy: true,
     langDir: 'locales',
     strategy: 'no_prefix',
@@ -41,7 +39,41 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      adminApiPrefix: '/admin',
+      adminI18n: true,
+      adminNavigation: [
+        {
+          label: 'Outreach',
+          to: '/admin/outreach',
+          icon: 'solar:plain-3-bold-duotone',
+          area: 'slate'
+        }
+      ],
+      adminUserColumns: [
+        { label: 'Name', key: 'name' },
+        { label: 'Email', key: 'email' },
+        { label: 'Last seen', key: 'last_seen_at', type: 'datetime' },
+        { label: 'Last transaction', key: 'last_transaction_at', type: 'datetime' },
+        { label: 'Joined', key: 'created_at', type: 'date' },
+        { label: 'AI tokens', key: 'tokens_used', type: 'number' }
+      ],
+      adminMetricDrilldowns: {
+        new_users_series: '/admin/users?joined_on={date}'
+      },
+      adminBrand: {
+        name: 'Trakli',
+        logoSrc: '/logo.svg',
+        logoMarkSrc: '/logo-mark.svg',
+        tag: 'Admin',
+        tagArea: 'green'
+      },
+      adminSkin: {
+        name: 'trakli',
+        railClass: '',
+        contentClass: ''
+      },
       apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1',
+      engagementSiteKey: process.env.NUXT_PUBLIC_ENGAGEMENT_SITE_KEY || '',
       reverbKey: process.env.NUXT_PUBLIC_REVERB_KEY || '',
       reverbHost: process.env.NUXT_PUBLIC_REVERB_HOST || 'localhost',
       reverbPort: process.env.NUXT_PUBLIC_REVERB_PORT || '6001',
@@ -59,6 +91,8 @@ export default defineNuxtConfig({
     }
   },
   css: [
+    // After the design layer's own stylesheet: it redeclares the tokens Trakli owns.
+    '@/assets/css/design-brand.css',
     '@/assets/scss/_variables.scss',
     '@/assets/scss/base.scss',
     '@/assets/scss/_surfaces.scss',

@@ -19,6 +19,9 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@whilesmart/eloquent-admin-ui": "^0.1.0",
+    "@whilesmart/engagement": "^0.1.0",
+    "@whilesmart/design": "^0.2.0",
     "@dicebear/collection": "^9.2.4",
     "@dicebear/core": "^9.2.4",
     "@heroicons/vue": "^2.2.0",

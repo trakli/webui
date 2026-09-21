@@ -1,0 +1,36 @@
+/*
+ * Trakli's brand, expressed in the design system's brand contract.
+ *
+ * Only tokens listed in @whilesmart/design/tokens/brand.css belong here. Anything else the
+ * admin needs is derived from these, so one value changes the whole console.
+ *
+ * Every text pair here is held to 4.5:1 in both themes by a test.
+ */
+
+:root {
+  --ds-brand-primary-50: #f0f5f2;
+  --ds-brand-primary-100: #d8e8e1;
+  --ds-brand-primary-200: #b6d8c9;
+  --ds-brand-primary-300: #89c8ab;
+  --ds-brand-primary-400: #57c192;
+  --ds-brand-primary-500: #27a56c;
+  --ds-brand-primary-600: #129158;
+  --ds-brand-primary-700: #09864e;
+  --ds-brand-primary-800: #047844;
+  --ds-brand-primary-900: #02502d;
+
+  --ds-brand-secondary-50: #edf7f6;
+  --ds-brand-secondary-100: #d2efeb;
+  --ds-brand-secondary-200: #aae4dc;
+  --ds-brand-secondary-300: #78d9cc;
+  --ds-brand-secondary-400: #43d0bd;
+  --ds-brand-secondary-500: #24b29f;
+  --ds-brand-secondary-600: #189584;
+  --ds-brand-secondary-700: #0e8171;
+  --ds-brand-secondary-800: #07695c;
+  --ds-brand-secondary-900: #024b41;
+
+  --ds-brand-font-sans:
+    'Ubuntu', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
