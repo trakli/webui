@@ -31,7 +31,7 @@
             ><span>{{ t('Message') }}</span
             ><textarea v-model="form.message" required rows="7" maxlength="5000" />
           </label>
-          <TButton :text="t('Send feedback')" :loading="sending" />
+          <TButton type="submit" :text="t('Send feedback')" :loading="sending" />
         </form>
       </TCard>
       <TCard>
@@ -70,6 +70,7 @@ import TCard from '@/components/TCard.vue';
 import TButton from '@/components/TButton.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
 import { useFeedback, type FeedbackItem } from '@/composables/useFeedback';
+import { useNotifications } from '@/composables/useNotifications';
 
 definePageMeta({ middleware: ['auth'] });
 const { t } = useI18n();
