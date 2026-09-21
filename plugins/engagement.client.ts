@@ -13,12 +13,15 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const router = useRouter();
   let currentPage = useRoute().fullPath;
-  router.afterEach((to) => {
+  const stopTracking = router.afterEach((to) => {
     if (to.fullPath === currentPage) return;
     currentPage = to.fullPath;
     engagement.page();
   });
-  nuxtApp.hook('app:beforeUnmount', () => engagement.destroy());
+  nuxtApp.hook('app:beforeUnmount', () => {
+    stopTracking();
+    engagement.destroy();
+  });
 
   return { provide: { engagement } };
 });
