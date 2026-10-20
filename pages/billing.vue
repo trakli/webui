@@ -59,8 +59,8 @@
             <label
               >{{ t('Billing period') }}
               <select v-model="plan">
-                <option value="monthly">{{ t('Monthly') }}</option>
                 <option value="yearly">{{ t('Yearly') }}</option>
+                <option value="monthly">{{ t('Monthly') }}</option>
               </select>
             </label>
           </div>
@@ -108,7 +108,7 @@ const loading = ref(true);
 const busy = ref(false);
 const error = ref<string | null>(null);
 const region = ref('us');
-const plan = ref('monthly');
+const plan = ref('yearly');
 const pricing = ref<CloudPlans | null>(null);
 const selectedPrice = computed(
   () => pricing.value?.regions[region.value]?.prices[plan.value]?.price_formatted
