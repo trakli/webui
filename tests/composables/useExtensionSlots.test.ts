@@ -27,6 +27,17 @@ function makeIntegration(overrides: Partial<Integration>): Integration {
 describe('useExtensionSlots', () => {
   beforeEach(() => {
     mockIntegrations.value = [];
+    vi.stubGlobal('useRouter', () => ({ resolve: () => ({ matched: [{}] }) }));
+  });
+
+  it('hides local links when their plugin route is not installed', () => {
+    vi.stubGlobal('useRouter', () => ({ resolve: () => ({ matched: [] }) }));
+    mockIntegrations.value = [
+      makeIntegration({
+        ui: { slots: ['sidebar.nav'], card: { title: 'Optional plugin', href: '/optional' } }
+      })
+    ];
+    expect(useExtensionSlots().contributionsFor('sidebar.nav').value).toEqual([]);
   });
 
   it('collects only contributions that declare the slot', () => {
