@@ -66,9 +66,33 @@ describe('billing purchase return', () => {
     await flushPromises();
     expect(page.text()).toContain('Free plan');
     expect(page.text()).toContain('Payment confirmation is pending');
-    expect(page.text()).toContain('$8.99');
+    expect(page.text()).toContain('$86.28');
     expect(page.text()).not.toContain('Paid access active');
     expect(page.text()).not.toContain('Manage billing');
+  });
+  it('starts checkout with yearly billing and allows switching to monthly', async () => {
+    const page = render();
+    await flushPromises();
+    const period = page.findAll('select')[1];
+    expect(period.element.value).toBe('yearly');
+    await page
+      .findAll('button')
+      .find((button) => button.text() === 'Upgrade')!
+      .trigger('click');
+    expect(request).toHaveBeenCalledWith('/cloud/billing/checkout', {
+      method: 'POST',
+      body: { region: 'us', plan: 'yearly' }
+    });
+    await period.setValue('monthly');
+    expect(page.text()).toContain('$8.99');
+    await page
+      .findAll('button')
+      .find((button) => button.text() === 'Upgrade')!
+      .trigger('click');
+    expect(request).toHaveBeenCalledWith('/cloud/billing/checkout', {
+      method: 'POST',
+      body: { region: 'us', plan: 'monthly' }
+    });
   });
   it('shows only server-confirmed access and monthly usage', async () => {
     request.mockImplementation((path: string) =>
