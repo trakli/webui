@@ -16,6 +16,7 @@ const componentRegistry = ref<Record<string, Component>>({});
  */
 export const useExtensionSlots = () => {
   const { integrations } = useIntegrations();
+  const router = useRouter();
 
   const contributionsFor = (slot: ExtensionSlot) =>
     computed<SlotContribution[]>(() => {
@@ -36,6 +37,11 @@ export const useExtensionSlots = () => {
         // Hide contributions that are not ready to use unless the descriptor
         // asks to surface an explicit needs-setup state.
         if (!integration.configured && !ui.show_when_unconfigured) {
+          continue;
+        }
+
+        const href = ui.onboarding?.href || ui.card?.href;
+        if (href?.startsWith('/') && !router.resolve(href).matched.length) {
           continue;
         }
 

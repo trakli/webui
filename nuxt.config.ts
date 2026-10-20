@@ -1,6 +1,11 @@
 import { defineNuxtConfig } from 'nuxt/config';
 import Icons from 'unplugin-icons/vite';
 
+const pluginLayers = (process.env.TRAKLI_UI_LAYERS || '')
+  .split(',')
+  .map((layer) => layer.trim())
+  .filter(Boolean);
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   vite: {
@@ -12,7 +17,7 @@ export default defineNuxtConfig({
   // A layer registers a component against a slot key with
   // useExtensionSlots().registerComponent(), and DescriptorRenderer resolves it when a
   // descriptor sets `ui.component`. That is how plugin UI reaches the app.
-  extends: ['@whilesmart/eloquent-admin-ui'],
+  extends: ['@whilesmart/eloquent-admin-ui', ...pluginLayers],
   routeRules: {
     '/ai-insights': { redirect: '/assistant' }
   },
