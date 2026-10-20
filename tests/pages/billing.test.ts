@@ -50,8 +50,8 @@ beforeEach(() => {
                   name: 'United States',
                   currency: 'USD',
                   prices: {
-                    monthly: { price: 5, price_formatted: '$5.00' },
-                    yearly: { price: 50, price_formatted: '$50.00' }
+                    monthly: { price: 8.99, price_formatted: '$8.99' },
+                    yearly: { price: 86.28, price_formatted: '$86.28' }
                   }
                 }
               }
@@ -66,7 +66,7 @@ describe('billing purchase return', () => {
     await flushPromises();
     expect(page.text()).toContain('Free plan');
     expect(page.text()).toContain('Payment confirmation is pending');
-    expect(page.text()).toContain('$5.00');
+    expect(page.text()).toContain('$8.99');
     expect(page.text()).not.toContain('Paid access active');
     expect(page.text()).not.toContain('Manage billing');
   });
