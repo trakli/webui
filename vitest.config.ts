@@ -28,7 +28,7 @@ export default defineConfig({
     }
   },
   resolve: {
-    dedupe: ['vue', '@vue/test-utils', 'vitest'],
+    dedupe: ['vue', '@vue/test-utils', 'vitest', '@whilesmart/design'],
     alias: {
       '@': resolve(__dirname, './'),
       '~': resolve(__dirname, './')
