@@ -1,0 +1,18 @@
+diff --git a/node_modules/@whilesmart/design/dist/useAppSwitcher-DHY0Z8S2.js b/node_modules/@whilesmart/design/dist/useAppSwitcher-DHY0Z8S2.js
+index 67965ca..219b67f 100644
+--- a/node_modules/@whilesmart/design/dist/useAppSwitcher-DHY0Z8S2.js
++++ b/node_modules/@whilesmart/design/dist/useAppSwitcher-DHY0Z8S2.js
+@@ -75,11 +75,11 @@ const k = {
+ function b(e) {
+   return e === "localhost" || e === "127.0.0.1" || e === "::1";
+ }
+-function i(e, o = window.location.hostname) {
++function i(e, o = typeof window === "undefined" ? "" : window.location.hostname) {
+   const c = M[e];
+   return c ? c.replace(/\/$/, "") : b(o) ? U[e] : k[e];
+ }
+-function H(e, o = window.location.hostname) {
++function H(e, o = typeof window === "undefined" ? "" : window.location.hostname) {
+   const c = new URL("/chat", i("chat", o));
+   c.searchParams.set("owner_type", e.ownerType), c.searchParams.set("owner_id", e.ownerId), c.searchParams.set("owner_name", e.ownerName), e.ownerHref && c.searchParams.set("owner_href", e.ownerHref);
+   for (const a of e.participants || []) c.searchParams.append("participant", a);
