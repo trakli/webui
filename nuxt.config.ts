@@ -54,7 +54,8 @@ export default defineNuxtConfig({
       engagement: {
         endpoint: `${apiBase}/engagement/events`,
         siteKey: '',
-        userState: 'auth.user'
+        userState: 'auth.user',
+        identifyPath: '/engagement/identify'
       },
       posthog: {
         key: '',
