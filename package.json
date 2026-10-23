@@ -20,13 +20,13 @@
     "check:plugins": "node scripts/check-plugin-layers.mjs"
   },
   "dependencies": {
-    "@whilesmart/eloquent-admin-ui": "^0.1.0",
-    "@whilesmart/engagement": "^0.1.0",
-    "@whilesmart/design": "^0.2.0",
     "@dicebear/collection": "^9.2.4",
     "@dicebear/core": "^9.2.4",
     "@heroicons/vue": "^2.2.0",
     "@nuxtjs/i18n": "^10.2.1",
+    "@whilesmart/design": "^0.2.0",
+    "@whilesmart/eloquent-admin-ui": "^0.2.0",
+    "@whilesmart/engagement": "^0.2.0",
     "apexcharts": "^5.3.3",
     "country-flag-icons": "^1.5.19",
     "laravel-echo": "^2.3.7",

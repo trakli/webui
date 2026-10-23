@@ -1,6 +1,11 @@
 import { defineNuxtConfig } from 'nuxt/config';
 import Icons from 'unplugin-icons/vite';
 
+const apiBase =
+  process.env.NUXT_PUBLIC_API_BASE ||
+  process.env.NUXT_PUBLIC_API_BASE_URL ||
+  'https://api.dev.trakli.app/api/v1';
+
 const pluginLayers = (process.env.TRAKLI_UI_LAYERS || '')
   .split(',')
   .map((layer) => layer.trim())
@@ -46,6 +51,16 @@ export default defineNuxtConfig({
     public: {
       adminApiPrefix: '/admin',
       adminI18n: true,
+      engagement: {
+        endpoint: `${apiBase}/engagement/events`,
+        siteKey: '',
+        userState: 'auth.user'
+      },
+      posthog: {
+        key: '',
+        host: '',
+        replay: false
+      },
       adminNavigation: [
         {
           label: 'Outreach',
@@ -77,8 +92,7 @@ export default defineNuxtConfig({
         railClass: '',
         contentClass: ''
       },
-      apiBase: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.dev.trakli.app/api/v1',
-      engagementSiteKey: process.env.NUXT_PUBLIC_ENGAGEMENT_SITE_KEY || '',
+      apiBase,
       reverbKey: process.env.NUXT_PUBLIC_REVERB_KEY || '',
       reverbHost: process.env.NUXT_PUBLIC_REVERB_HOST || 'localhost',
       reverbPort: process.env.NUXT_PUBLIC_REVERB_PORT || '6001',
