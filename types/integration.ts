@@ -1,6 +1,6 @@
 /**
  * Slots a plugin descriptor can target. These names are the contract shared
- * with the backend (see trakli/internal#9); a contribution only renders in a
+ * with the backend; a contribution only renders in a
  * declared slot.
  */
 export type ExtensionSlot =
@@ -31,11 +31,19 @@ export interface IntegrationOnboardingDescriptor {
   href?: string;
 }
 
+export interface IntegrationTabDescriptor {
+  key: string;
+  title: string;
+  component: string;
+  order?: number;
+}
+
 export interface IntegrationUiDescriptor {
   slots: ExtensionSlot[];
   card?: IntegrationCardDescriptor | null;
   connect?: IntegrationConnectDescriptor | null;
   onboarding?: IntegrationOnboardingDescriptor | null;
+  tab?: IntegrationTabDescriptor | null;
   /** Slot key a plugin Nuxt layer registered a real component for, else null. */
   component?: string | null;
   /**

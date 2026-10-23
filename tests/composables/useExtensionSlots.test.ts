@@ -122,6 +122,33 @@ describe('useExtensionSlots', () => {
     expect(items[0].configured).toBe(false);
   });
 
+  it('shows a settings tab only once its layer has registered the tab body', () => {
+    const Tab = defineComponent({ render: () => h('div', 'tab') });
+    mockIntegrations.value = [
+      makeIntegration({
+        key: 'late',
+        ui: {
+          slots: ['settings.tabs'],
+          tab: { key: 'late', title: 'Late', component: 'late.settings', order: 20 }
+        }
+      }),
+      makeIntegration({
+        key: 'early',
+        ui: {
+          slots: ['settings.tabs'],
+          tab: { key: 'early', title: 'Early', component: 'early.settings', order: 10 }
+        }
+      })
+    ];
+    const { contributionsFor, registerComponent } = useExtensionSlots();
+    const tabs = contributionsFor('settings.tabs');
+
+    expect(tabs.value).toEqual([]);
+    registerComponent('late.settings', Tab);
+    registerComponent('early.settings', Tab);
+    expect(tabs.value.map((c) => c.key)).toEqual(['early', 'late']);
+  });
+
   it('resolves a component a plugin layer registered for a slot key', () => {
     const { registerComponent, resolveComponent } = useExtensionSlots();
     const Custom = defineComponent({ render: () => h('div', 'custom') });

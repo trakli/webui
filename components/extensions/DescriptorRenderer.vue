@@ -54,11 +54,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Component } from 'vue';
-import * as LucideIcons from 'lucide-vue-next';
 import TCard from '@/components/TCard.vue';
 import TButton from '@/components/TButton.vue';
 import type { SlotContribution } from '~/types/integration';
 import { useExtensionSlots } from '~/composables/useExtensionSlots';
+import { integrationIcon } from '~/utils/integrationIcon';
 
 const props = defineProps<{ contribution: SlotContribution }>();
 defineEmits<{ next: []; action: [SlotContribution] }>();
@@ -73,18 +73,7 @@ const variant = computed(() => props.contribution.slot);
 const href = computed(() => onboarding.value?.href || card.value?.href || null);
 const resolved = computed(() => resolveComponent(ui.value.component));
 
-// Resolve the descriptor's icon name (kebab or PascalCase) to a lucide
-// component, with a generic glyph fallback so every plugin surface carries an
-// icon like its built-in neighbors.
-const lucide = LucideIcons as unknown as Record<string, Component>;
-const icon = computed<Component>(() => {
-  const name = integration.value.icon;
-  if (name) {
-    const pascal = name.replace(/(^\w|[-_ ]\w)/g, (m) => m.replace(/[-_ ]/, '').toUpperCase());
-    return lucide[name] || lucide[pascal] || lucide.Puzzle;
-  }
-  return lucide.Puzzle;
-});
+const icon = computed<Component>(() => integrationIcon(integration.value.icon));
 </script>
 
 <style lang="scss" scoped>

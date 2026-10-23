@@ -40,6 +40,10 @@ export const useExtensionSlots = () => {
           continue;
         }
 
+        if (slot === 'settings.tabs' && !componentRegistry.value[ui.tab?.component ?? '']) {
+          continue;
+        }
+
         const href = ui.onboarding?.href || ui.card?.href;
         if (href?.startsWith('/') && !router.resolve(href).matched.length) {
           continue;
@@ -51,7 +55,11 @@ export const useExtensionSlots = () => {
           integration: integration as SlotContribution['integration'],
           ui,
           order:
-            slot === 'onboarding.steps' ? (ui.onboarding?.order ?? DEFAULT_ORDER) : DEFAULT_ORDER,
+            slot === 'onboarding.steps'
+              ? (ui.onboarding?.order ?? DEFAULT_ORDER)
+              : slot === 'settings.tabs'
+                ? (ui.tab?.order ?? DEFAULT_ORDER)
+                : DEFAULT_ORDER,
           configured: integration.configured
         });
       }

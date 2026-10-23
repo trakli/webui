@@ -10,11 +10,8 @@ const THEME_STORAGE_KEY = 'trakli-theme';
 function applyTheme(dark: boolean) {
   if (typeof document === 'undefined') return;
 
-  if (dark) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
+  document.documentElement.classList.toggle('dark', dark);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   isDark.value = dark;
 }
 

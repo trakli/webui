@@ -6,7 +6,7 @@
     </div>
 
     <div class="settings-card">
-      <TTabs v-model:active-tab="activeTab" :tabs="tabs">
+      <TTabs :active-tab="activeTab" :tabs="tabs" @update:active-tab="selectTab">
         <template #account>
           <SettingsAccount @open-password-modal="showPasswordModal = true" />
         </template>
@@ -30,8 +30,12 @@
         <template #connections>
           <SettingsConnections />
         </template>
-        <template v-for="contribution in pluginTabs" :key="contribution.key" #[contribution.key]>
-          <DescriptorRenderer :contribution="contribution" />
+        <template
+          v-for="contribution in pluginTabs"
+          :key="contribution.key"
+          #[contribution.ui.tab.key]
+        >
+          <component :is="resolveComponent(contribution.ui.tab.component)" />
         </template>
       </TTabs>
     </div>
@@ -43,6 +47,8 @@
 <script setup>
 import { ref, computed, markRaw } from 'vue';
 import { Settings, Globe, Wallet, Sun, User, Bell, Puzzle, Bot } from 'lucide-vue-next';
+import { integrationIcon } from '~/utils/integrationIcon';
+import { selectedSettingsTab } from '~/utils/settingsTabs';
 import TTabs from '@/components/TTabs.vue';
 import SettingsAccount from '@/components/settings/SettingsAccount.vue';
 import SettingsConnections from '@/components/settings/SettingsConnections.vue';
@@ -52,7 +58,6 @@ import SettingsDisplay from '@/components/settings/SettingsDisplay.vue';
 import SettingsNotifications from '@/components/settings/SettingsNotifications.vue';
 import PasswordModal from '@/components/settings/PasswordModal.vue';
 import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
-import DescriptorRenderer from '@/components/extensions/DescriptorRenderer.vue';
 import { useExtensionSlots } from '@/composables/useExtensionSlots';
 
 const { t } = useI18n();
@@ -63,9 +68,10 @@ definePageMeta({
 });
 
 const showPasswordModal = ref(false);
-const activeTab = ref('account');
+const route = useRoute();
+const router = useRouter();
 
-const { contributionsFor } = useExtensionSlots();
+const { contributionsFor, resolveComponent } = useExtensionSlots();
 const pluginTabs = contributionsFor('settings.tabs');
 
 const tabs = computed(() => [
@@ -77,11 +83,20 @@ const tabs = computed(() => [
   { id: 'connections', label: t('Connected AI clients'), icon: markRaw(Bot) },
   { id: 'integrations', label: t('Integrations'), icon: markRaw(Puzzle) },
   ...pluginTabs.value.map((contribution) => ({
-    id: contribution.key,
-    label: contribution.ui.card?.title || contribution.integration.name,
-    icon: markRaw(Puzzle)
+    id: contribution.ui.tab.key,
+    label: t(contribution.ui.tab.title),
+    icon: markRaw(integrationIcon(contribution.integration.icon))
   }))
 ]);
+
+const activeTab = computed(() =>
+  selectedSettingsTab(
+    route.query,
+    tabs.value.map((tab) => tab.id)
+  )
+);
+
+const selectTab = (tab) => router.replace({ query: { tab } });
 </script>
 
 <style lang="scss" scoped>

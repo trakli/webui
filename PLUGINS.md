@@ -13,6 +13,14 @@ Without this setting, the app loads no optional plugin layers. A layer supplies 
 
 Backend integration descriptors insert links into the existing sidebar and settings slots. Links to local routes are hidden when the route is absent. Custom controls can still register through `useExtensionSlots().registerComponent()`.
 
+A plugin adds its own Settings tab by listing `settings.tabs` in its descriptor slots and describing the tab:
+
+```php
+'tab' => ['key' => 'banks', 'title' => 'Bank connections', 'component' => 'plaid.settings', 'order' => 20],
+```
+
+The layer registers the tab body under the same component key from a Nuxt plugin. The tab appears once both exist, at `/settings?tab=<key>`. Lower `order` values come first.
+
 Layer pages use the host's authentication middleware, layouts, components and API client. Keep provider return URLs on the same browser hostname as the UI to preserve login cookies.
 
 Plugin tests live under the layer's `tests` directory. The host test runner includes tests from the configured layers and supplies its aliases and dependencies.
