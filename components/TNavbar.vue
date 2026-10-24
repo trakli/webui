@@ -131,6 +131,21 @@ const openLearningModal = () => {
     flex-shrink: 0;
   }
 
+  @media (max-width: $breakpoint-sm) {
+    .navbar-left :deep(.ds-workspace__trigger) {
+      max-width: 8rem;
+      padding-inline: var(--ds-space-1);
+    }
+
+    .navbar-right {
+      gap: 0.5rem;
+    }
+
+    .info-btn {
+      display: none;
+    }
+  }
+
   // All top-right glyphs are neutral and share the base `.icon-button` hover.
   .add-transaction-btn {
     text-decoration: none !important;
