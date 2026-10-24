@@ -125,6 +125,41 @@ This command stops and removes the containers as well as any associated volumes.
 - `npm run build`
 - `npm run lint`
 
+## Screenshots
+
+[Pagebeam](https://pagebeam.dev/configuration/guided-screenshots/) captures the real app through
+`pagebeam.config.yaml`. The journeys cover onboarding, recording a transaction, the dashboard and
+wallets on desktop and phone viewports.
+
+Start the development UI on port 3001 against its running backend. The backend must include the
+`demo` command and run in the `local` environment. The complete screenshot suite creates two dedicated accounts
+with generated passwords, one empty and one with a month of sample finances. Existing accounts and
+data are preserved. The credentials stay in the screenshot process and are not saved in manifests.
+
+```sh
+npm run screenshots
+npm run screenshots -- --journey wallets
+```
+
+By default, account preparation uses the sibling backend's Compose app service. If the backend runs
+in another development container, point `TRAKLI_DEMO_COMMAND` at its command, for example:
+
+```sh
+TRAKLI_DEMO_COMMAND='docker exec -i your-development-app php artisan demo' npm run screenshots
+```
+
+The command runs from the sibling backend directory. Pagebeam appends `onboarding` or `active-month`
+and reads the generated credentials from its final JSON line. Account preparation is restricted to
+the local target. A remote deployment must never be used to create screenshot fixtures.
+
+Screenshots and manifests are saved under `.pagebeam/shots/local`, which Git ignores. A run replaces
+the selected journey's prior output. Each manifest records the source revision, account name,
+viewport, URL and focus regions. The transaction journey adds one coffee per viewport to its own
+demo account. The account is new on the next run.
+
+To capture a new feature, add a journey with the account, actions, visible-state checks and screenshot
+steps it needs. Run that journey and inspect both desktop and phone images before sharing them.
+
 ### MIT LICENSE
 
 See [LICENSE](LICENSE.md) for more information.

@@ -17,7 +17,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "check:plugins": "node scripts/check-plugin-layers.mjs"
+    "check:plugins": "node scripts/check-plugin-layers.mjs",
+    "screenshots": "pagebeam shoot --target local"
   },
   "dependencies": {
     "@dicebear/collection": "^9.2.4",
@@ -58,6 +59,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-vue": "^9.27.0",
     "happy-dom": "^20.0.11",
+    "pagebeam": "0.1.5",
     "patch-package": "^8.0.1",
     "prettier": "^3.3.3",
     "sass": "^1.89.0",

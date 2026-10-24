@@ -1,0 +1,144 @@
+docs:
+  root: ../docs
+
+apps:
+  - name: ui
+    path: .
+  - name: webservice
+    path: ../webservice
+
+tours:
+  targets:
+    local: { url: http://localhost:3001 }
+
+  accounts:
+    newcomer:
+      purpose: somebody who has just registered and has not finished setup
+      login:
+        form:
+          url: /login
+          username: input[type=email]
+          password: .password-input input
+          submit: button[type=submit]
+      confirm: .onboarding-page
+      fresh: true
+      seed:
+        command: node scripts/screenshot-account.mjs onboarding
+
+    active:
+      purpose: a user with a month of wallets, transactions and a transfer
+      login:
+        form:
+          url: /login
+          username: input[type=email]
+          password: .password-input input
+          submit: button[type=submit]
+      confirm: img.avatar-image
+      fresh: true
+      seed:
+        command: node scripts/screenshot-account.mjs active-month
+      requires:
+        - goto: /transactions
+          count: { selector: .custom-table tbody.table-body tr, min: 10 }
+        - count: { selector: .custom-table .pagination-btn, min: 6 }
+
+  journeys:
+    onboarding:
+      account: newcomer
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - goto: /onboarding
+        - wait: .language-grid
+        - select: { selector: .country-select, value: Germany }
+        - shot:
+            name: language
+            caption: Setup starts with your language and where you live
+            focus: [.language-grid, .country-field]
+            fullPage: true
+        - click: .step-actions .primary-btn
+        - wait: .wallet-currency-setup
+        - select: { selector: .currency-column .currency-select, value: EUR }
+        - shot:
+            name: wallet
+            caption: Every account starts with a cash wallet in the currency you choose
+            focus: [.wallet-cards, .currency-column]
+        - click: .step-actions .primary-btn
+        - wait: .categories-setup
+        - shot:
+            name: categories
+            caption: One tap gives you a ready set of categories
+            focus: [.categories-card]
+
+    log-a-coffee:
+      account: active
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - wait: 61000
+        - goto: /transactions/new
+        - wait: .transaction-form
+        - fill: { selector: '.transaction-amount input[type=number]', value: '4.20' }
+        - fill: { selector: .transaction-form textarea, value: Oat flat white }
+        - fill: { selector: 'input[placeholder="Search party..."]', value: Corner }
+        - click: .dropdown-list li:has-text("Corner Coffee")
+        - fill: { selector: 'input[placeholder="Search wallet..."]', value: Cash }
+        - click: .dropdown-list li:has-text("Cash")
+        - fill: { selector: 'input[placeholder="Search categories..."]', value: Food }
+        - click: .dropdown-list li:has-text("Food & Dining")
+        - shot:
+            name: coffee-form
+            caption: A coffee takes an amount, a place and a wallet
+            focus: [.transaction-amount, .transaction-form .form]
+        - click: .submit-button
+        - wait: 2000
+        - goto: /transactions
+        - shot:
+            name: coffee-recorded
+            caption: The coffee is at the top of your transactions
+            focus:
+              - .custom-table:visible tbody tr:has-text("Corner Coffee"):has-text("just now"), .txn-card:visible:has-text("Oat flat white")
+
+    month-overview:
+      account: active
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - wait: 61000
+        - goto: /dashboard
+        - wait: .kpi-card
+        - shot:
+            name: totals
+            caption: Balance, income and spending for the month in your own currency
+            focus: [.kpi-grid]
+        - shot:
+            name: spending
+            caption: Where the money went, by category
+            focus: [.category-breakdown]
+        - shot:
+            name: recent
+            caption: The latest transactions with their category
+            focus: [.recent-transactions]
+
+    wallets:
+      account: active
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - wait: 61000
+        - goto: /wallets
+        - wait: .split-list .row
+        - shot:
+            name: wallets
+            caption: Cash, bank and savings side by side, each in its own currency
+            focus: [.split-list .list, .stats-strip]
+        - click: .split-list .row:has-text("Dollar Savings")
+        - wait: .split-detail .hero-name:has-text("Dollar Savings")
+        - shot:
+            name: dollar-savings
+            caption: Savings kept in dollars, with their own balance and income
+            focus: [.split-detail .detail-body]
