@@ -2,10 +2,12 @@
   <div class="navbar">
     <div class="navbar-left">
       <HamburgerMenu v-if="isMobile" :is-open="isSidebarOpen" @toggle="toggleSidebar" />
+      <WorkspaceSwitcher />
     </div>
     <div class="navbar-right">
       <div class="navbar-actions">
         <NuxtLink
+          v-if="!$route.path.startsWith('/workspaces')"
           class="icon-button add-transaction-btn"
           to="/transactions/new"
           :aria-label="t('Add transaction')"
@@ -36,6 +38,7 @@
 
 <script setup>
 import TAvatar from './TAvatar.vue';
+import WorkspaceSwitcher from './workspaces/WorkspaceSwitcher.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import ThemeSelector from './ThemeSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
