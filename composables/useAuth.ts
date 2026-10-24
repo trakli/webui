@@ -18,6 +18,8 @@ export const useAuth = () => {
   // Reactive state using useState (SSR-friendly)
   const user = useState('auth.user', () => userCookie.value);
   const token = useState('auth.token', () => tokenCookie.value);
+  const workspaces = useState('workspaces', () => []);
+  const canCreateWorkspaces = useState('workspaces.canCreate', () => false);
 
   const isAuthenticated = computed(() => !!user.value && !!token.value);
 
@@ -110,7 +112,8 @@ export const useAuth = () => {
       userCookie.value = null;
       tokenCookie.value = null;
       clearOnboardingStatus();
-      useWorkspaces().clear();
+      workspaces.value = [];
+      canCreateWorkspaces.value = false;
 
       const { clearData } = useDataManager();
       clearData();
