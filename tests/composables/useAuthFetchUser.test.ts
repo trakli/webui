@@ -87,3 +87,17 @@ describe('fetchUser', () => {
     expect(auth.user.value.is_admin).toBe(true);
   });
 });
+
+describe('workspace state on logout', () => {
+  it('clears workspace state before another account can sign in', async () => {
+    vi.stubGlobal('useOnboardingStatus', () => ({ clear: vi.fn() }));
+    const auth = signedIn();
+    states.workspaces.value = [{ id: 10, name: 'Private family' }];
+    states['workspaces.canCreate'].value = true;
+    apiMock.mockResolvedValueOnce(undefined);
+    await auth.logout();
+    expect(states.workspaces.value).toEqual([]);
+    expect(states['workspaces.canCreate'].value).toBe(false);
+    expect(auth.user.value).toBeNull();
+  });
+});

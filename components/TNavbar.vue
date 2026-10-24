@@ -104,10 +104,7 @@ const openLearningModal = () => {
   .navbar-left {
     display: flex;
     align-items: center;
-
-    @media (min-width: $breakpoint-md) {
-      display: none;
-    }
+    min-width: 0;
   }
 
   .navbar-right {
