@@ -1,158 +1,25 @@
-<template>
-  <form class="budget-form" @submit.prevent="handleSubmit">
-    <div class="form-header">
-      <h2>{{ editingItem ? t('Edit Budget') : t('Create Budget') }}</h2>
-      <button type="button" class="close-btn" @click="$emit('close')">&times;</button>
-    </div>
-
-    <div class="form-grid">
-      <div class="field">
-        <label>{{ t('Budget Name') }}</label>
-        <input v-model="form.name" type="text" required maxlength="255" />
-      </div>
-
-      <div class="field">
-        <label>{{ t('Spending Limit') }}</label>
-        <div class="amount-row">
-          <input v-model.number="form.amount" type="number" min="0" step="0.01" required />
-          <select v-model="form.currency" class="currency">
-            <option v-for="code in currencyOptions" :key="code" :value="code">{{ code }}</option>
-          </select>
-        </div>
-        <p v-if="currencyOptions.length === 0" class="field-hint">
-          {{ t('Add a wallet first to pick a currency.') }}
-        </p>
-      </div>
-
-      <div class="field">
-        <label>{{ t('Budget Period') }}</label>
-        <select v-model="form.period_type">
-          <option value="weekly">{{ t('Weekly') }}</option>
-          <option value="monthly">{{ t('Monthly') }}</option>
-          <option value="yearly">{{ t('Yearly') }}</option>
-          <option value="custom">{{ t('Custom range') }}</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>{{ t('Start date') }}</label>
-        <input v-model="form.start_date" type="date" required />
-      </div>
-
-      <div v-if="form.period_type === 'custom'" class="field">
-        <label>{{ t('End date') }}</label>
-        <input v-model="form.end_date" type="date" required />
-      </div>
-
-      <div class="field field--full">
-        <label>{{ t('Budget Description') }}</label>
-        <textarea v-model="form.description" rows="2" maxlength="500" />
-      </div>
-
-      <div class="field field--full">
-        <label>{{ t('Budget Targets') }}</label>
-        <p class="field-hint">
-          {{
-            t(
-              'Leave empty to cover every transaction in this period. Pick categories, groups, or wallets to narrow the scope.'
-            )
-          }}
-        </p>
-        <div class="target-tabs">
-          <button
-            v-for="tab in targetTabs"
-            :key="tab.key"
-            type="button"
-            class="tab"
-            :class="{ active: activeTargetTab === tab.key }"
-            @click="activeTargetTab = tab.key"
-          >
-            {{ t(tab.label) }}
-            <span class="count">{{ selectedCount(tab.key) }}</span>
-          </button>
-        </div>
-        <div class="target-list">
-          <label
-            v-for="item in targetItems"
-            :key="`${activeTargetTab}-${item.id}`"
-            class="target-row"
-          >
-            <input
-              type="checkbox"
-              :checked="isSelected(activeTargetTab, item.id)"
-              @change="toggleTarget(activeTargetTab, item.id)"
-            />
-            <span>{{ item.name }}</span>
-          </label>
-          <p v-if="targetItems.length === 0" class="empty-hint">
-            {{ t('No items to choose from') }}
-          </p>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="inline-toggle">
-          <input v-model="form.rollover_enabled" type="checkbox" />
-          <span>{{ t('Rollover unused amount') }}</span>
-        </label>
-        <p class="field-hint">
-          {{ t('Leftover or overage carries forward to the next period.') }}
-        </p>
-      </div>
-
-      <div class="field">
-        <label>
-          {{ t('Alert threshold') }}
-          <template v-if="form.threshold_percent > 0">({{ form.threshold_percent }}%)</template>
-          <template v-else>— {{ t('off') }}</template>
-        </label>
-        <input v-model.number="form.threshold_percent" type="range" min="0" max="100" step="5" />
-        <p class="field-hint">
-          {{ t('Sends a reminder when spending crosses this percent. Set to 0 to disable.') }}
-        </p>
-      </div>
-
-      <div class="field">
-        <label class="inline-toggle">
-          <input v-model="form.forecast_alerts_enabled" type="checkbox" />
-          <span>{{ t('Forecast alerts') }}</span>
-        </label>
-        <p class="field-hint">
-          {{
-            t('Sends a reminder when your spending pace projects to exceed the limit this period.')
-          }}
-        </p>
-      </div>
-
-      <div class="field">
-        <label class="inline-toggle">
-          <input v-model="form.is_active" type="checkbox" />
-          <span>{{ t('Active') }}</span>
-        </label>
-      </div>
-    </div>
-
-    <p v-if="apiError" class="error-message">{{ apiError }}</p>
-
-    <div class="actions">
-      <button type="button" class="btn btn--ghost" @click="$emit('close')">
-        {{ t('Cancel') }}
-      </button>
-      <button type="submit" class="btn btn--primary" :disabled="isSubmitting || !canSubmit">
-        {{ editingItem ? t('Update Budget') : t('Create Budget') }}
-      </button>
-    </div>
-  </form>
-</template>
-
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
+import {
+  DsButton,
+  DsCard,
+  DsInput,
+  DsTextarea,
+  DsDropdown,
+  DsSwitch,
+  DsTabs
+} from '@whilesmart/design';
 import type { Budget, BudgetPeriodType, BudgetTargetType } from '~/types/budget';
 import { useSharedData } from '~/composables/useSharedData';
 import { CURRENCIES } from '@/utils/currencies';
 
 const props = defineProps<{
   editingItem?: Budget | null;
+  workspaceTargets?: {
+    categories: Array<{ id: number; name: string }>;
+    groups: Array<{ id: number; name: string }>;
+    wallets: Array<{ id: number; name: string; currency?: string }>;
+  };
   apiError?: string;
   isSubmitting?: boolean;
   defaults?: {
@@ -171,6 +38,18 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const shared = useSharedData();
+const nameInput = computed({
+  get: () => form.name,
+  set: (value: string) => {
+    form.name = value;
+  }
+});
+const amountInput = computed({
+  get: () => String(form.amount || ''),
+  set: (value: string) => {
+    form.amount = Number(value);
+  }
+});
 
 const defaultCurrency = computed(() => props.defaults?.currency ?? 'USD');
 
@@ -193,7 +72,9 @@ const currencyOptions = computed<string[]>(() => {
     }
   };
 
-  for (const w of (shared.wallets?.value ?? []) as Array<{ currency?: string }>) {
+  for (const w of (props.workspaceTargets?.wallets ?? shared.wallets?.value ?? []) as Array<{
+    currency?: string;
+  }>) {
     add(w.currency);
   }
   add(defaultCurrency.value);
@@ -271,11 +152,19 @@ const activeTargetTab = ref<BudgetTargetType>('category');
 const targetItems = computed(() => {
   switch (activeTargetTab.value) {
     case 'category':
-      return (shared.categories?.value ?? []).map((c: any) => ({ id: c.id, name: c.name }));
+      return (props.workspaceTargets?.categories ?? shared.categories?.value ?? []).map(
+        (c: any) => ({ id: c.id, name: c.name })
+      );
     case 'group':
-      return (shared.groups?.value ?? []).map((g: any) => ({ id: g.id, name: g.name }));
+      return (props.workspaceTargets?.groups ?? shared.groups?.value ?? []).map((g: any) => ({
+        id: g.id,
+        name: g.name
+      }));
     case 'wallet':
-      return (shared.wallets?.value ?? []).map((w: any) => ({ id: w.id, name: w.name }));
+      return (props.workspaceTargets?.wallets ?? shared.wallets?.value ?? []).map((w: any) => ({
+        id: w.id,
+        name: w.name
+      }));
     default:
       return [];
   }
@@ -329,248 +218,200 @@ const handleSubmit = () => {
 };
 </script>
 
-<style lang="scss" scoped>
-@use '@/assets/scss/_variables.scss' as *;
+<template>
+  <DsCard class="budget-form">
+    <form @submit.prevent="handleSubmit">
+      <header>
+        <h2>{{ editingItem ? t('Edit Budget') : t('Create Budget') }}</h2>
+      </header>
+      <div class="budget-fields">
+        <DsInput v-model="nameInput" :label="t('Budget Name')" required class="wide" />
+        <DsInput
+          v-model="amountInput"
+          type="number"
+          :label="t('Budget Amount')"
+          required
+          min="0"
+          step="any"
+        />
+        <div class="field">
+          <label for="budget-currency">{{ t('Currency') }}</label
+          ><select id="budget-currency" v-model="form.currency" class="currency ds-field__control">
+            <option v-for="code in currencyOptions" :key="code" :value="code">{{ code }}</option>
+          </select>
+        </div>
+        <DsDropdown
+          v-model="form.period_type"
+          :label="t('Budget Period')"
+          :options="
+            ['weekly', 'monthly', 'yearly', 'custom'].map((value) => ({
+              value,
+              label: t(value.charAt(0).toUpperCase() + value.slice(1))
+            }))
+          "
+        />
+        <div class="field">
+          <label for="budget-start">{{ t('Start date') }}</label
+          ><input
+            id="budget-start"
+            v-model="form.start_date"
+            type="date"
+            required
+            class="ds-field__control"
+          />
+        </div>
+        <div v-if="form.period_type === 'custom'" class="field">
+          <label for="budget-end">{{ t('End date') }}</label
+          ><input
+            id="budget-end"
+            v-model="form.end_date"
+            type="date"
+            required
+            class="ds-field__control"
+          />
+        </div>
+        <DsTextarea
+          v-model="form.description"
+          :label="t('Budget Description')"
+          :rows="2"
+          class="wide"
+        />
+        <fieldset class="wide targets">
+          <legend>{{ t('Budget Targets') }}</legend>
+          <p>
+            {{
+              workspaceTargets
+                ? t(
+                    'Leave empty to cover all shared spending. Choose targets to narrow the budget.'
+                  )
+                : t(
+                    'Leave empty to cover all personal spending. Choose targets to narrow the budget.'
+                  )
+            }}
+          </p>
+          <DsTabs
+            v-model="activeTargetTab"
+            role="group"
+            area="green"
+            :label="t('Budget Targets')"
+            :options="
+              targetTabs.map((tab) => ({
+                key: tab.key,
+                label: t(tab.label) + ' (' + selectedCount(tab.key) + ')'
+              }))
+            "
+          />
+          <div class="target-list">
+            <label v-for="item in targetItems" :key="item.id"
+              ><input
+                type="checkbox"
+                :checked="isSelected(activeTargetTab, item.id)"
+                @change="toggleTarget(activeTargetTab, item.id)"
+              />
+              {{ item.name }}</label
+            >
+            <p v-if="!targetItems.length">{{ t('No items to choose from') }}</p>
+          </div>
+        </fieldset>
+        <DsSwitch
+          v-model="form.rollover_enabled"
+          :label="t('Rollover unused amount')"
+          :description="t('Leftover or overage carries forward to the next period.')"
+        />
+        <div class="field">
+          <label for="budget-threshold"
+            >{{ t('Alert threshold') }} ({{ form.threshold_percent }}%)</label
+          ><input
+            id="budget-threshold"
+            v-model.number="form.threshold_percent"
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+          /><small>{{ t('Set to 0 to disable.') }}</small>
+        </div>
+        <DsSwitch v-model="form.forecast_alerts_enabled" :label="t('Forecast alerts')" />
+        <DsSwitch v-model="form.is_active" :label="t('Active')" />
+      </div>
+      <p v-if="apiError" role="alert" class="form-error">{{ apiError }}</p>
+      <footer>
+        <DsButton variant="ghost" @click="$emit('close')">{{ t('Cancel') }}</DsButton
+        ><DsButton type="submit" :loading="isSubmitting" :disabled="!canSubmit">{{
+          editingItem ? t('Update Budget') : t('Create Budget')
+        }}</DsButton>
+      </footer>
+    </form>
+  </DsCard>
+</template>
 
+<style scoped>
 .budget-form {
-  background: $bg-white;
-  color: $text-primary;
-  border: 1px solid $border-color;
-  border-radius: $radius-xl;
-  padding: 1.5rem;
-  width: 100%;
-  box-sizing: border-box;
+  color: var(--ds-text-primary);
 }
-
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
-
-  h2 {
-    font-size: $font-size-xl;
-    color: $text-primary;
-    margin: 0;
-  }
-  .close-btn {
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: $text-muted;
-
-    &:hover {
-      color: $text-primary;
-    }
-  }
+form {
+  display: grid;
+  gap: var(--ds-space-5);
 }
-
-.form-grid {
+h2 {
+  margin: 0;
+  font-size: var(--ds-text-xl);
+}
+.budget-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem 1.25rem;
-
-  @media (max-width: $breakpoint-md) {
+  gap: var(--ds-space-5);
+}
+.wide {
+  grid-column: 1 / -1;
+}
+.field {
+  display: grid;
+  align-content: start;
+  gap: var(--ds-space-2);
+}
+.field > label,
+legend {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-font-medium);
+}
+.targets {
+  border: 1px solid var(--ds-border-base);
+  border-radius: var(--ds-radius-card);
+  padding: var(--ds-space-4);
+  display: grid;
+  gap: var(--ds-space-3);
+  min-width: 0;
+}
+p,
+small {
+  color: var(--ds-text-secondary);
+  margin: 0;
+}
+.target-list {
+  display: grid;
+  gap: var(--ds-space-2);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+.target-list label {
+  display: flex;
+  gap: var(--ds-space-2);
+  align-items: center;
+}
+footer {
+  display: flex;
+  gap: var(--ds-space-3);
+  justify-content: flex-end;
+}
+.form-error {
+  color: var(--ds-status-error-text);
+}
+@media (max-width: 600px) {
+  .budget-fields {
     grid-template-columns: 1fr;
   }
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  &--full {
-    grid-column: 1 / -1;
-  }
-
-  label {
-    font-size: $font-size-sm;
-    font-weight: $font-medium;
-    color: $text-secondary;
-  }
-
-  input[type='text'],
-  input[type='number'],
-  input[type='date'],
-  select,
-  textarea {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid $border-color;
-    border-radius: $radius-lg;
-    background-color: $input-bg;
-    color: $text-primary;
-    font-size: $font-size-sm;
-    font-family: inherit;
-
-    &::placeholder {
-      color: $text-muted;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: $primary;
-      box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.15);
-    }
-  }
-
-  // Native date picker icon loses contrast on dark mode; invert it.
-  input[type='date'] {
-    color-scheme: light dark;
-  }
-
-  input[type='range'] {
-    width: 100%;
-    accent-color: $primary;
-  }
-}
-
-.amount-row {
-  display: flex;
-  gap: 8px;
-
-  input[type='number'] {
-    flex-grow: 1;
-  }
-  .currency {
-    width: 100px;
-    text-transform: uppercase;
-  }
-}
-
-.field-hint {
-  margin: 4px 0 0;
-  font-size: $font-size-xs;
-  color: $text-muted;
-}
-
-.inline-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: $font-size-sm;
-  font-weight: $font-normal;
-  color: $text-primary;
-
-  input[type='checkbox'] {
-    accent-color: $primary;
-  }
-}
-
-.target-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid $border-color;
-  margin-bottom: 8px;
-
-  .tab {
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    padding: 8px 12px;
-    font-size: $font-size-sm;
-    color: $text-secondary;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    &.active {
-      color: $primary;
-      border-bottom-color: $primary;
-    }
-
-    .count {
-      background: $border-color;
-      border-radius: 10px;
-      font-size: 10px;
-      padding: 1px 6px;
-    }
-  }
-}
-
-.target-list {
-  max-height: 180px;
-  overflow-y: auto;
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-  padding: 8px;
-  background-color: $input-bg;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.target-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: $font-size-sm;
-  color: $text-primary;
-  padding: 4px 6px;
-  border-radius: $radius-md;
-  cursor: pointer;
-
-  input[type='checkbox'] {
-    accent-color: $primary;
-  }
-
-  &:hover {
-    background-color: rgba(var(--color-primary-rgb), 0.1);
-  }
-}
-
-.empty-hint {
-  color: $text-muted;
-  font-size: $font-size-xs;
-  margin: 0;
-  padding: 8px;
-}
-
-.error-message {
-  color: $error-color;
-  margin: 12px 0 0;
-  font-size: $font-size-sm;
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 1.25rem;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: $radius-lg;
-  border: 1px solid transparent;
-  font-size: $font-size-sm;
-  cursor: pointer;
-  font-weight: $font-medium;
-
-  &--ghost {
-    background: transparent;
-    border-color: $border-color;
-    color: $text-secondary;
-
-    &:hover {
-      background-color: rgba(var(--color-primary-rgb), 0.08);
-      color: $primary;
-      border-color: $primary-muted;
-    }
-  }
-
-  &--primary {
-    background: $primary;
-    color: white;
-    &:hover:not(:disabled) {
-      background: $primary-hover;
-    }
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+  footer {
+    flex-direction: column-reverse;
   }
 }
 </style>

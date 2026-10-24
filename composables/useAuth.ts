@@ -110,6 +110,7 @@ export const useAuth = () => {
       userCookie.value = null;
       tokenCookie.value = null;
       clearOnboardingStatus();
+      useWorkspaces().clear();
 
       const { clearData } = useDataManager();
       clearData();
