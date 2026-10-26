@@ -16,11 +16,11 @@ const backendRevision = required('PAGEBEAM_BACKEND_REVISION');
 const config = parse(await readFile('pagebeam.config.yaml', 'utf8'));
 const quote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
 const seed = quote(fileURLToPath(new URL('seed-account.mjs', import.meta.url)));
-config.tours.timeoutMs = 120000;
+config.tours.timeoutMs = 20000;
 for (const [name, account] of Object.entries(config.tours.accounts)) {
   account.seed = {
     command: `node ${seed} ${name === 'newcomer' ? 'onboarding' : 'active-month'}`,
-    targets: ['after', 'before']
+    targets: ['ci']
   };
 }
 const mapping = {
@@ -50,38 +50,27 @@ config.tours.journeys['log-a-coffee'].steps.splice(-1, 0, {
     text: '4.2'
   }
 });
-const environments = {};
-for (const [name, port] of [
-  ['after', 4300],
-  ['before', 4301]
-]) {
-  const frontend = resolve(required(`PAGEBEAM_${name.toUpperCase()}_PATH`));
-  const revision = required(`PAGEBEAM_${name.toUpperCase()}_REVISION`);
-  const url = `http://127.0.0.1:${port}`;
-  config.tours.targets[name] = { url };
-  environments[name] = {
-    backend: {
-      kind: 'directory',
-      path: backend,
-      start: 'php artisan serve --host=127.0.0.1 --port=8100',
-      ready: 'http://127.0.0.1:8100/',
-      revision: backendRevision
-    },
-    frontend: {
-      path: frontend,
-      start: `npm run dev -- --host 127.0.0.1 --port ${port}`,
-      ready: url
-    },
-    frontendRevision: revision,
-    env: { NUXT_PUBLIC_API_BASE: 'http://127.0.0.1:8100/api/v1', PAGEBEAM_BACKEND_PATH: backend },
-    requiredEnv: [],
-    disposable: true,
-    timeoutMs: 180000,
-    fixtures: { version: `trakli-demo-${backendRevision}` }
-  };
-}
+config.tours.targets.ci = { url: 'http://127.0.0.1:4300' };
+const environment = {
+  backend: {
+    kind: 'directory',
+    path: backend,
+    start: 'php artisan serve --host=127.0.0.1 --port=8100',
+    ready: 'http://127.0.0.1:8100/',
+    revision: backendRevision
+  },
+  frontend: {
+    path: '.',
+    start: 'npm run dev -- --host 127.0.0.1 --port 4300',
+    ready: 'http://127.0.0.1:4300'
+  },
+  env: { NUXT_PUBLIC_API_BASE: 'http://127.0.0.1:8100/api/v1', PAGEBEAM_BACKEND_PATH: backend },
+  disposable: true,
+  timeoutMs: 180000,
+  fixtures: { version: `trakli-demo-${backendRevision}` }
+};
 config.capture = {
-  environments,
+  environments: { ci: environment },
   groups: {
     shared: {
       paths: [
@@ -91,15 +80,13 @@ config.capture = {
         'plugins/**',
         'components/base/**',
         'components/TNavbar.vue',
-        'composables/**',
-        'services/**',
         'package.json',
         'package-lock.json',
         'pagebeam.config.yaml',
         '.pagebeam/**',
         '.github/workflows/pagebeam-capture.yml'
       ],
-      journeys: Object.keys(config.tours.journeys)
+      journeys: ['month-overview']
     }
   },
   mask: ['img.avatar-image']

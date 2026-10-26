@@ -9,8 +9,15 @@ on:
         default: dev
         required: true
       journeys:
-        description: Comma-separated journeys (empty captures all)
+        description: Journey names, one per line (empty selects changed paths)
         default: ''
+      viewports:
+        description: Viewports to request (desktop, phone, or all)
+        default: desktop
+      all:
+        description: Run every saved journey
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -22,7 +29,7 @@ concurrency:
 jobs:
   captures:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 8
     services:
       mysql:
         image: mysql:8.0
@@ -52,10 +59,10 @@ jobs:
       TELESCOPE_ENABLED: 'false'
       PULSE_ENABLED: 'false'
       FRONTEND_URL: http://127.0.0.1:4300
-      CORS_ALLOWED_ORIGINS: http://127.0.0.1:4300,http://127.0.0.1:4301
+      CORS_ALLOWED_ORIGINS: http://127.0.0.1:4300
       PAGEBEAM_BACKEND_REVISION: 75e768c8b93fce4744e2ed1d76ed5fe4cc8473d1
     outputs:
-      artifact-url: ${{ steps.artifact.outputs.artifact-url }}
+      artifact-id: ${{ steps.pagebeam.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,37 +72,21 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.sha || inputs.base }}
-          path: before
-          persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
           repository: trakli/webservice
           ref: ${{ env.PAGEBEAM_BACKEND_REVISION }}
           path: backend
           persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          repository: pagebeam/pagebeam
-          ref: 704e5f16c37056b5118324c251e2ac91b6f2a28f
-          path: pagebeam
-          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+          cache-dependency-path: after/package-lock.json
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: pdo_mysql, gd, zip, bcmath, intl
           tools: composer
           coverage: none
-      - name: Build pinned Pagebeam
-        working-directory: pagebeam
-        run: |
-          npm ci
-          npm run build
-          test -x /usr/bin/google-chrome
-          echo "PAGEBEAM_CLI=$GITHUB_WORKSPACE/pagebeam/packages/cli/dist/main.js" >> "$GITHUB_ENV"
       - name: Prepare isolated API
         working-directory: backend
         run: |
@@ -103,78 +94,34 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan migrate --force
-      - name: Install both UI revisions
-        run: |
-          npm ci --prefix after
-          npm ci --prefix before
-      - name: Configure before and after captures
-        working-directory: after
+      - uses: pagebeam/pagebeam@a665113754c9888e0309e1cd38d27ea189cc82d0
+        id: pagebeam
         env:
-          PAGEBEAM_AFTER_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: |
-          export PAGEBEAM_AFTER_PATH="$GITHUB_WORKSPACE/after"
-          export PAGEBEAM_BEFORE_PATH="$GITHUB_WORKSPACE/before"
-          export PAGEBEAM_BACKEND_PATH="$GITHUB_WORKSPACE/backend"
-          export PAGEBEAM_BEFORE_REVISION="$(git -C ../before rev-parse HEAD)"
-          node .pagebeam/configure-captures.mjs
-      - name: Capture matching journeys on both revisions
-        working-directory: after
-        env:
-          CAPTURE_BASE: ${{ github.event.pull_request.base.sha }}
-          CAPTURE_JOURNEYS: ${{ inputs.journeys }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/captures"
-          args=(capture --config .pagebeam/capture.json --environment after --target after --compare-environment before --compare-target before --out "$RUNNER_TEMP/captures" --json)
-          if [ -n "$CAPTURE_JOURNEYS" ]; then
-            IFS=',' read -ra journeys <<< "$CAPTURE_JOURNEYS"
-            for journey in "${journeys[@]}"; do args+=(--journey "$journey"); done
-          elif [ -n "$CAPTURE_BASE" ]; then
-            args+=(--base "$CAPTURE_BASE")
-          else
-            args+=(--all)
-          fi
-          node "$PAGEBEAM_CLI" "${args[@]}" > "$RUNNER_TEMP/capture-result.json"
-      - name: Create comparison gallery
-        if: always()
-        working-directory: after
-        run: node .pagebeam/gallery.mjs "$RUNNER_TEMP/capture-result.json" "$RUNNER_TEMP/captures"
-      - name: Retain screenshots and reports
-        id: artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+          PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
         with:
-          name: pr-screenshots-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/captures
-          if-no-files-found: warn
-          retention-days: 14
-      - name: Link gallery from the job summary
-        if: always()
-        env:
-          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
-        run: |
-          echo "Download [before-and-after screenshots]($ARTIFACT_URL), extract the archive, and open index.html." >> "$GITHUB_STEP_SUMMARY"
+          command: capture
+          checkout: 'false'
+          cwd: after
+          install: npm ci && node .pagebeam/configure-captures.mjs
+          baseline-install: npm ci
+          capture-config: .pagebeam/capture.json
+          environment: ci
+          target: ci
+          compare-base: ${{ github.event.pull_request.base.sha || inputs.base }}
+          journeys: ${{ inputs.journeys }}
+          viewports: ${{ inputs.viewports || 'desktop' }}
+          all: ${{ inputs.all || false }}
 
   comment:
     needs: captures
-    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.captures.outputs.artifact-url != ''
-    runs-on: ubuntu-latest
+    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.captures.outputs.artifact-id != ''
     permissions:
+      contents: read
+      actions: read
       pull-requests: write
-    steps:
-      - uses: actions/github-script@v7
-        env:
-          ARTIFACT_URL: ${{ needs.captures.outputs.artifact-url }}
-          CAPTURE_STATUS: ${{ needs.captures.result }}
-          CAPTURE_SHA: ${{ github.event.pull_request.head.sha }}
-        with:
-          script: |
-            const marker = '<!-- pagebeam-screenshots -->';
-            const body = `${marker}\nBefore-and-after screenshots for ${process.env.CAPTURE_SHA}. Capture job: **${process.env.CAPTURE_STATUS}**.\n\n[Download the gallery](${process.env.ARTIFACT_URL}), extract it, and open index.html. Failed or incomplete captures are labelled in the reports.`;
-            const issue_number = context.payload.pull_request.number;
-            const {data: current} = await github.rest.pulls.get({...context.repo, pull_number: issue_number});
-            if (current.head.sha !== process.env.CAPTURE_SHA) return;
-            const comments = await github.paginate(github.rest.issues.listComments, {...context.repo, issue_number});
-            const existing = comments.find(c => c.user.type === 'Bot' && c.body.startsWith(marker));
-            if (existing) await github.rest.issues.updateComment({...context.repo, comment_id: existing.id, body});
-            else await github.rest.issues.createComment({...context.repo, issue_number, body});
+    uses: pagebeam/pagebeam/.github/workflows/report-capture.yml@a665113754c9888e0309e1cd38d27ea189cc82d0
+    with:
+      artifact-id: ${{ needs.captures.outputs.artifact-id }}
+      pull-request: ${{ format('{0}', github.event.pull_request.number) }}
+      head-sha: ${{ github.event.pull_request.head.sha }}
+      status: ${{ needs.captures.result }}
