@@ -160,6 +160,37 @@ demo account. The account is new on the next run.
 To capture a new feature, add a journey with the account, actions, visible-state checks and screenshot
 steps it needs. Run that journey and inspect both desktop and phone images before sharing them.
 
+### Pull request screenshots
+
+The **PR screenshots** workflow runs matching Pagebeam journeys against the PR head and its target
+branch revision, on desktop and phone. Changed paths select journeys; a manual run can select named
+journeys or the complete suite. Shared UI and capture configuration changes run all journeys.
+
+Download the workflow's screenshot artifact, extract it, and open `index.html` for paired before and
+after images. Each run includes its source revision, fixture version and completion status. Failed
+or incomplete comparisons remain available for review and fail the capture job. Unmapped changes
+are reported without pretending that screenshots cover them.
+
+Each job provisions its own MySQL database and a pinned Trakli API with the `demo` command. Both UI
+revisions use that API and separate generated accounts. The local development stack and existing
+accounts are never used. API and Pagebeam source revisions are pinned in the workflow; update them
+when changing the fixture contract or adopting a released capture CLI. The npm Pagebeam 0.1.5 CLI
+has no capture command, so CI builds the pinned source instead.
+
+A separate job with PR comment permission links the gallery on same-repository PRs. Capture jobs
+have read-only repository access and receive no repository secrets. Fork PRs keep the artifact and
+job summary but cannot post a comment with their read-only token. This workflow uses `pull_request`,
+never privileged execution of PR code through `pull_request_target`.
+
+GitHub artifact downloads cannot serve inline PR images. Inline image pairs need an approved image
+host; this workflow does not publish screenshots to a public site. Artifacts expire after 14 days.
+
+Merge this workflow before rebasing feature branches onto it. New screens still need saved journeys
+and path mappings in `.pagebeam/configure-captures.mjs`. A journey that visits a route absent from the
+baseline produces an incomplete comparison, rather than a fabricated before image. Features that
+require backend plugins also need an isolated fixture backend with those plugins before their full
+flows can be captured.
+
 ### MIT LICENSE
 
 See [LICENSE](LICENSE.md) for more information.

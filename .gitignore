@@ -17,9 +17,11 @@ logs
 .DS_Store
 .fleet
 .idea
-.pagebeam
+/.pagebeam/*
+!/.pagebeam/*.mjs
 
 # Local env files
 .env
 .env.*
 !.env.example
+.pagebeam/capture.json
