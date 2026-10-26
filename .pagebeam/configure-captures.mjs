@@ -23,25 +23,23 @@ for (const [name, account] of Object.entries(config.tours.accounts)) {
     targets: ['ci']
   };
 }
-const mapping = {
-  onboarding: ['pages/onboarding.vue', 'pages/onboarding/**', 'components/onboarding/**'],
-  'log-a-coffee': [
-    'pages/transactions/**',
-    'components/Transaction*.vue',
-    'services/transactionApi.ts',
-    'composables/useTransactions.ts'
-  ],
-  'month-overview': ['pages/dashboard/**', 'components/dashboard/**'],
-  wallets: [
-    'pages/wallets.vue',
-    'components/wallets/**',
-    'components/Wallet*.vue',
-    'services/api/walletsApi.ts'
-  ]
+const shotRoutes = {
+  language: '/onboarding',
+  wallet: '/onboarding',
+  categories: '/onboarding',
+  'coffee-form': '/transactions/new',
+  'coffee-recorded': '/transactions',
+  totals: '/dashboard',
+  spending: '/dashboard',
+  recent: '/dashboard',
+  wallets: '/wallets',
+  'dollar-savings': '/wallets'
 };
-for (const [name, journey] of Object.entries(config.tours.journeys)) {
-  journey.paths = mapping[name] || [];
+for (const journey of Object.values(config.tours.journeys)) {
   journey.steps = journey.steps.filter((step) => typeof step.wait !== 'number');
+  for (const step of journey.steps) {
+    if (step.shot && shotRoutes[step.shot.name]) step.shot.route = shotRoutes[step.shot.name];
+  }
 }
 config.tours.journeys['log-a-coffee'].steps.splice(-1, 0, {
   expect: {
@@ -55,7 +53,7 @@ dashboard.steps = dashboard.steps.filter((step) => !step.shot);
 dashboard.steps.push(
   { wait: '.category-breakdown' },
   { wait: '.recent-transactions' },
-  { shot: { name: 'dashboard', fullPage: true } }
+  { shot: { name: 'dashboard', route: '/dashboard', fullPage: true } }
 );
 config.tours.targets.ci = { url: 'http://127.0.0.1:4300' };
 const environment = {
@@ -78,24 +76,7 @@ const environment = {
 };
 config.capture = {
   environments: { ci: environment },
-  groups: {
-    shared: {
-      paths: [
-        'layouts/**',
-        'assets/**',
-        'nuxt.config.ts',
-        'plugins/**',
-        'components/base/**',
-        'components/TNavbar.vue',
-        'package.json',
-        'package-lock.json',
-        'pagebeam.config.yaml',
-        '.pagebeam/**',
-        '.github/workflows/pagebeam-capture.yml'
-      ],
-      journeys: ['month-overview']
-    }
-  },
+  impact: { ignore: ['.gitignore'] },
   mask: ['img.avatar-image']
 };
 await mkdir('.pagebeam', { recursive: true });
