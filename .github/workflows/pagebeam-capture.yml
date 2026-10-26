@@ -9,7 +9,7 @@ on:
         default: dev
         required: true
       journeys:
-        description: Journey names, one per line (empty selects changed paths)
+        description: Journey names, one per line (empty selects affected screens)
         default: ''
       viewports:
         description: Viewports to request (desktop, phone, or all)
@@ -26,8 +26,70 @@ concurrency:
   group: pagebeam-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  PAGEBEAM_BACKEND_REVISION: 75e768c8b93fce4744e2ed1d76ed5fe4cc8473d1
+
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      capture-needed: ${{ steps.pagebeam.outputs.capture-needed }}
+      artifact-id: ${{ steps.selection.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: after
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pagebeam/pagebeam@d60115e5803cac47c77f5d460d41a6c2eae9e46f
+        id: pagebeam
+        continue-on-error: true
+        env:
+          PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
+        with:
+          command: capture
+          checkout: 'false'
+          cwd: after
+          plan: 'true'
+          prepare: |
+            node .pagebeam/configure-captures.mjs
+            printf 'PAGEBEAM_CLI=%s\n' "$PAGEBEAM_CLI" >> "$GITHUB_ENV"
+          capture-config: .pagebeam/capture.json
+          environment: ci
+          target: ci
+          base: ${{ github.event.pull_request.base.sha || inputs.base }}
+          journeys: ${{ inputs.journeys }}
+          viewports: ${{ inputs.viewports || 'desktop' }}
+          all: ${{ inputs.all || false }}
+      - name: Save skipped or incomplete selection
+        if: always() && steps.pagebeam.outputs.capture-needed == 'false'
+        env:
+          CAPTURE_BASE: ${{ github.event.pull_request.base.sha || inputs.base }}
+        run: |
+          set +e
+          node "$PAGEBEAM_CLI" capture --cwd after --config .pagebeam/capture.json \
+            --environment ci --target ci --base "$CAPTURE_BASE" \
+            --out "$RUNNER_TEMP/pagebeam-selection" --json
+          code=$?
+          if [ "$code" != 0 ] && [ "$code" != 2 ]; then exit "$code"; fi
+      - uses: actions/upload-artifact@v4
+        id: selection
+        if: always() && steps.pagebeam.outputs.capture-needed == 'false'
+        with:
+          name: pagebeam-selection-${{ github.run_id }}
+          path: ${{ runner.temp }}/pagebeam-selection
+          if-no-files-found: error
+          retention-days: 14
+      - name: Require complete planning
+        if: always() && steps.pagebeam.outcome != 'success'
+        run: exit 1
+
   captures:
+    needs: plan
+    if: needs.plan.outputs.capture-needed == 'true'
+
     runs-on: ubuntu-latest
     timeout-minutes: 8
     services:
@@ -60,7 +122,6 @@ jobs:
       PULSE_ENABLED: 'false'
       FRONTEND_URL: http://127.0.0.1:4300
       CORS_ALLOWED_ORIGINS: http://127.0.0.1:4300
-      PAGEBEAM_BACKEND_REVISION: 75e768c8b93fce4744e2ed1d76ed5fe4cc8473d1
     outputs:
       artifact-id: ${{ steps.pagebeam.outputs.artifact-id }}
     steps:
@@ -94,7 +155,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan migrate --force
-      - uses: pagebeam/pagebeam@44ca23f7b964fd8b74f10fb637400a664ffbeedb
+      - uses: pagebeam/pagebeam@d60115e5803cac47c77f5d460d41a6c2eae9e46f
         id: pagebeam
         env:
           PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
@@ -102,7 +163,8 @@ jobs:
           command: capture
           checkout: 'false'
           cwd: after
-          install: npm ci && node .pagebeam/configure-captures.mjs
+          prepare: node .pagebeam/configure-captures.mjs
+          install: npm ci
           baseline-install: npm ci
           capture-config: .pagebeam/capture.json
           environment: ci
@@ -113,15 +175,15 @@ jobs:
           all: ${{ inputs.all || false }}
 
   comment:
-    needs: captures
-    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.captures.outputs.artifact-id != ''
+    needs: [plan, captures]
+    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && (needs.captures.outputs.artifact-id != '' || needs.plan.outputs.artifact-id != '')
     permissions:
       contents: write
       actions: read
       pull-requests: write
-    uses: pagebeam/pagebeam/.github/workflows/report-capture.yml@44ca23f7b964fd8b74f10fb637400a664ffbeedb
+    uses: pagebeam/pagebeam/.github/workflows/report-capture.yml@d60115e5803cac47c77f5d460d41a6c2eae9e46f
     with:
-      artifact-id: ${{ needs.captures.outputs.artifact-id }}
+      artifact-id: ${{ needs.captures.outputs.artifact-id || needs.plan.outputs.artifact-id }}
       pull-request: ${{ format('{0}', github.event.pull_request.number) }}
       head-sha: ${{ github.event.pull_request.head.sha }}
-      status: ${{ needs.captures.result }}
+      status: ${{ needs.captures.result != 'skipped' && needs.captures.result || needs.plan.result }}
