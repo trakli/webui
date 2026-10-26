@@ -94,7 +94,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan migrate --force
-      - uses: pagebeam/pagebeam@a665113754c9888e0309e1cd38d27ea189cc82d0
+      - uses: pagebeam/pagebeam@857e5429f7961062bd6442d262cd0c95b792b31e
         id: pagebeam
         env:
           PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
@@ -116,10 +116,10 @@ jobs:
     needs: captures
     if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.captures.outputs.artifact-id != ''
     permissions:
-      contents: read
+      contents: write
       actions: read
       pull-requests: write
-    uses: pagebeam/pagebeam/.github/workflows/report-capture.yml@a665113754c9888e0309e1cd38d27ea189cc82d0
+    uses: pagebeam/pagebeam/.github/workflows/report-capture.yml@857e5429f7961062bd6442d262cd0c95b792b31e
     with:
       artifact-id: ${{ needs.captures.outputs.artifact-id }}
       pull-request: ${{ format('{0}', github.event.pull_request.number) }}

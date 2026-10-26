@@ -50,6 +50,13 @@ config.tours.journeys['log-a-coffee'].steps.splice(-1, 0, {
     text: '4.2'
   }
 });
+const dashboard = config.tours.journeys['month-overview'];
+dashboard.steps = dashboard.steps.filter((step) => !step.shot);
+dashboard.steps.push(
+  { wait: '.category-breakdown' },
+  { wait: '.recent-transactions' },
+  { shot: { name: 'dashboard', fullPage: true } }
+);
 config.tours.targets.ci = { url: 'http://127.0.0.1:4300' };
 const environment = {
   backend: {
