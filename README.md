@@ -163,15 +163,19 @@ steps it needs. Run that journey and inspect both desktop and phone images befor
 ### Pull request screenshots
 
 The **PR screenshots** workflow runs matching Pagebeam journeys against the PR head and its target
-branch revision, on desktop and phone. Changed paths select journeys; a manual run can select named
-journeys or the complete suite. Shared UI and capture configuration changes run all journeys.
+branch revision, on desktop by default. Changed paths select journeys; shared UI and capture
+configuration changes select the dashboard smoke journey. Mobile sizes and the complete suite
+require an explicit manual request. Manual runs accept journey names, a viewport and an opt-in
+full-suite flag. The job has an eight-minute limit and browser checks time out after 20 seconds.
 
 Download the workflow's screenshot artifact, extract it, and open `index.html` for paired before and
 after images. Each run includes its source revision, fixture version and completion status. Failed
 or incomplete comparisons remain available for review and fail the capture job. Unmapped changes
 are reported without pretending that screenshots cover them.
 
-Each job provisions its own MySQL database and a pinned Trakli API with the `demo` command. Both UI
+Pagebeam's pinned reusable action prepares the baseline and gallery; its reusable reporting job
+updates the PR comment. Each job provisions its own MySQL database and a pinned Trakli API with the
+`demo` command. Both UI
 revisions use that API and separate generated accounts. The local development stack and existing
 accounts are never used. API and Pagebeam source revisions are pinned in the workflow; update them
 when changing the fixture contract or adopting a released capture CLI. The npm Pagebeam 0.1.5 CLI
