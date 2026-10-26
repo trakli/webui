@@ -7,7 +7,6 @@ import {
   DsChip,
   DsModal,
   DsInput,
-  DsDropdown,
   DsTextarea,
   DsStatePanel
 } from '@whilesmart/design';
@@ -22,7 +21,7 @@ const error = ref('');
 const formError = ref('');
 const creating = ref(false);
 const saving = ref(false);
-const form = reactive({ name: '', kind: 'family', description: '' });
+const form = reactive({ name: '', description: '' });
 async function reload() {
   loading.value = true;
   error.value = '';
@@ -81,15 +80,12 @@ onMounted(reload);
         @action="creating = true"
       />
       <DsCard v-if="!canCreate" class="plan-notice"
-        ><p>
-          Your cloud plan does not include creating shared spaces. You can still join an invitation.
-        </p>
-        <DsButton to="/billing" variant="secondary">View plans</DsButton></DsCard
-      >
+        ><p>Creating shared spaces is currently unavailable. You can still join an invitation.</p>
+      </DsCard>
       <div class="spaces-grid">
         <DsCard v-for="workspace in workspaces" :key="workspace.id" class="space-card">
           <div class="space-card__top">
-            <DsChip variant="primary">{{ workspace.kind === 'family' ? 'Family' : 'Group' }}</DsChip
+            <DsChip variant="primary">Shared space</DsChip
             ><DsChip v-if="workspace.read_only" variant="warning">Read-only</DsChip>
           </div>
           <h2>{{ workspace.name }}</h2>
@@ -112,14 +108,6 @@ onMounted(reload);
     >
       <form class="space-form" @submit.prevent="create">
         <DsInput v-model="form.name" label="Space name" placeholder="Our household" required />
-        <DsDropdown
-          v-model="form.kind"
-          label="Who is this for?"
-          :options="[
-            { value: 'family', label: 'Family' },
-            { value: 'group', label: 'Group' }
-          ]"
-        />
         <DsTextarea v-model="form.description" label="Description" :rows="2" />
         <p v-if="formError" role="alert">{{ formError }}</p>
         <div class="space-actions">

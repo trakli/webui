@@ -31,6 +31,8 @@ import { extractApiErrors } from '~/utils/apiErrors';
 definePageMeta({ layout: 'dashboard', middleware: 'auth' });
 const route = useRoute();
 const api = useApi();
+const { resolveComponent } = useExtensionSlots();
+const billingComponent = resolveComponent('cloud.workspace.billing');
 const { load: reloadSpaces } = useWorkspaces();
 const workspace = ref<Workspace | null>(null);
 const overview = ref<WorkspaceOverview>({
@@ -354,7 +356,7 @@ watch(
     <template v-else>
       <DsPageHeader
         :title="workspace.name"
-        :eyebrow="workspace.kind === 'family' ? 'Family space' : 'Group space'"
+        eyebrow="Shared space"
         :description="workspace.description || 'A clear view of the money you share.'"
       >
         <template #actions
@@ -368,16 +370,20 @@ watch(
           ></template
         >
       </DsPageHeader>
+      <component
+        :is="billingComponent"
+        v-if="billingComponent"
+        :key="workspace.slug"
+        :workspace="workspace"
+        @changed="reload"
+      />
       <DsCard v-if="workspace.read_only" class="readonly"
         ><DsChip variant="warning">Read-only</DsChip>
         <p>
-          The workspace owner's plan no longer includes shared spaces. Your records stay available.
-          You can still leave or revoke personal shares.
+          Changes to this space are currently unavailable. You can still view its records, leave, or
+          revoke your personal shares.
         </p>
-        <DsButton v-if="workspace.role === 'owner'" to="/billing" variant="secondary"
-          >View plans</DsButton
-        ></DsCard
-      >
+      </DsCard>
       <p v-if="error" role="alert" class="error">{{ error }}</p>
       <DsTabs v-model="tab" :options="tabs" area="green" label="Shared finances" />
       <template v-if="tab === 'overview'">
