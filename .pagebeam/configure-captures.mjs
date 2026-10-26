@@ -44,7 +44,11 @@ for (const [name, journey] of Object.entries(config.tours.journeys)) {
   journey.steps = journey.steps.filter((step) => typeof step.wait !== 'number');
 }
 config.tours.journeys['log-a-coffee'].steps.splice(-1, 0, {
-  expect: { selector: '.custom-table:visible tbody tr, .txn-card:visible', text: 'Oat flat white' }
+  expect: {
+    selector:
+      '.custom-table:visible tbody tr:has-text("Corner Coffee"):has-text("just now"), .txn-card:visible:has-text("Oat flat white")',
+    text: '4.2'
+  }
 });
 const environments = {};
 for (const [name, port] of [
