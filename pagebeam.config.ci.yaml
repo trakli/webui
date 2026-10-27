@@ -1,0 +1,40 @@
+extends: pagebeam.config.yaml
+
+tours:
+  timeoutMs: 20000
+  targets:
+    ci: { url: 'http://127.0.0.1:4300' }
+  accounts:
+    newcomer:
+      seed:
+        command: [php, artisan, demo, onboarding]
+        cwd: { $env: PAGEBEAM_BACKEND_PATH }
+        targets: [ci]
+    active:
+      seed:
+        command: [php, artisan, demo, active-month]
+        cwd: { $env: PAGEBEAM_BACKEND_PATH }
+        targets: [ci]
+
+capture:
+  skipDelays: true
+  impact: { ignore: ['.gitignore', 'scripts/screenshot-account.mjs'] }
+  mask: ['img.avatar-image']
+  environments:
+    ci:
+      backend:
+        kind: directory
+        path: { $env: PAGEBEAM_BACKEND_PATH }
+        revision: '${env:PAGEBEAM_BACKEND_REVISION}'
+        start: php artisan serve --host=127.0.0.1 --port=8100
+        ready: 'http://127.0.0.1:8100/'
+      frontend:
+        path: .
+        start: npm run dev -- --host 127.0.0.1 --port 4300
+        ready: 'http://127.0.0.1:4300'
+      env:
+        NUXT_PUBLIC_API_BASE: 'http://127.0.0.1:8100/api/v1'
+      disposable: true
+      timeoutMs: 180000
+      fixtures:
+        version: 'trakli-demo-${env:PAGEBEAM_BACKEND_REVISION}'

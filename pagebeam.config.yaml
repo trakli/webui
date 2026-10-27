@@ -23,7 +23,9 @@ tours:
       confirm: .onboarding-page
       fresh: true
       seed:
-        command: node scripts/screenshot-account.mjs onboarding
+        command: >-
+          cd ../webservice &&
+          sh -c "${TRAKLI_DEMO_COMMAND:-docker compose exec -T --user www-data app php artisan demo} onboarding"
 
     active:
       purpose: a user with a month of wallets, transactions and a transfer
@@ -36,7 +38,9 @@ tours:
       confirm: img.avatar-image
       fresh: true
       seed:
-        command: node scripts/screenshot-account.mjs active-month
+        command: >-
+          cd ../webservice &&
+          sh -c "${TRAKLI_DEMO_COMMAND:-docker compose exec -T --user www-data app php artisan demo} active-month"
       requires:
         - goto: /transactions
           count: { selector: .custom-table tbody.table-body tr, min: 10 }
@@ -95,6 +99,9 @@ tours:
         - click: .submit-button
         - wait: 2000
         - goto: /transactions
+        - expect:
+            selector: '.custom-table:visible tbody tr:has-text("Corner Coffee"):has-text("just now"), .txn-card:visible:has-text("Oat flat white")'
+            text: '4.2'
         - shot:
             name: coffee-recorded
             caption: The coffee is at the top of your transactions
@@ -110,18 +117,12 @@ tours:
         - wait: 61000
         - goto: /dashboard
         - wait: .kpi-card
+        - wait: .category-breakdown
+        - wait: .recent-transactions
         - shot:
-            name: totals
-            caption: Balance, income and spending for the month in your own currency
-            focus: [.kpi-grid]
-        - shot:
-            name: spending
-            caption: Where the money went, by category
-            focus: [.category-breakdown]
-        - shot:
-            name: recent
-            caption: The latest transactions with their category
-            focus: [.recent-transactions]
+            name: dashboard
+            caption: Monthly totals, spending by category and recent transactions
+            fullPage: true
 
     wallets:
       account: active

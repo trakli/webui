@@ -18,10 +18,8 @@ logs
 .fleet
 .idea
 /.pagebeam/*
-!/.pagebeam/*.mjs
 
 # Local env files
 .env
 .env.*
 !.env.example
-.pagebeam/capture.json
