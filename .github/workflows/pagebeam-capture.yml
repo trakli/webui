@@ -43,7 +43,7 @@ jobs:
           path: after
           fetch-depth: 0
           persist-credentials: false
-      - uses: pagebeam/pagebeam@7419b44e47c2cbb4afc08617d0663d3b7e92bcfd
+      - uses: pagebeam/pagebeam@66ab982c449ac6fef922cfc0be49b6222e5d667f
         id: pagebeam
         env:
           PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
@@ -129,7 +129,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan migrate --force
-      - uses: pagebeam/pagebeam@7419b44e47c2cbb4afc08617d0663d3b7e92bcfd
+      - uses: pagebeam/pagebeam@66ab982c449ac6fef922cfc0be49b6222e5d667f
         id: pagebeam
         env:
           PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
@@ -154,7 +154,7 @@ jobs:
       contents: write
       actions: read
       pull-requests: write
-    uses: pagebeam/pagebeam/.github/workflows/report-capture.yml@7419b44e47c2cbb4afc08617d0663d3b7e92bcfd
+    uses: pagebeam/pagebeam/.github/workflows/report-capture.yml@66ab982c449ac6fef922cfc0be49b6222e5d667f
     with:
       artifact-id: ${{ needs.captures.outputs.artifact-id || needs.plan.outputs.artifact-id }}
       pull-request: ${{ format('{0}', github.event.pull_request.number) }}
