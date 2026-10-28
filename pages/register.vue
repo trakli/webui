@@ -123,7 +123,10 @@ const handleSubmit = async () => {
 
     await register(payload);
     await nextTick();
-    await navigateTo('/onboarding');
+    const invitation = usePendingInvitation().take();
+    await navigateTo(
+      invitation ? { path: '/onboarding', query: { returnTo: invitation } } : '/onboarding'
+    );
   } catch (error) {
     if (error.response && error.response._data && Array.isArray(error.response._data.errors)) {
       const flattenedErrors = error.response._data.errors.reduce(

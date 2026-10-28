@@ -46,6 +46,21 @@ tours:
           count: { selector: .custom-table tbody.table-body tr, min: 10 }
         - count: { selector: .custom-table .pagination-btn, min: 6 }
 
+    shared:
+      purpose: an owner with a month of personal finances and a new family space that has not been paid for
+      login:
+        form:
+          url: /login
+          username: input[type=email]
+          password: .password-input input
+          submit: button[type=submit]
+      confirm: img.avatar-image
+      fresh: true
+      seed:
+        command: >-
+          cd ../webservice &&
+          sh -c "${TRAKLI_DEMO_COMMAND:-docker compose exec -T --user www-data app php artisan demo} shared-space"
+
   journeys:
     onboarding:
       account: newcomer

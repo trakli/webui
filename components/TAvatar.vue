@@ -1,10 +1,24 @@
 <template>
   <div ref="rootRef" class="t-avatar">
-    <button class="t-avatar-button" :aria-label="t('Account menu')" @click="toggle">
+    <button
+      class="t-avatar-button"
+      :class="{ 't-avatar-button--space': showSpace }"
+      :aria-label="t('Account menu')"
+      :aria-expanded="isOpen"
+      @click="toggle"
+    >
       <img :src="imageUrl" alt="User Avatar" class="avatar-image" />
-      <div v-if="showName && userName" class="user-info">
+      <div v-if="showSpace && user" class="space-info">
+        <span class="space-user">{{ user.first_name }}</span>
+        <span class="space-name">
+          <span class="space-tone" :class="`surface surface--${spaceAccent}`" />
+          {{ space ? space.name : t('Personal') }}
+        </span>
+      </div>
+      <div v-else-if="showName && userName" class="user-info">
         <span class="user-name-text">{{ userName }}</span>
       </div>
+      <ChevronsUpDown v-if="showSpace" class="space-chevron" />
     </button>
 
     <Transition name="dropdown">
@@ -16,6 +30,7 @@
             <p class="header-email">{{ user.email }}</p>
           </div>
         </div>
+        <SpaceMenuSection v-if="showSpace" @done="close" />
         <div class="menu-list">
           <button class="menu-item" @click="goToSettings">
             <Settings class="menu-icon" />
@@ -41,7 +56,10 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { Settings, LogOut, ShieldCheck, MessageSquare } from 'lucide-vue-next';
+import { computed, onMounted } from 'vue';
+import { Settings, LogOut, ShieldCheck, MessageSquare, ChevronsUpDown } from 'lucide-vue-next';
+import SpaceMenuSection from '@/components/space/SpaceMenuSection.vue';
+import { spaceTone } from '~/utils/activeSpace';
 import { useAuth } from '@/composables/useAuth';
 import { useDropdown } from '@/composables/useDropdown';
 
@@ -49,7 +67,7 @@ const { t } = useI18n();
 const router = useRouter();
 const { user, logout } = useAuth();
 
-defineProps({
+const props = defineProps({
   imageUrl: {
     type: String,
     required: true
@@ -65,8 +83,19 @@ defineProps({
   showDropdown: {
     type: Boolean,
     default: true
+  },
+  showSpace: {
+    type: Boolean,
+    default: false
   }
 });
+
+const { space } = useActiveSpace();
+const { load: loadSpaces } = useWorkspaces();
+onMounted(() => {
+  if (props.showSpace) loadSpaces().catch(() => {});
+});
+const spaceAccent = computed(() => (space.value ? spaceTone(space.value.kind) : 'neutral'));
 
 const { isOpen, rootRef, toggle, close } = useDropdown();
 
@@ -129,6 +158,63 @@ const handleLogout = async () => {
     align-items: center;
   }
 
+  &--space {
+    gap: 0.5rem;
+    max-width: 15rem;
+    padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+    border: 1px solid $border-color;
+    border-radius: $radius-lg;
+    background: $bg-white;
+  }
+
+  .space-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    text-align: left;
+    line-height: 1.2;
+
+    @media (max-width: $breakpoint-sm) {
+      display: none;
+    }
+  }
+
+  .space-user {
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+
+  .space-name {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    overflow: hidden;
+    font-size: $font-size-sm;
+    font-weight: $font-semibold;
+    color: $text-primary;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .space-tone {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-sm;
+    background: var(--surface-deep);
+  }
+
+  .space-chevron {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: $text-muted;
+
+    @media (max-width: $breakpoint-sm) {
+      display: none;
+    }
+  }
+
   .user-name-text {
     color: $text-primary;
     font-weight: $font-semibold;
@@ -140,7 +226,7 @@ const handleLogout = async () => {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 260px;
+  width: 300px;
   background: $bg-white;
   border: 1px solid $border-color;
   border-radius: $radius-xl;

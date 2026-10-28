@@ -4,6 +4,7 @@
   <div
     class="sidebar"
     :class="{
+      [`sidebar--space surface--${spaceAccent}`]: !!space,
       'sidebar--compact': isCompact,
       'sidebar--mobile-open': isMobile && isSidebarOpen,
       'sidebar--mobile-closed': isMobile && !isSidebarOpen
@@ -14,6 +15,9 @@
         <img v-if="isCompact" src="/logo-mark.svg" alt="Trakli" class="sidebar-brand__mark" />
         <Logo v-else size="small" alt="Trakli Logo" />
       </NuxtLink>
+      <span v-if="space && !isCompact" class="sidebar-space" :title="space.name">
+        {{ space.name }}
+      </span>
 
       <button
         v-if="isMobile && isSidebarOpen"
@@ -27,7 +31,7 @@
 
     <nav class="sidebar-nav">
       <ul>
-        <li v-for="item in primary" :key="item.to">
+        <li v-for="item in primaryItems" :key="item.to">
           <NuxtLink
             :to="item.to"
             class="nav-button"
@@ -68,7 +72,7 @@
         </li>
       </ul>
 
-      <div v-if="!isCompact" class="sidebar-ext">
+      <div v-if="!isCompact && !space" class="sidebar-ext">
         <ExtensionSlot name="sidebar.nav" />
       </div>
     </nav>
@@ -77,7 +81,7 @@
 
     <div class="nav-footer">
       <ul>
-        <li v-for="item in footer" :key="item.to">
+        <li v-for="item in footerItems" :key="item.to">
           <button
             class="nav-footer-button"
             :class="{
@@ -125,10 +129,12 @@ import {
   UserGroupIcon,
   UsersIcon,
   WalletIcon,
-  XMarkIcon
+  XMarkIcon,
+  CreditCardIcon
 } from '@heroicons/vue/24/outline';
 import { Sparkles, Scale, Coins } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { spaceSupports, spaceTone } from '~/utils/activeSpace';
 import Logo from './Logo.vue';
 import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
 import { useSidebar } from '@/composables/useSidebar';
@@ -230,6 +236,52 @@ const footer = [
   { to: '/settings', label: 'Settings', icon: Cog8ToothIcon }
 ];
 
+const { space, isOwner } = useActiveSpace();
+const { resolveComponent } = useExtensionSlots();
+const spaceAccent = computed(() => (space.value ? spaceTone(space.value.kind) : 'neutral'));
+
+const spaceItems = [
+  {
+    to: '/people',
+    label: 'People',
+    hint: 'Members and invitations',
+    icon: UserGroupIcon
+  }
+];
+
+const primaryItems = computed(() => {
+  if (!space.value) return primary;
+  const items = primary
+    .filter((item) => spaceSupports(item.to))
+    .map((item) => {
+      const copy = { ...item, hint: spaceHints[item.to] ?? item.hint };
+      delete copy.subItems;
+      return copy;
+    });
+  items.push(...spaceItems);
+  if (isOwner.value && resolveComponent('cloud.workspace.billing')) {
+    items.push({
+      to: '/space-billing',
+      label: 'Billing',
+      hint: 'Subscription for this space',
+      icon: CreditCardIcon
+    });
+  }
+  return items;
+});
+
+const spaceHints = {
+  '/dashboard': 'What this space shares',
+  '/transactions': 'Spending everyone can see',
+  '/wallets': 'Shared and shared-in wallets',
+  '/budgets': 'Limits you spend against together',
+  '/categories': 'Labels for this space'
+};
+
+const footerItems = computed(() =>
+  space.value ? footer.filter((item) => spaceSupports(item.to)) : footer
+);
+
 const isActive = (path) => route.path === path || route.path.startsWith(path + '/');
 
 // True when one of the item's sub-items navigates to its own route (e.g. the
@@ -257,6 +309,18 @@ const handleButtonNavClick = (path) => {
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
+
+.sidebar--space {
+  .nav-button.selected,
+  .nav-footer-button.selected {
+    background-color: var(--surface-bg);
+    box-shadow: inset 0 0 0 1px var(--surface-accent);
+
+    .icon {
+      color: var(--surface-deep);
+    }
+  }
+}
 
 .sidebar {
   width: $sidebar-width;
@@ -305,6 +369,21 @@ const handleButtonNavClick = (path) => {
     width: calc(100% - 32px);
     padding: 0;
     flex-shrink: 0;
+  }
+
+  .sidebar-space {
+    min-width: 0;
+    margin-right: auto;
+    margin-left: 10px;
+    padding: 2px 8px;
+    overflow: hidden;
+    border-radius: $radius-md;
+    background: var(--surface-bg);
+    color: var(--surface-ink);
+    font-size: $font-size-xs;
+    font-weight: $font-semibold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &--compact .sidebar-header {

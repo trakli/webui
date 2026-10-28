@@ -65,9 +65,9 @@ const handleSubmit = async () => {
     console.warn('Failed to load onboarding config', e);
   }
 
-  const returnTo = typeof route.query.returnTo === 'string' ? route.query.returnTo : '';
-  if (/^\/invitations\/[A-Za-z0-9]+$/.test(returnTo)) {
-    router.push(returnTo);
+  const invitation = usePendingInvitation().take(route.query.returnTo);
+  if (invitation) {
+    router.push(invitation);
   } else if (!isOnboardingComplete) {
     router.push('/onboarding');
   } else {

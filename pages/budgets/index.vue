@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <SpaceBudgets v-if="isShared" />
+  <div v-else>
     <ContentTopCard
       v-if="!showForm"
       page-name="Budget"
@@ -123,6 +124,7 @@
 </template>
 
 <script setup lang="ts">
+import SpaceBudgets from '@/components/space/SpaceBudgets.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { LightBulbIcon } from '@heroicons/vue/24/outline';
@@ -136,6 +138,8 @@ import { useSharedData } from '@/composables/useSharedData';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 import type { Budget, BudgetPeriodType } from '~/types/budget';
 import { extractApiErrors } from '@/utils/apiErrors';
+
+const { isShared } = useActiveSpace();
 
 const { t } = useI18n();
 const route = useRoute();

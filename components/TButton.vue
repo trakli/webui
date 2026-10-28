@@ -75,6 +75,12 @@ const buttonClasses = [
 
 .button {
   display: inline-flex;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;

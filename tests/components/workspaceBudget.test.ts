@@ -43,7 +43,8 @@ describe('workspace budget editing', () => {
     const wrapper = mount(BudgetForm, {
       props: { workspaceTargets: { wallets: [], categories: [], groups: [] } }
     });
-    expect(wrapper.text()).toContain('No items to choose from');
+    expect(wrapper.text()).toContain('No categories yet.');
+    expect(wrapper.findAll('.target-list input[type="checkbox"]')).toHaveLength(0);
     expect(wrapper.text()).not.toContain('Private category');
   });
 });

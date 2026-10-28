@@ -1,0 +1,98 @@
+@use '@/assets/scss/_variables.scss' as *;
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-4;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blocked p {
+  margin: 0;
+  color: $text-secondary;
+}
+
+.type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-1;
+  padding: $spacing-1;
+  border-radius: $radius-md;
+  background: $bg-light;
+}
+
+.type-option {
+  padding: $spacing-2;
+  border: 0;
+  border-radius: $radius-md;
+  background: none;
+  color: $text-secondary;
+  font: inherit;
+  font-weight: $font-semibold;
+  cursor: pointer;
+
+  &.active {
+    background: $bg-white;
+    box-shadow: $elevation-1;
+  }
+
+  &--expense.active {
+    color: var(--color-expense);
+  }
+
+  &--income.active {
+    color: var(--color-income);
+  }
+}
+
+.chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    width: 100%;
+    margin-bottom: $spacing-2;
+  }
+}
+
+.chip {
+  padding: $spacing-1 $spacing-3;
+  border: 1px solid $border-medium;
+  border-radius: $radius-md;
+  background: $bg-white;
+  color: $text-primary;
+  font: inherit;
+  font-size: $font-size-sm;
+  cursor: pointer;
+
+  &.active {
+    border-color: $primary;
+    background: $primary-light;
+    color: $primary-dark;
+  }
+}
+
+.refund {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  color: $text-primary;
+}
+
+.hint {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
