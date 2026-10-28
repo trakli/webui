@@ -7,6 +7,8 @@ const push = vi.fn();
 vi.mock('vue-router', () => ({ useRouter: () => ({ push }) }));
 
 const mockUser = ref<Record<string, unknown> | null>(null);
+vi.stubGlobal('useActiveSpace', () => ({ space: ref(null) }));
+vi.stubGlobal('useWorkspaces', () => ({ load: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/composables/useAuth', () => ({
   useAuth: () => ({ user: mockUser, logout: vi.fn() })
 }));

@@ -15,6 +15,11 @@ tours:
         command: [php, artisan, demo, active-month]
         cwd: { $env: PAGEBEAM_BACKEND_PATH }
         targets: [ci]
+    shared:
+      seed:
+        command: [php, artisan, demo, shared-space]
+        cwd: { $env: PAGEBEAM_BACKEND_PATH }
+        targets: [ci]
 
 capture:
   skipDelays: true

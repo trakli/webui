@@ -6,12 +6,15 @@
       <div class="content-wrapper">
         <div class="dashboard-content">
           <div class="dashboard-content-container">
+            <SpaceBar />
             <slot />
           </div>
         </div>
       </div>
     </div>
     <NotificationsContainer />
+    <SpaceTransactionModal v-if="isShared" />
+    <UpsellPrompt />
     <LearningModal :is-open="showLearningModal" @close="showLearningModal = false" />
   </div>
 </template>
@@ -22,11 +25,16 @@ import TNavbar from '@/components/TNavbar.vue';
 import TSidebar from '@/components/TSidebar.vue';
 import NotificationsContainer from '@/components/NotificationsContainer.vue';
 import LearningModal from '@/components/modals/LearningModal.vue';
+import SpaceBar from '@/components/space/SpaceBar.vue';
+import SpaceTransactionModal from '@/components/space/SpaceTransactionModal.vue';
+import UpsellPrompt from '@/components/space/UpsellPrompt.vue';
 import { useAuth } from '@/composables/useAuth';
 import { useSidebar } from '@/composables/useSidebar';
 
 const { user, fetchUser } = useAuth();
 const { sidebarCollapsed } = useSidebar();
+const { isShared } = useActiveSpace();
+useSpaceFinanceReset();
 
 const showLearningModal = ref(false);
 

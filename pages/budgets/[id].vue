@@ -1,5 +1,6 @@
 <template>
-  <div class="detail-page">
+  <SpaceBudgetDetail v-if="isShared" :id="Number($route.params.id)" />
+  <div v-else class="detail-page">
     <div class="back-row">
       <NuxtLink to="/budgets" class="back-link">
         <ArrowLeftIcon class="icon" />
@@ -163,6 +164,7 @@
 </template>
 
 <script setup lang="ts">
+import SpaceBudgetDetail from '@/components/space/SpaceBudgetDetail.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
@@ -183,6 +185,8 @@ import { useSharedData } from '@/composables/useSharedData';
 import { CONFIGURATION_KEYS } from '@/utils/configurationKeys';
 import { extractApiErrors } from '@/utils/apiErrors';
 import type { Budget, BudgetPeriodType } from '~/types/budget';
+
+const { isShared } = useActiveSpace();
 
 const { t } = useI18n();
 const route = useRoute();
@@ -369,6 +373,7 @@ async function handleDelete() {
 }
 
 onMounted(async () => {
+  if (isShared.value) return;
   await Promise.all([
     shared.loadCategories?.(),
     shared.loadGroups?.(),

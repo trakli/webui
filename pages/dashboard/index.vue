@@ -1,5 +1,6 @@
 <template>
-  <div class="dashboard">
+  <SpaceDashboard v-if="isShared" />
+  <div v-else class="dashboard">
     <DashboardAgentHero />
 
     <OnboardingWizard
@@ -58,6 +59,7 @@
 </template>
 
 <script setup>
+import SpaceDashboard from '@/components/space/SpaceDashboard.vue';
 import { computed, watch } from 'vue';
 import { useRouter } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
@@ -74,6 +76,8 @@ import OnboardingWizard from '@/components/onboarding/OnboardingWizard.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
 import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
 import { useStatistics } from '@/composables/useStatistics';
+
+const { isShared } = useActiveSpace();
 
 const router = useRouter();
 

@@ -30,7 +30,10 @@ const handleCallback = async (code) => {
       userCookie.value = response.data.user;
       tokenCookie.value = response.data.token;
 
-      router.push('/onboarding');
+      const invitation = usePendingInvitation().take();
+      router.push(
+        invitation ? { path: '/onboarding', query: { returnTo: invitation } } : '/onboarding'
+      );
     }
   } catch (error) {
     console.error(`Failed to handle ${driver} callback:`, error);

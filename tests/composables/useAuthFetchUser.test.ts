@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ref, computed, readonly } from 'vue';
 import { useAuth } from '~/composables/useAuth';
+import { resetSpaceFinance } from '~/composables/useSpaceFinance';
 
 // useAuth leans on Nuxt auto-imports, which a bare vitest run does not provide.
 vi.stubGlobal('computed', computed);
@@ -24,6 +25,7 @@ vi.stubGlobal('useState', (key: string, init?: () => unknown) => {
 vi.stubGlobal('useApi', () => apiMock);
 vi.stubGlobal('navigateTo', vi.fn());
 vi.stubGlobal('useDataManager', () => ({ clearData }));
+vi.stubGlobal('resetSpaceFinance', resetSpaceFinance);
 
 /** ofetch attaches the status to the error; see IFetchError in ofetch's types. */
 const fetchError = (status: number) =>

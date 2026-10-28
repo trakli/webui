@@ -2,12 +2,21 @@
   <div class="navbar">
     <div class="navbar-left">
       <HamburgerMenu v-if="isMobile" :is-open="isSidebarOpen" @toggle="toggleSidebar" />
-      <WorkspaceSwitcher />
     </div>
     <div class="navbar-right">
       <div class="navbar-actions">
+        <button
+          v-if="isShared"
+          type="button"
+          class="icon-button add-transaction-btn"
+          :aria-label="t('Add transaction')"
+          :title="t('Add transaction')"
+          @click="addInSpace"
+        >
+          <Plus class="icon" />
+        </button>
         <NuxtLink
-          v-if="!$route.path.startsWith('/workspaces')"
+          v-else
           class="icon-button add-transaction-btn"
           to="/transactions/new"
           :aria-label="t('Add transaction')"
@@ -15,7 +24,7 @@
         >
           <Plus class="icon" />
         </NuxtLink>
-        <LanguageSelector />
+        <LanguageSelector class="language-btn" />
         <ThemeSelector />
         <NotificationBell />
         <button
@@ -30,7 +39,7 @@
         </button>
       </div>
       <div class="avatar-container">
-        <TAvatar v-if="user" :image-url="getAvatarUrl(user)" :show-dropdown="true" />
+        <TAvatar v-if="user" :image-url="getAvatarUrl(user)" :show-dropdown="true" show-space />
       </div>
     </div>
   </div>
@@ -38,7 +47,6 @@
 
 <script setup>
 import TAvatar from './TAvatar.vue';
-import WorkspaceSwitcher from './workspaces/WorkspaceSwitcher.vue';
 import LanguageSelector from './LanguageSelector.vue';
 import ThemeSelector from './ThemeSelector.vue';
 import HamburgerMenu from './HamburgerMenu.vue';
@@ -57,6 +65,14 @@ const { getAvatarUrl } = useAvatar();
 const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
 
 const learningModal = inject('learningModal', null);
+const { isShared, canWrite } = useActiveSpace();
+const { compose } = useSpaceComposer();
+const { prompt } = useUpsell();
+
+const addInSpace = () => {
+  if (canWrite.value) compose();
+  else prompt('workspace');
+};
 
 const openLearningModal = () => {
   if (learningModal?.open) {
@@ -104,6 +120,7 @@ const openLearningModal = () => {
   .navbar-left {
     display: flex;
     align-items: center;
+    gap: 0.5rem;
     min-width: 0;
   }
 
@@ -132,16 +149,15 @@ const openLearningModal = () => {
   }
 
   @media (max-width: $breakpoint-sm) {
-    .navbar-left :deep(.ds-workspace__trigger) {
-      max-width: 8rem;
-      padding-inline: var(--ds-space-1);
-    }
-
     .navbar-right {
-      gap: 0.5rem;
+      gap: 0.25rem;
     }
 
-    .info-btn {
+    .navbar-actions {
+      gap: 0.25rem;
+    }
+
+    .language-btn {
       display: none;
     }
   }

@@ -1,5 +1,6 @@
 <template>
-  <div class="page">
+  <SpaceWallets v-if="isShared" />
+  <div v-else class="page">
     <ContentTopCard
       v-if="!showForm"
       page-name="Wallet"
@@ -98,6 +99,7 @@
 </template>
 
 <script setup>
+import SpaceWallets from '@/components/space/SpaceWallets.vue';
 import { ref, computed, onMounted, watch } from 'vue';
 import * as LucideIcons from 'lucide-vue-next';
 import { Search, Star } from 'lucide-vue-next';
@@ -114,6 +116,8 @@ import WalletForm from '@/components/WalletForm.vue';
 import WalletsStatsStrip from '@/components/wallets/WalletsStatsStrip.vue';
 import WalletDetailPanel from '@/components/wallets/WalletDetailPanel.vue';
 import TipsSection from '@/components/TipsSection.vue';
+
+const { isShared } = useActiveSpace();
 
 const { t } = useI18n();
 

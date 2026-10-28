@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <SpaceCategories v-if="isShared" />
+  <div v-else>
     <ContentTopCard
       v-if="!showForm"
       page-name="Category"
@@ -78,6 +79,7 @@
 </template>
 
 <script setup>
+import SpaceCategories from '@/components/space/SpaceCategories.vue';
 import { ref, computed, onMounted } from 'vue';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-vue-next';
 import { useCategories } from '@/composables/useCategories';
@@ -90,6 +92,8 @@ import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.v
 import CategoryForm from '@/components/categories/CategoryForm.vue';
 import ContentTable from '@/components/ContentTable.vue';
 import TipsSection from '@/components/TipsSection.vue';
+
+const { isShared } = useActiveSpace();
 
 const { t } = useI18n();
 

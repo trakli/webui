@@ -114,6 +114,8 @@ export const useAuth = () => {
       clearOnboardingStatus();
       workspaces.value = [];
       canCreateWorkspaces.value = false;
+      useCookie('trakli.space').value = null;
+      resetSpaceFinance();
 
       const { clearData } = useDataManager();
       clearData();
