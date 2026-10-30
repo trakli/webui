@@ -13,7 +13,7 @@
         <span class="status-chip" :class="`status-chip--${statusClass}`">
           {{ t(statusLabel) }}
         </span>
-        <div class="icon-actions">
+        <div v-if="editable" class="icon-actions">
           <button
             type="button"
             class="icon-btn"
@@ -102,7 +102,9 @@ import {
 } from '@heroicons/vue/24/outline';
 import type { Budget, BudgetTarget } from '~/types/budget';
 
-const props = defineProps<{ budget: Budget }>();
+const props = withDefaults(defineProps<{ budget: Budget; editable?: boolean }>(), {
+  editable: true
+});
 defineEmits<{
   (e: 'edit' | 'delete', budget: Budget): void;
 }>();

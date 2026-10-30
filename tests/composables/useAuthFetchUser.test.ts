@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ref, computed, readonly } from 'vue';
 import { useAuth } from '~/composables/useAuth';
+import { resetSpaceFinance } from '~/composables/useSpaceFinance';
 
 // useAuth leans on Nuxt auto-imports, which a bare vitest run does not provide.
 vi.stubGlobal('computed', computed);
@@ -24,6 +25,7 @@ vi.stubGlobal('useState', (key: string, init?: () => unknown) => {
 vi.stubGlobal('useApi', () => apiMock);
 vi.stubGlobal('navigateTo', vi.fn());
 vi.stubGlobal('useDataManager', () => ({ clearData }));
+vi.stubGlobal('resetSpaceFinance', resetSpaceFinance);
 
 /** ofetch attaches the status to the error; see IFetchError in ofetch's types. */
 const fetchError = (status: number) =>
@@ -85,5 +87,19 @@ describe('fetchUser', () => {
     await auth.fetchUser();
 
     expect(auth.user.value.is_admin).toBe(true);
+  });
+});
+
+describe('workspace state on logout', () => {
+  it('clears workspace state before another account can sign in', async () => {
+    vi.stubGlobal('useOnboardingStatus', () => ({ clear: vi.fn() }));
+    const auth = signedIn();
+    states.workspaces.value = [{ id: 10, name: 'Private family' }];
+    states['workspaces.canCreate'].value = true;
+    apiMock.mockResolvedValueOnce(undefined);
+    await auth.logout();
+    expect(states.workspaces.value).toEqual([]);
+    expect(states['workspaces.canCreate'].value).toBe(false);
+    expect(auth.user.value).toBeNull();
   });
 });

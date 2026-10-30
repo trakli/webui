@@ -5,7 +5,18 @@
     </div>
     <div class="navbar-right">
       <div class="navbar-actions">
+        <button
+          v-if="isShared"
+          type="button"
+          class="icon-button add-transaction-btn"
+          :aria-label="t('Add transaction')"
+          :title="t('Add transaction')"
+          @click="addInSpace"
+        >
+          <Plus class="icon" />
+        </button>
         <NuxtLink
+          v-else
           class="icon-button add-transaction-btn"
           to="/transactions/new"
           :aria-label="t('Add transaction')"
@@ -13,7 +24,7 @@
         >
           <Plus class="icon" />
         </NuxtLink>
-        <LanguageSelector />
+        <LanguageSelector class="language-btn" />
         <ThemeSelector />
         <NotificationBell />
         <button
@@ -28,7 +39,7 @@
         </button>
       </div>
       <div class="avatar-container">
-        <TAvatar v-if="user" :image-url="getAvatarUrl(user)" :show-dropdown="true" />
+        <TAvatar v-if="user" :image-url="getAvatarUrl(user)" :show-dropdown="true" show-space />
       </div>
     </div>
   </div>
@@ -54,6 +65,14 @@ const { getAvatarUrl } = useAvatar();
 const { isSidebarOpen, isMobile, toggleSidebar } = useSidebar();
 
 const learningModal = inject('learningModal', null);
+const { isShared, canWrite } = useActiveSpace();
+const { compose } = useSpaceComposer();
+const { prompt } = useUpsell();
+
+const addInSpace = () => {
+  if (canWrite.value) compose();
+  else prompt('workspace');
+};
 
 const openLearningModal = () => {
   if (learningModal?.open) {
@@ -101,10 +120,8 @@ const openLearningModal = () => {
   .navbar-left {
     display: flex;
     align-items: center;
-
-    @media (min-width: $breakpoint-md) {
-      display: none;
-    }
+    gap: 0.5rem;
+    min-width: 0;
   }
 
   .navbar-right {
@@ -129,6 +146,16 @@ const openLearningModal = () => {
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    .navbar-right {
+      gap: 0.25rem;
+    }
+
+    .navbar-actions {
+      gap: 0.25rem;
+    }
   }
 
   // All top-right glyphs are neutral and share the base `.icon-button` hover.

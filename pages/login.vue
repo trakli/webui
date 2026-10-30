@@ -65,7 +65,10 @@ const handleSubmit = async () => {
     console.warn('Failed to load onboarding config', e);
   }
 
-  if (!isOnboardingComplete) {
+  const invitation = usePendingInvitation().take(route.query.returnTo);
+  if (invitation) {
+    router.push(invitation);
+  } else if (!isOnboardingComplete) {
     router.push('/onboarding');
   } else {
     const landingMode = configs?.[CONFIGURATION_KEYS.LANDING_MODE];

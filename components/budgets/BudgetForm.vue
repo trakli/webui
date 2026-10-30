@@ -1,6 +1,6 @@
 <template>
   <form class="budget-form" @submit.prevent="handleSubmit">
-    <div class="form-header">
+    <div v-if="!hideHeader" class="form-header">
       <h2>{{ editingItem ? t('Edit Budget') : t('Create Budget') }}</h2>
       <button type="button" class="close-btn" @click="$emit('close')">&times;</button>
     </div>
@@ -84,9 +84,17 @@
             />
             <span>{{ item.name }}</span>
           </label>
-          <p v-if="targetItems.length === 0" class="empty-hint">
-            {{ t('No items to choose from') }}
-          </p>
+          <div v-if="targetItems.length === 0" class="empty-hint">
+            <p>{{ t(emptyTargetCopy[activeTargetTab]) }}</p>
+            <button
+              v-if="workspaceTargets && activeTargetTab !== 'wallet'"
+              type="button"
+              class="btn btn--ghost"
+              @click="$emit('create-target', activeTargetTab)"
+            >
+              {{ activeTargetTab === 'category' ? t('Create a category') : t('Create a group') }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -153,6 +161,12 @@ import { CURRENCIES } from '@/utils/currencies';
 
 const props = defineProps<{
   editingItem?: Budget | null;
+  hideHeader?: boolean;
+  workspaceTargets?: {
+    categories: Array<{ id: number; name: string }>;
+    groups: Array<{ id: number; name: string }>;
+    wallets: Array<{ id: number; name: string; currency?: string }>;
+  };
   apiError?: string;
   isSubmitting?: boolean;
   defaults?: {
@@ -167,6 +181,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'created' | 'updated', payload: any): void;
   (e: 'close'): void;
+  (e: 'create-target', type: BudgetTargetType): void;
 }>();
 
 const { t } = useI18n();
@@ -193,7 +208,9 @@ const currencyOptions = computed<string[]>(() => {
     }
   };
 
-  for (const w of (shared.wallets?.value ?? []) as Array<{ currency?: string }>) {
+  for (const w of (props.workspaceTargets?.wallets ?? shared.wallets?.value ?? []) as Array<{
+    currency?: string;
+  }>) {
     add(w.currency);
   }
   add(defaultCurrency.value);
@@ -268,17 +285,25 @@ const targetTabs: Array<{ key: BudgetTargetType; label: string }> = [
 
 const activeTargetTab = ref<BudgetTargetType>('category');
 
+const emptyTargetCopy: Record<BudgetTargetType, string> = {
+  category:
+    'No categories yet. Leave this empty to budget all spending, or create one to narrow it.',
+  group: 'No groups yet. Groups bundle spending such as a trip or a project.',
+  wallet: 'No wallets yet. Add a wallet to budget what moves through it.'
+};
+
 const targetItems = computed(() => {
-  switch (activeTargetTab.value) {
-    case 'category':
-      return (shared.categories?.value ?? []).map((c: any) => ({ id: c.id, name: c.name }));
-    case 'group':
-      return (shared.groups?.value ?? []).map((g: any) => ({ id: g.id, name: g.name }));
-    case 'wallet':
-      return (shared.wallets?.value ?? []).map((w: any) => ({ id: w.id, name: w.name }));
-    default:
-      return [];
-  }
+  const source = props.workspaceTargets ?? {
+    categories: shared.categories?.value ?? [],
+    groups: shared.groups?.value ?? [],
+    wallets: shared.wallets?.value ?? []
+  };
+  const items: Record<BudgetTargetType, Array<{ id: number; name: string }>> = {
+    category: source.categories,
+    group: source.groups,
+    wallet: source.wallets
+  };
+  return (items[activeTargetTab.value] ?? []).map((item) => ({ id: item.id, name: item.name }));
 });
 
 const isSelected = (type: BudgetTargetType, id: number) =>
@@ -522,10 +547,18 @@ const handleSubmit = () => {
 }
 
 .empty-hint {
-  color: $text-muted;
-  font-size: $font-size-xs;
-  margin: 0;
-  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-2;
+  padding: $spacing-2;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+
+  p {
+    margin: 0;
+  }
 }
 
 .error-message {
