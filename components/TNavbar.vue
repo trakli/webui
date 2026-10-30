@@ -156,10 +156,6 @@ const openLearningModal = () => {
     .navbar-actions {
       gap: 0.25rem;
     }
-
-    .language-btn {
-      display: none;
-    }
   }
 
   // All top-right glyphs are neutral and share the base `.icon-button` hover.

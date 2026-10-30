@@ -140,7 +140,11 @@ function confirmClose() {
     title: t('Close the ended period?'),
     message: t('Its total is saved and what is left carries into the next period.'),
     confirm: t('Close period'),
-    action: () => closeBudget(current.id)
+    action: async () => {
+      await closeBudget(current.id);
+      await loadEntries(1);
+      periods.value = await budgetPeriods(current.id);
+    }
   });
 }
 
@@ -148,11 +152,15 @@ function formatDate(value: string) {
   return new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 }
 
-watch(budget, async (current, previous) => {
-  if (!current || current.id === previous?.id) return;
-  await loadEntries(1);
-  periods.value = await budgetPeriods(current.id).catch(() => []);
-});
+watch(
+  budget,
+  async (current, previous) => {
+    if (!current || current.id === previous?.id) return;
+    await loadEntries(1);
+    periods.value = await budgetPeriods(current.id).catch(() => []);
+  },
+  { immediate: true }
+);
 
 onMounted(ensure);
 </script>

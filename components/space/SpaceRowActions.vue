@@ -26,22 +26,29 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
+import { extractApiErrors } from '~/utils/apiErrors';
 import { EllipsisHorizontalIcon } from '@heroicons/vue/24/outline';
 
 interface Item {
   label: string;
   danger?: boolean;
-  run: () => void;
+  run: () => unknown | Promise<unknown>;
 }
 
 defineProps<{ items: Item[] }>();
 const { t } = useI18n();
+const { showError } = useNotifications();
+const { handle } = useUpsell();
 const open = ref(false);
 const root = ref<HTMLElement | null>(null);
 
-function choose(item: Item) {
+async function choose(item: Item) {
   open.value = false;
-  item.run();
+  try {
+    await item.run();
+  } catch (cause) {
+    if (!handle(cause)) showError(t('Something went wrong'), extractApiErrors(cause));
+  }
 }
 
 function outside(event: MouseEvent) {

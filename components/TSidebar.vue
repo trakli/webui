@@ -72,7 +72,7 @@
         </li>
       </ul>
 
-      <div v-if="!isCompact && !space" class="sidebar-ext">
+      <div v-if="!isCompact" class="sidebar-ext">
         <ExtensionSlot name="sidebar.nav" />
       </div>
     </nav>

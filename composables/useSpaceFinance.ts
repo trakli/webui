@@ -240,8 +240,12 @@ export function resetSpaceFinance() {
 
 export function useSpaceFinanceReset() {
   const { space } = useActiveSpace();
+  const { load } = useSpaceFinance();
   watch(
     () => space.value?.slug,
-    () => resetSpaceFinance()
+    async (slug) => {
+      resetSpaceFinance();
+      if (slug) await load(1);
+    }
   );
 }
