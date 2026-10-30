@@ -224,12 +224,12 @@ function clearFilters() {
 }
 
 function labelNames(entry: WorkspaceTransaction) {
-  const names = new Map(
-    [...overview.value.categories, ...overview.value.groups].map((label) => [label.id, label.name])
-  );
-  return [...entry.category_ids, ...entry.group_ids]
-    .map((id) => names.get(id))
-    .filter((name): name is string => !!name);
+  const categories = new Map(overview.value.categories.map((label) => [label.id, label.name]));
+  const groups = new Map(overview.value.groups.map((label) => [label.id, label.name]));
+  return [
+    ...entry.category_ids.map((id) => categories.get(id)),
+    ...entry.group_ids.map((id) => groups.get(id))
+  ].filter((name): name is string => !!name);
 }
 
 function actionsFor(entry: WorkspaceTransaction) {

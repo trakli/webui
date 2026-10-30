@@ -18,6 +18,7 @@ export interface WorkspaceWallet {
   currency: string;
   balance: number;
   source: 'workspace' | 'shared_wallet';
+  transactions_count: number;
   can_edit: boolean;
   can_unshare: boolean;
 }

@@ -182,9 +182,13 @@ async function create() {
   formError.value = '';
   try {
     const response = await api<{ data: Workspace }>('/workspaces', { method: 'POST', body: form });
-    await load();
     creating.value = false;
-    await switchTo(response.data.slug, '/dashboard');
+    try {
+      await load();
+      await switchTo(response.data.slug, '/dashboard');
+    } catch (cause) {
+      error.value = cause;
+    }
   } catch (cause) {
     formError.value = extractApiErrors(cause);
   } finally {

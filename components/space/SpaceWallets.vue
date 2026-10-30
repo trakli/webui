@@ -97,7 +97,7 @@ import { spaceMoney } from '~/utils/spaceMoney';
 const { t } = useI18n();
 const route = useRoute();
 const { canWrite, canManage } = useActiveSpace();
-const { overview, transactions, ready, error, load, ensure, removeWallet } = useSpaceFinance();
+const { overview, ready, error, load, ensure, removeWallet } = useSpaceFinance();
 const { confirming, ask, runConfirm } = useSpaceConfirm();
 const walletOpen = ref(false);
 const sharing = ref(false);
@@ -117,7 +117,7 @@ function typeLabel(type: string) {
 }
 
 function hasEntries(wallet: WorkspaceWallet) {
-  return transactions.value.some((entry) => entry.wallet_id === wallet.id);
+  return wallet.transactions_count !== 0;
 }
 
 function actionsFor(wallet: WorkspaceWallet) {
