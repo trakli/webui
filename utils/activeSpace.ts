@@ -44,6 +44,6 @@ export function spaceUrgency(workspace: Workspace, overview: WorkspaceOverview):
   return over ? 'over-budget' : null;
 }
 
-export function spaceTone(kind: Workspace['kind']): 'gift' | 'investment' {
-  return kind === 'family' ? 'gift' : 'investment';
+export function spaceTone(id: number): 'gift' | 'investment' {
+  return id % 2 === 0 ? 'gift' : 'investment';
 }

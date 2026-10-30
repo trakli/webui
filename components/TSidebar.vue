@@ -238,7 +238,7 @@ const footer = [
 
 const { space, isOwner } = useActiveSpace();
 const { resolveComponent } = useExtensionSlots();
-const spaceAccent = computed(() => (space.value ? spaceTone(space.value.kind) : 'neutral'));
+const spaceAccent = computed(() => (space.value ? spaceTone(space.value.id) : 'neutral'));
 
 const spaceItems = [
   {

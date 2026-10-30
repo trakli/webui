@@ -31,7 +31,7 @@ const hasBilling = computed(() => !!resolveComponent('cloud.workspace.billing'))
 const visible = computed(
   () => !!space.value?.read_only && !['/dashboard', '/space-billing'].includes(route.path)
 );
-const tone = computed(() => (space.value ? spaceTone(space.value.kind) : 'neutral'));
+const tone = computed(() => (space.value ? spaceTone(space.value.id) : 'neutral'));
 </script>
 
 <style lang="scss" scoped>
