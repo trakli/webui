@@ -175,5 +175,6 @@ tours:
         - wait: .space-dashboard .totals
         - shot:
             name: shared-dashboard
+            route: /dashboard
             caption: The shared dashboard shows this household's money
             fullPage: true
