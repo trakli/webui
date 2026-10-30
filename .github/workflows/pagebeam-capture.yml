@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PAGEBEAM_BACKEND_REVISION: 75e768c8b93fce4744e2ed1d76ed5fe4cc8473d1
+  PAGEBEAM_BACKEND_REVISION: 7ed168c9189544e82bf6b55959e63ee4980b5859
 
 jobs:
   plan:

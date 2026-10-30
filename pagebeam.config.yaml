@@ -158,3 +158,22 @@ tours:
             name: dollar-savings
             caption: Savings kept in dollars, with their own balance and income
             focus: [.split-detail .detail-body]
+
+    shared-space:
+      account: shared
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - goto: /workspaces
+        - wait: .space-card
+        - shot:
+            name: shared-spaces
+            caption: Personal finances and shared spaces stay separate
+            fullPage: true
+        - click: '.space-card button:has-text("Switch to this space")'
+        - wait: .space-dashboard .totals
+        - shot:
+            name: shared-dashboard
+            caption: The shared dashboard shows this household's money
+            fullPage: true
