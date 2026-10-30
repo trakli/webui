@@ -128,7 +128,7 @@ const { overview, transactions, ready, error, load, ensure } = useSpaceFinance()
 const { compose } = useSpaceComposer();
 const { resolveComponent } = useExtensionSlots();
 const hasBilling = computed(() => !!resolveComponent('cloud.workspace.billing'));
-const tone = computed(() => (space.value ? spaceTone(space.value.kind) : 'neutral'));
+const tone = computed(() => (space.value ? spaceTone(space.value.id) : 'neutral'));
 const totals = computed(() =>
   overview.value.totals.length
     ? overview.value.totals

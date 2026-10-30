@@ -5,7 +5,6 @@ export interface Workspace {
   slug: string;
   name: string;
   description: string | null;
-  kind: 'family' | 'group';
   role: 'owner' | 'admin' | 'member';
   read_only: boolean;
   can_manage: boolean;

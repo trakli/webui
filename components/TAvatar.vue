@@ -95,7 +95,7 @@ const { load: loadSpaces } = useWorkspaces();
 onMounted(() => {
   if (props.showSpace) loadSpaces().catch(() => {});
 });
-const spaceAccent = computed(() => (space.value ? spaceTone(space.value.kind) : 'neutral'));
+const spaceAccent = computed(() => (space.value ? spaceTone(space.value.id) : 'neutral'));
 
 const { isOpen, rootRef, toggle, close } = useDropdown();
 

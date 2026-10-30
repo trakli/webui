@@ -28,8 +28,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { Check, House, Plus, User, Users } from 'lucide-vue-next';
-import type { Workspace } from '~/types/workspace';
+import { Check, Plus, User, Users } from 'lucide-vue-next';
 import { PERSONAL_SPACE, spaceTone } from '~/utils/activeSpace';
 
 const emit = defineEmits<{ done: [] }>();
@@ -38,18 +37,14 @@ const { workspaces, load } = useWorkspaces();
 const { space, switchTo } = useActiveSpace();
 const activeSlug = computed(() => space.value?.slug ?? PERSONAL_SPACE);
 
-function kindLabel(workspace: Workspace) {
-  return workspace.kind === 'family' ? t('Family') : t('Group');
-}
-
 const options = computed(() => [
   { slug: PERSONAL_SPACE, name: t('Personal'), kind: t('Just you'), icon: User, tone: 'neutral' },
   ...workspaces.value.map((workspace) => ({
     slug: workspace.slug,
     name: workspace.name,
-    kind: kindLabel(workspace),
-    icon: workspace.kind === 'family' ? House : Users,
-    tone: spaceTone(workspace.kind)
+    kind: t('Group'),
+    icon: Users,
+    tone: spaceTone(workspace.id)
   }))
 ]);
 

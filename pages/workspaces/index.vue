@@ -26,10 +26,10 @@
           v-for="workspace in workspaces"
           :key="workspace.id"
           class="space-card tone-card"
-          :class="`surface surface--${spaceTone(workspace.kind)}`"
+          :class="`surface surface--${spaceTone(workspace.id)}`"
         >
           <div class="space-card-top">
-            <span class="chip">{{ workspace.kind === 'family' ? t('Family') : t('Group') }}</span>
+            <span class="chip">{{ t('Group') }}</span>
             <span v-if="workspace.read_only" class="chip chip--warning">{{ t('Not active') }}</span>
           </div>
           <h2>{{ workspace.name }}</h2>
@@ -84,22 +84,6 @@
       :error="formError"
     >
       <form id="create-space" class="fields" @submit.prevent="create">
-        <fieldset class="form-group kinds">
-          <legend class="form-label">{{ t('Who is it for?') }}</legend>
-          <label
-            v-for="kind in kinds"
-            :key="kind.value"
-            class="kind"
-            :class="{ active: form.kind === kind.value }"
-          >
-            <input v-model="form.kind" type="radio" name="kind" :value="kind.value" />
-            <component :is="kind.icon" class="kind-icon" />
-            <span>
-              <strong>{{ kind.label }}</strong>
-              <span class="hint">{{ kind.hint }}</span>
-            </span>
-          </label>
-        </fieldset>
         <label class="form-group">
           <span class="form-label">{{ t('Name') }}</span>
           <input
@@ -107,7 +91,7 @@
             class="form-input"
             maxlength="255"
             required
-            :placeholder="form.kind === 'family' ? t('The Fischer household') : t('Flat 4B')"
+            :placeholder="t('Flat 4B')"
           />
         </label>
         <label class="form-group">
@@ -125,7 +109,6 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
-import { HomeIcon, UsersIcon } from '@heroicons/vue/24/outline';
 import TButton from '@/components/TButton.vue';
 import TModal from '@/components/TModal.vue';
 import ComponentLoader from '@/components/ComponentLoader.vue';
@@ -144,23 +127,14 @@ const error = ref<unknown>(null);
 const formError = ref('');
 const creating = ref(false);
 const saving = ref(false);
-const form = reactive({ name: '', description: '', kind: 'family' as Workspace['kind'] });
-const kinds = [
-  { value: 'family' as const, label: t('Family'), hint: t('People you live with'), icon: HomeIcon },
-  {
-    value: 'group' as const,
-    label: t('Group'),
-    hint: t('Friends, flatmates or a team'),
-    icon: UsersIcon
-  }
-];
+const form = reactive({ name: '', description: '' });
 
 function roleLabel(role: string) {
   return { owner: t('Owner'), admin: t('Admin'), member: t('Member') }[role] ?? role;
 }
 
 function openCreate() {
-  Object.assign(form, { name: '', description: '', kind: 'family' });
+  Object.assign(form, { name: '', description: '' });
   formError.value = '';
   creating.value = true;
 }
@@ -267,54 +241,5 @@ onMounted(async () => {
     background: $warning-bg;
     color: $warning-text;
   }
-}
-
-.kinds {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-3;
-  margin: 0;
-  padding: 0;
-  border: 0;
-
-  legend {
-    margin-bottom: $spacing-2;
-  }
-
-  @media (max-width: $breakpoint-sm) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.kind {
-  display: flex;
-  align-items: center;
-  gap: $spacing-3;
-  padding: $spacing-3;
-  border: 1px solid $border-medium;
-  border-radius: $radius-xl;
-  cursor: pointer;
-
-  input {
-    position: absolute;
-    opacity: 0;
-  }
-
-  &.active {
-    border-color: $primary;
-    background: $primary-light;
-  }
-
-  strong {
-    display: block;
-    color: $text-primary;
-  }
-}
-
-.kind-icon {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  color: $primary;
 }
 </style>
