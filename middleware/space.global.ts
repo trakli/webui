@@ -19,7 +19,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const legacy = to.path.match(/^\/workspaces\/([^/]+)$/);
   if (legacy) {
     stored.value = legacy[1];
-    return navigateTo({ path: '/dashboard', query: to.query });
+    const path = to.query.checkout ? '/space-billing' : '/dashboard';
+    return navigateTo({ path, query: to.query });
   }
 
   const { workspaces, load } = useWorkspaces();
