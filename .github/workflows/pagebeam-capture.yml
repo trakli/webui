@@ -32,6 +32,7 @@ env:
 jobs:
   plan:
     runs-on: ubuntu-latest
+    continue-on-error: true
     timeout-minutes: 3
     outputs:
       capture-needed: ${{ steps.pagebeam.outputs.capture-needed }}
@@ -45,7 +46,6 @@ jobs:
           persist-credentials: false
       - uses: pagebeam/pagebeam@66ab982c449ac6fef922cfc0be49b6222e5d667f
         id: pagebeam
-        continue-on-error: true
         env:
           PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
         with:
@@ -63,6 +63,7 @@ jobs:
 
   captures:
     needs: plan
+    continue-on-error: true
     if: needs.plan.outputs.capture-needed == 'true'
 
     runs-on: ubuntu-latest
@@ -132,7 +133,6 @@ jobs:
           php artisan migrate --force
       - uses: pagebeam/pagebeam@66ab982c449ac6fef922cfc0be49b6222e5d667f
         id: pagebeam
-        continue-on-error: true
         env:
           PAGEBEAM_BACKEND_PATH: ${{ github.workspace }}/backend
         with:
