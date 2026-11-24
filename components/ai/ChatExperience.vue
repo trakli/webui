@@ -4,7 +4,8 @@
     :class="{
       'is-fullscreen': isFullscreen,
       'mode-full': mode === 'full',
-      'mode-landing': mode === 'landing'
+      'mode-landing': mode === 'landing',
+      'chat-experience--ledger': isLedger
     }"
   >
     <!-- Full mode: collapsible history sidebar -->
@@ -22,7 +23,17 @@
     <section class="chat-main">
       <!-- Hero: a centered chatbox in both modes until the first message. -->
       <div v-if="!hasConversation" class="hero">
-        <div class="hero-mark"><Bot :size="30" /></div>
+        <button
+          v-if="isLedger && mode === 'full'"
+          type="button"
+          class="hero-history"
+          :aria-pressed="!sidebarCollapsed"
+          @click="sidebarCollapsed = !sidebarCollapsed"
+        >
+          <History :size="14" />{{ t('Past chats') }}
+        </button>
+        <LedgerLogo v-if="isLedger" class="hero-logo" />
+        <div v-else class="hero-mark"><Bot :size="30" /></div>
         <h1 class="hero-title">{{ t('What can I help with?') }}</h1>
         <p class="hero-subtitle">
           {{ t('Ask about your money, log a transaction, or import a statement.') }}
@@ -59,7 +70,7 @@
       <!-- Work area: conversation, optionally split with the canvas. -->
       <div v-else class="work" :class="{ 'with-canvas': !!openCanvas }">
         <section class="conversation">
-          <div class="chat-ambient" aria-hidden="true">
+          <div v-if="!isLedger" class="chat-ambient" aria-hidden="true">
             <Wallet class="amb a1" :size="150" :stroke-width="1" />
             <PieChart class="amb a2" :size="120" :stroke-width="1" />
             <Coins class="amb a3" :size="104" :stroke-width="1" />
@@ -150,6 +161,7 @@
 import { ref, computed, onMounted, type Component } from 'vue';
 import {
   Bot,
+  History,
   Plus,
   Maximize2,
   Minimize2,
@@ -167,6 +179,8 @@ import { useChatSurface } from '@/composables/useChatSurface';
 import { usePendingAsk } from '@/composables/usePendingAsk';
 import { pickSuggestions, type Suggestion } from '@/utils/landingSuggestions';
 import ChatSidebar from '@/components/ai/ChatSidebar.vue';
+import LedgerLogo from '@/components/ledger/LedgerLogo.vue';
+import { useDesign } from '@/composables/useDesign';
 import ChatComposer from '@/components/ai/ChatComposer.vue';
 import ChatMessageList from '@/components/ai/ChatMessageList.vue';
 import ChatEmptyState from '@/components/ai/ChatEmptyState.vue';
@@ -202,7 +216,8 @@ const {
   toggleFullscreen
 } = useChatSurface();
 
-const sidebarCollapsed = ref(false);
+const { isLedger } = useDesign();
+const sidebarCollapsed = ref(isLedger.value);
 
 const hasConversation = computed(() => (currentSession.value?.messages?.length ?? 0) > 0);
 

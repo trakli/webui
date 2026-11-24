@@ -1,6 +1,8 @@
 <template>
-  <SpaceDashboard v-if="isShared" />
-  <div v-else class="dashboard">
+  <LedgerSpace v-if="isShared && isLedger" />
+  <SpaceDashboard v-else-if="isShared" />
+  <LedgerOverview v-else-if="isLedger && !shouldShowWizard" />
+  <div v-else class="dashboard" :class="{ 'dashboard--ledger': isLedger }">
     <DashboardAgentHero />
 
     <OnboardingWizard
@@ -60,6 +62,9 @@
 
 <script setup>
 import SpaceDashboard from '@/components/space/SpaceDashboard.vue';
+import LedgerSpace from '@/components/ledger/space/LedgerSpace.vue';
+import LedgerOverview from '@/components/ledger/overview/LedgerOverview.vue';
+import { useDesign } from '@/composables/useDesign';
 import { computed, watch } from 'vue';
 import { useRouter } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
@@ -78,6 +83,7 @@ import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
 import { useStatistics } from '@/composables/useStatistics';
 
 const { isShared } = useActiveSpace();
+const { isLedger } = useDesign();
 
 const router = useRouter();
 
@@ -145,7 +151,8 @@ const handleCompleteOnboarding = () => {
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
+  middleware: 'auth',
+  ledgerFrame: true
 });
 </script>
 
@@ -156,6 +163,12 @@ definePageMeta({
   display: flex;
   flex-direction: column;
   gap: $spacing-4;
+}
+
+.dashboard--ledger {
+  padding: 20px 24px 32px;
+  overflow: auto;
+  height: 100%;
 }
 
 .middle-section {

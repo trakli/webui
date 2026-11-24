@@ -1,5 +1,10 @@
 <template>
-  <div class="reports-v2">
+  <component
+    :is="isLedger ? LedgerWorkspace : 'div'"
+    :class="isLedger ? 'reports-ledger' : 'reports-v2'"
+    v-bind="isLedger ? { title: t('Reports'), subtitle: rangeLabel, inspectorLabel: t('Report details') } : {}"
+    data-testid="reports"
+  >
     <div class="top-bar">
       <ReportsTabs v-model="activeTab" :tabs="tabs" />
     </div>
@@ -116,11 +121,64 @@
       :formatter="format"
       @close="reviewOpen = false"
     />
-  </div>
+
+    <template #inspector>
+      <template v-if="activeTab === 'calendar'">
+        <h2 class="rl-h"><CalIcon />{{ dayTitle }}</h2>
+        <template v-if="selectedDay">
+          <dl class="rl-kv">
+            <dt>{{ t('Out') }}</dt>
+            <dd class="rl-num">{{ money(selectedDay.expense, currency, locale) }}</dd>
+            <dt>{{ t('In') }}</dt>
+            <dd class="rl-num rl-in">{{ money(selectedDay.income, currency, locale) }}</dd>
+          </dl>
+          <ul class="rl-list" data-testid="reports-day-entries">
+            <li v-for="row in dayRows" :key="row.id">
+              <span>{{ row.description || row.party?.name || t('No description') }}</span>
+              <span class="rl-num" :class="{ 'rl-in': row.type === 'income' }">
+                {{ money(row.type === 'income' ? Number(row.amount) : -Number(row.amount), row.wallet?.currency || currency, locale, { sign: true }) }}
+              </span>
+            </li>
+          </ul>
+          <p v-if="!dayLoading && !dayRows.length" class="rl-muted">{{ t('Nothing went out.') }}</p>
+          <button type="button" class="rl-btn" @click="openDayDrill">{{ t('Open the full breakdown') }}</button>
+        </template>
+        <p v-else class="rl-muted">{{ t('Pick a day to see what moved.') }}</p>
+      </template>
+
+      <template v-else-if="activeTab === 'flow'">
+        <h2 class="rl-h"><Workflow />{{ t('Reading the flow') }}</h2>
+        <p class="rl-muted">
+          {{ t('Income comes in on the left. Spending leaves on the right, and the green stream is what you kept.') }}
+        </p>
+        <div v-if="totals.income > 0" class="rl-ins">
+          <b>{{ t('{percent}% of income stayed.', { percent: keptPercent }) }}</b>
+          {{ t('{amount} kept this period.', { amount: money(totals.income - totals.expense, currency, locale) }) }}
+        </div>
+        <div>
+          <h2 class="rl-h">{{ t('Biggest streams out') }}</h2>
+          <ul class="rl-list">
+            <li v-for="row in expenseCategories.slice(0, 6)" :key="row.name">
+              <span>{{ row.name }}<small>{{ t('{percent}% of spending', { percent: row.percentage.toFixed(1) }) }}</small></span>
+              <span class="rl-num">{{ money(row.amount, currency, locale) }}</span>
+            </li>
+          </ul>
+        </div>
+        <NuxtLink to="/transactions" class="rl-btn">{{ t('Open in Ledger') }}</NuxtLink>
+      </template>
+
+      <LedgerInsights v-else />
+    </template>
+  </component>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import LedgerWorkspace from '@/components/ledger/LedgerWorkspace.vue';
+import LedgerInsights from '@/components/ledger/overview/LedgerInsights.vue';
+import { useDesign } from '@/composables/useDesign';
+import { money } from '@/utils/ledgerMoney';
+import { api } from '@/services/api';
 import {
   LayoutDashboard,
   Calendar as CalIcon,
@@ -145,9 +203,10 @@ import ReportsEmpty from '@/components/reports/ReportsEmpty.vue';
 import { useReportData } from '~/composables/useReportData';
 import { formatShortAmount } from '@/utils/currency';
 
-definePageMeta({ layout: 'dashboard', middleware: 'auth' });
+definePageMeta({ layout: 'dashboard', middleware: 'auth', ledgerFrame: true });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const { isLedger } = useDesign();
 
 const {
   selectedPeriod,
@@ -174,7 +233,17 @@ const {
   toggleCompare
 } = useReportData();
 
-const activeTab = ref('overview');
+const REPORT_TABS = ['overview', 'calendar', 'flow', 'charts', 'categories', 'position'];
+const route = useRoute();
+const tabFromQuery = (value) => (REPORT_TABS.includes(value) ? value : null);
+const activeTab = ref(tabFromQuery(route.query.tab) ?? 'overview');
+watch(
+  () => route.query.tab,
+  (value) => {
+    const tab = tabFromQuery(value);
+    if (tab) activeTab.value = tab;
+  }
+);
 const drillOpen = ref(false);
 const drillBucket = ref(null);
 const reviewOpen = ref(false);
@@ -225,8 +294,54 @@ const openDrill = (bucket) => {
   drillOpen.value = true;
 };
 
+const selectedDay = ref(null);
+const dayRows = ref([]);
+const dayLoading = ref(false);
+const rangeLabel = computed(() =>
+  new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric', year: 'numeric' }).formatRange(
+    range.value.start,
+    range.value.end
+  )
+);
+const dayTitle = computed(() =>
+  selectedDay.value
+    ? new Date(`${selectedDay.value.date}T00:00:00`).toLocaleString(locale.value, {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric'
+      })
+    : t('Calendar')
+);
+const keptPercent = computed(() =>
+  totals.value.income > 0
+    ? Math.max(0, ((totals.value.income - totals.value.expense) / totals.value.income) * 100).toFixed(0)
+    : '0'
+);
+const loadDay = async (date) => {
+  dayLoading.value = true;
+  dayRows.value = [];
+  try {
+    const page = await api.transactions.fetchAll({ date_from: date, date_to: date, limit: 50, page: 1 });
+    if (selectedDay.value?.date === date) dayRows.value = page?.data || [];
+  } catch (error) {
+    console.warn('[reports] day entries failed', error);
+  } finally {
+    dayLoading.value = false;
+  }
+};
 const onSelectDay = (slot) => {
   if (!slot) return;
+  if (isLedger.value) {
+    selectedDay.value = slot;
+    loadDay(slot.date);
+    return;
+  }
+  openDrillForDay(slot);
+};
+const openDayDrill = () => {
+  if (selectedDay.value) openDrillForDay(selectedDay.value);
+};
+const openDrillForDay = (slot) => {
   drillBucket.value = {
     name: t('Spending on {date}', { date: slot.date }),
     kind: 'expense',
@@ -291,5 +406,116 @@ const reviewData = computed(() => reviewSnapshot.value || prevReviewSnapshot.val
 .tab-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+.reports-ledger .top-bar {
+  margin-bottom: 12px;
+}
+
+.reports-ledger :deep(.tab-stage) {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.rl-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ledger-ink-3);
+}
+
+.rl-h :deep(svg) {
+  width: 14px;
+  height: 14px;
+}
+
+.rl-kv {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 6px 10px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.rl-kv dt {
+  color: var(--ledger-ink-3);
+}
+
+.rl-kv dd {
+  margin: 0;
+}
+
+.rl-num {
+  font-family: var(--ledger-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rl-in {
+  color: var(--ledger-income);
+}
+
+.rl-muted {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ledger-ink-3);
+}
+
+.rl-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.rl-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ledger-line);
+  font-size: 13px;
+}
+
+.rl-list li:last-child {
+  border-bottom: 0;
+}
+
+.rl-list small {
+  display: block;
+  font-size: 12px;
+  color: var(--ledger-ink-3);
+}
+
+.rl-ins {
+  padding: 10px;
+  border-radius: var(--ledger-r);
+  background: var(--ledger-surface-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.rl-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--ledger-line);
+  border-radius: var(--ledger-r-sm);
+  background: var(--ledger-surface);
+  color: var(--ledger-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
 }
 </style>

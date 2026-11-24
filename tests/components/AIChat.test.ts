@@ -9,6 +9,11 @@ const mockCreateSession = vi.fn();
 const mockAddMessage = vi.fn();
 const mockDeleteSession = vi.fn();
 
+vi.mock('@/composables/useDesign', async () => {
+  const { ref } = await import('vue');
+  return { useDesign: () => ({ isLedger: ref(false) }) };
+});
+
 vi.mock('@/services/api/aiApi', () => ({
   default: { exportCanvasUrl: vi.fn() },
   aiApi: {

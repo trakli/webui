@@ -9,12 +9,14 @@ import ChatExperience from '@/components/ai/ChatExperience.vue';
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
+  middleware: 'auth',
+  ledgerFrame: true
 });
 </script>
 
 <style lang="scss" scoped>
 .assistant-page {
   width: 100%;
+  height: 100%;
 }
 </style>

@@ -22,6 +22,26 @@
             <Check v-if="theme === option.value" class="check-icon" />
           </button>
         </div>
+        <div class="dropdown-header dropdown-header--section">
+          <h3>{{ t('Design') }}</h3>
+        </div>
+        <div class="theme-list" data-testid="design-options">
+          <button
+            v-for="option in designOptions"
+            :key="option.value"
+            class="theme-item"
+            :class="{ active: design === option.value }"
+            :data-design-option="option.value"
+            @click="selectDesign(option.value)"
+          >
+            <component :is="option.icon" class="theme-icon" />
+            <span class="theme-name">
+              {{ t(option.label) }}
+              <small class="theme-hint">{{ t(option.hint) }}</small>
+            </span>
+            <Check v-if="design === option.value" class="check-icon" />
+          </button>
+        </div>
       </div>
     </Transition>
   </div>
@@ -29,7 +49,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Sun, Moon, Monitor, Check } from 'lucide-vue-next';
+import { Sun, Moon, Monitor, Check, PanelsTopLeft, LayoutGrid } from 'lucide-vue-next';
+import { useDesign, type DesignName } from '@/composables/useDesign';
 import { useTheme, type ThemeMode } from '@/composables/useTheme';
 import { useDropdown } from '@/composables/useDropdown';
 
@@ -43,6 +64,18 @@ const options: Array<{ value: ThemeMode; label: string; icon: typeof Sun }> = [
   { value: 'dark', label: 'Dark', icon: Moon },
   { value: 'system', label: 'System', icon: Monitor }
 ];
+
+const { design, setDesign } = useDesign();
+
+const designOptions: Array<{ value: DesignName; label: string; hint: string; icon: typeof Sun }> = [
+  { value: 'ledger', label: 'Ledger', hint: 'Dense, keyboard friendly', icon: PanelsTopLeft },
+  { value: 'classic', label: 'Classic', hint: 'The original layout', icon: LayoutGrid }
+];
+
+const selectDesign = (value: DesignName) => {
+  setDesign(value);
+  close();
+};
 
 const triggerIcon = computed(() => {
   if (theme.value === 'system') return Monitor;
@@ -102,6 +135,25 @@ const selectTheme = (value: ThemeMode) => {
 
 .theme-list {
   padding: 0.25rem 0;
+}
+
+.dropdown-header--section {
+  border-top: 1px solid $border-color;
+  padding: 0.75rem 1rem 0.5rem;
+
+  h3 {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-secondary;
+  }
+}
+
+.theme-hint {
+  display: block;
+  font-size: $font-size-xs;
+  font-weight: $font-normal;
+  color: $text-secondary;
 }
 
 .theme-item {

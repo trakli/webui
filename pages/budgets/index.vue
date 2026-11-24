@@ -1,5 +1,29 @@
 <template>
   <SpaceBudgets v-if="isShared" />
+  <LedgerBudgets
+    v-else-if="isLedger"
+    :budgets="budgets"
+    :form-open="showForm"
+    :form-title="editingItem ? t('Edit budget') : t('New budget')"
+    @create="handleOpenFormForCreation"
+    @edit="handleEdit"
+    @delete="handleDelete"
+  >
+    <template #form>
+      <BudgetForm
+        :editing-item="editingItem"
+        :api-error="submitError"
+        :is-submitting="isSubmitting"
+        :defaults="formDefaults"
+        @created="handleCreate"
+        @updated="handleUpdate"
+        @close="handleFormClose"
+      />
+    </template>
+    <template #empty>
+      <OnboardingEmptyState page-type="budgets" @create="handleOpenFormForCreation" />
+    </template>
+  </LedgerBudgets>
   <div v-else>
     <ContentTopCard
       v-if="!showForm"
@@ -125,6 +149,8 @@
 
 <script setup lang="ts">
 import SpaceBudgets from '@/components/space/SpaceBudgets.vue';
+import LedgerBudgets from '@/components/ledger/budgets/LedgerBudgets.vue';
+import { useDesign } from '@/composables/useDesign';
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { LightBulbIcon } from '@heroicons/vue/24/outline';
@@ -140,6 +166,7 @@ import type { Budget, BudgetPeriodType } from '~/types/budget';
 import { extractApiErrors } from '@/utils/apiErrors';
 
 const { isShared } = useActiveSpace();
+const { isLedger } = useDesign();
 
 const { t } = useI18n();
 const route = useRoute();
@@ -300,7 +327,8 @@ onMounted(async () => {
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
+  middleware: 'auth',
+  ledgerFrame: true
 });
 </script>
 

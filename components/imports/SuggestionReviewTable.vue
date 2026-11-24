@@ -36,7 +36,11 @@
         </thead>
         <tbody>
           <template v-for="suggestion in suggestions" :key="suggestion.index">
-            <tr :class="rowClass(suggestion)">
+            <tr
+              :class="[rowClass(suggestion), { 'row--selected': suggestion.index === selectedIndex }]"
+              @click="$emit('select', suggestion.index)"
+              @focusin="$emit('select', suggestion.index)"
+            >
               <td class="col-status">
                 <input
                   type="checkbox"
@@ -237,9 +241,11 @@ defineProps<{
   acceptedCount: number;
   rejectedCount: number;
   pendingCount: number;
+  selectedIndex?: number | null;
 }>();
 
 const emit = defineEmits<{
+  select: [index: number];
   toggle: [index: number];
   edit: [index: number, edits: Partial<SuggestionWithDuplicate>];
   acceptAll: [];
@@ -569,5 +575,9 @@ select.inline-edit {
       background-color: $bg-gray;
     }
   }
+}
+
+tr.row--selected {
+  box-shadow: inset 2px 0 0 var(--ledger-orange, #ff9500);
 }
 </style>
