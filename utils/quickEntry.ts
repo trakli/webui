@@ -38,7 +38,10 @@ const containsPhrase = (haystack: string, phrase: string) =>
 const removePhrase = (haystack: string, phrase: string) =>
   ` ${haystack} `.replace(` ${phrase} `, ' ').replace(/\s+/g, ' ').trim();
 
-function longestNamed<T extends { name: string }>(text: string, items: readonly T[]): T | undefined {
+function longestNamed<T extends { name: string }>(
+  text: string,
+  items: readonly T[]
+): T | undefined {
   return items
     .filter((item) => containsPhrase(text, norm(item.name)))
     .sort((a, b) => b.name.length - a.name.length)[0];

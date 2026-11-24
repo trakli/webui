@@ -2,7 +2,11 @@
   <aside class="lt" :aria-label="t('Wallets and spending')">
     <section>
       <h2 class="lt-h">{{ t('Wallets') }}</h2>
-      <NuxtLink :to="onLedger ? '/transactions' : '/dashboard'" class="lt-node" :aria-current="allCurrent ? 'page' : undefined">
+      <NuxtLink
+        :to="onLedger ? '/transactions' : '/dashboard'"
+        class="lt-node"
+        :aria-current="allCurrent ? 'page' : undefined"
+      >
         <Layers />
         <span class="lt-name">{{ t('All wallets') }}</span>
         <span class="lt-num">{{ walletAmount(kpis.netWorth, base, locale) }}</span>
@@ -23,14 +27,11 @@
 
     <section v-if="spending.length">
       <h2 class="lt-h">{{ spentHeading }}</h2>
-      <NuxtLink
-        v-for="row in spending.slice(0, 8)"
-        :key="row.name"
-        to="/reports"
-        class="lt-cat"
-      >
+      <NuxtLink v-for="row in spending.slice(0, 8)" :key="row.name" to="/reports" class="lt-cat">
         <span class="lt-name">{{ row.name }}</span>
-        <span class="lt-num">{{ money(row.amount, base, locale, { whole: row.amount >= 1000 }) }}</span>
+        <span class="lt-num">{{
+          money(row.amount, base, locale, { whole: row.amount >= 1000 })
+        }}</span>
         <span class="lt-bar"><i :style="{ width: `${(row.amount / topSpend) * 100}%` }" /></span>
       </NuxtLink>
     </section>
@@ -39,7 +40,9 @@
       <h2 class="lt-h">{{ t('Paid most') }}</h2>
       <NuxtLink v-for="row in payees.slice(0, 4)" :key="row.name" to="/parties" class="lt-cat">
         <span class="lt-name">{{ row.name }}</span>
-        <span class="lt-num">{{ money(row.amount, base, locale, { whole: row.amount >= 1000 }) }}</span>
+        <span class="lt-num">{{
+          money(row.amount, base, locale, { whole: row.amount >= 1000 })
+        }}</span>
       </NuxtLink>
     </section>
   </aside>

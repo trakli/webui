@@ -27,7 +27,8 @@ const selectedId = ref<string | null>(null);
 
 let run = 0;
 
-const sortKey = (row: FrontendTransaction) => `${row.date}T${row.time || '00:00'}#${row.id.padStart(10, '0')}`;
+const sortKey = (row: FrontendTransaction) =>
+  `${row.date}T${row.time || '00:00'}#${row.id.padStart(10, '0')}`;
 
 export function useLedgerEntries() {
   const shared = useSharedData();
@@ -42,7 +43,7 @@ export function useLedgerEntries() {
   const wallet = computed(() =>
     walletId.value === null
       ? null
-      : (shared.wallets.value ?? []).find((w: any) => w.id === walletId.value) ?? null
+      : ((shared.wallets.value ?? []).find((w: any) => w.id === walletId.value) ?? null)
   );
 
   async function load() {
@@ -107,7 +108,11 @@ export function useLedgerEntries() {
 
   const visible = computed(() =>
     entries.value.filter((row) =>
-      flow.value === 'all' ? true : flow.value === 'in' ? row.type === 'INCOME' : row.type === 'EXPENSE'
+      flow.value === 'all'
+        ? true
+        : flow.value === 'in'
+          ? row.type === 'INCOME'
+          : row.type === 'EXPENSE'
     )
   );
 
@@ -124,7 +129,9 @@ export function useLedgerEntries() {
     return { income, expense, net: income - expense };
   });
 
-  const mixedCurrencies = computed(() => new Set(entries.value.map((row) => row.currency)).size > 1);
+  const mixedCurrencies = computed(
+    () => new Set(entries.value.map((row) => row.currency)).size > 1
+  );
 
   return {
     walletId,

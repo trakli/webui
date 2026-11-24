@@ -41,13 +41,7 @@ const editingItem = ref(null);
 const isSubmitting = ref(false);
 const submitError = ref('');
 
-const {
-  parties: rawParties,
-  fetchParties,
-  createParty,
-  updateParty,
-  deleteParty
-} = useParties();
+const { parties: rawParties, fetchParties, createParty, updateParty, deleteParty } = useParties();
 
 const { transactions } = useTransactions();
 
@@ -82,7 +76,6 @@ const parties = computed(() => {
     };
   });
 });
-
 
 const { confirmDelete, showSuccess, showError } = useNotifications();
 

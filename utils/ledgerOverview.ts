@@ -149,7 +149,10 @@ export function noSpendDays(daily: number[], elapsed: number): NoSpendSummary {
   return { count, longest, longestStart };
 }
 
-export function compareCategories(current: NamedAmount[], previous: NamedAmount[]): CategoryChange[] {
+export function compareCategories(
+  current: NamedAmount[],
+  previous: NamedAmount[]
+): CategoryChange[] {
   const map = new Map<string, CategoryChange>();
   for (const { name, amount } of current) {
     map.set(name, { name, amount, prevAmount: 0, delta: amount });

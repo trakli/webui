@@ -1,4 +1,9 @@
-export const DEBT_INTENTS = ['loan_received', 'debt_owed', 'loan_repayment', 'debt_settled'] as const;
+export const DEBT_INTENTS = [
+  'loan_received',
+  'debt_owed',
+  'loan_repayment',
+  'debt_settled'
+] as const;
 
 const MONEY_IN = new Set(['loan_received', 'debt_owed']);
 const MONEY_OUT = new Set(['loan_repayment', 'debt_settled']);
@@ -50,12 +55,20 @@ export function partyDebts(rows: DebtRow[]): Map<number, PartyDebt[]> {
     debt.net = round(debt.net + (direction === 'in' ? amount : -amount));
     if (direction === 'out') debt.lent = round(debt.lent + amount);
     else debt.repaid = round(debt.repaid + amount);
-    debt.movements.push({ date: row.datetime, amount, description: row.description ?? '', direction, intent });
+    debt.movements.push({
+      date: row.datetime,
+      amount,
+      description: row.description ?? '',
+      direction,
+      intent
+    });
   }
 
   const result = new Map<number, PartyDebt[]>();
   for (const [partyId, currencies] of byParty) {
-    const list = [...currencies.values()].filter((debt) => Math.abs(debt.net) >= 0.005 || debt.movements.length);
+    const list = [...currencies.values()].filter(
+      (debt) => Math.abs(debt.net) >= 0.005 || debt.movements.length
+    );
     for (const debt of list) debt.movements.sort((a, b) => (a.date < b.date ? 1 : -1));
     result.set(partyId, list);
   }
@@ -71,6 +84,8 @@ const SETTLES: Record<string, string> = {
 
 /** The intent that moves this balance back toward zero, in the same pair as the latest entry. */
 export function settlingIntent(debt: PartyDebt): string {
-  const latest = debt.movements.find((movement) => (debt.net > 0 ? movement.direction === 'in' : movement.direction === 'out'));
+  const latest = debt.movements.find((movement) =>
+    debt.net > 0 ? movement.direction === 'in' : movement.direction === 'out'
+  );
   return SETTLES[latest?.intent ?? ''] ?? (debt.net > 0 ? 'debt_settled' : 'debt_owed');
 }

@@ -37,11 +37,21 @@
           :class="bar.type === 'today' ? 'ld-today' : 'ld-spent'"
         />
         <template v-if="bar.value > cap">
-          <line :x1="bar.x - 1" :x2="bar.x + bar.w + 1" :y1="y(bar.value) + 9" :y2="y(bar.value) + 5" class="ld-break" />
-          <text v-if="bar.capLabel" :x="bar.x + bar.w / 2" :y="P.t - 3" text-anchor="middle">{{ format(bar.value) }}</text>
+          <line
+            :x1="bar.x - 1"
+            :x2="bar.x + bar.w + 1"
+            :y1="y(bar.value) + 9"
+            :y2="y(bar.value) + 5"
+            class="ld-break"
+          />
+          <text v-if="bar.capLabel" :x="bar.x + bar.w / 2" :y="P.t - 3" text-anchor="middle">
+            {{ format(bar.value) }}
+          </text>
         </template>
       </template>
-      <text v-if="bar.tick" :x="bar.x + bar.w / 2" :y="H - 4" text-anchor="middle">{{ bar.tick }}</text>
+      <text v-if="bar.tick" :x="bar.x + bar.w / 2" :y="H - 4" text-anchor="middle">
+        {{ bar.tick }}
+      </text>
     </g>
   </svg>
 </template>
@@ -88,7 +98,13 @@ const bars = computed(() => {
   const list = props.daily.map((value, i) => {
     const date = addDays(props.start, i);
     const type =
-      i >= props.elapsed ? 'future' : i === props.elapsed - 1 ? 'today' : value > 0 ? 'spent' : 'none';
+      i >= props.elapsed
+        ? 'future'
+        : i === props.elapsed - 1
+          ? 'today'
+          : value > 0
+            ? 'spent'
+            : 'none';
     const tick =
       props.period === 'month'
         ? i % 7 === 0

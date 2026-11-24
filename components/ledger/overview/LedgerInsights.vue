@@ -1,30 +1,32 @@
 <template>
   <div class="lo-insights">
-      <h2 class="lo-h"><Lightbulb />{{ t('What stands out') }}</h2>
-      <div v-for="item in insights" :key="item.key" class="lo-ins">
-        <span class="lo-coin"><component :is="item.icon" /></span>
-        <div><b>{{ item.title }}</b> {{ item.detail }}</div>
-      </div>
-      <p v-if="!insights.length" class="lo-muted">{{ t('Nothing unusual so far.') }}</p>
-
+    <h2 class="lo-h"><Lightbulb />{{ t('What stands out') }}</h2>
+    <div v-for="item in insights" :key="item.key" class="lo-ins">
+      <span class="lo-coin"><component :is="item.icon" /></span>
       <div>
-        <h2 class="lo-h">{{ t('Coming up') }}</h2>
-        <ul class="lo-list lo-upcoming">
-          <li v-for="item in upcoming" :key="item.id">
-            <span class="lo-when">
-              <b>{{ item.when.getDate() }}</b>
-              <small>{{ item.when.toLocaleString(locale, { month: 'short' }) }}</small>
-            </span>
-            <span class="lo-list-name">
-              {{ item.title }}
-              <small v-if="item.description">{{ item.description }}</small>
-            </span>
-          </li>
-        </ul>
-        <NuxtLink v-if="!upcoming.length" to="/reminders" class="lo-link">
-          {{ t('Nothing scheduled. Add a reminder') }}
-        </NuxtLink>
+        <b>{{ item.title }}</b> {{ item.detail }}
       </div>
+    </div>
+    <p v-if="!insights.length" class="lo-muted">{{ t('Nothing unusual so far.') }}</p>
+
+    <div>
+      <h2 class="lo-h">{{ t('Coming up') }}</h2>
+      <ul class="lo-list lo-upcoming">
+        <li v-for="item in upcoming" :key="item.id">
+          <span class="lo-when">
+            <b>{{ item.when.getDate() }}</b>
+            <small>{{ item.when.toLocaleString(locale, { month: 'short' }) }}</small>
+          </span>
+          <span class="lo-list-name">
+            {{ item.title }}
+            <small v-if="item.description">{{ item.description }}</small>
+          </span>
+        </li>
+      </ul>
+      <NuxtLink v-if="!upcoming.length" to="/reminders" class="lo-link">
+        {{ t('Nothing scheduled. Add a reminder') }}
+      </NuxtLink>
+    </div>
   </div>
 </template>
 
@@ -43,17 +45,21 @@ const { activeBudgets, fetchBudgets } = useBudgets();
 const { reminders, fetchReminders } = useReminders();
 
 const fmt = (value: number) => money(value, base.value, locale.value);
-const shortDate = (date: Date) => date.toLocaleString(locale.value, { month: 'short', day: 'numeric' });
+const shortDate = (date: Date) =>
+  date.toLocaleString(locale.value, { month: 'short', day: 'numeric' });
 const prevLabel = computed(() =>
   new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric' })
     .formatRange(span.value.prevStart, span.value.prevToday)
     .replace(/\s/g, '\u00a0')
 );
-const biggestFall = computed(() =>
-  categories.value.filter((row) => row.prevAmount > 0 && row.delta < -0.005).sort((a, b) => a.delta - b.delta)[0]
+const biggestFall = computed(
+  () =>
+    categories.value
+      .filter((row) => row.prevAmount > 0 && row.delta < -0.005)
+      .sort((a, b) => a.delta - b.delta)[0]
 );
-const biggestRise = computed(() =>
-  categories.value.filter((row) => row.delta > 0.005).sort((a, b) => b.delta - a.delta)[0]
+const biggestRise = computed(
+  () => categories.value.filter((row) => row.delta > 0.005).sort((a, b) => b.delta - a.delta)[0]
 );
 
 const insights = computed(() => {
@@ -70,7 +76,11 @@ const insights = computed(() => {
         icon: Target,
         title: t('{name} is {amount} over budget.', {
           name: budget.name,
-          amount: money(progress.net_spent - progress.effective_limit, budget.currency, locale.value)
+          amount: money(
+            progress.net_spent - progress.effective_limit,
+            budget.currency,
+            locale.value
+          )
         }),
         detail: t('{spent} spent of {limit}.', { spent, limit })
       });
@@ -94,7 +104,10 @@ const insights = computed(() => {
     out.push({
       key: 'fall',
       icon: TrendingDown,
-      title: t('{name} fell {amount}', { name: biggestFall.value.name, amount: fmt(-biggestFall.value.delta) }),
+      title: t('{name} fell {amount}', {
+        name: biggestFall.value.name,
+        amount: fmt(-biggestFall.value.delta)
+      }),
       detail: t('against {range}, the biggest drop of any category.', { range: prevLabel.value })
     });
   }
@@ -103,7 +116,10 @@ const insights = computed(() => {
     out.push({
       key: 'rise',
       icon: TrendingUp,
-      title: t('{name} is up {amount}', { name: biggestRise.value.name, amount: fmt(biggestRise.value.delta) }),
+      title: t('{name} is up {amount}', {
+        name: biggestRise.value.name,
+        amount: fmt(biggestRise.value.delta)
+      }),
       detail: t('against {range}.', { range: prevLabel.value })
     });
   }
@@ -134,7 +150,10 @@ const upcoming = computed(() => {
   const today = span.value.today.getTime();
   return reminders.value
     .filter((item) => item.status === 'active' || item.status === 'snoozed')
-    .map((item) => ({ ...item, when: new Date(item.snoozed_until || item.next_trigger_at || item.trigger_at) }))
+    .map((item) => ({
+      ...item,
+      when: new Date(item.snoozed_until || item.next_trigger_at || item.trigger_at)
+    }))
     .filter((item) => !Number.isNaN(item.when.getTime()) && item.when.getTime() >= today)
     .sort((a, b) => a.when.getTime() - b.when.getTime())
     .slice(0, 4);

@@ -184,7 +184,6 @@ tours:
             caption: The shared dashboard shows this household's money
             fullPage: true
 
-
     ledger-reports:
       account: active
       viewports:
