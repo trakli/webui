@@ -9,11 +9,6 @@ const mockCreateSession = vi.fn();
 const mockAddMessage = vi.fn();
 const mockDeleteSession = vi.fn();
 
-vi.mock('@/composables/useDesign', async () => {
-  const { ref } = await import('vue');
-  return { useDesign: () => ({ isLedger: ref(false) }) };
-});
-
 vi.mock('@/services/api/aiApi', () => ({
   default: { exportCanvasUrl: vi.fn() },
   aiApi: {
@@ -30,6 +25,11 @@ const mountChat = () =>
     props: { mode: 'full' },
     global: { stubs: { ChatLandingInsights: true } }
   });
+
+const openHistory = async (wrapper: ReturnType<typeof mountChat>) => {
+  await wrapper.find('.hero-history').trigger('click');
+  await flushPromises();
+};
 
 const emptyPage = { data: [], current_page: 1, last_page: 1, total: 0 };
 
@@ -51,6 +51,7 @@ describe('ChatExperience (full mode)', () => {
   it('renders the centered hero when no session is active', async () => {
     const wrapper = mountChat();
     await flushPromises();
+    await openHistory(wrapper);
 
     expect(wrapper.find('.hero').exists()).toBe(true);
     expect(wrapper.text()).toContain('What can I help with?');
@@ -93,6 +94,7 @@ describe('ChatExperience (full mode)', () => {
 
     const wrapper = mountChat();
     await flushPromises();
+    await openHistory(wrapper);
 
     await wrapper.find('.chat-input').setValue('How much on food?');
     await wrapper.find('form').trigger('submit');
@@ -155,6 +157,7 @@ describe('ChatExperience (full mode)', () => {
 
     const wrapper = mountChat();
     await flushPromises();
+    await openHistory(wrapper);
 
     await wrapper.findAll('.session-item')[0].trigger('click');
     await flushPromises();
@@ -208,6 +211,7 @@ describe('ChatExperience (full mode)', () => {
 
     const wrapper = mountChat();
     await flushPromises();
+    await openHistory(wrapper);
     await wrapper.findAll('.session-item')[0].trigger('click');
     await flushPromises();
 
@@ -227,6 +231,7 @@ describe('ChatExperience (full mode)', () => {
 
     const wrapper = mountChat();
     await flushPromises();
+    await openHistory(wrapper);
 
     expect(wrapper.findAll('.session-item').length).toBe(2);
     expect(wrapper.text()).toContain('First chat');
@@ -236,6 +241,7 @@ describe('ChatExperience (full mode)', () => {
   it('does not send empty messages', async () => {
     const wrapper = mountChat();
     await flushPromises();
+    await openHistory(wrapper);
 
     await wrapper.find('form').trigger('submit');
     await flushPromises();
@@ -255,6 +261,7 @@ describe('ChatExperience (full mode)', () => {
 
     const wrapper = mountChat();
     await flushPromises();
+    await openHistory(wrapper);
     await wrapper.find('.remove-btn').trigger('click');
     await flushPromises();
 

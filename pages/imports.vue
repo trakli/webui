@@ -1,11 +1,11 @@
 <template>
-  <component
-    :is="isLedger ? LedgerWorkspace : 'div'"
-    :class="{ 'imports-ledger': isLedger }"
-    v-bind="isLedger ? { title: t('Imports'), subtitle: ledgerSubtitle, inspectorLabel: t('Row details') } : {}"
+  <LedgerWorkspace
+    class="imports-ledger"
+    :title="t('Imports')"
+    :subtitle="ledgerSubtitle"
+    :inspector-label="t('Row details')"
     data-testid="imports"
   >
-    <ContentTopCard v-if="!isLedger" page-name="Import" page-name-plural="Imports" :show-add-button="false" />
 
     <div class="content-area">
       <!-- Upload + analyzing + error state -->
@@ -102,7 +102,7 @@
           </tbody>
         </table>
 
-        <div v-if="isLedger && currentSession.status !== 'confirmed'" class="il-chips">
+        <div v-if="currentSession.status !== 'confirmed'" class="il-chips">
           <span class="il-chip il-chip--good">{{ t('{count} ready', { count: readyCount }) }}</span>
           <span v-if="needCategoryCount" class="il-chip il-chip--bad">
             {{ t('{count} need a category', { count: needCategoryCount }, needCategoryCount) }}
@@ -113,7 +113,7 @@
         </div>
         <SuggestionReviewTable
           v-if="currentSession.status !== 'confirmed'"
-          :selected-index="isLedger ? selectedIndex : null"
+          :selected-index="selectedIndex"
           :suggestions="suggestions"
           :wallets="wallets"
           :categories="categories"
@@ -207,15 +207,13 @@
         </p>
       </template>
     </template>
-  </component>
+  </LedgerWorkspace>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { Copy, FileText, MessageCircle } from 'lucide-vue-next';
-import ContentTopCard from '@/components/TTopCard.vue';
 import LedgerWorkspace from '@/components/ledger/LedgerWorkspace.vue';
-import { useDesign } from '@/composables/useDesign';
 import { money } from '@/utils/ledgerMoney';
 import ImportUpload from '~/components/imports/ImportUpload.vue';
 import ImportAnalyzing from '~/components/imports/ImportAnalyzing.vue';
@@ -231,7 +229,6 @@ definePageMeta({
 });
 
 const { t, locale } = useI18n();
-const { isLedger } = useDesign();
 const { showSuccess, showError, showWarning, confirmDelete } = useNotifications();
 const { wallets, categories, parties, loadWallets, loadCategories, loadParties } = useSharedData();
 

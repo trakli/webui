@@ -1,93 +1,32 @@
 <template>
-  <LedgerSpace v-if="isShared && isLedger" />
-  <SpaceDashboard v-else-if="isShared" />
-  <LedgerOverview v-else-if="isLedger && !shouldShowWizard" />
-  <div v-else class="dashboard" :class="{ 'dashboard--ledger': isLedger }">
+  <LedgerSpace v-if="isShared" />
+  <div v-else-if="shouldShowWizard" class="dashboard">
     <DashboardAgentHero />
-
     <OnboardingWizard
-      v-if="shouldShowWizard"
       @start-action="handleWizardAction"
       @step-action="handleWizardAction"
       @complete-onboarding="handleCompleteOnboarding"
     />
-
-    <template v-if="!shouldShowWizard">
-      <TDashboardTopCard :show-filters="hasData" />
-
-      <ComponentLoader
-        :is-loading="kpiLoading"
-        :has-data="hasData"
-        :show-empty="false"
-        skeleton-variant="card"
-      >
-        <DashboardKPIs />
-      </ComponentLoader>
-
-      <div class="middle-section">
-        <ComponentLoader
-          :is-loading="categoryLoading"
-          :has-data="hasData"
-          :show-empty="false"
-          skeleton-variant="card"
-        >
-          <CategoryBreakdown />
-        </ComponentLoader>
-
-        <ComponentLoader
-          :is-loading="isLoadingOrNotReady"
-          :has-data="hasTransactions"
-          :show-empty="false"
-          skeleton-variant="card"
-        >
-          <RecentTransactions />
-        </ComponentLoader>
-      </div>
-
-      <ComponentLoader
-        :is-loading="insightsLoading"
-        :has-data="hasData"
-        :show-empty="false"
-        skeleton-variant="card"
-      >
-        <QuickInsights />
-      </ComponentLoader>
-
-      <div class="dashboard-widgets">
-        <ExtensionSlot name="dashboard.widgets" />
-      </div>
-    </template>
   </div>
+  <LedgerOverview v-else />
 </template>
 
 <script setup>
-import SpaceDashboard from '@/components/space/SpaceDashboard.vue';
 import LedgerSpace from '@/components/ledger/space/LedgerSpace.vue';
 import LedgerOverview from '@/components/ledger/overview/LedgerOverview.vue';
-import { useDesign } from '@/composables/useDesign';
 import { computed, watch } from 'vue';
 import { useRouter } from 'nuxt/app';
 import { useTransactions } from '@/composables/useTransactions';
 import { useNotifications } from '@/composables/useNotifications';
 import { checkAuth } from '~/utils/auth';
 import { CONFIGURATION_KEYS } from '~/utils/configurationKeys';
-import TDashboardTopCard from '@/components/TDashboardTopCard.vue';
 import DashboardAgentHero from '@/components/dashboard/DashboardAgentHero.vue';
-import DashboardKPIs from '@/components/dashboard/DashboardKPIs.vue';
-import CategoryBreakdown from '@/components/dashboard/CategoryBreakdown.vue';
-import RecentTransactions from '@/components/dashboard/RecentTransactions.vue';
-import QuickInsights from '@/components/dashboard/QuickInsights.vue';
 import OnboardingWizard from '@/components/onboarding/OnboardingWizard.vue';
-import ComponentLoader from '@/components/ComponentLoader.vue';
-import ExtensionSlot from '@/components/extensions/ExtensionSlot.vue';
-import { useStatistics } from '@/composables/useStatistics';
 
 const { isShared } = useActiveSpace();
-const { isLedger } = useDesign();
 
 const router = useRouter();
 
-const { isSectionLoaded } = useStatistics();
 const { transactions } = useTransactions();
 const { configurationsMap } = useSharedData();
 const { setComplete: setOnboardingComplete } = useOnboardingStatus();
@@ -111,16 +50,6 @@ watch(
   },
   { immediate: true }
 );
-
-const isLoadingOrNotReady = computed(() => isLoading.value || !isInitialized.value);
-const kpiLoading = computed(() => isLoadingOrNotReady.value || !isSectionLoaded('overview'));
-const categoryLoading = computed(() => isLoadingOrNotReady.value || !isSectionLoaded('categories'));
-const insightsLoading = computed(
-  () => isLoadingOrNotReady.value || !isSectionLoaded('overview') || !isSectionLoaded('parties')
-);
-const hasDataLoaded = computed(() => isInitialized.value && !isLoading.value);
-const hasTransactions = computed(() => hasDataLoaded.value && transactions.value.length > 0);
-const hasData = computed(() => hasDataLoaded.value);
 
 const shouldShowWizard = computed(() => {
   if (typeof window === 'undefined') return false;
@@ -156,34 +85,13 @@ definePageMeta({
 });
 </script>
 
-<style lang="scss" scoped>
-@use '@/assets/scss/_variables.scss' as *;
-
+<style scoped>
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: $spacing-4;
-}
-
-.dashboard--ledger {
+  gap: 16px;
   padding: 20px 24px 32px;
   overflow: auto;
   height: 100%;
-}
-
-.middle-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-4;
-
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.dashboard-widgets {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: $spacing-4;
 }
 </style>

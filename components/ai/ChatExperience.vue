@@ -5,7 +5,7 @@
       'is-fullscreen': isFullscreen,
       'mode-full': mode === 'full',
       'mode-landing': mode === 'landing',
-      'chat-experience--ledger': isLedger
+      'chat-experience--ledger': true
     }"
   >
     <!-- Full mode: collapsible history sidebar -->
@@ -24,7 +24,7 @@
       <!-- Hero: a centered chatbox in both modes until the first message. -->
       <div v-if="!hasConversation" class="hero">
         <button
-          v-if="isLedger && mode === 'full'"
+          v-if="mode === 'full'"
           type="button"
           class="hero-history"
           :aria-pressed="!sidebarCollapsed"
@@ -32,8 +32,7 @@
         >
           <History :size="14" />{{ t('Past chats') }}
         </button>
-        <LedgerLogo v-if="isLedger" class="hero-logo" />
-        <div v-else class="hero-mark"><Bot :size="30" /></div>
+        <LedgerLogo class="hero-logo" />
         <h1 class="hero-title">{{ t('What can I help with?') }}</h1>
         <p class="hero-subtitle">
           {{ t('Ask about your money, log a transaction, or import a statement.') }}
@@ -70,14 +69,6 @@
       <!-- Work area: conversation, optionally split with the canvas. -->
       <div v-else class="work" :class="{ 'with-canvas': !!openCanvas }">
         <section class="conversation">
-          <div v-if="!isLedger" class="chat-ambient" aria-hidden="true">
-            <Wallet class="amb a1" :size="150" :stroke-width="1" />
-            <PieChart class="amb a2" :size="120" :stroke-width="1" />
-            <Coins class="amb a3" :size="104" :stroke-width="1" />
-            <Receipt class="amb a4" :size="132" :stroke-width="1" />
-            <PiggyBank class="amb a5" :size="116" :stroke-width="1" />
-            <TrendingUp class="amb a6" :size="110" :stroke-width="1" />
-          </div>
           <header class="chat-header">
             <div class="header-left">
               <button
@@ -160,19 +151,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, type Component } from 'vue';
 import {
-  Bot,
   History,
   Plus,
   Maximize2,
   Minimize2,
   PanelLeft,
-  PanelLeftClose,
-  Wallet,
-  PieChart,
-  Coins,
-  Receipt,
-  PiggyBank,
-  TrendingUp
+  PanelLeftClose
 } from 'lucide-vue-next';
 import * as lucideIcons from 'lucide-vue-next';
 import { useChatSurface } from '@/composables/useChatSurface';
@@ -180,7 +164,6 @@ import { usePendingAsk } from '@/composables/usePendingAsk';
 import { pickSuggestions, type Suggestion } from '@/utils/landingSuggestions';
 import ChatSidebar from '@/components/ai/ChatSidebar.vue';
 import LedgerLogo from '@/components/ledger/LedgerLogo.vue';
-import { useDesign } from '@/composables/useDesign';
 import ChatComposer from '@/components/ai/ChatComposer.vue';
 import ChatMessageList from '@/components/ai/ChatMessageList.vue';
 import ChatEmptyState from '@/components/ai/ChatEmptyState.vue';
@@ -216,8 +199,7 @@ const {
   toggleFullscreen
 } = useChatSurface();
 
-const { isLedger } = useDesign();
-const sidebarCollapsed = ref(isLedger.value);
+const sidebarCollapsed = ref(true);
 
 const hasConversation = computed(() => (currentSession.value?.messages?.length ?? 0) > 0);
 
@@ -324,15 +306,6 @@ const handleNew = () => {
   padding: $spacing-2 $spacing-4;
 }
 
-.chat-main:has(.hero) {
-  background:
-    radial-gradient(62% 56% at 50% 44%, $bg-white, transparent 72%),
-    radial-gradient(46% 42% at 3% 2%, rgba(var(--color-primary-rgb), 0.24), transparent 56%),
-    radial-gradient(44% 40% at 98% 2%, rgba(var(--color-info-rgb), 0.22), transparent 56%),
-    radial-gradient(44% 40% at 98% 99%, rgba(var(--color-warning-rgb), 0.22), transparent 56%),
-    radial-gradient(46% 42% at 2% 99%, rgba(var(--color-error-rgb), 0.18), transparent 56%),
-    $bg-light;
-}
 
 /* Hero (landing, empty) */
 .hero {
@@ -350,16 +323,6 @@ const handleNew = () => {
   overflow-y: auto;
 }
 
-.hero-mark {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: $primary-light;
-  color: $primary;
-}
 
 .hero-title {
   font-size: $font-size-2xl;
@@ -461,9 +424,7 @@ const handleNew = () => {
   flex-direction: column;
   min-width: 0;
   width: 100%;
-  background:
-    radial-gradient(120% 60% at 50% 0%, rgba(var(--color-primary-rgb), 0.04), transparent 60%),
-    $bg-light;
+  background: var(--ledger-bg);
 
   > .chat-header,
   > .chat-window,
@@ -473,53 +434,6 @@ const handleNew = () => {
   }
 }
 
-.chat-ambient {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-
-  .amb {
-    position: absolute;
-    color: $primary;
-    opacity: 0.05;
-  }
-  .a1 {
-    top: 8%;
-    left: 4%;
-    transform: rotate(-12deg);
-  }
-  .a2 {
-    top: 22%;
-    right: 6%;
-    color: $info;
-    transform: rotate(10deg);
-  }
-  .a3 {
-    top: 52%;
-    left: 8%;
-    color: $warning;
-    transform: rotate(8deg);
-  }
-  .a4 {
-    bottom: 16%;
-    right: 9%;
-    transform: rotate(-8deg);
-  }
-  .a5 {
-    bottom: 6%;
-    left: 14%;
-    color: $warning;
-    transform: rotate(6deg);
-  }
-  .a6 {
-    top: 40%;
-    left: 46%;
-    color: $info;
-    transform: rotate(-6deg);
-  }
-}
 
 .work.with-canvas {
   .conversation {

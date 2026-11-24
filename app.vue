@@ -13,13 +13,7 @@ const layoutKey = computed(() => route.meta.layout || 'default');
 
 const { initTheme } = useTheme();
 
-const { design, applyQuery } = useDesign();
-applyQuery(route.query.design);
-watch(
-  () => route.query.design,
-  (value) => applyQuery(value)
-);
-useHead({ htmlAttrs: { 'data-design': design } });
+useHead({ htmlAttrs: { 'data-design': 'ledger' } });
 
 onMounted(() => {
   initTheme();
