@@ -150,14 +150,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, type Component } from 'vue';
-import {
-  History,
-  Plus,
-  Maximize2,
-  Minimize2,
-  PanelLeft,
-  PanelLeftClose
-} from 'lucide-vue-next';
+import { History, Plus, Maximize2, Minimize2, PanelLeft, PanelLeftClose } from 'lucide-vue-next';
 import * as lucideIcons from 'lucide-vue-next';
 import { useChatSurface } from '@/composables/useChatSurface';
 import { usePendingAsk } from '@/composables/usePendingAsk';
@@ -306,7 +299,6 @@ const handleNew = () => {
   padding: $spacing-2 $spacing-4;
 }
 
-
 /* Hero (landing, empty) */
 .hero {
   flex: 1;
@@ -322,7 +314,6 @@ const handleNew = () => {
   width: 100%;
   overflow-y: auto;
 }
-
 
 .hero-title {
   font-size: $font-size-2xl;
@@ -433,7 +424,6 @@ const handleNew = () => {
     z-index: 1;
   }
 }
-
 
 .work.with-canvas {
   .conversation {

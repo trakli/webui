@@ -37,7 +37,10 @@
         <tbody>
           <template v-for="suggestion in suggestions" :key="suggestion.index">
             <tr
-              :class="[rowClass(suggestion), { 'row--selected': suggestion.index === selectedIndex }]"
+              :class="[
+                rowClass(suggestion),
+                { 'row--selected': suggestion.index === selectedIndex }
+              ]"
               @click="$emit('select', suggestion.index)"
               @focusin="$emit('select', suggestion.index)"
             >

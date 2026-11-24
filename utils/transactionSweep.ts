@@ -13,7 +13,8 @@ export async function sweepTransactions(
   params: Omit<TransactionQueryParams, 'page' | 'limit'>,
   maxPages = 30
 ): Promise<SweepResult> {
-  const fetchPage = (page: number) => api.transactions.fetchAll({ ...params, page, limit: PAGE_SIZE });
+  const fetchPage = (page: number) =>
+    api.transactions.fetchAll({ ...params, page, limit: PAGE_SIZE });
 
   const first = await fetchPage(1);
   const lastPage = Math.max(1, first?.last_page || 1);

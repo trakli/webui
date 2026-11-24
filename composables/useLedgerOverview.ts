@@ -39,8 +39,9 @@ let detailKey = '';
 let statsRun = 0;
 let detailRun = 0;
 
-const people = (rows: { id?: number | string; name: string; amount: number }[] | undefined): NamedAmount[] =>
-  named((rows ?? []).filter((row) => row.id !== 'uncategorized'));
+const people = (
+  rows: { id?: number | string; name: string; amount: number }[] | undefined
+): NamedAmount[] => named((rows ?? []).filter((row) => row.id !== 'uncategorized'));
 
 const named = (rows: { name: string; amount: number }[] | undefined): NamedAmount[] =>
   (rows ?? []).map((row) => ({ name: row.name, amount: Number(row.amount) || 0 }));
@@ -191,9 +192,7 @@ export function useLedgerOverview() {
     dailyTotals(expenses.value, span.value.prevStart, span.value.prevTotalDays)
   );
 
-  const spentSoFar = computed(() =>
-    cumulative(daily.value).slice(0, span.value.elapsedDays)
-  );
+  const spentSoFar = computed(() => cumulative(daily.value).slice(0, span.value.elapsedDays));
 
   const prevSpent = computed(() => cumulative(prevDaily.value));
 

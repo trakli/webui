@@ -6,7 +6,6 @@
     :inspector-label="t('Row details')"
     data-testid="imports"
   >
-
     <div class="content-area">
       <!-- Upload + analyzing + error state -->
       <div
@@ -153,7 +152,16 @@
           <dd>{{ selectedRow.date || t('None') }}</dd>
           <dt>{{ t('Amount') }}</dt>
           <dd class="il-num" :class="{ 'il-in': selectedRow.type === 'income' }">
-            {{ selectedRow.amount == null ? t('None') : money(selectedRow.type === 'income' ? selectedRow.amount : -selectedRow.amount, selectedRow.currency || 'EUR', locale, { sign: true }) }}
+            {{
+              selectedRow.amount == null
+                ? t('None')
+                : money(
+                    selectedRow.type === 'income' ? selectedRow.amount : -selectedRow.amount,
+                    selectedRow.currency || 'EUR',
+                    locale,
+                    { sign: true }
+                  )
+            }}
           </dd>
           <dt>{{ t('Read as') }}</dt>
           <dd :class="{ 'il-neg': !rowCategory }">{{ rowCategory || t('No category yet') }}</dd>
@@ -183,27 +191,49 @@
                 amount:
                   selectedRow.duplicate.transaction_amount == null
                     ? ''
-                    : money(selectedRow.duplicate.transaction_amount, selectedRow.currency || 'EUR', locale)
+                    : money(
+                        selectedRow.duplicate.transaction_amount,
+                        selectedRow.currency || 'EUR',
+                        locale
+                      )
               })
             }}
             <b>{{ t('Skip it unless you really paid twice.') }}</b>
           </div>
         </div>
         <div v-if="selectedRow.duplicate" class="il-actions">
-          <button v-if="selectedRow.status !== 'rejected'" type="button" class="il-btn" @click="toggleSuggestion(selectedRow.index)">
+          <button
+            v-if="selectedRow.status !== 'rejected'"
+            type="button"
+            class="il-btn"
+            @click="toggleSuggestion(selectedRow.index)"
+          >
             {{ t('Skip') }}
           </button>
-          <button v-if="selectedRow.status !== 'accepted'" type="button" class="il-btn il-btn--o" @click="toggleSuggestion(selectedRow.index)">
+          <button
+            v-if="selectedRow.status !== 'accepted'"
+            type="button"
+            class="il-btn il-btn--o"
+            @click="toggleSuggestion(selectedRow.index)"
+          >
             {{ t('Keep it') }}
           </button>
         </div>
 
-        <NuxtLink :to="rowAskLink" class="il-btn il-btn--o"><MessageCircle />{{ t('Ask the assistant about this row') }}</NuxtLink>
+        <NuxtLink :to="rowAskLink" class="il-btn il-btn--o"
+          ><MessageCircle />{{ t('Ask the assistant about this row') }}</NuxtLink
+        >
       </template>
       <template v-else>
         <h2 class="il-h"><FileText />{{ t('Imports') }}</h2>
         <p class="il-muted">
-          {{ currentSession ? t('Pick a row to check how it was read.') : t('Upload a bank statement, receipt or spreadsheet. Nothing is saved until you confirm.') }}
+          {{
+            currentSession
+              ? t('Pick a row to check how it was read.')
+              : t(
+                  'Upload a bank statement, receipt or spreadsheet. Nothing is saved until you confirm.'
+                )
+          }}
         </p>
       </template>
     </template>
@@ -259,28 +289,41 @@ const {
 } = useImports();
 
 const selectedIndex = ref<number | null>(null);
-const selectedRow = computed(() => suggestions.value.find((row) => row.index === selectedIndex.value) ?? null);
+const selectedRow = computed(
+  () => suggestions.value.find((row) => row.index === selectedIndex.value) ?? null
+);
 const nameOf = (list: readonly { id: number; name: string }[], id: number | null) =>
   id == null ? null : (list.find((item) => item.id === id)?.name ?? null);
 const rowCategory = computed(() =>
-  selectedRow.value ? (nameOf(categories.value, selectedRow.value.category_id) ?? selectedRow.value.category) : null
+  selectedRow.value
+    ? (nameOf(categories.value, selectedRow.value.category_id) ?? selectedRow.value.category)
+    : null
 );
 const rowWallet = computed(() =>
-  selectedRow.value ? (nameOf(wallets.value, selectedRow.value.wallet_id) ?? selectedRow.value.wallet) : null
+  selectedRow.value
+    ? (nameOf(wallets.value, selectedRow.value.wallet_id) ?? selectedRow.value.wallet)
+    : null
 );
 const rowCategoryOptions = computed(() =>
-  categories.value.filter((category) => !selectedRow.value?.type || category.type === selectedRow.value.type)
+  categories.value.filter(
+    (category) => !selectedRow.value?.type || category.type === selectedRow.value.type
+  )
 );
 const setRowCategory = (value: string) => {
-  if (selectedRow.value && value) editSuggestion(selectedRow.value.index, { category_id: Number(value) });
+  if (selectedRow.value && value)
+    editSuggestion(selectedRow.value.index, { category_id: Number(value) });
 };
 const needCategoryCount = computed(
-  () => suggestions.value.filter((row) => row.status !== 'rejected' && row.category_id == null && !row.category).length
+  () =>
+    suggestions.value.filter(
+      (row) => row.status !== 'rejected' && row.category_id == null && !row.category
+    ).length
 );
 const readyCount = computed(
   () =>
     suggestions.value.filter(
-      (row) => row.status === 'accepted' && !row.duplicate && (row.category_id != null || !!row.category)
+      (row) =>
+        row.status === 'accepted' && !row.duplicate && (row.category_id != null || !!row.category)
     ).length
 );
 const ledgerSubtitle = computed(() =>
@@ -300,7 +343,8 @@ const rowAskLink = computed(() => ({
   }
 }));
 watch(suggestions, (rows) => {
-  if (!rows.some((row) => row.index === selectedIndex.value)) selectedIndex.value = rows[0]?.index ?? null;
+  if (!rows.some((row) => row.index === selectedIndex.value))
+    selectedIndex.value = rows[0]?.index ?? null;
 });
 
 const showConfirmDialog = ref(false);

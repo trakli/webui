@@ -19,9 +19,16 @@
         </option>
       </select>
       <div class="lx-month" role="group" :aria-label="t('Month')">
-        <button type="button" :aria-label="t('Previous month')" @click="step(-1)"><ChevronLeft /></button>
+        <button type="button" :aria-label="t('Previous month')" @click="step(-1)">
+          <ChevronLeft />
+        </button>
         <span>{{ monthLabel }}</span>
-        <button type="button" :aria-label="t('Next month')" :disabled="month.isCurrent" @click="step(1)">
+        <button
+          type="button"
+          :aria-label="t('Next month')"
+          :disabled="month.isCurrent"
+          @click="step(1)"
+        >
           <ChevronRight />
         </button>
       </div>
@@ -36,7 +43,12 @@
           {{ option.label }}
         </button>
       </div>
-      <button type="button" class="lx-icon" :title="t('Open spreadsheet view')" @click="showSpreadsheet = true">
+      <button
+        type="button"
+        class="lx-icon"
+        :title="t('Open spreadsheet view')"
+        @click="showSpreadsheet = true"
+      >
         <Sheet />
       </button>
     </template>
@@ -53,7 +65,12 @@
       />
       <kbd>Enter</kbd>
     </form>
-    <p v-if="quickText.trim()" class="lx-preview" :class="{ 'lx-preview--bad': !quick }" data-testid="ledger-add-preview">
+    <p
+      v-if="quickText.trim()"
+      class="lx-preview"
+      :class="{ 'lx-preview--bad': !quick }"
+      data-testid="ledger-add-preview"
+    >
       <template v-if="quick">
         <b :class="quick.type === 'INCOME' ? 'lx-in' : ''">{{ previewAmount }}</b>
         <span v-for="part in previewParts" :key="part">{{ part }}</span>
@@ -103,9 +120,13 @@
               <Repeat v-if="row.isRecurring" class="lx-flag" :aria-label="t('Repeats')" />
               <ArrowLeftRight v-if="row.isTransfer" class="lx-flag" :aria-label="t('Transfer')" />
             </td>
-            <td class="lx-hide-sm"><span v-if="row.category" class="lx-chip">{{ row.category }}</span></td>
+            <td class="lx-hide-sm">
+              <span v-if="row.category" class="lx-chip">{{ row.category }}</span>
+            </td>
             <td v-if="!wallet" class="lx-hide-md lx-muted">{{ row.wallet }}</td>
-            <td class="lx-r lx-num" :class="{ 'lx-in': row.type === 'INCOME' }">{{ rowAmount(row) }}</td>
+            <td class="lx-r lx-num" :class="{ 'lx-in': row.type === 'INCOME' }">
+              {{ rowAmount(row) }}
+            </td>
             <td v-if="showBalance" class="lx-r lx-num lx-muted lx-hide-sm">
               {{ row.balanceAfter === null ? '' : money(row.balanceAfter, row.currency, locale) }}
             </td>
@@ -113,7 +134,11 @@
         </tbody>
       </table>
       <p v-if="!loading && !visible.length" class="lx-empty">
-        {{ searchApplied ? t('Nothing matches that search this month.') : t('No entries this month yet.') }}
+        {{
+          searchApplied
+            ? t('Nothing matches that search this month.')
+            : t('No entries this month yet.')
+        }}
       </p>
       <p v-if="loading && !entries.length" class="lx-empty">{{ t('Loading') }}</p>
     </div>
@@ -131,8 +156,12 @@
       <template v-if="selected">
         <h2 class="lx-h"><Tag />{{ selected.category || t('No category') }}</h2>
         <div>
-          <div class="lx-amt" :class="{ 'lx-in': selected.type === 'INCOME' }">{{ rowAmount(selected) }}</div>
-          <div class="lx-title">{{ selected.description || selected.party || t('No description') }}</div>
+          <div class="lx-amt" :class="{ 'lx-in': selected.type === 'INCOME' }">
+            {{ rowAmount(selected) }}
+          </div>
+          <div class="lx-title">
+            {{ selected.description || selected.party || t('No description') }}
+          </div>
         </div>
         <dl class="lx-kv">
           <dt>{{ t('Date') }}</dt>
@@ -156,7 +185,10 @@
           <div class="lx-weeks">
             <div v-for="week in weeks" :key="week.label" class="lx-week">
               <span class="lx-week-bar">
-                <i :class="{ 'lx-week-on': week.current }" :style="{ height: `${(week.total / weekMax) * 100}%` }" />
+                <i
+                  :class="{ 'lx-week-on': week.current }"
+                  :style="{ height: `${(week.total / weekMax) * 100}%` }"
+                />
               </span>
               <small>{{ week.label }}</small>
             </div>
@@ -168,7 +200,9 @@
           <ul class="lx-list">
             <li v-for="row in similar" :key="row.id">
               <button type="button" @click="select(row.id)">
-                <span>{{ row.description || row.party }}<small>{{ dayLabel(row.date) }}</small></span>
+                <span
+                  >{{ row.description || row.party }}<small>{{ dayLabel(row.date) }}</small></span
+                >
                 <span class="lx-num">{{ rowAmount(row) }}</span>
               </button>
             </li>
@@ -187,8 +221,12 @@
             </select>
           </label>
           <div class="lx-actions">
-            <button type="button" class="lx-btn" :disabled="saving" @click="saveCategory">{{ t('Save') }}</button>
-            <button type="button" class="lx-btn lx-btn--o" @click="editing = null">{{ t('Cancel') }}</button>
+            <button type="button" class="lx-btn" :disabled="saving" @click="saveCategory">
+              {{ t('Save') }}
+            </button>
+            <button type="button" class="lx-btn lx-btn--o" @click="editing = null">
+              {{ t('Cancel') }}
+            </button>
           </div>
         </div>
         <div v-else-if="editing === 'note'" class="lx-edit">
@@ -197,21 +235,44 @@
             <textarea v-model="draftNote" rows="3" />
           </label>
           <div class="lx-actions">
-            <button type="button" class="lx-btn" :disabled="saving" @click="saveNote">{{ t('Save') }}</button>
-            <button type="button" class="lx-btn lx-btn--o" @click="editing = null">{{ t('Cancel') }}</button>
+            <button type="button" class="lx-btn" :disabled="saving" @click="saveNote">
+              {{ t('Save') }}
+            </button>
+            <button type="button" class="lx-btn lx-btn--o" @click="editing = null">
+              {{ t('Cancel') }}
+            </button>
           </div>
         </div>
         <div v-else class="lx-actions" data-testid="ledger-entry-actions">
-          <button v-if="!selected.isTransfer" type="button" class="lx-btn lx-btn--o" @click="startCategory">
+          <button
+            v-if="!selected.isTransfer"
+            type="button"
+            class="lx-btn lx-btn--o"
+            @click="startCategory"
+          >
             <Tag />{{ t('Change category') }}
           </button>
-          <button v-if="!selected.isTransfer" type="button" class="lx-btn lx-btn--o" @click="startNote">
+          <button
+            v-if="!selected.isTransfer"
+            type="button"
+            class="lx-btn lx-btn--o"
+            @click="startNote"
+          >
             <StickyNote />{{ t('Edit note') }}
           </button>
-          <NuxtLink v-if="!selected.isTransfer" :to="`/transactions/edit/${selected.id}`" class="lx-btn lx-btn--o">
+          <NuxtLink
+            v-if="!selected.isTransfer"
+            :to="`/transactions/edit/${selected.id}`"
+            class="lx-btn lx-btn--o"
+          >
             <Pencil />{{ t('All details') }}
           </NuxtLink>
-          <button v-if="!selected.isTransfer" type="button" class="lx-btn lx-btn--o" @click="showRecurring = true">
+          <button
+            v-if="!selected.isTransfer"
+            type="button"
+            class="lx-btn lx-btn--o"
+            @click="showRecurring = true"
+          >
             <Repeat />{{ selected.isRecurring ? t('Change repeat') : t('Repeat') }}
           </button>
           <button type="button" class="lx-btn lx-btn--danger" @click="remove">
@@ -233,9 +294,15 @@
           <dd class="lx-num">{{ entries.length }}</dd>
         </dl>
         <p v-if="mixedCurrencies && !wallet" class="lx-muted">
-          {{ t('Totals add amounts in different currencies. Pick a wallet on the left for exact totals.') }}
+          {{
+            t(
+              'Totals add amounts in different currencies. Pick a wallet on the left for exact totals.'
+            )
+          }}
         </p>
-        <p class="lx-muted">{{ t('Select an entry to see its details. Use j and k to move, e to edit.') }}</p>
+        <p class="lx-muted">
+          {{ t('Select an entry to see its details. Use j and k to move, e to edit.') }}
+        </p>
       </template>
     </template>
   </LedgerWorkspace>
@@ -332,7 +399,9 @@ const fullDate = (row: LedgerRow) => {
 const rowAmount = (row: LedgerRow) => money(row.signed, row.currency, locale.value, { sign: true });
 
 const totalLabel = (value: number, sign = false) =>
-  money(value, wallet.value?.currency || shared.getDefaultCurrency.value || 'USD', locale.value, { sign });
+  money(value, wallet.value?.currency || shared.getDefaultCurrency.value || 'USD', locale.value, {
+    sign
+  });
 
 const PERIOD_LABEL: Record<string, string> = {
   daily: 'Daily',
@@ -350,7 +419,10 @@ const PERIOD_UNIT: Record<string, string> = {
 const recurrenceLabel = (row: LedgerRow) => {
   const period = row.recurrencePeriod || '';
   if (row.recurrenceInterval && row.recurrenceInterval > 1 && PERIOD_UNIT[period]) {
-    return t('Every {count} {period}', { count: row.recurrenceInterval, period: t(PERIOD_UNIT[period]) });
+    return t('Every {count} {period}', {
+      count: row.recurrenceInterval,
+      period: t(PERIOD_UNIT[period])
+    });
   }
   return PERIOD_LABEL[period] ? t(PERIOD_LABEL[period]) : t('Repeats');
 };
@@ -514,7 +586,8 @@ async function saveWith(changes: Partial<LedgerRow>) {
   }
 }
 
-const saveCategory = () => saveWith({ categoryIds: draftCategory.value ? [draftCategory.value] : [] });
+const saveCategory = () =>
+  saveWith({ categoryIds: draftCategory.value ? [draftCategory.value] : [] });
 const saveNote = () => saveWith({ description: draftNote.value.trim() });
 
 async function saveRecurring(config: any) {
@@ -524,7 +597,10 @@ async function saveRecurring(config: any) {
     showRecurring.value = false;
     await refreshAll();
   } catch (error) {
-    showError(t('Failed to update recurrence'), t('Failed to update transaction recurrence. Please try again.'));
+    showError(
+      t('Failed to update recurrence'),
+      t('Failed to update transaction recurrence. Please try again.')
+    );
     console.error('[ledger] recurrence failed', error);
   }
 }

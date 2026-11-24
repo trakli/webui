@@ -1,5 +1,9 @@
 <template>
-  <LedgerWorkspace :title="space?.name ?? t('Shared')" :subtitle="subtitle" :inspector-label="t('People')">
+  <LedgerWorkspace
+    :title="space?.name ?? t('Shared')"
+    :subtitle="subtitle"
+    :inspector-label="t('People')"
+  >
     <template #actions>
       <NuxtLink v-if="canManage" to="/wallets" class="ls-btn ls-btn--ghost">
         <Share2 />{{ t('Shared wallets') }}
@@ -11,7 +15,9 @@
 
     <p v-if="urgent" class="ls-notice" data-testid="space-notice">
       <AlertCircle />
-      <span><b>{{ urgent.title }}</b> {{ urgent.text }}</span>
+      <span
+        ><b>{{ urgent.title }}</b> {{ urgent.text }}</span
+      >
       <NuxtLink v-if="urgent.to" :to="urgent.to">{{ urgent.label }}</NuxtLink>
     </p>
 
@@ -19,13 +25,21 @@
       <div>
         {{ t('Shared spending') }}
         <span class="ls-num">{{ fmt(main.expenses) }}</span>
-        <small>{{ t('{count} people recorded', { count: contributors.length }, contributors.length) }}</small>
+        <small>{{
+          t('{count} people recorded', { count: contributors.length }, contributors.length)
+        }}</small>
       </div>
       <div>
         {{ t('Budgets left') }}
-        <span class="ls-num" :class="budgetTotals.left < 0 ? 'ls-out' : 'ls-in'">{{ fmt(budgetTotals.left) }}</span>
+        <span class="ls-num" :class="budgetTotals.left < 0 ? 'ls-out' : 'ls-in'">{{
+          fmt(budgetTotals.left)
+        }}</span>
         <small>{{
-          t('of {amount} across {count} budgets', { amount: fmt(budgetTotals.limit), count: budgetRows.length }, budgetRows.length)
+          t(
+            'of {amount} across {count} budgets',
+            { amount: fmt(budgetTotals.limit), count: budgetRows.length },
+            budgetRows.length
+          )
         }}</small>
       </div>
       <div>
@@ -35,7 +49,9 @@
       </div>
       <div>
         {{ t('Shared by members') }}
-        <span class="ls-num ls-text">{{ t('{count} wallets', { count: memberWallets.length }, memberWallets.length) }}</span>
+        <span class="ls-num ls-text">{{
+          t('{count} wallets', { count: memberWallets.length }, memberWallets.length)
+        }}</span>
         <small>{{ memberWallets.map((wallet) => wallet.name).join(', ') || t('None yet') }}</small>
       </div>
     </div>
@@ -45,8 +61,14 @@
         <h3 class="ls-h"><Target />{{ t('Shared budgets') }}</h3>
         <div v-for="row in budgetRows" :key="row.id" class="ls-budget">
           <span>{{ row.name }}</span>
-          <span class="ls-mono" :class="{ 'ls-out': row.ratio > 0.9 }">{{ fmt(row.spent, true) }} / {{ fmt(row.limit, true) }}</span>
-          <span class="ls-bar"><i :class="{ 'ls-warn': row.ratio > 0.9 }" :style="{ width: `${Math.min(100, row.ratio * 100)}%` }" /></span>
+          <span class="ls-mono" :class="{ 'ls-out': row.ratio > 0.9 }"
+            >{{ fmt(row.spent, true) }} / {{ fmt(row.limit, true) }}</span
+          >
+          <span class="ls-bar"
+            ><i
+              :class="{ 'ls-warn': row.ratio > 0.9 }"
+              :style="{ width: `${Math.min(100, row.ratio * 100)}%` }"
+          /></span>
         </div>
         <p v-if="!budgetRows.length" class="ls-muted">{{ t('No shared budgets yet') }}</p>
       </section>
@@ -94,16 +116,22 @@
             @keydown.enter="selectedKey = key(entry)"
           >
             <td class="ls-mono ls-muted">{{ day(entry.datetime) }}</td>
-            <td>{{ entry.description || (entry.type === 'income' ? t('Income') : t('Expense')) }}</td>
             <td>
-              <span class="ls-who"><span class="ls-sq">{{ initials(entry.contributor) }}</span>{{ entry.contributor }}</span>
+              {{ entry.description || (entry.type === 'income' ? t('Income') : t('Expense')) }}
+            </td>
+            <td>
+              <span class="ls-who"
+                ><span class="ls-sq">{{ initials(entry.contributor) }}</span
+                >{{ entry.contributor }}</span
+              >
             </td>
             <td class="ls-muted ls-hide-md">{{ entry.wallet_name }}</td>
             <td class="ls-hide-md">
               <span v-for="label in labels(entry)" :key="label" class="ls-chip">{{ label }}</span>
             </td>
             <td class="ls-r ls-mono" :class="{ 'ls-in': entry.type === 'income' }">
-              {{ entry.type === 'income' ? '+' : '' }}{{ money(entry.amount, entry.currency, locale) }}
+              {{ entry.type === 'income' ? '+' : ''
+              }}{{ money(entry.amount, entry.currency, locale) }}
             </td>
           </tr>
         </tbody>
@@ -117,7 +145,12 @@
       <section>
         <h3 class="ls-h">
           <UsersRound />{{ t('People') }}
-          <NuxtLink v-if="canManage" class="ls-h-link" :to="{ path: '/people', query: { invite: '1' } }">{{ t('Invite') }}</NuxtLink>
+          <NuxtLink
+            v-if="canManage"
+            class="ls-h-link"
+            :to="{ path: '/people', query: { invite: '1' } }"
+            >{{ t('Invite') }}</NuxtLink
+          >
         </h3>
         <ul class="ls-list" data-testid="space-members">
           <li v-for="member in members" :key="member.id" class="ls-member">
@@ -126,13 +159,17 @@
               {{ member.name }}
               <small>{{ ROLE_TEXT[member.role] ? t(ROLE_TEXT[member.role]) : '' }}</small>
             </span>
-            <span class="ls-chip" :class="`ls-chip--${member.role}`">{{ roleLabel(member.role) }}</span>
+            <span class="ls-chip" :class="`ls-chip--${member.role}`">{{
+              roleLabel(member.role)
+            }}</span>
           </li>
         </ul>
       </section>
 
       <section v-if="selected">
-        <h3 class="ls-h">{{ t('Selected: {name}', { name: selected.description || t('Entry') }) }}</h3>
+        <h3 class="ls-h">
+          {{ t('Selected: {name}', { name: selected.description || t('Entry') }) }}
+        </h3>
         <dl class="ls-kv">
           <dt>{{ t('Recorded by') }}</dt>
           <dd>{{ selected.contributor }}</dd>
@@ -151,20 +188,33 @@
           {{
             selected.source === 'workspace'
               ? t('It belongs to the space. Anyone who can edit here can change it.')
-              : t('It stays {name}\'s. Unsharing removes it from the space and its budgets.', { name: selected.contributor })
+              : t("It stays {name}'s. Unsharing removes it from the space and its budgets.", {
+                  name: selected.contributor
+                })
           }}
         </p>
         <div class="ls-actions">
-          <button v-if="selected.can_edit && selected.source === 'workspace'" type="button" class="ls-btn ls-btn--ghost" @click="compose(selected)">
+          <button
+            v-if="selected.can_edit && selected.source === 'workspace'"
+            type="button"
+            class="ls-btn ls-btn--ghost"
+            @click="compose(selected)"
+          >
             <Pencil />{{ t('Edit') }}
           </button>
-          <NuxtLink to="/transactions" class="ls-btn ls-btn--ghost"><List />{{ t('All transactions') }}</NuxtLink>
+          <NuxtLink to="/transactions" class="ls-btn ls-btn--ghost"
+            ><List />{{ t('All transactions') }}</NuxtLink
+          >
         </div>
       </section>
 
       <p class="ls-priv">
         <Lock />
-        <span>{{ t('Your other wallets, budgets and transactions stay private. Only what you record here or share shows up in a space.') }}</span>
+        <span>{{
+          t(
+            'Your other wallets, budgets and transactions stay private. Only what you record here or share shows up in a space.'
+          )
+        }}</span>
       </p>
     </template>
   </LedgerWorkspace>
@@ -172,7 +222,16 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { AlertCircle, List, Lock, Pencil, Share2, Target, UserPlus, UsersRound } from 'lucide-vue-next';
+import {
+  AlertCircle,
+  List,
+  Lock,
+  Pencil,
+  Share2,
+  Target,
+  UserPlus,
+  UsersRound
+} from 'lucide-vue-next';
 import LedgerWorkspace from '@/components/ledger/LedgerWorkspace.vue';
 import type { WorkspaceMember, WorkspaceTransaction } from '~/types/workspace';
 import { spaceUrgency } from '~/utils/activeSpace';
@@ -185,7 +244,12 @@ const { overview, transactions, ensure } = useSpaceFinance();
 const { compose } = useSpaceComposer();
 const { resolveComponent } = useExtensionSlots();
 
-const SWATCH = ['var(--ledger-brand)', 'var(--ledger-orange)', 'var(--ledger-ink-3)', 'var(--ledger-income)'];
+const SWATCH = [
+  'var(--ledger-brand)',
+  'var(--ledger-orange)',
+  'var(--ledger-ink-3)',
+  'var(--ledger-income)'
+];
 const ROLE_TEXT: Record<string, string> = {
   owner: 'Manages the space and billing',
   admin: 'Manages budgets, wallets and people',
@@ -209,7 +273,11 @@ const fmt = (value: number, whole = false) =>
   money(value, main.value.currency, locale.value, whole ? { whole: true } : {});
 
 const subtitle = computed(() =>
-  t('{count} people · only shared money shows here', { count: space.value?.member_count ?? 1 }, space.value?.member_count ?? 1)
+  t(
+    '{count} people · only shared money shows here',
+    { count: space.value?.member_count ?? 1 },
+    space.value?.member_count ?? 1
+  )
 );
 
 const budgetRows = computed(() =>
@@ -218,7 +286,13 @@ const budgetRows = computed(() =>
     .map((budget) => {
       const limit = budget.progress?.effective_limit ?? Number(budget.amount);
       const spent = budget.progress?.net_spent ?? 0;
-      return { id: budget.id, name: budget.name, limit, spent, ratio: limit > 0 ? spent / limit : 0 };
+      return {
+        id: budget.id,
+        name: budget.name,
+        limit,
+        spent,
+        ratio: limit > 0 ? spent / limit : 0
+      };
     })
 );
 
@@ -232,10 +306,15 @@ const spaceWallets = computed(() => {
   const own = overview.value.wallets.filter(
     (wallet) => wallet.source === 'workspace' && wallet.currency === main.value.currency
   );
-  return { count: own.length, balance: own.reduce((sum, wallet) => sum + Number(wallet.balance), 0) };
+  return {
+    count: own.length,
+    balance: own.reduce((sum, wallet) => sum + Number(wallet.balance), 0)
+  };
 });
 
-const memberWallets = computed(() => overview.value.wallets.filter((wallet) => wallet.source === 'shared_wallet'));
+const memberWallets = computed(() =>
+  overview.value.wallets.filter((wallet) => wallet.source === 'shared_wallet')
+);
 
 const contributors = computed(() => {
   const sums = new Map<string, number>();
@@ -251,12 +330,15 @@ const contributors = computed(() => {
 
 const labelNames = computed(() => {
   const map = new Map<number, string>();
-  for (const label of [...overview.value.categories, ...overview.value.groups]) map.set(label.id, label.name);
+  for (const label of [...overview.value.categories, ...overview.value.groups])
+    map.set(label.id, label.name);
   return map;
 });
 
 function labels(entry: WorkspaceTransaction) {
-  return entry.category_ids.map((id) => labelNames.value.get(id)).filter((name): name is string => !!name);
+  return entry.category_ids
+    .map((id) => labelNames.value.get(id))
+    .filter((name): name is string => !!name);
 }
 
 const selected = computed(
@@ -281,8 +363,12 @@ const urgent = computed(() => {
       return {
         title: isOwner.value ? t('Activate {name}', { name }) : t('Waiting for the owner'),
         text: isOwner.value
-          ? t('This space is a draft. Activate it to share wallets, budgets and spending with the people you invite.')
-          : t('The owner needs to activate this space before anyone can make changes. You can still look around.'),
+          ? t(
+              'This space is a draft. Activate it to share wallets, budgets and spending with the people you invite.'
+            )
+          : t(
+              'The owner needs to activate this space before anyone can make changes. You can still look around.'
+            ),
         to: isOwner.value && resolveComponent('cloud.workspace.billing') ? '/space-billing' : '',
         label: t('Activate space')
       };
@@ -332,7 +418,9 @@ function day(value: string) {
 async function loadMembers() {
   if (!space.value) return;
   try {
-    members.value = (await api<{ data: WorkspaceMember[] }>(`/workspaces/${space.value.slug}/members`)).data;
+    members.value = (
+      await api<{ data: WorkspaceMember[] }>(`/workspaces/${space.value.slug}/members`)
+    ).data;
   } catch (error) {
     console.warn('[ledger] members failed', error);
   }

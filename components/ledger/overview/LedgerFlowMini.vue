@@ -1,5 +1,12 @@
 <template>
-  <svg class="lf" :viewBox="`0 0 ${W} ${H}`" width="100%" role="img" :aria-label="label" data-testid="ledger-flow">
+  <svg
+    class="lf"
+    :viewBox="`0 0 ${W} ${H}`"
+    width="100%"
+    role="img"
+    :aria-label="label"
+    data-testid="ledger-flow"
+  >
     <path v-for="link in bands" :key="link.key" :d="link.d" :class="link.cls">
       <title>{{ link.title }}</title>
     </path>
@@ -78,7 +85,16 @@ const layout = computed(() => {
     let cursor = (H - height) / 2;
     return rows.map((row, i) => {
       const h = row.amount * scale;
-      const node = { key: `${side}${i}`, side, x, y: cursor, h, label: row.name, amount: row.amount, tone: row.tone };
+      const node = {
+        key: `${side}${i}`,
+        side,
+        x,
+        y: cursor,
+        h,
+        label: row.name,
+        amount: row.amount,
+        tone: row.tone
+      };
       cursor += h + GAP;
       return node;
     });
@@ -97,7 +113,16 @@ const nodes = computed(() => {
     n.tone === 'brand' ? 'lf-node-brand' : n.tone === 'warn' ? 'lf-node-warn' : base;
   return [
     ...leftNodes.map((n) => ({ ...n, cls: tone(n, 'lf-node-brand') })),
-    { key: 'pool', side: 'pool', x: POOL_X, y: poolY, h: poolH, label: '', amount: 0, cls: 'lf-node-pool' },
+    {
+      key: 'pool',
+      side: 'pool',
+      x: POOL_X,
+      y: poolY,
+      h: poolH,
+      label: '',
+      amount: 0,
+      cls: 'lf-node-pool'
+    },
     ...rightNodes.map((n) => ({ ...n, cls: tone(n, 'lf-node-ink') }))
   ];
 });

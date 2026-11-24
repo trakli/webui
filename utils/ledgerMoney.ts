@@ -43,5 +43,10 @@ export function money(
 }
 
 export function walletAmount(value: number, currency: string, locale = 'en'): string {
-  return money(value, currency, locale, Math.abs(value) >= 100_000 ? { compact: true } : { whole: Math.abs(value) >= 1000 });
+  return money(
+    value,
+    currency,
+    locale,
+    Math.abs(value) >= 100_000 ? { compact: true } : { whole: Math.abs(value) >= 1000 }
+  );
 }

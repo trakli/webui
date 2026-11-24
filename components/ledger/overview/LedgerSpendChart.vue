@@ -75,7 +75,8 @@ const xTicks = computed(() => {
   for (let i = 0; i < props.totalDays; i += 1) {
     const date = addDays(props.start, i);
     if (props.period === 'month' && i % 7 === 0) ticks.push({ i, label: monthDay.format(date) });
-    if (props.period !== 'month' && date.getDate() === 1) ticks.push({ i, label: month.format(date) });
+    if (props.period !== 'month' && date.getDate() === 1)
+      ticks.push({ i, label: month.format(date) });
   }
   return ticks;
 });

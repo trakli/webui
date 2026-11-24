@@ -9,9 +9,16 @@
       <template v-if="!formOpen">
         <div class="lp-search">
           <Search />
-          <input v-model="query" type="search" :placeholder="t('Search people')" :aria-label="t('Search people')" />
+          <input
+            v-model="query"
+            type="search"
+            :placeholder="t('Search people')"
+            :aria-label="t('Search people')"
+          />
         </div>
-        <button type="button" class="lp-btn lp-btn--o" @click="emit('create')"><UserPlus />{{ t('Add person') }}</button>
+        <button type="button" class="lp-btn lp-btn--o" @click="emit('create')">
+          <UserPlus />{{ t('Add person') }}
+        </button>
       </template>
     </template>
 
@@ -43,23 +50,38 @@
               <td>
                 <span class="lp-person">
                   <span class="lp-sq">{{ row.initials }}</span>
-                  <span>{{ row.name }}<small>{{ row.typeLabel }}</small></span>
+                  <span
+                    >{{ row.name }}<small>{{ row.typeLabel }}</small></span
+                  >
                 </span>
               </td>
               <td>
-                <span v-for="debt in row.debts" :key="debt.currency" class="lp-chip" :class="`lp-chip--${tone(debt.net)}`">
+                <span
+                  v-for="debt in row.debts"
+                  :key="debt.currency"
+                  class="lp-chip"
+                  :class="`lp-chip--${tone(debt.net)}`"
+                >
                   {{ debtLabel(debt.net, debt.currency) }}
                 </span>
                 <span v-if="!row.debts.length" class="lp-muted">—</span>
               </td>
-              <td class="lp-r lp-num lp-hide-sm">{{ row.paid ? money(row.paid, base, locale) : '' }}</td>
-              <td class="lp-r lp-num lp-hide-md lp-in">{{ row.got ? money(row.got, base, locale) : '' }}</td>
-              <td class="lp-muted lp-hide-sm">{{ row.last ? relative(row.last) : t('No recent activity') }}</td>
+              <td class="lp-r lp-num lp-hide-sm">
+                {{ row.paid ? money(row.paid, base, locale) : '' }}
+              </td>
+              <td class="lp-r lp-num lp-hide-md lp-in">
+                {{ row.got ? money(row.got, base, locale) : '' }}
+              </td>
+              <td class="lp-muted lp-hide-sm">
+                {{ row.last ? relative(row.last) : t('No recent activity') }}
+              </td>
               <td class="lp-r lp-num lp-hide-md">{{ row.count || '' }}</td>
             </tr>
           </tbody>
         </table>
-        <p v-if="parties.length && !rows.length" class="lp-empty">{{ t('No parties match your search.') }}</p>
+        <p v-if="parties.length && !rows.length" class="lp-empty">
+          {{ t('No parties match your search.') }}
+        </p>
         <slot v-if="!parties.length" name="empty" />
         <p v-if="currencyNote" class="lp-note">{{ currencyNote }}</p>
       </div>
@@ -79,7 +101,11 @@
 
         <div v-for="debt in selected.debts" :key="debt.currency" class="lp-debt">
           <div class="lp-amt" :class="debt.net < 0 ? 'lp-in' : debt.net > 0 ? 'lp-neg' : ''">
-            {{ Math.abs(debt.net) < 0.005 ? t('Settled') : money(Math.abs(debt.net), debt.currency, locale) }}
+            {{
+              Math.abs(debt.net) < 0.005
+                ? t('Settled')
+                : money(Math.abs(debt.net), debt.currency, locale)
+            }}
           </div>
           <p class="lp-muted">
             {{
@@ -91,9 +117,16 @@
             }}
           </p>
           <template v-if="debt.net < -0.005 && debt.repaid > 0">
-            <span class="lp-bar"><i :style="{ width: `${Math.min(100, (debt.repaid / debt.lent) * 100)}%` }" /></span>
+            <span class="lp-bar"
+              ><i :style="{ width: `${Math.min(100, (debt.repaid / debt.lent) * 100)}%` }"
+            /></span>
             <p class="lp-muted">
-              {{ t('{paid} of {lent} paid back', { paid: money(debt.repaid, debt.currency, locale), lent: money(debt.lent, debt.currency, locale) }) }}
+              {{
+                t('{paid} of {lent} paid back', {
+                  paid: money(debt.repaid, debt.currency, locale),
+                  lent: money(debt.lent, debt.currency, locale)
+                })
+              }}
             </p>
           </template>
         </div>
@@ -107,12 +140,20 @@
           <label>
             {{ t('Wallet') }}
             <select v-model="settleWallet" required>
-              <option v-for="wallet in walletsIn(settling.currency)" :key="wallet.id" :value="wallet.id">{{ wallet.name }}</option>
+              <option
+                v-for="wallet in walletsIn(settling.currency)"
+                :key="wallet.id"
+                :value="wallet.id"
+              >
+                {{ wallet.name }}
+              </option>
             </select>
           </label>
           <div class="lp-actions">
             <button type="submit" class="lp-btn" :disabled="saving">{{ t('Save') }}</button>
-            <button type="button" class="lp-btn lp-btn--o" @click="settling = null">{{ t('Cancel') }}</button>
+            <button type="button" class="lp-btn lp-btn--o" @click="settling = null">
+              {{ t('Cancel') }}
+            </button>
           </div>
         </form>
 
@@ -129,15 +170,32 @@
 
         <div v-if="!settling" class="lp-actions">
           <template v-for="debt in selected.debts" :key="debt.currency">
-            <button v-if="Math.abs(debt.net) >= 0.005" type="button" class="lp-btn" @click="startSettle(debt)">
+            <button
+              v-if="Math.abs(debt.net) >= 0.005"
+              type="button"
+              class="lp-btn"
+              @click="startSettle(debt)"
+            >
               <HandCoins />{{ debt.net < 0 ? t('Record payback') : t('Pay back') }}
             </button>
           </template>
-          <NuxtLink :to="{ path: '/transactions', query: {} }" class="lp-btn lp-btn--o" @click="searchLedger(selected.name)">
+          <NuxtLink
+            :to="{ path: '/transactions', query: {} }"
+            class="lp-btn lp-btn--o"
+            @click="searchLedger(selected.name)"
+          >
             <List />{{ t('See entries') }}
           </NuxtLink>
-          <button type="button" class="lp-btn lp-btn--o" @click="emit('edit', selected.party)"><Pencil />{{ t('Edit') }}</button>
-          <button type="button" class="lp-btn lp-btn--danger" @click="emit('delete', selected.party)"><Trash2 />{{ t('Delete') }}</button>
+          <button type="button" class="lp-btn lp-btn--o" @click="emit('edit', selected.party)">
+            <Pencil />{{ t('Edit') }}
+          </button>
+          <button
+            type="button"
+            class="lp-btn lp-btn--danger"
+            @click="emit('delete', selected.party)"
+          >
+            <Trash2 />{{ t('Delete') }}
+          </button>
         </div>
       </template>
       <p v-else class="lp-muted">{{ t('Pick a person to see what you owe each other.') }}</p>
@@ -181,7 +239,9 @@ const { showSuccess, showError } = useNotifications();
 const query = ref('');
 const selectedId = ref<number | null>(null);
 const debts = ref(new Map<number, PartyDebt[]>());
-const activity = ref(new Map<number, { paid: number; got: number; count: number; last: string; recent: any[] }>());
+const activity = ref(
+  new Map<number, { paid: number; got: number; count: number; last: string; recent: any[] }>()
+);
 const otherCurrencies = ref<string[]>([]);
 
 const tone = (net: number) => (net < -0.005 ? 'good' : net > 0.005 ? 'bad' : 'flat');
@@ -234,7 +294,8 @@ const rows = computed(() => {
       };
     })
     .sort((a, b) => {
-      const owed = (row: typeof a) => (row.debts.some((debt) => Math.abs(debt.net) >= 0.005) ? 1 : 0);
+      const owed = (row: typeof a) =>
+        row.debts.some((debt) => Math.abs(debt.net) >= 0.005) ? 1 : 0;
       return owed(b) - owed(a) || (a.last < b.last ? 1 : a.last > b.last ? -1 : 0);
     });
 });
@@ -248,7 +309,8 @@ watch(selectedId, (id, before) => {
 watch(
   rows,
   (list) => {
-    if (!picked.value || !list.some((row) => row.id === selectedId.value)) selectedId.value = list[0]?.id ?? null;
+    if (!picked.value || !list.some((row) => row.id === selectedId.value))
+      selectedId.value = list[0]?.id ?? null;
   },
   { immediate: true }
 );
@@ -267,12 +329,16 @@ const subtitle = computed(() => {
   const parts = [];
   if (owed.size) parts.push(t('Owed to you {amount}', { amount: join(owed) }));
   if (owe.size) parts.push(t('you owe {amount}', { amount: join(owe) }));
-  return parts.length ? parts.join(' · ') : t('{count} people', { count: props.parties.length }, props.parties.length);
+  return parts.length
+    ? parts.join(' · ')
+    : t('{count} people', { count: props.parties.length }, props.parties.length);
 });
 
 const currencyNote = computed(() =>
   otherCurrencies.value.length
-    ? t('Paid and got columns leave out entries in {currencies}.', { currencies: otherCurrencies.value.join(', ') })
+    ? t('Paid and got columns leave out entries in {currencies}.', {
+        currencies: otherCurrencies.value.join(', ')
+      })
     : ''
 );
 
@@ -288,7 +354,10 @@ const history = computed(() => {
       text:
         movement.direction === 'out'
           ? t('You gave {amount}', { amount: money(movement.amount, debt.currency, locale.value) })
-          : t('{name} gave {amount}', { name: firstName(row.name), amount: money(movement.amount, debt.currency, locale.value) })
+          : t('{name} gave {amount}', {
+              name: firstName(row.name),
+              amount: money(movement.amount, debt.currency, locale.value)
+            })
     }))
   );
   const recent = row.recent.map((entry: any) => ({
@@ -333,7 +402,10 @@ async function saveSettle() {
       type: debt.net < 0 ? 'INCOME' : 'EXPENSE',
       intent: settlingIntent(debt),
       amount: String(settleAmount.value),
-      description: debt.net < 0 ? t('Paid back by {name}', { name: row.name }) : t('Paid back to {name}', { name: row.name }),
+      description:
+        debt.net < 0
+          ? t('Paid back by {name}', { name: row.name })
+          : t('Paid back to {name}', { name: row.name }),
       partyId: row.id,
       walletId: settleWallet.value,
       categoryIds: [],
@@ -363,7 +435,10 @@ async function load() {
       sweepTransactions({ exclude_transfers: true, date_from: isoDate(addDays(new Date(), -92)) })
     ]);
     debts.value = partyDebts(debtSweep.rows);
-    const map = new Map<number, { paid: number; got: number; count: number; last: string; recent: any[] }>();
+    const map = new Map<
+      number,
+      { paid: number; got: number; count: number; last: string; recent: any[] }
+    >();
     const skipped = new Set<string>();
     for (const entry of recentSweep.rows) {
       if (entry.party_id == null) continue;

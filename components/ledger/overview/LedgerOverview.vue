@@ -28,13 +28,18 @@
       <div>
         {{ t('Out') }}
         <span class="lo-num">{{ fmt(kpis.expense) }}</span>
-        <small v-if="kpis.expenseChange !== null" :class="kpis.expenseChange <= 0 ? 'lo-in' : 'lo-out'">
+        <small
+          v-if="kpis.expenseChange !== null"
+          :class="kpis.expenseChange <= 0 ? 'lo-in' : 'lo-out'"
+        >
           {{ outNote }}
         </small>
       </div>
       <div>
         {{ t('Kept') }}
-        <span class="lo-num" :class="kpis.kept >= 0 ? 'lo-in' : 'lo-out'">{{ fmt(kpis.kept, { sign: true }) }}</span>
+        <span class="lo-num" :class="kpis.kept >= 0 ? 'lo-in' : 'lo-out'">{{
+          fmt(kpis.kept, { sign: true })
+        }}</span>
         <small>{{ t('In minus out') }}</small>
       </div>
       <div>
@@ -45,12 +50,18 @@
       <div>
         {{ t('Net worth') }}
         <span class="lo-num">{{ fmt(kpis.netWorth) }}</span>
-        <small>{{ t('{count} wallets, in {currency}', { count: walletCount, currency: base }, walletCount) }}</small>
+        <small>{{
+          t('{count} wallets, in {currency}', { count: walletCount, currency: base }, walletCount)
+        }}</small>
       </div>
     </div>
 
     <p v-if="unconverted.length" class="lo-note">
-      {{ t('Not counted in the charts, no exchange rate yet: {codes}', { codes: unconverted.join(', ') }) }}
+      {{
+        t('Not counted in the charts, no exchange rate yet: {codes}', {
+          codes: unconverted.join(', ')
+        })
+      }}
     </p>
 
     <div class="lo-grid">
@@ -76,7 +87,9 @@
       </section>
 
       <section class="lo-pan lo-span2 lo-row2">
-        <h2 class="lo-h"><GitCompareArrows />{{ t('This vs last {period}', { period: periodWord }) }}</h2>
+        <h2 class="lo-h">
+          <GitCompareArrows />{{ t('This vs last {period}', { period: periodWord }) }}
+        </h2>
         <div class="lo-legend">
           <span><i />{{ rangeLabel }}</span>
           <span><i class="lo-prev" />{{ prevLabel }}</span>
@@ -86,13 +99,25 @@
             <span class="lo-cmp-name">{{ row.name }}</span>
             <div class="lo-bars">
               <span class="lo-b" :style="{ width: `${(row.amount / compareMax) * 100}%` }" />
-              <span class="lo-b lo-b-prev" :style="{ width: `${(row.prevAmount / compareMax) * 100}%` }" />
+              <span
+                class="lo-b lo-b-prev"
+                :style="{ width: `${(row.prevAmount / compareMax) * 100}%` }"
+              />
             </div>
-            <span class="lo-d" :class="row.delta > 0.005 ? 'lo-out' : row.delta < -0.005 ? 'lo-in' : 'lo-muted'">
-              {{ Math.abs(row.delta) < 0.005 ? t('same') : fmt(row.delta, { sign: true, whole: Math.abs(row.delta) >= 1000 }) }}
+            <span
+              class="lo-d"
+              :class="row.delta > 0.005 ? 'lo-out' : row.delta < -0.005 ? 'lo-in' : 'lo-muted'"
+            >
+              {{
+                Math.abs(row.delta) < 0.005
+                  ? t('same')
+                  : fmt(row.delta, { sign: true, whole: Math.abs(row.delta) >= 1000 })
+              }}
             </span>
           </div>
-          <p v-if="!compareRows.length" class="lo-muted">{{ t('No spending in either period yet.') }}</p>
+          <p v-if="!compareRows.length" class="lo-muted">
+            {{ t('No spending in either period yet.') }}
+          </p>
         </div>
         <p v-if="compareNote" class="lo-foot">{{ compareNote }}</p>
       </section>
@@ -164,13 +189,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import {
-  Briefcase,
-  CalendarDays,
-  GitCompareArrows,
-  TrendingUp,
-  Waypoints
-} from 'lucide-vue-next';
+import { Briefcase, CalendarDays, GitCompareArrows, TrendingUp, Waypoints } from 'lucide-vue-next';
 import LedgerWorkspace from '../LedgerWorkspace.vue';
 import LedgerSpendChart from './LedgerSpendChart.vue';
 import LedgerDailyChart from './LedgerDailyChart.vue';
@@ -204,8 +223,10 @@ const {
 } = useLedgerOverview();
 const { wallets } = useSharedData();
 
-const fmt = (value: number, options: MoneyOptions = {}) => money(value, base.value, locale.value, options);
-const tick = (value: number) => money(value, base.value, locale.value, value >= 10_000 ? { compact: true } : { whole: true });
+const fmt = (value: number, options: MoneyOptions = {}) =>
+  money(value, base.value, locale.value, options);
+const tick = (value: number) =>
+  money(value, base.value, locale.value, value >= 10_000 ? { compact: true } : { whole: true });
 
 const periodOptions = computed<{ value: LedgerPeriod; label: string }[]>(() => [
   { value: 'month', label: t('Month') },
@@ -263,11 +284,14 @@ const compareMax = computed(() =>
   Math.max(1, ...compareRows.value.map((row) => Math.max(row.amount, row.prevAmount)))
 );
 
-const biggestFall = computed(() =>
-  categories.value.filter((row) => row.prevAmount > 0 && row.delta < -0.005).sort((a, b) => a.delta - b.delta)[0]
+const biggestFall = computed(
+  () =>
+    categories.value
+      .filter((row) => row.prevAmount > 0 && row.delta < -0.005)
+      .sort((a, b) => a.delta - b.delta)[0]
 );
-const biggestRise = computed(() =>
-  categories.value.filter((row) => row.delta > 0.005).sort((a, b) => b.delta - a.delta)[0]
+const biggestRise = computed(
+  () => categories.value.filter((row) => row.delta > 0.005).sort((a, b) => b.delta - a.delta)[0]
 );
 
 const compareNote = computed(() => {
@@ -296,16 +320,27 @@ const flowSinks = computed<FlowNode[]>(() => {
   const rows: FlowNode[] = [...top];
   const rest = kpis.value.expense - named;
   if (rest > kpis.value.expense * 0.01) rows.push({ name: t('Other spending'), amount: rest });
-  if (kpis.value.kept > 0.005) rows.push({ name: t('Kept'), amount: kpis.value.kept, tone: 'brand' });
+  if (kpis.value.kept > 0.005)
+    rows.push({ name: t('Kept'), amount: kpis.value.kept, tone: 'brand' });
   return rows;
 });
 
-const INCOME_COLORS = ['var(--ledger-brand)', 'var(--ledger-orange)', 'var(--ledger-ink-3)', 'var(--ledger-ink-2)'];
+const INCOME_COLORS = [
+  'var(--ledger-brand)',
+  'var(--ledger-orange)',
+  'var(--ledger-ink-3)',
+  'var(--ledger-ink-2)'
+];
 
 const incomeRows = computed(() =>
   incomeSources.value.slice(0, 4).map((row, i) => ({ ...row, color: INCOME_COLORS[i] }))
 );
-const incomeTotal = computed(() => Math.max(1, incomeRows.value.reduce((sum, row) => sum + row.amount, 0)));
+const incomeTotal = computed(() =>
+  Math.max(
+    1,
+    incomeRows.value.reduce((sum, row) => sum + row.amount, 0)
+  )
+);
 
 onMounted(() => {
   loadStats();

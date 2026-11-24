@@ -7,7 +7,13 @@
     <p v-if="saved" class="la-ok" role="status"><Check />{{ saved }}</p>
     <p v-if="errorMessage" class="la-err" role="alert">{{ errorMessage }}</p>
     <FormSection :key="formKey" :is-submitting="isSubmitting" @submit="save" @transfer="transfer" />
-    <p class="la-tip">{{ t('Faster: type "64.30 groceries" in the command bar, then fill only what it could not guess.') }}</p>
+    <p class="la-tip">
+      {{
+        t(
+          'Faster: type "64.30 groceries" in the command bar, then fill only what it could not guess.'
+        )
+      }}
+    </p>
   </div>
 </template>
 
@@ -177,7 +183,10 @@ const transfer = (data: any) =>
   color: var(--ledger-ink-2);
 }
 
-.la :deep(:is(input:not([type='checkbox']):not([type='radio']):not([type='file']), select, textarea)) {
+.la
+  :deep(
+    :is(input:not([type='checkbox']):not([type='radio']):not([type='file']), select, textarea)
+  ) {
   height: 34px;
   min-height: 34px;
   padding: 6px 10px;

@@ -63,19 +63,71 @@ html.dark[data-design='ledger'] {
 }
 
 html[data-design='ledger'] body,
-html[data-design='ledger'] .ledger-shell :is(button, input, select, textarea, h1, h2, h3, h4, p, span, div, td, th, label, a) {
+html[data-design='ledger']
+  .ledger-shell
+  :is(button, input, select, textarea, h1, h2, h3, h4, p, span, div, td, th, label, a) {
   font-family: var(--ledger-font);
 }
 
-html[data-design='ledger'] .ledger-shell :is(.amount, .num, [class*='amount'], [class*='balance'], [class*='total'] strong) {
+html[data-design='ledger']
+  .ledger-shell
+  :is(.amount, .num, [class*='amount'], [class*='balance'], [class*='total'] strong) {
   font-variant-numeric: tabular-nums;
 }
 
-html[data-design='ledger'] :is(.ledger-content, .modal-overlay, .modal-root, [role='dialog']) :is(button, input, select, textarea, [class*='btn'], [class*='button'], [class*='chip'], [class*='pill'], [class*='badge'], [class*='tag'], [class*='avatar'], img, [class*='tab'], [class*='indicator'], [class*='delta'], [class*='count'], [class*='preset'], [class*='tip'], [class*='row'], [class*='seg'], [class*='toggle']:not([class*='knob'])) {
+html[data-design='ledger']
+  :is(.ledger-content, .modal-overlay, .modal-root, [role='dialog'])
+  :is(
+    button,
+    input,
+    select,
+    textarea,
+    [class*='btn'],
+    [class*='button'],
+    [class*='chip'],
+    [class*='pill'],
+    [class*='badge'],
+    [class*='tag'],
+    [class*='avatar'],
+    img,
+    [class*='tab'],
+    [class*='indicator'],
+    [class*='delta'],
+    [class*='count'],
+    [class*='preset'],
+    [class*='tip'],
+    [class*='row'],
+    [class*='seg'],
+    [class*='toggle']:not([class*='knob'])
+  ) {
   border-radius: var(--ledger-r-sm) !important;
 }
 
-html[data-design='ledger'] :is(.ledger-content, .modal-overlay, .modal-root, [role='dialog']) :is([class*='card'], [class*='panel'], [class*='tile'], [class*='modal'], [class*='dropdown'], [class*='section'], [class*='surface'], [class*='widget'], [class*='sheet'], [class*='hero'], [class*='strip'], [class*='icon'], [class*='steps'], [class*='split'], [class*='zone'], [class*='composer'], [class*='stat'], [class*='empty'], [class*='box'], [class*='menu'], [class*='popover']) {
+html[data-design='ledger']
+  :is(.ledger-content, .modal-overlay, .modal-root, [role='dialog'])
+  :is(
+    [class*='card'],
+    [class*='panel'],
+    [class*='tile'],
+    [class*='modal'],
+    [class*='dropdown'],
+    [class*='section'],
+    [class*='surface'],
+    [class*='widget'],
+    [class*='sheet'],
+    [class*='hero'],
+    [class*='strip'],
+    [class*='icon'],
+    [class*='steps'],
+    [class*='split'],
+    [class*='zone'],
+    [class*='composer'],
+    [class*='stat'],
+    [class*='empty'],
+    [class*='box'],
+    [class*='menu'],
+    [class*='popover']
+  ) {
   border-radius: var(--ledger-r) !important;
 }
 
@@ -83,7 +135,32 @@ html[data-design='ledger'] .ledger-content :is(input[type='checkbox'], input[typ
   border-radius: var(--ledger-r-xs) !important;
 }
 
-html[data-design='ledger'] .ledger-shell :is(.lx-num, .lx-dt, .lx-amt, .lx-week small, .lo-num, .lo-num-sm, .lo-d, .lo-when b, .lt-num, .ls b, kbd, .il-num, .il-title, .lb-amt, .lb-num, .lg-kbd, .lp-amt, .lp-num, .ls-mono, .ls-num, .lx-preview b, .rl-num) {
+html[data-design='ledger']
+  .ledger-shell
+  :is(
+    .lx-num,
+    .lx-dt,
+    .lx-amt,
+    .lx-week small,
+    .lo-num,
+    .lo-num-sm,
+    .lo-d,
+    .lo-when b,
+    .lt-num,
+    .ls b,
+    kbd,
+    .il-num,
+    .il-title,
+    .lb-amt,
+    .lb-num,
+    .lg-kbd,
+    .lp-amt,
+    .lp-num,
+    .ls-mono,
+    .ls-num,
+    .lx-preview b,
+    .rl-num
+  ) {
   font-family: var(--ledger-mono);
   font-variant-numeric: tabular-nums;
 }
@@ -96,7 +173,9 @@ html[data-design='ledger'] .chat-experience--ledger {
   background: var(--ledger-bg);
 }
 
-html[data-design='ledger'] .chat-experience--ledger :is(.chat-main, .chat-main:has(.hero), .conversation) {
+html[data-design='ledger']
+  .chat-experience--ledger
+  :is(.chat-main, .chat-main:has(.hero), .conversation) {
   background: var(--ledger-bg);
 }
 

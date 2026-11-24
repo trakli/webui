@@ -42,7 +42,9 @@
         </template>
       </div>
       <div class="lg-pal-foot">
-        <span>↑ ↓ {{ t('move') }}</span><span>Enter {{ t('open') }}</span><span>Esc {{ t('close') }}</span>
+        <span>↑ ↓ {{ t('move') }}</span
+        ><span>Enter {{ t('open') }}</span
+        ><span>Esc {{ t('close') }}</span>
       </div>
     </div>
   </Teleport>
@@ -158,7 +160,7 @@ const actions = computed<PaletteEntry[]>(() => [
     icon: isDark.value ? Sun : Moon,
     keywords: 'theme dark light mode',
     action: () => setTheme(isDark.value ? 'light' : 'dark')
-  },
+  }
 ]);
 
 const records = computed<PaletteEntry[]>(() => [
@@ -207,7 +209,8 @@ const quick = computed(() => {
 
 function quickPreview(entry: QuickEntry) {
   const wallet =
-    (shared.wallets.value ?? []).find((w: any) => w.id === entry.walletId) ?? shared.getDefaultWallet.value;
+    (shared.wallets.value ?? []).find((w: any) => w.id === entry.walletId) ??
+    shared.getDefaultWallet.value;
   const category = (shared.categories.value ?? []).find((c: any) => c.id === entry.categoryIds[0]);
   const amount = money(
     entry.type === 'INCOME' ? entry.amount : -entry.amount,
@@ -215,7 +218,11 @@ function quickPreview(entry: QuickEntry) {
     locale.value,
     { sign: true }
   );
-  return { wallet, amount, detail: [amount, category?.name ?? t('No category'), wallet?.name].filter(Boolean).join(' · ') };
+  return {
+    wallet,
+    amount,
+    detail: [amount, category?.name ?? t('No category'), wallet?.name].filter(Boolean).join(' · ')
+  };
 }
 
 async function logQuick(entry: QuickEntry) {

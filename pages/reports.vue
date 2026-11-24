@@ -137,12 +137,21 @@
             <li v-for="row in dayRows" :key="row.id">
               <span>{{ row.description || row.party?.name || t('No description') }}</span>
               <span class="rl-num" :class="{ 'rl-in': row.type === 'income' }">
-                {{ money(row.type === 'income' ? Number(row.amount) : -Number(row.amount), row.wallet?.currency || currency, locale, { sign: true }) }}
+                {{
+                  money(
+                    row.type === 'income' ? Number(row.amount) : -Number(row.amount),
+                    row.wallet?.currency || currency,
+                    locale,
+                    { sign: true }
+                  )
+                }}
               </span>
             </li>
           </ul>
           <p v-if="!dayLoading && !dayRows.length" class="rl-muted">{{ t('Nothing went out.') }}</p>
-          <button type="button" class="rl-btn" @click="openDayDrill">{{ t('Open the full breakdown') }}</button>
+          <button type="button" class="rl-btn" @click="openDayDrill">
+            {{ t('Open the full breakdown') }}
+          </button>
         </template>
         <p v-else class="rl-muted">{{ t('Pick a day to see what moved.') }}</p>
       </template>
@@ -150,17 +159,30 @@
       <template v-else-if="activeTab === 'flow'">
         <h2 class="rl-h"><Workflow />{{ t('Reading the flow') }}</h2>
         <p class="rl-muted">
-          {{ t('Income comes in on the left. Spending leaves on the right, and the green stream is what you kept.') }}
+          {{
+            t(
+              'Income comes in on the left. Spending leaves on the right, and the green stream is what you kept.'
+            )
+          }}
         </p>
         <div v-if="totals.income > 0" class="rl-ins">
           <b>{{ t('{percent}% of income stayed.', { percent: keptPercent }) }}</b>
-          {{ t('{amount} kept this period.', { amount: money(totals.income - totals.expense, currency, locale) }) }}
+          {{
+            t('{amount} kept this period.', {
+              amount: money(totals.income - totals.expense, currency, locale)
+            })
+          }}
         </div>
         <div>
           <h2 class="rl-h">{{ t('Biggest streams out') }}</h2>
           <ul class="rl-list">
             <li v-for="row in expenseCategories.slice(0, 6)" :key="row.name">
-              <span>{{ row.name }}<small>{{ t('{percent}% of spending', { percent: row.percentage.toFixed(1) }) }}</small></span>
+              <span
+                >{{ row.name
+                }}<small>{{
+                  t('{percent}% of spending', { percent: row.percentage.toFixed(1) })
+                }}</small></span
+              >
               <span class="rl-num">{{ money(row.amount, currency, locale) }}</span>
             </li>
           </ul>
@@ -297,10 +319,11 @@ const selectedDay = ref(null);
 const dayRows = ref([]);
 const dayLoading = ref(false);
 const rangeLabel = computed(() =>
-  new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric', year: 'numeric' }).formatRange(
-    range.value.start,
-    range.value.end
-  )
+  new Intl.DateTimeFormat(locale.value, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).formatRange(range.value.start, range.value.end)
 );
 const dayTitle = computed(() =>
   selectedDay.value
@@ -313,14 +336,22 @@ const dayTitle = computed(() =>
 );
 const keptPercent = computed(() =>
   totals.value.income > 0
-    ? Math.max(0, ((totals.value.income - totals.value.expense) / totals.value.income) * 100).toFixed(0)
+    ? Math.max(
+        0,
+        ((totals.value.income - totals.value.expense) / totals.value.income) * 100
+      ).toFixed(0)
     : '0'
 );
 const loadDay = async (date) => {
   dayLoading.value = true;
   dayRows.value = [];
   try {
-    const page = await api.transactions.fetchAll({ date_from: date, date_to: date, limit: 50, page: 1 });
+    const page = await api.transactions.fetchAll({
+      date_from: date,
+      date_to: date,
+      limit: 50,
+      page: 1
+    });
     if (selectedDay.value?.date === date) dayRows.value = page?.data || [];
   } catch (error) {
     console.warn('[reports] day entries failed', error);

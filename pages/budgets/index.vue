@@ -48,8 +48,7 @@ const editingItem = ref<Budget | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref('');
 
-const { budgets, fetchBudgets, createBudget, updateBudget, deleteBudget } =
-  useBudgets();
+const { budgets, fetchBudgets, createBudget, updateBudget, deleteBudget } = useBudgets();
 const { showSuccess, showError, confirmDelete } = useNotifications();
 const shared = useSharedData();
 
@@ -73,7 +72,6 @@ const formDefaults = computed(() => {
     currency: typeof currency === 'string' && currency.length === 3 ? currency : 'USD'
   };
 });
-
 
 async function loadBudgets() {
   try {

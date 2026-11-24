@@ -7,8 +7,20 @@ const row = (changes: Record<string, unknown>) => ({ ...sample, ...changes });
 describe('partyDebts', () => {
   it('says a person owes you when you lent more than they paid back', () => {
     const debts = partyDebts([
-      row({ type: 'expense', intent: 'debt_settled', amount: '120.0000', datetime: '2026-11-02T10:00:00.000000Z', description: 'Lent for the train' }),
-      row({ type: 'income', intent: 'debt_owed', amount: '40.0000', datetime: '2026-11-10T10:00:00.000000Z', description: 'Paid back' })
+      row({
+        type: 'expense',
+        intent: 'debt_settled',
+        amount: '120.0000',
+        datetime: '2026-11-02T10:00:00.000000Z',
+        description: 'Lent for the train'
+      }),
+      row({
+        type: 'income',
+        intent: 'debt_owed',
+        amount: '40.0000',
+        datetime: '2026-11-10T10:00:00.000000Z',
+        description: 'Paid back'
+      })
     ]).get(304)!;
     expect(debts).toHaveLength(1);
     expect(debts[0]).toMatchObject({ currency: 'EUR', net: -80, lent: 120, repaid: 40 });
@@ -28,7 +40,11 @@ describe('partyDebts', () => {
   it('ignores regular entries and keeps each currency apart', () => {
     const debts = partyDebts([
       sample,
-      row({ intent: 'loan_received', amount: '25000.0000', wallet: { ...sample.wallet, currency: 'XAF' } }),
+      row({
+        intent: 'loan_received',
+        amount: '25000.0000',
+        wallet: { ...sample.wallet, currency: 'XAF' }
+      }),
       row({ type: 'expense', intent: 'debt_settled', amount: '10.0000' })
     ]).get(304)!;
     expect(debts.map((d) => [d.currency, d.net])).toEqual([

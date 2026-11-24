@@ -58,16 +58,25 @@
               <td class="lb-r lb-num" :class="{ 'lb-neg': row.left < 0 }">{{ row.leftLabel }}</td>
               <td class="lb-hide-sm">
                 <span class="lb-bar">
-                  <i :class="`lb-bar--${row.tone}`" :style="{ width: `${Math.min(row.percent, 100)}%` }" />
+                  <i
+                    :class="`lb-bar--${row.tone}`"
+                    :style="{ width: `${Math.min(row.percent, 100)}%` }"
+                  />
                 </span>
               </td>
               <td class="lb-r lb-num lb-hide-md">{{ row.paceLabel }}</td>
-              <td><span class="lb-chip" :class="`lb-chip--${row.tone}`">{{ row.statusLabel }}</span></td>
+              <td>
+                <span class="lb-chip" :class="`lb-chip--${row.tone}`">{{ row.statusLabel }}</span>
+              </td>
             </tr>
           </tbody>
         </table>
         <p v-if="rows.length" class="lb-note">
-          {{ t('"At this pace" projects spending to the end of each period from what has gone out so far.') }}
+          {{
+            t(
+              '"At this pace" projects spending to the end of each period from what has gone out so far.'
+            )
+          }}
         </p>
         <slot v-else name="empty" />
       </div>
@@ -86,7 +95,12 @@
 
         <div v-if="history.length">
           <h2 class="lb-h">{{ t('Last four months') }}</h2>
-          <svg class="lb-chart" viewBox="0 0 270 140" role="img" :aria-label="t('Monthly spending against budget')">
+          <svg
+            class="lb-chart"
+            viewBox="0 0 270 140"
+            role="img"
+            :aria-label="t('Monthly spending against budget')"
+          >
             <g v-for="(bar, index) in history" :key="bar.label">
               <rect
                 :x="18 + index * 64"
@@ -97,7 +111,12 @@
                 :class="bar.over ? 'lb-fill-over' : 'lb-fill'"
                 :opacity="index === history.length - 1 ? 1 : 0.75"
               />
-              <text :x="38 + index * 64" :y="111 - bar.height" text-anchor="middle" class="lb-chart-value">
+              <text
+                :x="38 + index * 64"
+                :y="111 - bar.height"
+                text-anchor="middle"
+                class="lb-chart-value"
+              >
                 {{ bar.short }}
               </text>
               <text :x="38 + index * 64" y="132" text-anchor="middle">{{ bar.label }}</text>
@@ -120,7 +139,11 @@
                 {{ row.description || row.party?.name || t('No description') }}
                 <small>{{ shortDate(row.datetime) }}</small>
               </span>
-              <span class="lb-num">{{ money(-Number(row.amount), row.wallet?.currency || selected.currency, locale, { sign: true }) }}</span>
+              <span class="lb-num">{{
+                money(-Number(row.amount), row.wallet?.currency || selected.currency, locale, {
+                  sign: true
+                })
+              }}</span>
             </li>
           </ul>
           <p v-if="!latestLoading && !latest.length" class="lb-muted">{{ t('Nothing yet.') }}</p>
@@ -130,16 +153,26 @@
           <button type="button" class="lb-btn lb-btn--o" @click="emit('edit', selected.budget)">
             <SlidersHorizontal />{{ t('Adjust budget') }}
           </button>
-          <NuxtLink :to="askLink" class="lb-btn lb-btn--o"><MessageCircle />{{ t('Ask why') }}</NuxtLink>
-          <NuxtLink :to="`/budgets/${selected.id}`" class="lb-btn lb-btn--o"><ListTree />{{ t('All details') }}</NuxtLink>
-          <button type="button" class="lb-btn lb-btn--danger" @click="emit('delete', selected.budget)">
+          <NuxtLink :to="askLink" class="lb-btn lb-btn--o"
+            ><MessageCircle />{{ t('Ask why') }}</NuxtLink
+          >
+          <NuxtLink :to="`/budgets/${selected.id}`" class="lb-btn lb-btn--o"
+            ><ListTree />{{ t('All details') }}</NuxtLink
+          >
+          <button
+            type="button"
+            class="lb-btn lb-btn--danger"
+            @click="emit('delete', selected.budget)"
+          >
             <Trash2 />{{ t('Delete') }}
           </button>
         </div>
       </template>
       <template v-else>
         <h2 class="lb-h"><Target />{{ t('Budgets') }}</h2>
-        <p class="lb-muted">{{ t('Pick a budget to see its last four months and latest entries.') }}</p>
+        <p class="lb-muted">
+          {{ t('Pick a budget to see its last four months and latest entries.') }}
+        </p>
       </template>
     </template>
   </LedgerWorkspace>
@@ -188,7 +221,9 @@ const STATUS: Record<BudgetStatus, { tone: string; label: string }> = {
 const scopeLabel = (budget: Budget) => {
   const names = budget.targets.map((target) => target.name).filter(Boolean);
   if (!names.length) return t('Everything you spend');
-  return names.length > 2 ? t('{first} and {count} more', { first: names[0], count: names.length - 1 }) : names.join(', ');
+  return names.length > 2
+    ? t('{first} and {count} more', { first: names[0], count: names.length - 1 })
+    : names.join(', ');
 };
 
 const shortDate = (value: string) =>
@@ -197,7 +232,10 @@ const shortDate = (value: string) =>
 const rows = computed(() =>
   props.budgets
     .filter((budget) => budget.is_active)
-    .filter((budget) => view.value === 'all' || budget.targets.some((target) => target.type === view.value))
+    .filter(
+      (budget) =>
+        view.value === 'all' || budget.targets.some((target) => target.type === view.value)
+    )
     .map((budget) => {
       const progress = budget.progress;
       const currency = budget.currency;
@@ -251,7 +289,9 @@ watch(
 const askLink = computed(() => ({
   path: '/assistant',
   query: {
-    ask: selected.value ? t('How is my {name} budget going, and what is driving it?', { name: selected.value.name }) : ''
+    ask: selected.value
+      ? t('How is my {name} budget going, and what is driving it?', { name: selected.value.name })
+      : ''
   }
 }));
 
@@ -286,9 +326,14 @@ async function loadSelected() {
     });
 
   const budget = row.budget;
-  if (budget.period_type !== 'monthly' || budget.targets.some((target) => target.type === 'group')) return;
-  const categoryIds = budget.targets.filter((target) => target.type === 'category').map((target) => target.id);
-  const walletIds = budget.targets.filter((target) => target.type === 'wallet').map((target) => target.id);
+  if (budget.period_type !== 'monthly' || budget.targets.some((target) => target.type === 'group'))
+    return;
+  const categoryIds = budget.targets
+    .filter((target) => target.type === 'category')
+    .map((target) => target.id);
+  const walletIds = budget.targets
+    .filter((target) => target.type === 'wallet')
+    .map((target) => target.id);
   const now = new Date();
   const months = [3, 2, 1, 0].map((back) => new Date(now.getFullYear(), now.getMonth() - back, 1));
   try {
@@ -310,7 +355,8 @@ async function loadSelected() {
       }
       const date = new Date(entry.datetime);
       const index = months.findIndex(
-        (month) => month.getFullYear() === date.getFullYear() && month.getMonth() === date.getMonth()
+        (month) =>
+          month.getFullYear() === date.getFullYear() && month.getMonth() === date.getMonth()
       );
       if (index >= 0) totals[index] += Number(entry.amount) || 0;
     }

@@ -1,11 +1,17 @@
 <template>
   <footer class="ls" data-testid="ledger-status">
     <span>{{ rangeLabel }}</span>
-    <span>{{ t('In') }} <b class="ls-in">{{ money(kpis.income, base, locale) }}</b></span>
-    <span>{{ t('Out') }} <b>{{ money(kpis.expense, base, locale) }}</b></span>
+    <span
+      >{{ t('In') }} <b class="ls-in">{{ money(kpis.income, base, locale) }}</b></span
+    >
+    <span
+      >{{ t('Out') }} <b>{{ money(kpis.expense, base, locale) }}</b></span
+    >
     <span class="ls-hide-sm">
       {{ t('Kept') }}
-      <b :class="kpis.kept >= 0 ? 'ls-in' : 'ls-out'">{{ money(kpis.kept, base, locale, { sign: true }) }}</b>
+      <b :class="kpis.kept >= 0 ? 'ls-in' : 'ls-out'">{{
+        money(kpis.kept, base, locale, { sign: true })
+      }}</b>
     </span>
     <span v-if="updated" class="ls-end ls-hide-sm">
       <span class="ls-dot" />{{ t('Updated {time}', { time: updated }) }}
