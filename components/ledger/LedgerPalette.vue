@@ -55,11 +55,9 @@ import {
   ChartNoAxesCombined,
   FileDown,
   LayoutDashboard,
-  LayoutGrid,
   List,
   MessageCircle,
   Moon,
-  PanelsTopLeft,
   Plus,
   Search,
   Settings2,
@@ -73,7 +71,6 @@ import {
 import { usePendingAsk } from '@/composables/usePendingAsk';
 import { useSharedData } from '@/composables/useSharedData';
 import { useTheme } from '@/composables/useTheme';
-import { useDesign } from '@/composables/useDesign';
 import { useTransactions } from '@/composables/useTransactions';
 import { useNotifications } from '@/composables/useNotifications';
 import { useLedgerAdd } from '@/composables/useLedgerAdd';
@@ -108,7 +105,6 @@ const ledgerEntries = useLedgerEntries();
 const { loadStats } = useLedgerOverview();
 const { locale } = useI18n();
 const { isDark, setTheme } = useTheme();
-const { design, setDesign } = useDesign();
 
 const query = ref('');
 const selected = ref(0);
@@ -163,14 +159,6 @@ const actions = computed<PaletteEntry[]>(() => [
     keywords: 'theme dark light mode',
     action: () => setTheme(isDark.value ? 'light' : 'dark')
   },
-  {
-    id: 'action:design',
-    group: 'Appearance',
-    label: design.value === 'ledger' ? t('Use the Classic design') : t('Use the Ledger design'),
-    icon: design.value === 'ledger' ? LayoutGrid : PanelsTopLeft,
-    keywords: 'design classic ledger layout theme',
-    action: () => setDesign(design.value === 'ledger' ? 'classic' : 'ledger')
-  }
 ]);
 
 const records = computed<PaletteEntry[]>(() => [

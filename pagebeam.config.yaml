@@ -42,9 +42,8 @@ tours:
           cd ../webservice &&
           sh -c "${TRAKLI_DEMO_COMMAND:-docker compose exec -T --user www-data app php artisan demo} active-month"
       requires:
-        - goto: /transactions?design=classic
-          count: { selector: .custom-table tbody.table-body tr, min: 10 }
-        - count: { selector: .custom-table .pagination-btn, min: 6 }
+        - goto: /transactions
+          count: { selector: '[data-testid="ledger-row"]', min: 10 }
 
     shared:
       purpose: an owner with a month of personal finances and a new family space that has not been paid for
@@ -115,13 +114,13 @@ tours:
         - wait: 2000
         - goto: /transactions
         - expect:
-            selector: '.custom-table:visible tbody tr:has-text("Corner Coffee"):has-text("just now"), .txn-card:visible:has-text("Oat flat white")'
-            text: '4.2'
+            selector: '[data-testid="ledger-row"]:has-text("Oat flat white")'
+            text: '4.20'
         - shot:
             name: coffee-recorded
             caption: The coffee is at the top of your transactions
             focus:
-              - .custom-table:visible tbody tr:has-text("Corner Coffee"):has-text("just now"), .txn-card:visible:has-text("Oat flat white")
+              - '[data-testid="ledger-row"]:has-text("Oat flat white")'
 
     month-overview:
       account: active
@@ -131,13 +130,19 @@ tours:
       steps:
         - wait: 61000
         - goto: /dashboard
-        - wait: .kpi-card
-        - wait: .category-breakdown
-        - wait: .recent-transactions
+        - wait: '[data-testid="ledger-overview"]'
+        - wait: '[data-testid="ledger-flow"]'
+        - wait: 1500
         - shot:
             name: dashboard
-            caption: Monthly totals, spending by category and recent transactions
-            fullPage: true
+            caption: The month at a glance, with every screen one click away
+        - click: '[data-testid="ledger-command"]'
+        - wait: '[data-testid="ledger-palette"]'
+        - fill: { selector: '[data-testid="ledger-palette"] input', value: cash }
+        - shot:
+            name: ledger-palette
+            caption: Jump to a page, a wallet or a person, or ask a question
+            focus: ['[data-testid="ledger-palette"]']
 
     wallets:
       account: active
@@ -172,34 +177,13 @@ tours:
             caption: Personal finances and shared spaces stay separate
             fullPage: true
         - click: '.space-card button:has-text("Switch to this space")'
-        - wait: .space-dashboard .totals
+        - wait: '[data-testid="space-kpis"]'
         - shot:
             name: shared-dashboard
             route: /dashboard
             caption: The shared dashboard shows this household's money
             fullPage: true
 
-    ledger-overview:
-      account: active
-      viewports:
-        - { name: desktop, width: 1440, height: 900, scale: 2 }
-        - { name: phone, width: 390, height: 844, scale: 3 }
-      steps:
-        - wait: 61000
-        - goto: /dashboard?design=ledger
-        - wait: '[data-testid="ledger-overview"]'
-        - wait: '[data-testid="ledger-flow"]'
-        - wait: 1500
-        - shot:
-            name: ledger-overview
-            caption: The month at a glance, with every screen one click away
-        - click: '[data-testid="ledger-command"]'
-        - wait: '[data-testid="ledger-palette"]'
-        - fill: { selector: '[data-testid="ledger-palette"] input', value: cash }
-        - shot:
-            name: ledger-palette
-            caption: Jump to a page, a wallet or a person, or ask a question
-            focus: ['[data-testid="ledger-palette"]']
 
     ledger-reports:
       account: active
@@ -208,7 +192,7 @@ tours:
         - { name: phone, width: 390, height: 844, scale: 3 }
       steps:
         - wait: 61000
-        - goto: /reports?design=ledger
+        - goto: /reports
         - wait: .ledger-shell .tabs
         - shot:
             name: reports-overview
@@ -246,7 +230,7 @@ tours:
         - { name: phone, width: 390, height: 844, scale: 3 }
       steps:
         - wait: 61000
-        - goto: /transactions?design=ledger
+        - goto: /transactions
         - wait: '[data-testid="ledger-row"]'
         - select: { selector: '[data-testid="ledger-wallet-pick"]', value: Main Checking }
         - wait: 1500
@@ -297,16 +281,3 @@ tours:
         - shot:
             name: ledger-imports
             caption: Bank statements turned into transactions
-
-    classic-design:
-      account: active
-      viewports:
-        - { name: desktop, width: 1440, height: 900, scale: 2 }
-      steps:
-        - wait: 61000
-        - goto: /dashboard?design=classic
-        - wait: .dashboard-layout
-        - wait: .kpi-card
-        - shot:
-            name: classic-dashboard
-            caption: The Classic design is still one click away

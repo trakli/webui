@@ -3,11 +3,6 @@ import { mount, flushPromises } from '@vue/test-utils';
 import ChatExperience from '@/components/ai/ChatExperience.vue';
 
 // Stub the API so the surface mounts clean.
-vi.mock('@/composables/useDesign', async () => {
-  const { ref } = await import('vue');
-  return { useDesign: () => ({ isLedger: ref(false) }) };
-});
-
 vi.mock('@/services/api/aiApi', () => ({
   default: { exportCanvasUrl: vi.fn() },
   aiApi: {
@@ -50,7 +45,9 @@ describe('ChatExperience (landing mode)', () => {
     // than a bottom-docked composer.
     expect(w.find('.hero').exists()).toBe(true);
     expect(w.find('.composer-dock').exists()).toBe(false);
-    // Full mode keeps the history sidebar.
+    // Past chats stay hidden until asked for.
+    expect(w.find('.experience-sidebar').exists()).toBe(false);
+    await w.find('.hero-history').trigger('click');
     expect(w.find('.experience-sidebar').exists()).toBe(true);
   });
 });

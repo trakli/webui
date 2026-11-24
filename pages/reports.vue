@@ -1,8 +1,9 @@
 <template>
-  <component
-    :is="isLedger ? LedgerWorkspace : 'div'"
-    :class="isLedger ? 'reports-ledger' : 'reports-v2'"
-    v-bind="isLedger ? { title: t('Reports'), subtitle: rangeLabel, inspectorLabel: t('Report details') } : {}"
+  <LedgerWorkspace
+    class="reports-ledger"
+    :title="t('Reports')"
+    :subtitle="rangeLabel"
+    :inspector-label="t('Report details')"
     data-testid="reports"
   >
     <div class="top-bar">
@@ -169,14 +170,13 @@
 
       <LedgerInsights v-else />
     </template>
-  </component>
+  </LedgerWorkspace>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import LedgerWorkspace from '@/components/ledger/LedgerWorkspace.vue';
 import LedgerInsights from '@/components/ledger/overview/LedgerInsights.vue';
-import { useDesign } from '@/composables/useDesign';
 import { money } from '@/utils/ledgerMoney';
 import { api } from '@/services/api';
 import {
@@ -206,7 +206,6 @@ import { formatShortAmount } from '@/utils/currency';
 definePageMeta({ layout: 'dashboard', middleware: 'auth', ledgerFrame: true });
 
 const { t, locale } = useI18n();
-const { isLedger } = useDesign();
 
 const {
   selectedPeriod,
@@ -331,12 +330,8 @@ const loadDay = async (date) => {
 };
 const onSelectDay = (slot) => {
   if (!slot) return;
-  if (isLedger.value) {
-    selectedDay.value = slot;
-    loadDay(slot.date);
-    return;
-  }
-  openDrillForDay(slot);
+  selectedDay.value = slot;
+  loadDay(slot.date);
 };
 const openDayDrill = () => {
   if (selectedDay.value) openDrillForDay(selectedDay.value);
@@ -364,13 +359,6 @@ const reviewData = computed(() => reviewSnapshot.value || prevReviewSnapshot.val
 
 <style lang="scss" scoped>
 @use '@/assets/scss/_variables.scss' as *;
-
-.reports-v2 {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-4;
-}
 
 .top-bar {
   display: flex;
