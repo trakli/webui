@@ -1,6 +1,11 @@
 <template>
-  <div>
-    <ContentTopCard page-name="Import" page-name-plural="Imports" :show-add-button="false" />
+  <component
+    :is="isLedger ? LedgerWorkspace : 'div'"
+    :class="{ 'imports-ledger': isLedger }"
+    v-bind="isLedger ? { title: t('Imports'), subtitle: ledgerSubtitle, inspectorLabel: t('Row details') } : {}"
+    data-testid="imports"
+  >
+    <ContentTopCard v-if="!isLedger" page-name="Import" page-name-plural="Imports" :show-add-button="false" />
 
     <div class="content-area">
       <!-- Upload + analyzing + error state -->
@@ -97,8 +102,18 @@
           </tbody>
         </table>
 
+        <div v-if="isLedger && currentSession.status !== 'confirmed'" class="il-chips">
+          <span class="il-chip il-chip--good">{{ t('{count} ready', { count: readyCount }) }}</span>
+          <span v-if="needCategoryCount" class="il-chip il-chip--bad">
+            {{ t('{count} need a category', { count: needCategoryCount }, needCategoryCount) }}
+          </span>
+          <span v-if="duplicateCount" class="il-chip il-chip--warn">
+            {{ t('{count} look like duplicates', { count: duplicateCount }, duplicateCount) }}
+          </span>
+        </div>
         <SuggestionReviewTable
           v-if="currentSession.status !== 'confirmed'"
+          :selected-index="isLedger ? selectedIndex : null"
           :suggestions="suggestions"
           :wallets="wallets"
           :categories="categories"
@@ -106,6 +121,7 @@
           :accepted-count="acceptedCount"
           :rejected-count="rejectedCount"
           :pending-count="pendingCount"
+          @select="selectedIndex = $event"
           @toggle="toggleSuggestion"
           @edit="editSuggestion"
           @accept-all="acceptAll"
@@ -127,11 +143,80 @@
         />
       </div>
     </div>
-  </div>
+
+    <template #inspector>
+      <template v-if="selectedRow">
+        <h2 class="il-h"><FileText />{{ t('On the statement') }}</h2>
+        <div class="il-title">{{ selectedRow.description || t('No description') }}</div>
+        <dl class="il-kv">
+          <dt>{{ t('Date') }}</dt>
+          <dd>{{ selectedRow.date || t('None') }}</dd>
+          <dt>{{ t('Amount') }}</dt>
+          <dd class="il-num" :class="{ 'il-in': selectedRow.type === 'income' }">
+            {{ selectedRow.amount == null ? t('None') : money(selectedRow.type === 'income' ? selectedRow.amount : -selectedRow.amount, selectedRow.currency || 'EUR', locale, { sign: true }) }}
+          </dd>
+          <dt>{{ t('Read as') }}</dt>
+          <dd :class="{ 'il-neg': !rowCategory }">{{ rowCategory || t('No category yet') }}</dd>
+          <dt>{{ t('Wallet') }}</dt>
+          <dd>{{ rowWallet || t('None') }}</dd>
+          <dt>{{ t('Confidence') }}</dt>
+          <dd class="il-num">{{ Math.round((selectedRow.confidence || 0) * 100) }}%</dd>
+        </dl>
+
+        <label v-if="!rowCategory" class="il-field">
+          {{ t('Category') }}
+          <select @change="setRowCategory(($event.target as HTMLSelectElement).value)">
+            <option value="">{{ t('Choose a category') }}</option>
+            <option v-for="category in rowCategoryOptions" :key="category.id" :value="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+        </label>
+
+        <div v-if="selectedRow.duplicate" class="il-ins">
+          <Copy />
+          <div>
+            {{
+              t('Matches {description} on {date}, {amount}.', {
+                description: selectedRow.duplicate.transaction_description || t('an entry'),
+                date: selectedRow.duplicate.transaction_date || '',
+                amount:
+                  selectedRow.duplicate.transaction_amount == null
+                    ? ''
+                    : money(selectedRow.duplicate.transaction_amount, selectedRow.currency || 'EUR', locale)
+              })
+            }}
+            <b>{{ t('Skip it unless you really paid twice.') }}</b>
+          </div>
+        </div>
+        <div v-if="selectedRow.duplicate" class="il-actions">
+          <button v-if="selectedRow.status !== 'rejected'" type="button" class="il-btn" @click="toggleSuggestion(selectedRow.index)">
+            {{ t('Skip') }}
+          </button>
+          <button v-if="selectedRow.status !== 'accepted'" type="button" class="il-btn il-btn--o" @click="toggleSuggestion(selectedRow.index)">
+            {{ t('Keep it') }}
+          </button>
+        </div>
+
+        <NuxtLink :to="rowAskLink" class="il-btn il-btn--o"><MessageCircle />{{ t('Ask the assistant about this row') }}</NuxtLink>
+      </template>
+      <template v-else>
+        <h2 class="il-h"><FileText />{{ t('Imports') }}</h2>
+        <p class="il-muted">
+          {{ currentSession ? t('Pick a row to check how it was read.') : t('Upload a bank statement, receipt or spreadsheet. Nothing is saved until you confirm.') }}
+        </p>
+      </template>
+    </template>
+  </component>
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue';
+import { Copy, FileText, MessageCircle } from 'lucide-vue-next';
 import ContentTopCard from '@/components/TTopCard.vue';
+import LedgerWorkspace from '@/components/ledger/LedgerWorkspace.vue';
+import { useDesign } from '@/composables/useDesign';
+import { money } from '@/utils/ledgerMoney';
 import ImportUpload from '~/components/imports/ImportUpload.vue';
 import ImportAnalyzing from '~/components/imports/ImportAnalyzing.vue';
 import ImportSessionsList from '~/components/imports/ImportSessionsList.vue';
@@ -141,10 +226,12 @@ import type { AutoCreateOptions } from '~/types/import';
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
+  middleware: 'auth',
+  ledgerFrame: true
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const { isLedger } = useDesign();
 const { showSuccess, showError, showWarning, confirmDelete } = useNotifications();
 const { wallets, categories, parties, loadWallets, loadCategories, loadParties } = useSharedData();
 
@@ -173,6 +260,51 @@ const {
   removeSession,
   reset
 } = useImports();
+
+const selectedIndex = ref<number | null>(null);
+const selectedRow = computed(() => suggestions.value.find((row) => row.index === selectedIndex.value) ?? null);
+const nameOf = (list: readonly { id: number; name: string }[], id: number | null) =>
+  id == null ? null : (list.find((item) => item.id === id)?.name ?? null);
+const rowCategory = computed(() =>
+  selectedRow.value ? (nameOf(categories.value, selectedRow.value.category_id) ?? selectedRow.value.category) : null
+);
+const rowWallet = computed(() =>
+  selectedRow.value ? (nameOf(wallets.value, selectedRow.value.wallet_id) ?? selectedRow.value.wallet) : null
+);
+const rowCategoryOptions = computed(() =>
+  categories.value.filter((category) => !selectedRow.value?.type || category.type === selectedRow.value.type)
+);
+const setRowCategory = (value: string) => {
+  if (selectedRow.value && value) editSuggestion(selectedRow.value.index, { category_id: Number(value) });
+};
+const needCategoryCount = computed(
+  () => suggestions.value.filter((row) => row.status !== 'rejected' && row.category_id == null && !row.category).length
+);
+const readyCount = computed(
+  () =>
+    suggestions.value.filter(
+      (row) => row.status === 'accepted' && !row.duplicate && (row.category_id != null || !!row.category)
+    ).length
+);
+const ledgerSubtitle = computed(() =>
+  currentSession.value
+    ? `${currentSession.value.file_name} · ${t('{count} rows read', { count: suggestions.value.length }, suggestions.value.length)}`
+    : ''
+);
+const rowAskLink = computed(() => ({
+  path: '/assistant',
+  query: {
+    ask: selectedRow.value
+      ? t('In my import, how should I record "{description}" for {amount}?', {
+          description: selectedRow.value.description ?? '',
+          amount: selectedRow.value.amount ?? ''
+        })
+      : ''
+  }
+}));
+watch(suggestions, (rows) => {
+  if (!rows.some((row) => row.index === selectedIndex.value)) selectedIndex.value = rows[0]?.index ?? null;
+});
 
 const showConfirmDialog = ref(false);
 const uploadedFileName = ref('');
@@ -502,5 +634,176 @@ const handleDeleteSession = async (id: number) => {
   .num {
     text-align: right;
   }
+}
+
+.imports-ledger :deep(.review-header__info) {
+  display: none;
+}
+
+.imports-ledger :deep(.table-wrapper) {
+  overflow-x: auto;
+}
+
+.imports-ledger :deep(.table-wrapper table) {
+  min-width: 1080px;
+}
+
+.il-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.il-chip {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.il-chip--good {
+  background: var(--ledger-brand-soft);
+  color: var(--ledger-brand);
+}
+
+.il-chip--bad {
+  background: var(--ledger-expense-soft);
+  color: var(--ledger-expense);
+}
+
+.il-chip--warn {
+  background: var(--ledger-orange-soft);
+  color: var(--ledger-orange-text);
+}
+
+.il-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ledger-ink-3);
+}
+
+.il-h :deep(svg) {
+  width: 14px;
+  height: 14px;
+}
+
+.il-title {
+  font-family: var(--ledger-mono);
+  font-size: 13px;
+  padding: 10px;
+  border-radius: var(--ledger-r-sm);
+  background: var(--ledger-surface-2);
+  word-break: break-word;
+}
+
+.il-kv {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 7px 10px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.il-kv dt {
+  color: var(--ledger-ink-3);
+}
+
+.il-kv dd {
+  margin: 0;
+}
+
+.il-num {
+  font-family: var(--ledger-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.il-in {
+  color: var(--ledger-income);
+}
+
+.il-neg {
+  color: var(--ledger-expense);
+}
+
+.il-muted {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ledger-ink-3);
+}
+
+.il-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ledger-ink-3);
+}
+
+.il-field select {
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ledger-ink);
+  background: var(--ledger-surface);
+  border: 1px solid var(--ledger-line);
+  border-radius: var(--ledger-r-sm);
+  padding: 7px 8px;
+}
+
+.il-ins {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--ledger-r);
+  background: var(--ledger-surface-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.il-ins :deep(svg) {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-top: 2px;
+}
+
+.il-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.il-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--ledger-r-sm);
+  border: 1px solid transparent;
+  background: var(--ledger-brand);
+  color: var(--ledger-on-brand);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.il-btn :deep(svg) {
+  width: 14px;
+  height: 14px;
+}
+
+.il-btn--o {
+  background: var(--ledger-surface);
+  color: var(--ledger-ink);
+  border-color: var(--ledger-line);
 }
 </style>

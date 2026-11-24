@@ -3,6 +3,11 @@ import { mount, flushPromises } from '@vue/test-utils';
 import ChatExperience from '@/components/ai/ChatExperience.vue';
 
 // Stub the API so the surface mounts clean.
+vi.mock('@/composables/useDesign', async () => {
+  const { ref } = await import('vue');
+  return { useDesign: () => ({ isLedger: ref(false) }) };
+});
+
 vi.mock('@/services/api/aiApi', () => ({
   default: { exportCanvasUrl: vi.fn() },
   aiApi: {

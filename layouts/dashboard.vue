@@ -1,5 +1,11 @@
 <template>
-  <div class="dashboard-layout">
+  <LedgerShell v-if="isLedger">
+    <slot />
+    <NotificationsContainer />
+    <SpaceTransactionModal v-if="isShared" />
+    <UpsellPrompt />
+  </LedgerShell>
+  <div v-else class="dashboard-layout">
     <TSidebar />
     <div class="main-content" :class="{ 'main-content--collapsed': sidebarCollapsed }">
       <TNavbar />
@@ -30,10 +36,13 @@ import SpaceTransactionModal from '@/components/space/SpaceTransactionModal.vue'
 import UpsellPrompt from '@/components/space/UpsellPrompt.vue';
 import { useAuth } from '@/composables/useAuth';
 import { useSidebar } from '@/composables/useSidebar';
+import LedgerShell from '@/components/ledger/LedgerShell.vue';
+import { useDesign } from '@/composables/useDesign';
 
 const { user, fetchUser } = useAuth();
 const { sidebarCollapsed } = useSidebar();
 const { isShared } = useActiveSpace();
+const { isLedger } = useDesign();
 useSpaceFinanceReset();
 
 const showLearningModal = ref(false);

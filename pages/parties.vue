@@ -1,5 +1,28 @@
 <template>
-  <div class="page">
+  <LedgerPeople
+    v-if="isLedger"
+    :parties="parties"
+    :form-open="showForm"
+    :form-title="editingItem ? t('Edit person') : t('Add person')"
+    @create="handleOpenFormForCreation"
+    @edit="handleEdit"
+    @delete="handleDelete"
+  >
+    <template #form>
+      <PartiesForm
+        :editing-item="editingItem"
+        :api-error="submitError"
+        :is-submitting="isSubmitting"
+        @created="handleCreate"
+        @updated="handleUpdate"
+        @close="handleFormClose"
+      />
+    </template>
+    <template #empty>
+      <OnboardingEmptyState page-type="parties" @create="handleOpenFormForCreation" />
+    </template>
+  </LedgerPeople>
+  <div v-else class="page">
     <ContentTopCard
       v-if="!showForm"
       page-name="Party"
@@ -101,9 +124,12 @@ import OnboardingEmptyState from '@/components/onboarding/OnboardingEmptyState.v
 import PartiesForm from '@/components/PartiesForm.vue';
 import PartiesStatsStrip from '@/components/parties/PartiesStatsStrip.vue';
 import PartyDetailPanel from '@/components/parties/PartyDetailPanel.vue';
+import LedgerPeople from '@/components/ledger/people/LedgerPeople.vue';
+import { useDesign } from '@/composables/useDesign';
 import TipsSection from '@/components/TipsSection.vue';
 
 const { t } = useI18n();
+const { isLedger } = useDesign();
 
 const showForm = ref(false);
 const editingItem = ref(null);
@@ -341,7 +367,8 @@ onMounted(() => {
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
+  middleware: 'auth',
+  ledgerFrame: true
 });
 </script>
 

@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap');
+
+html[data-design='ledger'] {
+  --ledger-font: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --ledger-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ledger-r-lg: 8px;
+  --ledger-r: 6px;
+  --ledger-r-sm: 4px;
+  --ledger-r-xs: 3px;
+
+  --ledger-bg: #f4f6f5;
+  --ledger-surface: #ffffff;
+  --ledger-surface-2: #eef2f0;
+  --ledger-surface-3: #e3e9e5;
+  --ledger-line: #dce3df;
+  --ledger-ink: #0f1a14;
+  --ledger-ink-2: #44554b;
+  --ledger-ink-3: #6e7e75;
+  --ledger-brand: #047844;
+  --ledger-brand-text: #047844;
+  --ledger-brand-soft: #e2f1e8;
+  --ledger-on-brand: #ffffff;
+  --ledger-orange: #ff9500;
+  --ledger-orange-text: #b05c00;
+  --ledger-orange-soft: #fff1dc;
+  --ledger-income: #047844;
+  --ledger-expense: #c2364b;
+  --ledger-expense-soft: #fbe7ea;
+  --ledger-logo-g: #047844;
+
+  --color-bg-gray: var(--ledger-bg);
+  --color-bg-light: var(--ledger-bg);
+  --color-bg-white: var(--ledger-surface);
+  --color-bg-card: var(--ledger-surface-2);
+  --color-border: var(--ledger-line);
+  --color-border-gray: var(--ledger-line);
+  --color-text-primary: var(--ledger-ink);
+  --color-text-secondary: var(--ledger-ink-2);
+  --color-text-muted: var(--ledger-ink-3);
+  --color-accent: var(--ledger-orange);
+  --shadow-sm: none;
+  --shadow-md: 0 8px 24px -16px rgba(0, 0, 0, 0.35);
+}
+
+html.dark[data-design='ledger'] {
+  --ledger-bg: #0c1410;
+  --ledger-surface: #121c17;
+  --ledger-surface-2: #18251e;
+  --ledger-surface-3: #1f2e26;
+  --ledger-line: #26352d;
+  --ledger-ink: #e8f0eb;
+  --ledger-ink-2: #a9bbb1;
+  --ledger-ink-3: #7d8f85;
+  --ledger-brand: #0a8a50;
+  --ledger-brand-text: #4fd18f;
+  --ledger-brand-soft: #123524;
+  --ledger-orange-text: #ffb347;
+  --ledger-orange-soft: #3a2a12;
+  --ledger-income: #4fd18f;
+  --ledger-expense: #ff7a8a;
+  --ledger-expense-soft: #3b1a20;
+  --ledger-logo-g: #ffffff;
+}
+
+html[data-design='ledger'] body,
+html[data-design='ledger'] .ledger-shell :is(button, input, select, textarea, h1, h2, h3, h4, p, span, div, td, th, label, a) {
+  font-family: var(--ledger-font);
+}
+
+html[data-design='ledger'] .ledger-shell :is(.amount, .num, [class*='amount'], [class*='balance'], [class*='total'] strong) {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-design='ledger'] :is(.ledger-content, .modal-overlay, .modal-root, [role='dialog']) :is(button, input, select, textarea, [class*='btn'], [class*='button'], [class*='chip'], [class*='pill'], [class*='badge'], [class*='tag'], [class*='avatar'], img, [class*='tab'], [class*='indicator'], [class*='delta'], [class*='count'], [class*='preset'], [class*='tip'], [class*='row'], [class*='seg'], [class*='toggle']:not([class*='knob'])) {
+  border-radius: var(--ledger-r-sm) !important;
+}
+
+html[data-design='ledger'] :is(.ledger-content, .modal-overlay, .modal-root, [role='dialog']) :is([class*='card'], [class*='panel'], [class*='tile'], [class*='modal'], [class*='dropdown'], [class*='section'], [class*='surface'], [class*='widget'], [class*='sheet'], [class*='hero'], [class*='strip'], [class*='icon'], [class*='steps'], [class*='split'], [class*='zone'], [class*='composer'], [class*='stat'], [class*='empty'], [class*='box'], [class*='menu'], [class*='popover']) {
+  border-radius: var(--ledger-r) !important;
+}
+
+html[data-design='ledger'] .ledger-content :is(input[type='checkbox'], input[type='radio']) {
+  border-radius: var(--ledger-r-xs) !important;
+}
+
+html[data-design='ledger'] .ledger-shell :is(.lx-num, .lx-dt, .lx-amt, .lx-week small, .lo-num, .lo-num-sm, .lo-d, .lo-when b, .lt-num, .ls b, kbd, .il-num, .il-title, .lb-amt, .lb-num, .lg-kbd, .lp-amt, .lp-num, .ls-mono, .ls-num, .lx-preview b, .rl-num) {
+  font-family: var(--ledger-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-design='ledger'] .chat-experience--ledger {
+  height: 100%;
+  border: 0;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background: var(--ledger-bg);
+}
+
+html[data-design='ledger'] .chat-experience--ledger :is(.chat-main, .chat-main:has(.hero), .conversation) {
+  background: var(--ledger-bg);
+}
+
+html[data-design='ledger'] .chat-experience--ledger .hero-logo {
+  height: 34px;
+  margin: 8px 0 4px;
+}
+
+html[data-design='ledger'] .chat-experience--ledger .hero-title {
+  letter-spacing: -0.02em;
+}
+
+html[data-design='ledger'] .ledger-shell .stat {
+  background: var(--ledger-surface) !important;
+  border: 1px solid var(--ledger-line) !important;
+  box-shadow: none !important;
+}
+
+html[data-design='ledger'] .ledger-shell .stat::before,
+html[data-design='ledger'] .ledger-shell .stat::after {
+  display: none;
+}
+
+html[data-design='ledger'] .ledger-shell .stat .stat-art {
+  display: none;
+}
+
+html[data-design='ledger'] .chat-experience--ledger .hero-history {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--ledger-line);
+  border-radius: var(--ledger-r-sm);
+  background: var(--ledger-surface);
+  color: var(--ledger-ink-2);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+html[data-design='ledger'] .ledger-shell .ls-num.ls-text {
+  font-family: var(--ledger-font);
+}

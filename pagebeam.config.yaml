@@ -42,7 +42,7 @@ tours:
           cd ../webservice &&
           sh -c "${TRAKLI_DEMO_COMMAND:-docker compose exec -T --user www-data app php artisan demo} active-month"
       requires:
-        - goto: /transactions
+        - goto: /transactions?design=classic
           count: { selector: .custom-table tbody.table-body tr, min: 10 }
         - count: { selector: .custom-table .pagination-btn, min: 6 }
 
@@ -178,3 +178,135 @@ tours:
             route: /dashboard
             caption: The shared dashboard shows this household's money
             fullPage: true
+
+    ledger-overview:
+      account: active
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - wait: 61000
+        - goto: /dashboard?design=ledger
+        - wait: '[data-testid="ledger-overview"]'
+        - wait: '[data-testid="ledger-flow"]'
+        - wait: 1500
+        - shot:
+            name: ledger-overview
+            caption: The month at a glance, with every screen one click away
+        - click: '[data-testid="ledger-command"]'
+        - wait: '[data-testid="ledger-palette"]'
+        - fill: { selector: '[data-testid="ledger-palette"] input', value: cash }
+        - shot:
+            name: ledger-palette
+            caption: Jump to a page, a wallet or a person, or ask a question
+            focus: ['[data-testid="ledger-palette"]']
+
+    ledger-reports:
+      account: active
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - wait: 61000
+        - goto: /reports?design=ledger
+        - wait: .ledger-shell .tabs
+        - shot:
+            name: reports-overview
+            caption: Reports open on the month, with more views a tab away
+        - click: '.tabs .tab:has-text("Calendar")'
+        - wait: 800
+        - shot:
+            name: reports-calendar
+            caption: Each day of the month, coloured by what you spent
+        - click: '.tabs .tab:has-text("Flow")'
+        - wait: 800
+        - shot:
+            name: reports-flow
+            caption: Where the money came from and where it went
+        - click: '.tabs .tab:has-text("Charts")'
+        - wait: 800
+        - shot:
+            name: reports-charts
+            caption: Income and spending over time
+        - click: '.tabs .tab:has-text("Categories")'
+        - wait: 800
+        - shot:
+            name: reports-categories
+            caption: Spending by category, biggest first
+        - click: '.tabs .tab:has-text("Position")'
+        - wait: 800
+        - shot:
+            name: reports-position
+            caption: What you own and what you owe
+
+    ledger-screens:
+      account: active
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+        - { name: phone, width: 390, height: 844, scale: 3 }
+      steps:
+        - wait: 61000
+        - goto: /transactions?design=ledger
+        - wait: '[data-testid="ledger-row"]'
+        - select: { selector: '[data-testid="ledger-wallet-pick"]', value: Main Checking }
+        - wait: 1500
+        - click: '[data-testid="ledger-row"] >> nth=2'
+        - wait: 500
+        - shot:
+            name: ledger-transactions
+            caption: Every entry with a running balance, details on the right
+        - fill: { selector: '[data-testid="ledger-add"]', value: 12.50 lunch Trattoria Roma cash }
+        - wait: '[data-testid="ledger-add-preview"]'
+        - shot:
+            name: ledger-quick-add
+            caption: Type one line and Trakli fills in the rest
+            focus: ['[data-testid="ledger-add"]', '[data-testid="ledger-add-preview"]']
+        - goto: /reports?tab=overview
+        - wait: '[data-testid="reports"]'
+        - wait: 2500
+        - shot:
+            name: ledger-reports
+            caption: Reports with what stands out on the right
+        - goto: /reports?tab=calendar
+        - wait: 2500
+        - click: '.cell:not(.cell--empty):not(.cell--zero) >> nth=-3'
+        - wait: '[data-testid="reports-day-entries"]'
+        - wait: 800
+        - shot:
+            name: ledger-reports-calendar
+            caption: Pick a day and its entries show on the right
+        - goto: /reports?tab=flow
+        - wait: 2500
+        - shot:
+            name: ledger-reports-flow
+            caption: Where money came from and where it went
+        - goto: /budgets
+        - wait: '[data-testid="ledger-budget-row"]'
+        - wait: 2500
+        - shot:
+            name: ledger-budgets
+            caption: Every budget in one table, with its last four months on the right
+        - goto: /parties
+        - wait: '[data-testid="ledger-person-row"]'
+        - wait: 2500
+        - shot:
+            name: ledger-people
+            caption: Who owes whom, with the history on the right
+        - goto: /imports
+        - wait: 1500
+        - shot:
+            name: ledger-imports
+            caption: Bank statements turned into transactions
+
+    classic-design:
+      account: active
+      viewports:
+        - { name: desktop, width: 1440, height: 900, scale: 2 }
+      steps:
+        - wait: 61000
+        - goto: /dashboard?design=classic
+        - wait: .dashboard-layout
+        - wait: .kpi-card
+        - shot:
+            name: classic-dashboard
+            caption: The Classic design is still one click away

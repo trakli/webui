@@ -117,7 +117,8 @@ export default defineNuxtConfig({
     '@/assets/scss/base.scss',
     '@/assets/scss/_surfaces.scss',
     '@/assets/scss/_form-styles.scss',
-    '@/assets/scss/_transaction-form.scss'
+    '@/assets/scss/_transaction-form.scss',
+    '@/assets/css/ledger.css'
   ],
   build: {
     transpile: []

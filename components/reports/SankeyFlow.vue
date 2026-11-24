@@ -39,16 +39,19 @@
           @mouseenter="hoverNode = node.name"
           @mouseleave="hoverNode = null"
         />
+        <title>{{ node.name }}: {{ formatter(node.amount, currency) }}</title>
         <text
+          v-if="node.showLabel"
           :x="node.x - 8"
           :y="node.y + node.height / 2"
           dy="0.32em"
           text-anchor="end"
           class="node-label"
         >
-          {{ node.name }}
+          {{ node.label }}
         </text>
         <text
+          v-if="node.showAmount"
           :x="node.x - 8"
           :y="node.y + node.height / 2 + 14"
           dy="0.32em"
@@ -70,15 +73,18 @@
           @mouseenter="hoverNode = node.name"
           @mouseleave="hoverNode = null"
         />
+        <title>{{ node.name }}: {{ formatter(node.amount, currency) }}</title>
         <text
+          v-if="node.showLabel"
           :x="node.x + nodeWidth + 8"
           :y="node.y + node.height / 2"
           dy="0.32em"
           class="node-label"
         >
-          {{ node.name }}
+          {{ node.label }}
         </text>
         <text
+          v-if="node.showAmount"
           :x="node.x + nodeWidth + 8"
           :y="node.y + node.height / 2 + 14"
           dy="0.32em"
@@ -115,8 +121,10 @@ const width = 900;
 const height = 460;
 const nodeWidth = 14;
 const nodeGap = 8;
-const leftX = 80;
-const rightX = width - 80 - nodeWidth;
+const leftX = 160;
+const rightX = width - 160 - nodeWidth;
+const LABEL_CHARS = 20;
+const LABEL_LINE = 14;
 
 const layoutNodes = (items, color) => {
   if (!items.length) return [];
@@ -137,13 +145,28 @@ const layoutNodes = (items, color) => {
   });
 };
 
+const withLabels = (nodes) => {
+  let freeFrom = -Infinity;
+  return nodes.map((node) => {
+    const mid = node.y + node.height / 2;
+    const showLabel = mid - LABEL_LINE / 2 >= freeFrom;
+    const showAmount = showLabel && node.height >= 2 * LABEL_LINE;
+    if (showLabel) freeFrom = mid + LABEL_LINE / 2 + (showAmount ? LABEL_LINE : 0);
+    const name = String(node.name);
+    const label = name.length > LABEL_CHARS ? `${name.slice(0, LABEL_CHARS - 1)}…` : name;
+    return { ...node, label, showLabel, showAmount };
+  });
+};
+
 const incomeNodes = computed(() => {
   const items = props.flow.sources || [];
-  return layoutNodes(items, 'var(--color-income)').map((n) => ({
-    ...n,
-    x: leftX,
-    color: 'var(--color-income)'
-  }));
+  return withLabels(
+    layoutNodes(items, 'var(--color-income)').map((n) => ({
+      ...n,
+      x: leftX,
+      color: 'var(--color-income)'
+    }))
+  );
 });
 
 const expenseNodes = computed(() => {
@@ -153,10 +176,12 @@ const expenseNodes = computed(() => {
   if (savings > 0) {
     all.push({ name: t('Savings'), amount: savings, color: 'var(--color-primary)' });
   }
-  return layoutNodes(all, 'var(--color-expense)').map((n) => ({
-    ...n,
-    x: rightX
-  }));
+  return withLabels(
+    layoutNodes(all, 'var(--color-expense)').map((n) => ({
+      ...n,
+      x: rightX
+    }))
+  );
 });
 
 const links = computed(() => {
